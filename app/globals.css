@@ -1,0 +1,34 @@
+@import "tailwindcss";
+
+@import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Inter:wght@300;400;500&display=swap');
+
+:root {
+  --bg: #080808;
+  --bg2: #0f0f11;
+  --bg3: #161618;
+  --ink: #ffffff;
+  --ink2: rgba(255,255,255,0.65);
+  --ink3: rgba(255,255,255,0.35);
+  --border: rgba(255,255,255,0.08);
+  --border2: rgba(255,255,255,0.14);
+  --accent: #4D6BFE;
+  --accent2: #6B82FF;
+  --green: #1DB954;
+  --purple: #7F77DD;
+  --radius: 14px;
+  --radius-sm: 8px;
+  --radius-pill: 999px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: 'Inter', sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, .garamond {
+  font-family: 'EB Garamond', serif;
+}
