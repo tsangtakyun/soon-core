@@ -36,19 +36,32 @@ const MODES = [
   },
 ]
 
+const inputStyle = {
+  width: '100%',
+  background: 'var(--bg2)',
+  border: '1px solid var(--border2)',
+  borderRadius: 'var(--radius)',
+  padding: '14px 16px',
+  fontSize: '15px',
+  color: 'var(--ink)',
+  outline: 'none',
+  fontFamily: 'Inter, sans-serif',
+} as const
+
 export default function Home() {
   const router = useRouter()
-  const [topic, setTopic] = useState('')
-  const [scope, setScope] = useState('')
-  const [mode, setMode] = useState('')
+  const [topic, setTopic]   = useState('')
+  const [address, setAddress] = useState('')
+  const [scope, setScope]   = useState('')
+  const [mode, setMode]     = useState('')
   const [loading, setLoading] = useState(false)
 
   const ready = topic.trim() && scope && mode
 
-  const handleStart = async () => {
+  const handleStart = () => {
     if (!ready || loading) return
     setLoading(true)
-    const params = new URLSearchParams({ topic, scope, mode })
+    const params = new URLSearchParams({ topic, address, scope, mode })
     router.push(`/shoot?${params}`)
   }
 
@@ -56,63 +69,46 @@ export default function Home() {
     <main style={{ minHeight: '100dvh', background: 'var(--bg)', display: 'flex', flexDirection: 'column' }}>
 
       {/* Top bar */}
-      <div style={{
-        padding: '16px 20px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        borderBottom: '1px solid var(--border)',
-      }}>
+      <div style={{ padding: '16px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid var(--border)' }}>
         <span style={{ fontFamily: 'EB Garamond, serif', fontSize: '20px', letterSpacing: '0.02em' }}>SOON</span>
-        <span style={{
-          fontSize: '11px',
-          color: 'var(--ink3)',
-          padding: '4px 10px',
-          border: '1px solid var(--border)',
-          borderRadius: 'var(--radius-pill)',
-          letterSpacing: '0.08em',
-        }}>CORE</span>
+        <span style={{ fontSize: '11px', color: 'var(--ink3)', padding: '4px 10px', border: '1px solid var(--border)', borderRadius: 'var(--radius-pill)', letterSpacing: '0.08em' }}>CORE</span>
       </div>
 
-      {/* Body */}
       <div style={{ flex: 1, padding: '32px 20px 40px', maxWidth: '480px', width: '100%', margin: '0 auto' }}>
 
         {/* Hero */}
         <div style={{ marginBottom: '36px' }}>
-          <h1 style={{
-            fontFamily: 'EB Garamond, serif',
-            fontSize: '38px',
-            fontWeight: 400,
-            lineHeight: 1.15,
-            marginBottom: '10px',
-          }}>
+          <h1 style={{ fontFamily: 'EB Garamond, serif', fontSize: '38px', fontWeight: 400, lineHeight: 1.15, marginBottom: '10px' }}>
             今日拍咩？
           </h1>
           <p style={{ fontSize: '14px', color: 'var(--ink3)', lineHeight: 1.6 }}>
-            輸入地點或主題，AI 幫你策劃成條片
+            輸入地點同主題，AI 幫你策劃成條片
           </p>
         </div>
 
-        {/* Topic input */}
-        <div style={{ marginBottom: '28px' }}>
-          <label style={{ fontSize: '11px', color: 'var(--ink3)', letterSpacing: '0.1em', display: 'block', marginBottom: '10px' }}>
-            地點 / 主題
+        {/* Topic */}
+        <div style={{ marginBottom: '14px' }}>
+          <label style={{ fontSize: '11px', color: 'var(--ink3)', letterSpacing: '0.1em', display: 'block', marginBottom: '8px' }}>
+            主題
           </label>
           <input
             value={topic}
             onChange={e => setTopic(e.target.value)}
-            placeholder="例：喜記茶餐廳，深水埗"
-            style={{
-              width: '100%',
-              background: 'var(--bg2)',
-              border: '1px solid var(--border2)',
-              borderRadius: 'var(--radius)',
-              padding: '14px 16px',
-              fontSize: '15px',
-              color: 'var(--ink)',
-              outline: 'none',
-              fontFamily: 'Inter, sans-serif',
-            }}
+            placeholder="例：喜記茶餐廳"
+            style={inputStyle}
+          />
+        </div>
+
+        {/* Address */}
+        <div style={{ marginBottom: '28px' }}>
+          <label style={{ fontSize: '11px', color: 'var(--ink3)', letterSpacing: '0.1em', display: 'block', marginBottom: '8px' }}>
+            地址 <span style={{ color: 'var(--ink3)', fontWeight: 400, letterSpacing: 0 }}>（可選，幫 AI 搵資料）</span>
+          </label>
+          <input
+            value={address}
+            onChange={e => setAddress(e.target.value)}
+            placeholder="例：深水埗桂林街 122 號"
+            style={inputStyle}
           />
         </div>
 
@@ -136,16 +132,8 @@ export default function Home() {
                   transition: 'all 0.15s',
                 }}
               >
-                <div style={{
-                  fontSize: '13px',
-                  fontWeight: 500,
-                  color: scope === s.id ? '#fff' : 'var(--ink)',
-                  marginBottom: '3px',
-                }}>{s.label}</div>
-                <div style={{
-                  fontSize: '11px',
-                  color: scope === s.id ? 'rgba(255,255,255,0.7)' : 'var(--ink3)',
-                }}>{s.sub}</div>
+                <div style={{ fontSize: '13px', fontWeight: 500, color: scope === s.id ? '#fff' : 'var(--ink)', marginBottom: '3px' }}>{s.label}</div>
+                <div style={{ fontSize: '11px', color: scope === s.id ? 'rgba(255,255,255,0.7)' : 'var(--ink3)' }}>{s.sub}</div>
               </button>
             ))}
           </div>
@@ -171,21 +159,9 @@ export default function Home() {
                   transition: 'all 0.15s',
                 }}
               >
-                <div style={{
-                  color: mode === m.id ? 'var(--accent2)' : 'var(--ink3)',
-                  marginBottom: '8px',
-                }}>{m.icon}</div>
-                <div style={{
-                  fontSize: '13px',
-                  fontWeight: 500,
-                  color: 'var(--ink)',
-                  marginBottom: '3px',
-                }}>{m.label}</div>
-                <div style={{
-                  fontSize: '11px',
-                  color: 'var(--ink3)',
-                  lineHeight: 1.5,
-                }}>{m.sub}</div>
+                <div style={{ color: mode === m.id ? 'var(--accent2)' : 'var(--ink3)', marginBottom: '8px' }}>{m.icon}</div>
+                <div style={{ fontSize: '13px', fontWeight: 500, color: 'var(--ink)', marginBottom: '3px' }}>{m.label}</div>
+                <div style={{ fontSize: '11px', color: 'var(--ink3)', lineHeight: 1.5 }}>{m.sub}</div>
               </button>
             ))}
           </div>
