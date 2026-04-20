@@ -82,6 +82,7 @@ function CameraView({ onSave, onSkip, shotText, shotType, partLabel }: {
   const streamRef  = useRef<MediaStream | null>(null)
   const [camState, setCamState] = useState<'preview'|'recording'|'review'>('preview')
   const [recordedBlob, setRecordedBlob] = useState<Blob | null>(null)
+  const blobRef = useRef<Blob | null>(null)
   const [elapsed, setElapsed]   = useState(0)
   const [camError, setCamError] = useState('')
   const [facingMode, setFacingMode] = useState<'environment'|'user'>('environment')
@@ -142,6 +143,7 @@ function CameraView({ onSave, onSkip, shotText, shotType, partLabel }: {
     mr.onstop = () => {
       const mime2 = chunksRef.current[0]?.type || 'video/mp4'
       const blob  = new Blob(chunksRef.current, { type: mime2 })
+      blobRef.current = blob
       setRecordedBlob(blob)
       setCamState('review')
       // stop live stream
@@ -176,9 +178,9 @@ function CameraView({ onSave, onSkip, shotText, shotType, partLabel }: {
   }
 
   const confirm = () => {
-    if (!recordedBlob) return
-    const url = URL.createObjectURL(recordedBlob)
-    onSave(url)
+    const blob = blobRef.current || recordedBlob
+    if (!blob) { onSave(''); return }
+    try { onSave(URL.createObjectURL(blob)) } catch { onSave('') }
   }
 
   const fmt = (s: number) => `${Math.floor(s/60).toString().padStart(2,'0')}:${(s%60).toString().padStart(2,'0')}`
@@ -405,13 +407,19 @@ Hook 風格：${hook.name}（${hook.teaser}）
     setPartIdx(i => i+1); setShotIdx(0)
   }
   const advance = (recorded: boolean, url: string) => {
-    setParts(prev => prev.map((p,i) => {
-      if (i!==partIdx) return p
-      const shots = p.shots.map((s,j) => j===shotIdx ? {...s, recorded, skipped:!recorded, videoUrl:url} : s)
-      return { ...p, shots, done: shots.every(s=>s.recorded||s.skipped) }
+    const isLastShot = shotIdx >= (cur?.shots.length || 1) - 1
+    setParts(prev => prev.map((p, i) => {
+      if (i !== partIdx) return p
+      const shots = p.shots.map((s, j) => j === shotIdx ? { ...s, recorded, skipped: !recorded, videoUrl: url } : s)
+      const allDone = shots.every(s => s.recorded || s.skipped)
+      return { ...p, shots, done: allDone }
     }))
-    if (shotIdx < (cur?.shots.length||1)-1) { setShotIdx(i=>i+1) }
-    else { setParts(prev=>prev.map((p,i)=>i===partIdx?{...p,done:true}:p)); setPartIdx(i=>i+1); setShotIdx(0) }
+    if (!isLastShot) {
+      setShotIdx(i => i + 1)
+    } else {
+      setPartIdx(i => i + 1)
+      setShotIdx(0)
+    }
   }
 
   // ── Hook screen ──
