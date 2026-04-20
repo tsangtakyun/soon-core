@@ -1,37 +1,37 @@
 'use client'
 import { useSearchParams, useRouter } from 'next/navigation'
-import { useEffect, useState, Suspense } from 'react'
+import { useState, Suspense } from 'react'
 
-const HOOK_MAP: Record<string, { code: string; name: string; preview: (topic: string) => string }[]> = {
+const HOOK_MAP: Record<string, { code: string; name: string; teaser: string }[]> = {
   food: [
-    { code: 'H2', name: '真定假 — 直接挑戰', preview: (t) => `「${t}真係香港第一？我今日幫你驗證。」` },
-    { code: 'H4', name: '感官喚起 + 懸念',   preview: (t) => `「成條街都係香味……等陣你就知點解人人話${t}值得排。」` },
-    { code: 'H5', name: '反差驚喜 — 竟然',   preview: (t) => `「${t}外表普普通通，但係個質素……竟然係咁。」` },
+    { code: 'H2', name: '真定假 — 直接挑戰', teaser: '質疑佢嘅名氣，幫觀眾驗證' },
+    { code: 'H4', name: '感官喚起 + 懸念',   teaser: '用香味／顏色勾起好奇' },
+    { code: 'H5', name: '反差驚喜 — 竟然',   teaser: '外表平凡但質素出人意表' },
   ],
   general: [
-    { code: 'H3', name: '聽講 — 半信半疑',   preview: (t) => `「聽講${t}係隱世神店，我今日幫你確認。」` },
-    { code: 'H7', name: '荒誕事實',           preview: (t) => `「你估唔到${t}有幾多年歷史。」` },
-    { code: 'H8', name: '代入感假設',         preview: (t) => `「如果你只有一個鐘去${t}，你會點揀？」` },
+    { code: 'H3', name: '聽講 — 半信半疑',   teaser: '借第三者說法引入懸念' },
+    { code: 'H7', name: '荒誕事實',           teaser: '真實但匪夷所思嘅背景' },
+    { code: 'H8', name: '代入感假設',         teaser: '直問觀眾「如果你係…」' },
   ],
   queue: [
-    { code: 'H1', name: '極端行動質問',       preview: (t) => `「有人為咗${t}排足三個鐘，你話值唔值？」` },
-    { code: 'H2', name: '真定假 — 挑戰',      preview: (t) => `「${t}係咪真係值得排咁耐？我今日親身測試。」` },
-    { code: 'H5', name: '反差驚喜',           preview: (t) => `「以為係噱頭，但係${t}個人龍……真係有原因。」` },
+    { code: 'H1', name: '極端行動質問',       teaser: '有人排足幾個鐘，值唔值？' },
+    { code: 'H2', name: '真定假 — 挑戰',      teaser: '親身測試係咪值得排' },
+    { code: 'H5', name: '反差驚喜',           teaser: '以為係噱頭，原來有原因' },
   ],
   vlog: [
-    { code: 'H6', name: '意外自我披露',       preview: (t) => `「我其實唔係美食 blogger，但係${t}令我改變咗睇法。」` },
-    { code: 'H4', name: '感官喚起',           preview: (t) => `「有啲地方，一入去就知道唔同——${t}就係其中一個。」` },
-    { code: 'H8', name: '代入感假設',         preview: (t) => `「如果你今日唔知去邊，跟我去${t}就啱喇。」` },
+    { code: 'H6', name: '意外自我披露',       teaser: '個人故事拉近觀眾距離' },
+    { code: 'H4', name: '感官喚起',           teaser: '一入去就知道唔同' },
+    { code: 'H8', name: '代入感假設',         teaser: '帶觀眾一齊去' },
   ],
   chef: [
-    { code: 'H3', name: '聽講 — 懸念',       preview: (t) => `「聽講${t}個廚師有段唔為人知嘅故事。」` },
-    { code: 'H6', name: '意外自我披露',       preview: (t) => `「佢放棄咗一份高薪工，就係為咗${t}呢個夢想。」` },
-    { code: 'H7', name: '荒誕事實',           preview: (t) => `「${t}個廚師每日凌晨三點就開工——原因你估唔到。」` },
+    { code: 'H3', name: '聽講 — 懸念',       teaser: '廚師有段唔為人知嘅故事' },
+    { code: 'H6', name: '意外自我披露',       teaser: '放棄高薪追夢嘅真實故事' },
+    { code: 'H7', name: '荒誕事實',           teaser: '凌晨三點開工嘅真相' },
   ],
   attraction: [
-    { code: 'H4', name: '感官喚起 + 懸念',   preview: (t) => `「${t}有樣嘢，你唔親眼見唔會信。」` },
-    { code: 'H8', name: '代入感假設',         preview: (t) => `「如果你只係路過${t}，你一定會後悔冇入去。」` },
-    { code: 'H5', name: '反差驚喜',           preview: (t) => `「${t}外面睇落普通，但係入到去……完全唔同世界。」` },
+    { code: 'H4', name: '感官喚起 + 懸念',   teaser: '有樣嘢你唔親眼見唔會信' },
+    { code: 'H8', name: '代入感假設',         teaser: '路過唔入會後悔' },
+    { code: 'H5', name: '反差驚喜',           teaser: '外面普通，入面另一個世界' },
   ],
 }
 
@@ -63,18 +63,19 @@ type Part = {
 }
 
 function ShootInner() {
-  const params = useSearchParams()
-  const router = useRouter()
-  const topic  = params.get('topic') || ''
-  const scope  = params.get('scope') || 'food'
-  const mode   = params.get('mode')  || 'crew'
+  const params  = useSearchParams()
+  const router  = useRouter()
+  const topic   = params.get('topic')   || ''
+  const address = params.get('address') || ''
+  const scope   = params.get('scope')   || 'food'
+  const mode    = params.get('mode')    || 'crew'
 
-  const [step, setStep] = useState<'hook' | 'plan' | 'shoot'>('hook')
-  const [selHook, setSelHook]   = useState(0)
-  const [parts, setParts]       = useState<Part[]>([])
-  const [current, setCurrent]   = useState(0)
-  const [done, setDone]         = useState<Set<number>>(new Set())
-  const [skipped, setSkipped]   = useState<Set<number>>(new Set())
+  const [step, setStep]           = useState<'hook' | 'plan' | 'shoot'>('hook')
+  const [selHook, setSelHook]     = useState(0)
+  const [parts, setParts]         = useState<Part[]>([])
+  const [current, setCurrent]     = useState(0)
+  const [done, setDone]           = useState<Set<number>>(new Set())
+  const [skipped, setSkipped]     = useState<Set<number>>(new Set())
   const [generating, setGenerating] = useState(false)
 
   const hooks = HOOK_MAP[scope] || HOOK_MAP.food
@@ -90,17 +91,21 @@ function ShootInner() {
       const trans = TRANS_MAP[scope]
       const end   = END_MAP[scope]
       const hook  = hooks[selHook]
+      const locationInfo = address ? `主題：${topic}\n地址：${address}` : `主題：${topic}`
 
       const prompt = `你係 SOON Core AI，幫 creator 策劃短片拍攝計劃。
-主題：${topic}
+${locationInfo}
 角度：${scopeLabel[scope]}
 拍攝方式：${modeLabel}
-Hook：${hook.code} ${hook.name}
+Hook 風格：${hook.code} ${hook.name}（${hook.teaser}）
+
+重要：請根據實際地址同地區生成內容，唔好假設係香港。
 
 請輸出 JSON，格式如下（唔好加任何其他文字）：
 {
+  "hookExample": "根據主題同地區寫一句具體 hook 例句，廣東話",
   "background": {
-    "content": "50-80字廣東話背景介紹",
+    "content": "50-80字廣東話背景介紹，根據實際地點",
     "shot": "一句鏡頭指示"
   },
   "tests": [
@@ -116,7 +121,7 @@ Hook：${hook.code} ${hook.name}
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           model: 'claude-sonnet-4-20250514',
-          max_tokens: 1000,
+          max_tokens: 1200,
           messages: [{ role: 'user', content: prompt }],
         }),
       })
@@ -124,10 +129,12 @@ Hook：${hook.code} ${hook.name}
       const text = data.content?.[0]?.text || '{}'
       const parsed = JSON.parse(text.replace(/```json|```/g, '').trim())
 
+      const hookContent = parsed.hookExample || `「${topic}——${hook.teaser}」`
+
       const builtParts: Part[] = [
-        { id: 'hook',  label: 'Hook',   type: 'hook',  content: hook.preview(topic), shot: mode === 'self' ? '前置鏡頭對住自己，講出 hook' : '後置鏡頭拍主角走入場景' },
+        { id: 'hook',  label: 'Hook',    type: 'hook',  content: hookContent, shot: mode === 'self' ? '前置鏡頭對住自己，講出 hook' : '後置鏡頭拍主角走入場景' },
         { id: 'bg',    label: '背景介紹', type: 'bg',    content: parsed.background?.content, shot: parsed.background?.shot },
-        { id: 'trans', label: '轉場',   type: 'trans', content: trans.name, shot: '快速剪接或走位轉場' },
+        { id: 'trans', label: '轉場',    type: 'trans', content: trans.name, shot: '快速剪接或走位轉場' },
         ...(parsed.tests || []).map((t: any, i: number) => ({
           id: `test${i+1}`, label: `實測 ${i+1}`, type: 'test' as const,
           content: t.content, shot: t.shot, price: `${t.label}${t.price ? ' · ' + t.price : ''}`,
@@ -152,11 +159,13 @@ Hook：${hook.code} ${hook.name}
         <span style={{ fontFamily: 'EB Garamond, serif', fontSize: '18px' }}>SOON</span>
         <span style={{ fontSize: '11px', color: 'var(--ink3)', letterSpacing: '0.08em' }}>1 / 3</span>
       </div>
+
       <div style={{ flex: 1, padding: '28px 20px 40px', maxWidth: '480px', width: '100%', margin: '0 auto' }}>
         <h2 style={{ fontFamily: 'EB Garamond, serif', fontSize: '30px', fontWeight: 400, marginBottom: '6px' }}>揀你嘅開場方式</h2>
         <p style={{ fontSize: '13px', color: 'var(--ink3)', marginBottom: '24px' }}>
           AI 根據「{({food:'實測食物',general:'一般介紹',queue:'排隊實況',vlog:'個人 Vlog',chef:'廚師幕後',attraction:'景點體驗'} as any)[scope]}」揀咗 3 款
         </p>
+
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '24px' }}>
           {hooks.map((h, i) => (
             <button key={h.code} onClick={() => setSelHook(i)} style={{
@@ -167,15 +176,17 @@ Hook：${hook.code} ${hook.name}
             }}>
               <div style={{ fontSize: '10px', color: selHook === i ? 'var(--accent2)' : 'var(--ink3)', letterSpacing: '0.1em', marginBottom: '5px' }}>{h.code}</div>
               <div style={{ fontSize: '14px', fontWeight: 500, color: 'var(--ink)', marginBottom: '5px' }}>{h.name}</div>
-              <div style={{ fontSize: '13px', color: 'var(--ink2)', lineHeight: 1.6, fontStyle: 'italic' }}>{h.preview(topic)}</div>
+              <div style={{ fontSize: '12px', color: 'var(--ink3)', lineHeight: 1.5 }}>{h.teaser}</div>
             </button>
           ))}
         </div>
-        <button onClick={() => { setStep('plan') }} style={{
+
+        <button onClick={() => setStep('plan')} style={{
           width: '100%', background: 'var(--accent)', border: 'none',
           borderRadius: 'var(--radius-pill)', padding: '16px',
           fontSize: '15px', fontWeight: 500, color: '#fff', cursor: 'pointer',
         }}>用呢個 Hook →</button>
+
         <button style={{
           width: '100%', background: 'none', border: '1px solid var(--border)',
           borderRadius: 'var(--radius-pill)', padding: '13px',
@@ -245,6 +256,7 @@ Hook：${hook.code} ${hook.name}
             {part.price && <div style={{ fontSize: '13px', fontWeight: 500, color: 'var(--ink)', marginBottom: '3px' }}>{part.price}</div>}
             {part.content && <div style={{ fontSize: '13px', color: 'var(--ink2)', lineHeight: 1.6, fontStyle: part.type === 'hook' ? 'italic' : 'normal' }}>{part.content}</div>}
           </div>
+
           <div style={{ flex: 1, position: 'relative', background: '#000', margin: '12px 20px', borderRadius: 'var(--radius)', overflow: 'hidden', minHeight: '320px' }}>
             <div style={{ position: 'absolute', inset: 0, display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', pointerEvents: 'none' }}>
               {[...Array(9)].map((_, i) => <div key={i} style={{ border: '0.5px solid rgba(255,255,255,0.1)' }} />)}
