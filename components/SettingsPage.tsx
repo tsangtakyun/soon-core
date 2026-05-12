@@ -1,9 +1,9 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { type ChangeEvent, useEffect, useState } from 'react'
 
 import { DashboardShell } from '@/components/DashboardShell'
-import { defaultSettings, settingsRateGroups, type InvoiceSettings } from '@/lib/invoice'
+import { currencyOptions, defaultSettings, normaliseCurrency, settingsRateGroups, type InvoiceSettings } from '@/lib/invoice'
 import { supabase } from '@/lib/supabase'
 
 export function SettingsPage() {
@@ -16,19 +16,22 @@ export function SettingsPage() {
 
   async function load() {
     const { data } = await supabase.from('settings').select('*').eq('user_id', 'tommy').maybeSingle()
-    if (data) {
-      setSettings({
-        company_name: data.company_name ?? '',
-        email: data.email ?? '',
-        phone: data.phone ?? '',
-        address: data.address ?? '',
-        bank_name: data.bank_name ?? '',
-        account_name: data.account_name ?? '',
-        account_number: data.account_number ?? '',
-        tax_rate: Number(data.tax_rate ?? 0),
-        default_rates: (data.default_rates ?? {}) as Record<string, number>,
-      })
-    }
+    if (!data) return
+
+    setSettings({
+      display_name: data.display_name ?? 'Tommy',
+      logo_base64: data.logo_base64 ?? '',
+      company_name: data.company_name ?? 'SOON Studio',
+      email: data.email ?? '',
+      phone: data.phone ?? '',
+      address: data.address ?? '',
+      bank_name: data.bank_name ?? '',
+      account_name: data.account_name ?? '',
+      account_number: data.account_number ?? '',
+      default_currency: normaliseCurrency(data.default_currency),
+      tax_rate: Number(data.tax_rate ?? 0),
+      default_rates: (data.default_rates ?? {}) as Record<string, number>,
+    })
   }
 
   function update<K extends keyof InvoiceSettings>(key: K, value: InvoiceSettings[K]) {
@@ -42,6 +45,14 @@ export function SettingsPage() {
       default_rates: { ...current.default_rates, [key]: Number(value || 0) },
     }))
     setSaved(false)
+  }
+
+  function uploadLogo(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = () => update('logo_base64', String(reader.result ?? ''))
+    reader.readAsDataURL(file)
   }
 
   async function save() {
@@ -59,15 +70,16 @@ export function SettingsPage() {
       return
     }
     setSaved(true)
+    window.dispatchEvent(new Event('soon-data-updated'))
   }
 
   return (
     <DashboardShell activeSection="settings">
       <section className="settings-page">
-        <header className="docs-header">
+        <header className="docs-header settings-header">
           <div>
             <h1>設定</h1>
-            <p>公司資料、付款資料同 Invoice 預設費率</p>
+            <p>管理用戶資料、公司資料、付款資料同 Invoice 預設費率</p>
           </div>
           <div className="settings-save-row">
             {saved && <span>已儲存</span>}
@@ -78,10 +90,25 @@ export function SettingsPage() {
         </header>
 
         <section className="settings-card">
-          <h2>公司資料</h2>
+          <h2>用戶資料</h2>
+          <label>
+            Display name
+            <input value={settings.display_name} onChange={(event) => update('display_name', event.target.value)} />
+          </label>
           <label>
             公司名稱
             <input value={settings.company_name} onChange={(event) => update('company_name', event.target.value)} />
+          </label>
+          <label>
+            Logo upload
+            <div className="settings-logo-row">
+              {settings.logo_base64 ? (
+                <img src={settings.logo_base64} alt="" />
+              ) : (
+                <span className="settings-logo-placeholder">Logo</span>
+              )}
+              <input type="file" accept="image/*" onChange={uploadLogo} />
+            </div>
           </label>
           <label>
             Email
@@ -111,10 +138,23 @@ export function SettingsPage() {
             Account Number
             <input value={settings.account_number} onChange={(event) => update('account_number', event.target.value)} />
           </label>
+          <label>
+            預設貨幣
+            <select
+              value={settings.default_currency}
+              onChange={(event) => update('default_currency', normaliseCurrency(event.target.value))}
+            >
+              {currencyOptions.map((currency) => (
+                <option key={currency} value={currency}>
+                  {currency}
+                </option>
+              ))}
+            </select>
+          </label>
         </section>
 
         <section className="settings-card">
-          <h2>Invoice 預設費率 (HK$)</h2>
+          <h2>Invoice 預設費率</h2>
           <div className="settings-rate-groups">
             {settingsRateGroups.map((group) => (
               <div key={group.phase} className="settings-rate-group">

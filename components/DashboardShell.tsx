@@ -25,6 +25,12 @@ type WorkspaceDraft = {
   description: string
 }
 
+type SettingsProfile = {
+  companyName: string
+  displayName: string
+  logoBase64: string
+}
+
 const primaryNav = [
   { href: '/', label: '首頁', icon: '🏠', section: 'home' },
   { href: '/work', label: '我的工作', icon: '📅', section: 'work' },
@@ -47,6 +53,11 @@ export function DashboardShell({ activeSection, pipeline, tool, children }: Dash
     type: 'youtube',
     owner: '',
     description: '',
+  })
+  const [settingsProfile, setSettingsProfile] = useState<SettingsProfile>({
+    companyName: 'SOON Studio',
+    displayName: 'Tommy',
+    logoBase64: '',
   })
 
   useEffect(() => {
@@ -73,13 +84,19 @@ export function DashboardShell({ activeSection, pipeline, tool, children }: Dash
   }, [projects])
 
   async function loadSidebarData() {
-    const [{ data: workspaceData }, { data: projectData }] = await Promise.all([
+    const [{ data: workspaceData }, { data: projectData }, { data: settingsData }] = await Promise.all([
       supabase.from('workspaces').select('*').order('created_at', { ascending: false }),
       supabase.from('projects').select('*').order('created_at', { ascending: false }),
+      supabase.from('settings').select('*').eq('user_id', 'tommy').maybeSingle(),
     ])
 
     setWorkspaces((workspaceData ?? []) as Workspace[])
     setProjects((projectData ?? []) as Project[])
+    setSettingsProfile({
+      companyName: settingsData?.company_name || 'SOON Studio',
+      displayName: settingsData?.display_name || 'Tommy',
+      logoBase64: settingsData?.logo_base64 || '',
+    })
   }
 
   function notifyWorkspaceChange() {
@@ -239,10 +256,14 @@ export function DashboardShell({ activeSection, pipeline, tool, children }: Dash
         </Link>
 
         <div className="sidebar-user">
-          <div className="avatar">T</div>
+          {settingsProfile.logoBase64 ? (
+            <img className="sidebar-logo-avatar" src={settingsProfile.logoBase64} alt="" />
+          ) : (
+            <div className="avatar">{settingsProfile.companyName.slice(0, 1).toUpperCase()}</div>
+          )}
           <div>
-            <strong>Tommy</strong>
-            <span>SOON Studio</span>
+            <strong>{settingsProfile.companyName}</strong>
+            <span>{settingsProfile.displayName}</span>
           </div>
         </div>
       </aside>

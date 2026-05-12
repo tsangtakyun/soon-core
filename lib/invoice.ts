@@ -1,4 +1,5 @@
 export type InvoiceLanguage = 'zh' | 'en'
+export type InvoiceCurrency = 'HK$' | 'USD $' | 'GBP £' | 'EUR €' | 'SGD $' | 'TWD NT$' | 'CNY ¥'
 
 export type InvoicePhase =
   | 'Pre-production'
@@ -42,11 +43,14 @@ export type InvoiceContent = {
   bankName: string
   accountName: string
   accountNumber: string
+  currency: InvoiceCurrency
   notes: string
   updatedAt?: string
 }
 
 export type InvoiceSettings = {
+  display_name: string
+  logo_base64: string
   company_name: string
   email: string
   phone: string
@@ -54,9 +58,12 @@ export type InvoiceSettings = {
   bank_name: string
   account_name: string
   account_number: string
+  default_currency: InvoiceCurrency
   tax_rate: number
   default_rates: Record<string, number>
 }
+
+export const currencyOptions: InvoiceCurrency[] = ['HK$', 'USD $', 'GBP £', 'EUR €', 'SGD $', 'TWD NT$', 'CNY ¥']
 
 export const invoicePhases: InvoicePhase[] = [
   'Pre-production',
@@ -146,6 +153,8 @@ export const settingsRateGroups: Array<{ phase: InvoicePhase; items: string[] }>
 ]
 
 export const defaultSettings: InvoiceSettings = {
+  display_name: 'Tommy',
+  logo_base64: '',
   company_name: 'SOON Studio',
   email: '',
   phone: '',
@@ -153,15 +162,20 @@ export const defaultSettings: InvoiceSettings = {
   bank_name: '',
   account_name: '',
   account_number: '',
+  default_currency: 'HK$',
   tax_rate: 0,
   default_rates: {},
+}
+
+export function normaliseCurrency(value: unknown): InvoiceCurrency {
+  return currencyOptions.includes(value as InvoiceCurrency) ? (value as InvoiceCurrency) : 'HK$'
 }
 
 export function createEmptyInvoice(settings = defaultSettings): InvoiceContent {
   return {
     language: 'zh',
     title: 'Invoice',
-    logoDataUrl: '',
+    logoDataUrl: settings.logo_base64,
     companyName: settings.company_name,
     email: settings.email,
     phone: settings.phone,
@@ -178,6 +192,7 @@ export function createEmptyInvoice(settings = defaultSettings): InvoiceContent {
     bankName: settings.bank_name,
     accountName: settings.account_name,
     accountNumber: settings.account_number,
+    currency: normaliseCurrency(settings.default_currency),
     notes: '',
   }
 }
@@ -200,7 +215,21 @@ export function createLineItem(
 export function parseInvoice(content: string | null, settings = defaultSettings): InvoiceContent {
   if (!content) return createEmptyInvoice(settings)
   try {
-    return { ...createEmptyInvoice(settings), ...(JSON.parse(content) as Partial<InvoiceContent>) }
+    const parsed = JSON.parse(content) as Partial<InvoiceContent>
+    return {
+      ...createEmptyInvoice(settings),
+      ...parsed,
+      companyName: parsed.companyName || settings.company_name || '',
+      email: parsed.email || settings.email || '',
+      phone: parsed.phone || settings.phone || '',
+      address: parsed.address || settings.address || '',
+      bankName: parsed.bankName || settings.bank_name || '',
+      accountName: parsed.accountName || settings.account_name || '',
+      accountNumber: parsed.accountNumber || settings.account_number || '',
+      logoDataUrl: parsed.logoDataUrl || settings.logo_base64 || '',
+      currency: normaliseCurrency(parsed.currency || settings.default_currency),
+      taxRate: parsed.taxRate ?? Number(settings.tax_rate ?? 0),
+    }
   } catch {
     return createEmptyInvoice(settings)
   }

@@ -301,6 +301,14 @@ a {
   font-weight: 700;
 }
 
+.sidebar-logo-avatar {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  border-radius: 6px;
+  object-fit: cover;
+}
+
 .sidebar-user strong,
 .sidebar-user span {
   display: block;
@@ -1329,13 +1337,16 @@ textarea:disabled {
 
 .settings-page {
   display: grid;
-  gap: 18px;
+  width: min(680px, 100%);
+  margin: 0 auto;
+  padding: 40px 24px;
 }
 
 .settings-save-row {
   display: flex;
   align-items: center;
   gap: 12px;
+  margin-bottom: 24px;
 }
 
 .settings-save-row span {
@@ -1349,7 +1360,8 @@ textarea:disabled {
   border: 0.5px solid var(--soon-border);
   border-radius: 12px;
   background: var(--soon-surface);
-  padding: 18px;
+  margin-bottom: 24px;
+  padding: 24px;
 }
 
 .settings-card h2,
@@ -1369,9 +1381,36 @@ textarea:disabled {
   font-size: 12px;
 }
 
+.settings-card input,
+.settings-card select,
+.settings-card textarea {
+  width: 100%;
+}
+
+.settings-logo-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.settings-logo-row img,
+.settings-logo-placeholder {
+  display: grid;
+  width: 80px;
+  height: 80px;
+  flex-shrink: 0;
+  place-items: center;
+  border: 0.5px solid var(--soon-border);
+  border-radius: 8px;
+  background: var(--soon-surface2);
+  color: var(--soon-text-muted);
+  font-size: 11px;
+  object-fit: cover;
+}
+
 .settings-rate-groups {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: 1fr;
   gap: 16px;
 }
 
@@ -1387,6 +1426,31 @@ textarea:disabled {
 
 .invoice-toolbar {
   grid-template-columns: 260px minmax(180px, 1fr) auto;
+}
+
+.invoice-currency-select {
+  width: auto;
+  min-width: 78px;
+  border: 0.5px solid var(--soon-border);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--soon-text-secondary);
+  font-size: 12px;
+  padding: 4px 10px;
+}
+
+.invoice-currency-select:focus {
+  border-color: var(--soon-purple);
+}
+
+.invoice-loading {
+  width: min(900px, 100%);
+  justify-self: center;
+  border: 0.5px solid var(--soon-border);
+  border-radius: 12px;
+  background: var(--soon-surface);
+  color: var(--soon-text-secondary);
+  padding: 28px;
 }
 
 .invoice-document {
@@ -1413,7 +1477,7 @@ textarea:disabled {
 
 .invoice-header {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 280px;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 36px;
 }
 
@@ -1452,6 +1516,7 @@ textarea:disabled {
 
 .invoice-meta-box {
   display: grid;
+  justify-items: end;
   align-content: start;
   gap: 8px;
   text-align: right;
@@ -1470,6 +1535,14 @@ textarea:disabled {
   gap: 4px;
   color: #555;
   font-size: 12px;
+}
+
+.invoice-meta-box label {
+  width: min(260px, 100%);
+}
+
+.invoice-meta-box input {
+  text-align: right;
 }
 
 .invoice-block,
