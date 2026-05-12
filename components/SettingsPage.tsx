@@ -81,7 +81,11 @@ export function SettingsPage() {
     const file = event.target.files?.[0]
     if (!file) return
     const reader = new FileReader()
-    reader.onload = () => update('signature_base64', String(reader.result ?? ''))
+    reader.onload = () => {
+      const image = new Image()
+      image.onload = () => update('signature_base64', autoCropSignature(image))
+      image.src = String(reader.result ?? '')
+    }
     reader.readAsDataURL(file)
   }
 
@@ -115,7 +119,7 @@ export function SettingsPage() {
   function finishSignatureDraw() {
     if (!isDrawing) return
     setIsDrawing(false)
-    const dataUrl = canvasRef.current?.toDataURL('image/png')
+    const dataUrl = canvasRef.current ? autoCropSignature(canvasRef.current) : ''
     if (dataUrl) update('signature_base64', dataUrl)
   }
 
@@ -388,4 +392,52 @@ function SettingsCard({
       <div className="settings-card-body">{children}</div>
     </section>
   )
+}
+
+function autoCropSignature(source: HTMLImageElement | HTMLCanvasElement) {
+  const sourceWidth = source instanceof HTMLImageElement ? source.naturalWidth : source.width
+  const sourceHeight = source instanceof HTMLImageElement ? source.naturalHeight : source.height
+  const canvas = document.createElement('canvas')
+  canvas.width = Number(sourceWidth)
+  canvas.height = Number(sourceHeight)
+  const context = canvas.getContext('2d')
+  if (!context || canvas.width === 0 || canvas.height === 0) return ''
+
+  context.drawImage(source, 0, 0)
+  const pixels = context.getImageData(0, 0, canvas.width, canvas.height)
+  const data = pixels.data
+  let minX = canvas.width
+  let minY = canvas.height
+  let maxX = 0
+  let maxY = 0
+
+  for (let y = 0; y < canvas.height; y += 1) {
+    for (let x = 0; x < canvas.width; x += 1) {
+      const alpha = data[(y * canvas.width + x) * 4 + 3]
+      if (alpha > 10) {
+        minX = Math.min(minX, x)
+        minY = Math.min(minY, y)
+        maxX = Math.max(maxX, x)
+        maxY = Math.max(maxY, y)
+      }
+    }
+  }
+
+  if (minX > maxX || minY > maxY) return canvas.toDataURL('image/png')
+
+  const padding = 8
+  minX = Math.max(0, minX - padding)
+  minY = Math.max(0, minY - padding)
+  maxX = Math.min(canvas.width, maxX + padding)
+  maxY = Math.min(canvas.height, maxY + padding)
+
+  const cropW = Math.max(1, maxX - minX)
+  const cropH = Math.max(1, maxY - minY)
+  const cropCanvas = document.createElement('canvas')
+  cropCanvas.width = cropW
+  cropCanvas.height = cropH
+  const cropContext = cropCanvas.getContext('2d')
+  if (!cropContext) return canvas.toDataURL('image/png')
+  cropContext.drawImage(canvas, minX, minY, cropW, cropH, 0, 0, cropW, cropH)
+  return cropCanvas.toDataURL('image/png')
 }

@@ -2165,7 +2165,7 @@ textarea:disabled {
 
 .sig-col {
   display: grid;
-  grid-template-rows: 24px 160px 1px auto auto;
+  grid-template-rows: 24px 120px 1px auto auto;
   gap: 0;
   color: #1a1a1a;
   font-size: 13px;
@@ -2180,21 +2180,16 @@ textarea:disabled {
 
 .sig-image-area {
   display: flex;
-  height: 160px;
+  height: 120px;
   align-items: flex-end;
 }
 
 .quotation-signature-image {
   display: block;
-  min-width: 200px;
-  max-width: 400px;
-  max-height: 160px;
+  max-width: 300px;
+  max-height: 120px;
   object-fit: contain;
   object-position: bottom left;
-}
-
-.signature-img {
-  mix-blend-mode: multiply;
 }
 
 .sig-line {
