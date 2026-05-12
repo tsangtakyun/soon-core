@@ -2184,15 +2184,16 @@ textarea:disabled {
   min-height: 120px;
   flex: 1;
   align-items: flex-end;
+  padding-left: 10%;
   padding-bottom: 0;
   margin-bottom: 0;
 }
 
 .quotation-signature-image {
   display: block;
-  min-width: 200px;
-  max-width: 400px;
-  max-height: 160px;
+  min-width: 260px;
+  max-width: 520px;
+  max-height: 208px;
   margin-bottom: 0;
   object-fit: contain;
   object-position: bottom left;
