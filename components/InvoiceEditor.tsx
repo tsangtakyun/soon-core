@@ -306,22 +306,6 @@ export function InvoiceEditor({ doc, onBack, onSaved }: Props) {
             <button className="quote-import-button" type="button" onClick={() => void openQuotePicker()}>
               ↓ 匯入報價單
             </button>
-            {quotePickerOpen && (
-              <div className="quote-import-menu">
-                {quoteDocs.map((quoteDoc) => {
-                  const quote = parseQuotation(quoteDoc.content)
-                  return (
-                    <button key={quoteDoc.id} type="button" onClick={() => importQuotation(quoteDoc)}>
-                      <strong>{quote.quoteNumber}</strong>
-                      <span>{quote.projectName || '未命名項目'}</span>
-                      <em>{quote.quoteDate || new Date(quoteDoc.created_at).toLocaleDateString('zh-HK')}</em>
-                      <small>{quote.clientCompany || '-'}</small>
-                    </button>
-                  )
-                })}
-                {quoteDocs.length === 0 && <p>未有報價單</p>}
-              </div>
-            )}
           </div>
           <select
             className="invoice-currency-select"
@@ -357,6 +341,29 @@ export function InvoiceEditor({ doc, onBack, onSaved }: Props) {
           </button>
         </div>
       </header>
+
+      {quotePickerOpen && (
+        <div className="quote-import-popover soon-no-print">
+          <div className="quote-import-popover-head">
+            <strong>匯入報價單</strong>
+            <button type="button" onClick={() => setQuotePickerOpen(false)}>關閉</button>
+          </div>
+          <div className="quote-import-menu">
+            {quoteDocs.map((quoteDoc) => {
+              const quote = parseQuotation(quoteDoc.content)
+              return (
+                <button key={quoteDoc.id} type="button" onClick={() => importQuotation(quoteDoc)}>
+                  <strong>{quote.quoteNumber}</strong>
+                  <span>{quote.projectName || '未命名項目'}</span>
+                  <em>{quote.quoteDate || new Date(quoteDoc.created_at).toLocaleDateString('zh-HK')}</em>
+                  <small>{quote.clientCompany || '-'}</small>
+                </button>
+              )
+            })}
+            {quoteDocs.length === 0 && <p>未有報價單</p>}
+          </div>
+        </div>
+      )}
 
       <article className="invoice-document soon-print-doc">
         <section className="invoice-header">
