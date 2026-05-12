@@ -23,12 +23,15 @@ export type ProjectStage =
 
 export type ProjectCategory = 'youtube' | 'ig_reel' | 'ig_drama'
 export type ProjectType = 'youtube' | 'ig'
+export type WorkspaceType = ProjectType | 'mixed'
 export type PipelineStep = 'idea' | 'script' | 'storyboard' | 'production' | 'subtitle' | 'done'
 
 export interface Workspace {
   id: string
   name: string
-  type: ProjectType
+  type: WorkspaceType
+  owner: string | null
+  description: string | null
   created_at: string
 }
 
@@ -88,4 +91,10 @@ export const categoryOptions: Array<{ value: ProjectCategory; label: string; typ
   { value: 'youtube', label: 'YouTube', type: 'youtube' },
   { value: 'ig_reel', label: 'IG Reel', type: 'ig' },
   { value: 'ig_drama', label: 'IG Drama', type: 'ig' },
+]
+
+export const workspaceTypeOptions: Array<{ value: WorkspaceType; label: string }> = [
+  { value: 'youtube', label: 'YouTube' },
+  { value: 'ig', label: 'IG' },
+  { value: 'mixed', label: '混合' },
 ]

@@ -20,6 +20,15 @@ import {
 } from '@/lib/types'
 
 const pipelineOptions: PipelineStep[] = ['idea', 'script', 'storyboard', 'production', 'subtitle', 'done']
+const sortStorageKey = 'soon-work-sort'
+
+type SortKey = 'created_at' | 'shoot_date' | 'title' | 'status' | 'current_stage'
+type SortDirection = 'asc' | 'desc'
+type SortState = {
+  key: SortKey
+  direction: SortDirection
+  label: string
+}
 
 type ProjectDraft = {
   title: string
@@ -33,6 +42,18 @@ type ProjectDraft = {
   pipeline_step: PipelineStep
   output_url: string
 }
+
+const defaultSort: SortState = { key: 'created_at', direction: 'desc', label: '最新建立' }
+
+const sortOptions: SortState[] = [
+  defaultSort,
+  { key: 'created_at', direction: 'asc', label: '最舊建立' },
+  { key: 'shoot_date', direction: 'asc', label: '拍攝日期 近→遠' },
+  { key: 'shoot_date', direction: 'desc', label: '拍攝日期 遠→近' },
+  { key: 'title', direction: 'asc', label: '題目 A→Z' },
+  { key: 'status', direction: 'asc', label: 'Status 1→7' },
+  { key: 'status', direction: 'desc', label: 'Status 7→1' },
+]
 
 const emptyProject: ProjectDraft = {
   title: '',
@@ -57,13 +78,41 @@ export function WorkBoard() {
   const [statusFilter, setStatusFilter] = useState('')
   const [categoryFilter, setCategoryFilter] = useState('')
   const [ownerFilter, setOwnerFilter] = useState('')
+  const [sort, setSort] = useState<SortState>(defaultSort)
   const [panelMode, setPanelMode] = useState<'create' | 'edit' | null>(null)
   const [selectedProject, setSelectedProject] = useState<Project | null>(null)
   const [draft, setDraft] = useState<ProjectDraft>(emptyProject)
 
   useEffect(() => {
+    const saved = window.localStorage.getItem(sortStorageKey)
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved) as SortState
+        if (sortOptions.some((option) => option.key === parsed.key && option.direction === parsed.direction)) {
+          setSort({
+            ...parsed,
+            label:
+              sortOptions.find((option) => option.key === parsed.key && option.direction === parsed.direction)?.label ??
+              parsed.label,
+          })
+        }
+      } catch {
+        window.localStorage.removeItem(sortStorageKey)
+      }
+    }
+  }, [])
+
+  useEffect(() => {
+    setSort(defaultSort)
+    window.localStorage.setItem(sortStorageKey, JSON.stringify(defaultSort))
     void load()
   }, [workspaceFilter])
+
+  useEffect(() => {
+    const refresh = () => void load()
+    window.addEventListener('soon-workspaces-changed', refresh)
+    return () => window.removeEventListener('soon-workspaces-changed', refresh)
+  }, [])
 
   async function load() {
     const [{ data: projectData }, { data: workspaceData }] = await Promise.all([
@@ -74,8 +123,25 @@ export function WorkBoard() {
     setWorkspaces((workspaceData ?? []) as Workspace[])
   }
 
+  function setAndPersistSort(nextSort: SortState) {
+    setSort(nextSort)
+    window.localStorage.setItem(sortStorageKey, JSON.stringify(nextSort))
+  }
+
+  function toggleColumnSort(key: SortKey) {
+    const direction: SortDirection = sort.key === key && sort.direction === 'asc' ? 'desc' : 'asc'
+    setAndPersistSort({
+      key,
+      direction,
+      label: `${columnSortLabels[key]} ${direction === 'asc' ? '↑' : '↓'}`,
+    })
+  }
+
+  const activeWorkspaceName =
+    workspaces.find((workspace) => workspace.id === workspaceFilter)?.name ?? (workspaceFilter ? '未找到' : '全部')
+
   const visibleProjects = useMemo(() => {
-    return projects.filter((project) => {
+    const filtered = projects.filter((project) => {
       if (workspaceFilter && project.workspace_id !== workspaceFilter) return false
       if (statusFilter && project.status !== statusFilter) return false
       if (categoryFilter && project.category !== categoryFilter) return false
@@ -83,7 +149,9 @@ export function WorkBoard() {
       if (query && !project.title.toLowerCase().includes(query.toLowerCase())) return false
       return true
     })
-  }, [categoryFilter, ownerFilter, projects, query, statusFilter, workspaceFilter])
+
+    return [...filtered].sort((a, b) => compareProjects(a, b, sort))
+  }, [categoryFilter, ownerFilter, projects, query, sort, statusFilter, workspaceFilter])
 
   const owners = Array.from(new Set(projects.map((project) => project.owner).filter(Boolean))) as string[]
 
@@ -174,13 +242,14 @@ export function WorkBoard() {
           <div>
             <h1>我的工作</h1>
             <p>內容製作 pipeline board</p>
+            <p className="active-workspace-line">工作區：{activeWorkspaceName}</p>
           </div>
           <button className="primary-button" type="button" onClick={openCreatePanel}>
             + 新項目
           </button>
         </header>
 
-        <div className="filters">
+        <div className="filters work-filters">
           <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="搜尋題目" />
           <select value={categoryFilter} onChange={(event) => setCategoryFilter(event.target.value)}>
             <option value="">全部類別</option>
@@ -206,19 +275,33 @@ export function WorkBoard() {
               </option>
             ))}
           </select>
+          <select
+            value={`${sort.key}:${sort.direction}`}
+            onChange={(event) => {
+              const next = sortOptions.find((option) => `${option.key}:${option.direction}` === event.target.value)
+              if (next) setAndPersistSort(next)
+            }}
+            aria-label="排序"
+          >
+            {sortOptions.map((option) => (
+              <option key={`${option.key}:${option.direction}`} value={`${option.key}:${option.direction}`}>
+                排序：{option.label}
+              </option>
+            ))}
+          </select>
         </div>
 
         <div className="work-table-wrap">
           <table className="work-table">
             <thead>
               <tr>
-                <th>題目</th>
+                <SortableHeader label="題目" sortKey="title" activeSort={sort} onSort={toggleColumnSort} />
                 <th>類別</th>
-                <th>Status</th>
-                <th>當前工序</th>
+                <SortableHeader label="Status" sortKey="status" activeSort={sort} onSort={toggleColumnSort} />
+                <SortableHeader label="當前工序" sortKey="current_stage" activeSort={sort} onSort={toggleColumnSort} />
                 <th>主持</th>
                 <th>負責人</th>
-                <th>拍攝日期</th>
+                <SortableHeader label="拍攝日期" sortKey="shoot_date" activeSort={sort} onSort={toggleColumnSort} />
                 <th>Pipeline</th>
                 <th>Output</th>
               </tr>
@@ -406,5 +489,54 @@ export function WorkBoard() {
         </aside>
       )}
     </DashboardShell>
+  )
+}
+
+const columnSortLabels: Record<SortKey, string> = {
+  created_at: '建立日期',
+  shoot_date: '拍攝日期',
+  title: '題目',
+  status: 'Status',
+  current_stage: '當前工序',
+}
+
+function compareProjects(a: Project, b: Project, sort: SortState) {
+  const modifier = sort.direction === 'asc' ? 1 : -1
+
+  if (sort.key === 'status') {
+    return (statusOptions.indexOf(a.status) - statusOptions.indexOf(b.status)) * modifier
+  }
+
+  const aValue = getSortValue(a, sort.key)
+  const bValue = getSortValue(b, sort.key)
+  return aValue.localeCompare(bValue, 'zh-HK', { numeric: true }) * modifier
+}
+
+function getSortValue(project: Project, key: SortKey) {
+  if (key === 'shoot_date') return project.shoot_date ?? '9999-12-31'
+  if (key === 'created_at') return project.created_at
+  if (key === 'current_stage') return project.current_stage
+  return project.title
+}
+
+function SortableHeader({
+  label,
+  sortKey,
+  activeSort,
+  onSort,
+}: {
+  label: string
+  sortKey: SortKey
+  activeSort: SortState
+  onSort: (key: SortKey) => void
+}) {
+  const active = activeSort.key === sortKey
+  return (
+    <th className={active ? 'sortable-header active' : 'sortable-header'}>
+      <button type="button" onClick={() => onSort(sortKey)}>
+        {label}
+        {active && <span>{activeSort.direction === 'asc' ? '↑' : '↓'}</span>}
+      </button>
+    </th>
   )
 }
