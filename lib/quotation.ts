@@ -150,7 +150,7 @@ export function createEmptyQuotation(settings = defaultQuotationSettings): Quota
     items: [{ id: crypto.randomUUID(), phase: 'Pre-production', deliverable: '', details: '', cost: 0 }],
     discount: null,
     taxRate: Number(settings.tax_rate ?? 0),
-    paymentTerms: buildPaymentTerms(settings),
+    paymentTerms: buildPaymentTerms(settings, 'zh'),
     authorizedName: settings.authorized_name,
     signatureBase64: settings.signature_base64,
     authorizedDate: new Date().toISOString().slice(0, 10),
@@ -186,22 +186,42 @@ export function parseQuotation(content: string | null, settings = defaultQuotati
   }
 }
 
-export function buildPaymentTerms(settings = defaultQuotationSettings) {
+export function buildPaymentTerms(settings = defaultQuotationSettings, language: QuotationLanguage = 'en') {
   const blocks: string[] = []
   if (settings.bank_transfer_enabled) {
-    blocks.push(`Bank Transfer in payment should be made out payable to:
+    blocks.push(
+      language === 'zh'
+        ? `銀行轉帳付款資料：
+銀行名稱：${settings.bank_name}
+戶口名稱：${settings.account_name}
+戶口號碼：${settings.account_number}`
+        : `Bank Transfer in payment should be made out payable to:
 Bank Name: ${settings.bank_name}
 Account Name: ${settings.account_name}
-Account Number: ${settings.account_number}`)
+Account Number: ${settings.account_number}`
+    )
   }
   if (settings.cheque_enabled) {
-    blocks.push(`Cheques should be made payable to ${settings.cheque_payable_to}
-and mailed to: ${settings.cheque_address}`)
+    blocks.push(
+      language === 'zh'
+        ? `支票抬頭：${settings.cheque_payable_to}
+郵寄地址：${settings.cheque_address}`
+        : `Cheques should be made payable to ${settings.cheque_payable_to}
+and mailed to: ${settings.cheque_address}`
+    )
   }
   if (settings.fps_enabled) blocks.push(`FPS / PayMe: ${settings.fps_id}`)
   if (settings.paypal_enabled) blocks.push(`PayPal: ${settings.paypal_email}`)
-  blocks.push(`Total amount shall be settled in ${settings.payment_days} days after job completed.`)
-  blocks.push(`An interest charge of ${settings.interest_rate}% per month will be imposed on overdue account.`)
+  blocks.push(
+    language === 'zh'
+      ? `總金額須於項目完成後 ${settings.payment_days} 日內繳清。`
+      : `Total amount shall be settled in ${settings.payment_days} days after job completed.`
+  )
+  blocks.push(
+    language === 'zh'
+      ? `逾期帳款將按每月 ${settings.interest_rate}% 收取利息。`
+      : `An interest charge of ${settings.interest_rate}% per month will be imposed on overdue account.`
+  )
   return blocks.filter(Boolean).join('\n\n')
 }
 

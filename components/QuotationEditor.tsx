@@ -13,6 +13,7 @@ import {
 } from '@/lib/invoice'
 import {
   defaultQuotationSettings,
+  buildPaymentTerms,
   mergeQuotationSettings,
   parseQuotation,
   type QuotationContent,
@@ -142,6 +143,20 @@ export function QuotationEditor({ doc, onBack, onSaved }: Props) {
     setSaved(false)
   }
 
+  function updateLanguage(language: QuotationContent['language']) {
+    setQuote((current) => {
+      const zhDefault = buildPaymentTerms(settings, 'zh')
+      const enDefault = buildPaymentTerms(settings, 'en')
+      const shouldSwapTerms = current.paymentTerms === zhDefault || current.paymentTerms === enDefault
+      return {
+        ...current,
+        language,
+        paymentTerms: shouldSwapTerms ? buildPaymentTerms(settings, language) : current.paymentTerms,
+      }
+    })
+    setSaved(false)
+  }
+
   function updateItem(id: string, patch: Partial<QuotationItem>) {
     setQuote((current) => ({
       ...current,
@@ -211,8 +226,8 @@ export function QuotationEditor({ doc, onBack, onSaved }: Props) {
         <div className="brief-toolbar-left">
           <button type="button" onClick={onBack}>{t.back}</button>
           <div className="brief-language-toggle">
-            <button className={quote.language === 'zh' ? 'active' : ''} type="button" onClick={() => update('language', 'zh')}>{t.chinese}</button>
-            <button className={quote.language === 'en' ? 'active' : ''} type="button" onClick={() => update('language', 'en')}>{t.english}</button>
+            <button className={quote.language === 'zh' ? 'active' : ''} type="button" onClick={() => updateLanguage('zh')}>{t.chinese}</button>
+            <button className={quote.language === 'en' ? 'active' : ''} type="button" onClick={() => updateLanguage('en')}>{t.english}</button>
           </div>
           <select className="invoice-currency-select" value={quote.currency} onChange={(event) => update('currency', event.target.value as InvoiceCurrency)}>
             {currencyOptions.map((currency) => <option key={currency} value={currency}>{currency}</option>)}
