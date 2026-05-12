@@ -7,6 +7,7 @@ import { supabase } from '@/lib/supabase'
 import type { CoreDoc, Workspace } from '@/lib/types'
 
 type BriefLang = 'zh' | 'en'
+type BriefStatus = 'Planning' | 'In Progress' | 'On Hold' | 'Done'
 
 const briefLangStorageKey = 'soon-brief-lang'
 
@@ -61,7 +62,7 @@ type ProjectBriefContent = {
   title: string
   projectName: string
   owner: string
-  status: 'Planning' | 'In Progress' | 'On Hold' | 'Done'
+  status: BriefStatus
   startDate: string
   targetDate: string
   team: string
@@ -79,7 +80,7 @@ type ProjectBriefContent = {
 
 const templateLabels = Object.fromEntries(templates.map((template) => [template.type, template.title]))
 const templateIcons = Object.fromEntries(templates.map((template) => [template.type, template.icon]))
-const projectBriefStatusOptions: ProjectBriefContent['status'][] = ['Planning', 'In Progress', 'On Hold', 'Done']
+const projectBriefStatusOptions: BriefStatus[] = ['Planning', 'In Progress', 'On Hold', 'Done']
 
 const briefCopy = {
   zh: {
@@ -88,6 +89,8 @@ const briefCopy = {
     save: 'Save',
     saved: '已儲存',
     saving: '儲存中...',
+    exportPdf: '匯出 PDF',
+    exportWord: '匯出 Word',
     meta: (created: string, updated: string) => `建立者 Tommy · 建立日期 ${created} · 最近更新 ${updated}`,
     fields: {
       projectName: '項目名稱',
@@ -136,6 +139,8 @@ const briefCopy = {
     save: 'Save',
     saved: 'Saved',
     saving: 'Saving...',
+    exportPdf: 'Export PDF',
+    exportWord: 'Export Word',
     meta: (created: string, updated: string) => `Created by Tommy · Created ${created} · Last updated ${updated}`,
     fields: {
       projectName: 'Project name',
@@ -236,6 +241,10 @@ export function DocsCenter() {
     setWorkspaces((workspaceData ?? []) as Workspace[])
   }
 
+  function notifyDocsChanged() {
+    window.dispatchEvent(new Event('soon-docs-changed'))
+  }
+
   function getStoredBriefLanguage(): BriefLang {
     if (typeof window === 'undefined') return 'zh'
     return window.localStorage.getItem(briefLangStorageKey) === 'en' ? 'en' : 'zh'
@@ -264,7 +273,28 @@ export function DocsCenter() {
       return
     }
 
+    notifyDocsChanged()
     openDoc(data as CoreDoc, [data as CoreDoc, ...docs])
+  }
+
+  async function deleteDoc(doc: CoreDoc) {
+    const confirmed = window.confirm('確定刪除此文件？此動作不可撤回')
+    if (!confirmed) return
+
+    const { error } = await supabase.from('docs').delete().eq('id', doc.id)
+    if (error) {
+      window.alert(error.message)
+      return
+    }
+
+    if (selectedDoc?.id === doc.id) {
+      setSelectedDoc(null)
+      setContent('')
+      setSaveState('idle')
+    }
+    setDocs((current) => current.filter((item) => item.id !== doc.id))
+    notifyDocsChanged()
+    await load()
   }
 
   async function saveDoc() {
@@ -303,6 +333,23 @@ export function DocsCenter() {
     setSelectedDoc(data as CoreDoc)
     setDocs((current) => current.map((doc) => (doc.id === selectedDoc.id ? (data as CoreDoc) : doc)))
     setSaveState('saved')
+  }
+
+  function exportPdf() {
+    window.print()
+  }
+
+  function exportWord() {
+    const html = buildWordHtml(projectBrief, copy, selectedDoc?.created_at ?? new Date().toISOString())
+    const blob = new Blob(['\ufeff', html], { type: 'application/msword' })
+    const url = URL.createObjectURL(blob)
+    const anchor = document.createElement('a')
+    anchor.href = url
+    anchor.download = `${sanitizeFilename(projectBrief.projectName || projectBrief.title || 'project')}-brief.doc`
+    document.body.appendChild(anchor)
+    anchor.click()
+    anchor.remove()
+    URL.revokeObjectURL(url)
   }
 
   function openDoc(doc: CoreDoc, nextDocs = docs) {
@@ -359,9 +406,9 @@ export function DocsCenter() {
     return (
       <DashboardShell activeSection="docs">
         <section className="brief-editor-page">
-          <header className="brief-toolbar">
+          <header className="brief-toolbar soon-no-print">
             <div className="brief-toolbar-left">
-              <button type="button" onClick={closeDoc}>
+              <button className="soon-no-print" type="button" onClick={closeDoc}>
                 {copy.back}
               </button>
               <div className="brief-language-toggle" aria-label="Project brief language">
@@ -385,13 +432,19 @@ export function DocsCenter() {
             <div className="brief-toolbar-actions">
               {saveState === 'saved' && <span>{copy.saved}</span>}
               {saveState === 'saving' && <span>{copy.saving}</span>}
+              <button className="export-button soon-no-print" type="button" onClick={exportPdf}>
+                {copy.exportPdf}
+              </button>
+              <button className="export-button soon-no-print" type="button" onClick={exportWord}>
+                {copy.exportWord}
+              </button>
               <button className="primary-button" type="button" onClick={() => void saveProjectBrief()}>
                 {copy.save}
               </button>
             </div>
           </header>
 
-          <article className="brief-document">
+          <article className="brief-document soon-print-doc">
             <input
               className="brief-title-input"
               value={projectBrief.title}
@@ -416,9 +469,7 @@ export function DocsCenter() {
                 <BriefInfoRow label={copy.fields.status}>
                   <select
                     value={projectBrief.status}
-                    onChange={(event) =>
-                      updateProjectBrief('status', event.target.value as ProjectBriefContent['status'])
-                    }
+                    onChange={(event) => updateProjectBrief('status', event.target.value as BriefStatus)}
                   >
                     {projectBriefStatusOptions.map((status) => (
                       <option key={status} value={status}>
@@ -527,7 +578,7 @@ export function DocsCenter() {
                   ))}
                 </tbody>
               </table>
-              <button className="add-row-button" type="button" onClick={addStakeholder}>
+              <button className="add-row-button soon-no-print" type="button" onClick={addStakeholder}>
                 {copy.addRow}
               </button>
             </BriefSection>
@@ -608,9 +659,14 @@ export function DocsCenter() {
                   {templateLabels[doc.template_type ?? ''] ?? doc.template_type ?? 'Document'}
                 </span>
                 <time>{new Date(doc.created_at).toLocaleDateString('zh-HK')}</time>
-                <button type="button" onClick={() => openDoc(doc)}>
-                  開啟
-                </button>
+                <div className="doc-row-actions">
+                  <button type="button" onClick={() => openDoc(doc)}>
+                    開啟
+                  </button>
+                  <button className="doc-delete-button" type="button" onClick={() => void deleteDoc(doc)}>
+                    刪除
+                  </button>
+                </div>
               </div>
             ))}
             {docs.length === 0 && <p className="docs-empty">未有文件</p>}
@@ -661,6 +717,69 @@ function parseProjectBrief(content: string | null, fallbackLanguage: BriefLang):
   } catch {
     return { ...defaultProjectBrief, language: fallbackLanguage, problemStatement: content }
   }
+}
+
+function buildWordHtml(content: ProjectBriefContent, copy: (typeof briefCopy)[BriefLang], createdAt: string) {
+  const rows = [
+    [copy.fields.projectName, content.projectName],
+    [copy.fields.owner, content.owner],
+    [copy.fields.status, copy.status[content.status]],
+    [copy.fields.startDate, content.startDate],
+    [copy.fields.targetDate, content.targetDate],
+    [copy.fields.team, content.team],
+  ]
+    .map(([label, value]) => `<tr><td>${escapeHtml(label)}</td><td>${escapeHtml(value)}</td></tr>`)
+    .join('')
+
+  const stakeholderRows = content.stakeholders
+    .map(
+      (item) =>
+        `<tr><td>${escapeHtml(item.name)}</td><td>${escapeHtml(item.role)}</td><td>${escapeHtml(item.involvement)}</td></tr>`
+    )
+    .join('')
+
+  return `<html><head><meta charset="utf-8">
+<style>
+  body { font-family: Arial, sans-serif; margin: 40px; color: #1a1a1a; }
+  h1 { font-size: 28px; margin-bottom: 4px; }
+  .meta { font-size: 12px; color: #888; margin-bottom: 24px; }
+  table { border-collapse: collapse; width: 100%; margin-bottom: 24px; }
+  td, th { border: 1px solid #e5e5e5; padding: 8px 12px; font-size: 13px; text-align: left; }
+  td:first-child { font-weight: bold; width: 200px; }
+  h2 { font-size: 16px; margin-top: 28px; margin-bottom: 8px; }
+  h3 { font-size: 13px; margin-top: 16px; margin-bottom: 4px; color: #555; }
+  p { font-size: 13px; line-height: 1.8; white-space: pre-wrap; }
+</style></head><body>
+  <h1>${escapeHtml(content.title)}</h1>
+  <div class="meta">${escapeHtml(copy.meta(formatDate(createdAt), formatDate(content.updatedAt ?? createdAt)))}</div>
+  <table>${rows}</table>
+  <h2>${escapeHtml(copy.sections.problemStatement)}</h2><p>${escapeHtml(content.problemStatement)}</p>
+  <h2>${escapeHtml(copy.sections.goalsMetrics)}</h2>
+  <h3>${escapeHtml(copy.labels.goals)}</h3><p>${escapeHtml(content.goals)}</p>
+  <h3>${escapeHtml(copy.labels.successMetrics)}</h3><p>${escapeHtml(content.successMetrics)}</p>
+  <h2>${escapeHtml(copy.sections.scope)}</h2>
+  <h3>${escapeHtml(copy.labels.inScope)}</h3><p>${escapeHtml(content.inScope)}</p>
+  <h3>${escapeHtml(copy.labels.outOfScope)}</h3><p>${escapeHtml(content.outOfScope)}</p>
+  <h2>${escapeHtml(copy.sections.stakeholders)}</h2>
+  <table><tr>${copy.stakeholderColumns.map((column) => `<th>${escapeHtml(column)}</th>`).join('')}</tr>${stakeholderRows}</table>
+  <h2>${escapeHtml(copy.sections.risksDependencies)}</h2>
+  <h3>${escapeHtml(copy.labels.risks)}</h3><p>${escapeHtml(content.risks)}</p>
+  <h3>${escapeHtml(copy.labels.dependencies)}</h3><p>${escapeHtml(content.dependencies)}</p>
+  <h2>${escapeHtml(copy.sections.openQuestions)}</h2><p>${escapeHtml(content.openQuestions)}</p>
+</body></html>`
+}
+
+function escapeHtml(value: string) {
+  return value
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#039;')
+}
+
+function sanitizeFilename(value: string) {
+  return value.trim().replace(/[\\/:*?"<>|]+/g, '-').replace(/\s+/g, '-').toLowerCase() || 'project'
 }
 
 function formatDate(value: string) {

@@ -58,6 +58,12 @@ export function DashboardShell({ activeSection, pipeline, tool, children }: Dash
   }, [])
 
   useEffect(() => {
+    const refreshSidebar = () => void loadSidebarData()
+    window.addEventListener('soon-docs-changed', refreshSidebar)
+    return () => window.removeEventListener('soon-docs-changed', refreshSidebar)
+  }, [])
+
+  useEffect(() => {
     const projectId = window.localStorage.getItem('current_project_id')
     if (!projectId) {
       setActiveProject(null)
@@ -177,7 +183,7 @@ export function DashboardShell({ activeSection, pipeline, tool, children }: Dash
 
   return (
     <div className="core-shell">
-      <aside className="core-sidebar">
+      <aside className="core-sidebar soon-no-print">
         <div className="core-logo">⚡ SOON CORE</div>
 
         <nav className="core-nav" aria-label="Main navigation">

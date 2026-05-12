@@ -999,12 +999,23 @@ textarea:disabled {
   font-size: 12px;
 }
 
+.doc-row-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
 .doc-row button {
   border: 0;
   background: transparent;
   color: var(--soon-purple-light);
   font-size: 12px;
   padding: 0;
+}
+
+.doc-row .doc-delete-button {
+  color: #ef4444;
+  cursor: pointer;
 }
 
 .docs-empty {
@@ -1105,6 +1116,19 @@ textarea:disabled {
 .brief-toolbar-actions span {
   color: var(--soon-success);
   font-size: 12px;
+}
+
+.export-button {
+  border: 0.5px solid var(--soon-border);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--soon-text-secondary);
+  font-size: 12px;
+  padding: 6px 12px;
+}
+
+.export-button:hover {
+  background: var(--soon-surface2);
 }
 
 .brief-document {
@@ -1273,6 +1297,43 @@ textarea:disabled {
   color: var(--soon-text-muted);
   font-size: 12px;
   padding: 4px 16px;
+}
+
+@media print {
+  @page {
+    margin: 20mm;
+  }
+
+  html,
+  body {
+    background: white !important;
+    color: black !important;
+  }
+
+  .soon-no-print {
+    display: none !important;
+  }
+
+  .core-shell,
+  .core-main,
+  .dashboard-content,
+  .brief-editor-page {
+    display: block !important;
+    height: auto !important;
+    overflow: visible !important;
+    padding: 0 !important;
+    background: white !important;
+  }
+
+  .soon-print-doc {
+    width: 100% !important;
+    max-width: 100% !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    background: white !important;
+    color: black !important;
+    padding: 0 !important;
+  }
 }
 
 @media (max-width: 900px) {
