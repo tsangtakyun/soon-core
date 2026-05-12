@@ -1,28 +1,59 @@
 'use client'
 
-import { type ChangeEvent, type PointerEvent, useEffect, useRef, useState } from 'react'
+import { type ChangeEvent, type PointerEvent, type ReactNode, useEffect, useRef, useState } from 'react'
 
 import { DashboardShell } from '@/components/DashboardShell'
 import { buildInvoiceNumber, currencyOptions, normaliseCurrency, settingsRateGroups } from '@/lib/invoice'
 import { buildQuoteNumber, defaultQuotationSettings, mergeQuotationSettings, type QuotationSettings } from '@/lib/quotation'
 import { supabase } from '@/lib/supabase'
 
+type SignatureMode = 'draw' | 'upload'
+type SectionKey = 'user' | 'company' | 'payment' | 'paymentTerms' | 'signature' | 'invoice' | 'rates' | 'tax'
+
+const collapsedStorageKey = 'soon-settings-collapsed'
+
+const defaultCollapsed: Record<SectionKey, boolean> = {
+  user: false,
+  company: false,
+  payment: true,
+  paymentTerms: true,
+  signature: false,
+  invoice: true,
+  rates: true,
+  tax: true,
+}
+
 export function SettingsPage() {
   const [settings, setSettings] = useState<QuotationSettings>(defaultQuotationSettings)
   const [saved, setSaved] = useState(false)
-  const [signatureMode, setSignatureMode] = useState<'draw' | 'upload'>('draw')
+  const [signatureSaved, setSignatureSaved] = useState(false)
+  const [signatureMode, setSignatureMode] = useState<SignatureMode>('draw')
   const [isDrawing, setIsDrawing] = useState(false)
+  const [collapsed, setCollapsed] = useState<Record<SectionKey, boolean>>(defaultCollapsed)
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
 
   useEffect(() => {
     void load()
+    const stored = window.localStorage.getItem(collapsedStorageKey)
+    if (!stored) return
+    try {
+      setCollapsed({ ...defaultCollapsed, ...(JSON.parse(stored) as Partial<Record<SectionKey, boolean>>) })
+    } catch {
+      setCollapsed(defaultCollapsed)
+    }
   }, [])
 
   async function load() {
     const { data } = await supabase.from('settings').select('*').eq('user_id', 'tommy').maybeSingle()
-    if (!data) return
+    if (data) setSettings(mergeQuotationSettings(data))
+  }
 
-    setSettings(mergeQuotationSettings(data))
+  function toggleSection(key: SectionKey) {
+    setCollapsed((current) => {
+      const next = { ...current, [key]: !current[key] }
+      window.localStorage.setItem(collapsedStorageKey, JSON.stringify(next))
+      return next
+    })
   }
 
   function update<K extends keyof QuotationSettings>(key: K, value: QuotationSettings[K]) {
@@ -56,16 +87,12 @@ export function SettingsPage() {
 
   function pointerPosition(event: PointerEvent<HTMLCanvasElement>) {
     const rect = event.currentTarget.getBoundingClientRect()
-    return {
-      x: event.clientX - rect.left,
-      y: event.clientY - rect.top,
-    }
+    return { x: event.clientX - rect.left, y: event.clientY - rect.top }
   }
 
   function startSignatureDraw(event: PointerEvent<HTMLCanvasElement>) {
-    const canvas = canvasRef.current
-    const context = canvas?.getContext('2d')
-    if (!canvas || !context) return
+    const context = canvasRef.current?.getContext('2d')
+    if (!context) return
     const position = pointerPosition(event)
     context.strokeStyle = '#000000'
     context.lineWidth = 2
@@ -102,11 +129,7 @@ export function SettingsPage() {
 
   async function save() {
     const { error } = await supabase.from('settings').upsert(
-      {
-        user_id: 'tommy',
-        ...settings,
-        updated_at: new Date().toISOString(),
-      },
+      { user_id: 'tommy', ...settings, updated_at: new Date().toISOString() },
       { onConflict: 'user_id' }
     )
 
@@ -118,13 +141,33 @@ export function SettingsPage() {
     window.dispatchEvent(new Event('soon-data-updated'))
   }
 
+  async function saveSignature() {
+    const { error } = await supabase.from('settings').upsert(
+      {
+        user_id: 'tommy',
+        signature_base64: settings.signature_base64,
+        authorized_name: settings.authorized_name,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: 'user_id' }
+    )
+
+    if (error) {
+      window.alert(error.message)
+      return
+    }
+    setSignatureSaved(true)
+    window.dispatchEvent(new Event('soon-data-updated'))
+    window.setTimeout(() => setSignatureSaved(false), 2000)
+  }
+
   return (
     <DashboardShell activeSection="settings">
       <section className="settings-page">
         <header className="docs-header settings-header">
           <div>
             <h1>設定</h1>
-            <p>管理用戶資料、公司資料、付款資料同 Invoice 預設費率</p>
+            <p>管理用戶資料、公司資料、付款資料、文件編號、費率同簽署設定</p>
           </div>
           <div className="settings-save-row">
             {saved && <span>已儲存</span>}
@@ -134,12 +177,14 @@ export function SettingsPage() {
           </div>
         </header>
 
-        <section className="settings-card">
-          <h2>用戶資料</h2>
+        <SettingsCard title="用戶資料" collapsed={collapsed.user} onToggle={() => toggleSection('user')}>
           <label>
             Display name
             <input value={settings.display_name} onChange={(event) => update('display_name', event.target.value)} />
           </label>
+        </SettingsCard>
+
+        <SettingsCard title="公司資料" collapsed={collapsed.company} onToggle={() => toggleSection('company')}>
           <label>
             公司名稱
             <input value={settings.company_name} onChange={(event) => update('company_name', event.target.value)} />
@@ -147,11 +192,7 @@ export function SettingsPage() {
           <label>
             Logo upload
             <div className="settings-logo-row">
-              {settings.logo_base64 ? (
-                <img src={settings.logo_base64} alt="" />
-              ) : (
-                <span className="settings-logo-placeholder">Logo</span>
-              )}
+              {settings.logo_base64 ? <img src={settings.logo_base64} alt="" /> : <span className="settings-logo-placeholder">Logo</span>}
               <input type="file" accept="image/*" onChange={uploadLogo} />
             </div>
           </label>
@@ -167,10 +208,9 @@ export function SettingsPage() {
             地址
             <textarea value={settings.address} onChange={(event) => update('address', event.target.value)} rows={3} />
           </label>
-        </section>
+        </SettingsCard>
 
-        <section className="settings-card">
-          <h2>付款資料</h2>
+        <SettingsCard title="付款資料" collapsed={collapsed.payment} onToggle={() => toggleSection('payment')}>
           <label>
             銀行名稱
             <input value={settings.bank_name} onChange={(event) => update('bank_name', event.target.value)} />
@@ -185,21 +225,13 @@ export function SettingsPage() {
           </label>
           <label>
             預設貨幣
-            <select
-              value={settings.default_currency}
-              onChange={(event) => update('default_currency', normaliseCurrency(event.target.value))}
-            >
-              {currencyOptions.map((currency) => (
-                <option key={currency} value={currency}>
-                  {currency}
-                </option>
-              ))}
+            <select value={settings.default_currency} onChange={(event) => update('default_currency', normaliseCurrency(event.target.value))}>
+              {currencyOptions.map((currency) => <option key={currency} value={currency}>{currency}</option>)}
             </select>
           </label>
-        </section>
+        </SettingsCard>
 
-        <section className="settings-card">
-          <h2>發票設定</h2>
+        <SettingsCard title="發票設定" collapsed={collapsed.invoice} onToggle={() => toggleSection('invoice')}>
           <label>
             發票號碼前綴
             <input value={settings.invoice_prefix} onChange={(event) => update('invoice_prefix', event.target.value)} />
@@ -210,12 +242,7 @@ export function SettingsPage() {
           </div>
           <label>
             起始號碼
-            <input
-              type="number"
-              min="1"
-              value={settings.invoice_start_number}
-              onChange={(event) => update('invoice_start_number', Number(event.target.value || 1))}
-            />
+            <input type="number" min="1" value={settings.invoice_start_number} onChange={(event) => update('invoice_start_number', Number(event.target.value || 1))} />
           </label>
           <div className="settings-readonly-row">
             <span>目前號碼</span>
@@ -233,10 +260,9 @@ export function SettingsPage() {
             <span>報價單目前號碼</span>
             <strong>{settings.quote_current_number}</strong>
           </div>
-        </section>
+        </SettingsCard>
 
-        <section className="settings-card">
-          <h2>付款條款設定</h2>
+        <SettingsCard title="付款條款設定" collapsed={collapsed.paymentTerms} onToggle={() => toggleSection('paymentTerms')}>
           <label className="settings-toggle-row">
             <input type="checkbox" checked={settings.bank_transfer_enabled} onChange={(event) => update('bank_transfer_enabled', event.target.checked)} />
             Bank Transfer
@@ -277,21 +303,16 @@ export function SettingsPage() {
             逾期利息
             <input type="number" min="0" value={settings.interest_rate} onChange={(event) => update('interest_rate', Number(event.target.value || 0))} />
           </label>
-        </section>
+        </SettingsCard>
 
-        <section className="settings-card">
-          <h2>簽署設定</h2>
+        <SettingsCard title="簽署設定" collapsed={collapsed.signature} onToggle={() => toggleSection('signature')}>
           <label>
             授權人姓名
             <input value={settings.authorized_name} onChange={(event) => update('authorized_name', event.target.value)} />
           </label>
           <div className="signature-mode-toggle">
-            <button className={signatureMode === 'draw' ? 'active' : ''} type="button" onClick={() => setSignatureMode('draw')}>
-              手寫
-            </button>
-            <button className={signatureMode === 'upload' ? 'active' : ''} type="button" onClick={() => setSignatureMode('upload')}>
-              上傳圖片
-            </button>
+            <button className={signatureMode === 'draw' ? 'active' : ''} type="button" onClick={() => setSignatureMode('draw')}>手寫</button>
+            <button className={signatureMode === 'upload' ? 'active' : ''} type="button" onClick={() => setSignatureMode('upload')}>上傳圖片</button>
           </div>
           {signatureMode === 'draw' ? (
             <div className="signature-canvas-wrap">
@@ -304,9 +325,7 @@ export function SettingsPage() {
                 onPointerUp={finishSignatureDraw}
                 onPointerLeave={finishSignatureDraw}
               />
-              <button className="ghost-button inline-ghost-button" type="button" onClick={clearSignature}>
-                清除
-              </button>
+              <button className="ghost-button inline-ghost-button" type="button" onClick={clearSignature}>清除</button>
             </div>
           ) : (
             <label>
@@ -317,10 +336,13 @@ export function SettingsPage() {
               </div>
             </label>
           )}
-        </section>
+          <div className="signature-save-row">
+            <button className="signature-save-button" type="button" onClick={() => void saveSignature()}>儲存簽名</button>
+            {signatureSaved && <span>已儲存</span>}
+          </div>
+        </SettingsCard>
 
-        <section className="settings-card">
-          <h2>Invoice 預設費率</h2>
+        <SettingsCard title="Invoice 預設費率" collapsed={collapsed.rates} onToggle={() => toggleSection('rates')}>
           <div className="settings-rate-groups">
             {settingsRateGroups.map((group) => (
               <div key={group.phase} className="settings-rate-group">
@@ -328,32 +350,43 @@ export function SettingsPage() {
                 {group.items.map((item) => (
                   <label key={item}>
                     {item}
-                    <input
-                      type="number"
-                      min="0"
-                      value={settings.default_rates[item] ?? 0}
-                      onChange={(event) => updateRate(item, event.target.value)}
-                    />
+                    <input type="number" min="0" value={settings.default_rates[item] ?? 0} onChange={(event) => updateRate(item, event.target.value)} />
                   </label>
                 ))}
               </div>
             ))}
           </div>
-        </section>
+        </SettingsCard>
 
-        <section className="settings-card">
-          <h2>稅率</h2>
+        <SettingsCard title="稅率" collapsed={collapsed.tax} onToggle={() => toggleSection('tax')}>
           <label>
             Tax rate %
-            <input
-              type="number"
-              min="0"
-              value={settings.tax_rate}
-              onChange={(event) => update('tax_rate', Number(event.target.value || 0))}
-            />
+            <input type="number" min="0" value={settings.tax_rate} onChange={(event) => update('tax_rate', Number(event.target.value || 0))} />
           </label>
-        </section>
+        </SettingsCard>
       </section>
     </DashboardShell>
+  )
+}
+
+function SettingsCard({
+  title,
+  collapsed,
+  onToggle,
+  children,
+}: {
+  title: string
+  collapsed: boolean
+  onToggle: () => void
+  children: ReactNode
+}) {
+  return (
+    <section className={`settings-card ${collapsed ? 'collapsed' : 'expanded'}`}>
+      <button className="settings-card-header" type="button" onClick={onToggle} aria-expanded={!collapsed}>
+        <h2>{title}</h2>
+        <span>{collapsed ? '▶' : '▼'}</span>
+      </button>
+      <div className="settings-card-body">{children}</div>
+    </section>
   )
 }

@@ -1352,6 +1352,20 @@ textarea:disabled {
   padding: 40px 24px;
 }
 
+.settings-page,
+.settings-page label,
+.settings-page h1,
+.settings-page h2,
+.settings-page h3 {
+  color: var(--soon-text);
+}
+
+.settings-page p,
+.settings-readonly-row,
+.settings-save-row span {
+  color: var(--soon-text-secondary);
+}
+
 .settings-save-row {
   display: flex;
   align-items: center;
@@ -1366,12 +1380,59 @@ textarea:disabled {
 
 .settings-card {
   display: grid;
-  gap: 14px;
+  gap: 0;
+  overflow: hidden;
   border: 0.5px solid var(--soon-border);
   border-radius: 12px;
   background: var(--soon-surface);
   margin-bottom: 24px;
-  padding: 24px;
+  padding: 0;
+}
+
+.settings-card-header {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  padding: 16px 20px;
+  text-align: left;
+}
+
+.settings-card-header:hover {
+  background: rgba(255,255,255,0.02);
+}
+
+.settings-card.collapsed .settings-card-header {
+  border-radius: 12px;
+}
+
+.settings-card.expanded .settings-card-header {
+  border-radius: 12px 12px 0 0;
+}
+
+.settings-card-header span {
+  color: var(--soon-text-secondary);
+  font-size: 12px;
+}
+
+.settings-card-body {
+  display: grid;
+  gap: 14px;
+  max-height: 3000px;
+  overflow: hidden;
+  padding: 0 24px 24px;
+  transition: max-height 0.2s ease, padding 0.2s ease, opacity 0.2s ease;
+  opacity: 1;
+}
+
+.settings-card.collapsed .settings-card-body {
+  max-height: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  opacity: 0;
 }
 
 .settings-card h2,
@@ -1381,13 +1442,14 @@ textarea:disabled {
 
 .settings-card h2 {
   color: var(--soon-purple-light);
-  font-size: 15px;
+  font-size: 14px;
+  font-weight: 600;
 }
 
 .settings-card label {
   display: grid;
   gap: 6px;
-  color: var(--soon-text-secondary);
+  color: var(--soon-text);
   font-size: 12px;
 }
 
@@ -1395,6 +1457,7 @@ textarea:disabled {
 .settings-card select,
 .settings-card textarea {
   width: 100%;
+  color: var(--soon-text);
 }
 
 .settings-logo-row {
@@ -1502,6 +1565,30 @@ textarea:disabled {
   border-radius: 6px;
   background: #fff;
   object-fit: contain;
+}
+
+.signature-save-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.signature-save-button {
+  border: 0;
+  border-radius: 6px;
+  background: var(--soon-purple);
+  color: #fff;
+  font-size: 13px;
+  padding: 8px 20px;
+}
+
+.signature-save-button:hover {
+  background: #6d28d9;
+}
+
+.signature-save-row span {
+  color: var(--soon-success);
+  font-size: 12px;
 }
 
 .settings-rate-groups {
