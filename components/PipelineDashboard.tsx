@@ -57,7 +57,7 @@ export function PipelineDashboard({ pipeline, tool }: PipelineDashboardProps) {
   return (
     <div className="dashboard-shell">
       <aside className="sidebar">
-        <div className="brand">SOON CORE</div>
+        <div className="brand">⚡ SOON CORE</div>
         <PipelineToggle activeId={pipeline.id} />
         <ToolNav pipeline={pipeline} activeToolId={tool.id} />
       </aside>
@@ -68,7 +68,7 @@ export function PipelineDashboard({ pipeline, tool }: PipelineDashboardProps) {
             <p className="eyebrow">Active Tool</p>
             <h1>{tool.label}</h1>
           </div>
-          <span className="pipeline-badge">{pipeline.badge}</span>
+          <span className={`pipeline-badge ${pipeline.id}`}>{pipeline.badge}</span>
         </header>
 
         <div className="iframe-wrap">
