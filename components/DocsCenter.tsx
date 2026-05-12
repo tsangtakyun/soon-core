@@ -88,7 +88,7 @@ const briefCopy = {
     save: 'Save',
     saved: '已儲存',
     saving: '儲存中...',
-    meta: (created: string, updated: string) => `建立者 Tommy · 已建立 ${created} · 最近更新 ${updated}`,
+    meta: (created: string, updated: string) => `建立者 Tommy · 建立日期 ${created} · 最近更新 ${updated}`,
     fields: {
       projectName: '項目名稱',
       owner: '負責人',
@@ -120,7 +120,7 @@ const briefCopy = {
       dependencies: '依賴項目',
     },
     placeholders: {
-      problemStatement: '我哋解決緊咩問題？對象係誰？唔解決會有咩影響？',
+      problemStatement: '我們正在解決什麼問題？對象是誰？若不解決會有什麼影響？',
       goals: '目標 1\n目標 2',
       successMetrics: '指標 1\n指標 2',
       inScope: '範圍內項目',
@@ -429,14 +429,18 @@ export function DocsCenter() {
                 </BriefInfoRow>
                 <BriefInfoRow label={copy.fields.startDate}>
                   <input
-                    type="date"
+                    type="text"
+                    inputMode="numeric"
+                    placeholder="YYYY-MM-DD"
                     value={projectBrief.startDate}
                     onChange={(event) => updateProjectBrief('startDate', event.target.value)}
                   />
                 </BriefInfoRow>
                 <BriefInfoRow label={copy.fields.targetDate}>
                   <input
-                    type="date"
+                    type="text"
+                    inputMode="numeric"
+                    placeholder="YYYY-MM-DD"
                     value={projectBrief.targetDate}
                     onChange={(event) => updateProjectBrief('targetDate', event.target.value)}
                   />
