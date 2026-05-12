@@ -393,10 +393,14 @@ function SignatureBlock({
   return (
     <div className="quotation-signature-block">
       <h3>{title}</h3>
-      {signatureBase64 && <img className="quotation-signature-image" src={signatureBase64} alt="" />}
+      <div className="quotation-signature-area">
+        {signatureBase64 && <img className="quotation-signature-image" src={signatureBase64} alt="" />}
+      </div>
       <div className="signature-line" />
-      <label>{nameLabel}: <input value={name} onChange={(event) => onName(event.target.value)} /></label>
-      <label>{dateLabel}: <input value={date} onChange={(event) => onDate(event.target.value)} /></label>
+      <div className="quotation-signature-details">
+        <label><span>{nameLabel}:</span><input value={name} onChange={(event) => onName(event.target.value)} /></label>
+        <label><span>{dateLabel}:</span><input value={date} onChange={(event) => onDate(event.target.value)} /></label>
+      </div>
     </div>
   )
 }

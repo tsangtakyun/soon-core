@@ -2020,42 +2020,66 @@ textarea:disabled {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 48px;
+  align-items: end;
   margin-top: 48px;
 }
 
 .quotation-signature-block {
-  display: grid;
-  gap: 10px;
+  display: flex;
+  min-height: 120px;
+  flex-direction: column;
   color: #1a1a1a;
   font-size: 13px;
 }
 
 .quotation-signature-block h3 {
   margin: 0;
-  font-size: 14px;
-  font-weight: 600;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.quotation-signature-area {
+  display: flex;
+  min-height: 80px;
+  align-items: flex-end;
+  padding-top: 10px;
 }
 
 .quotation-signature-image {
   display: block;
+  min-width: 120px;
   max-width: 200px;
   max-height: 80px;
+  margin-bottom: 8px;
   object-fit: contain;
 }
 
 .signature-line {
+  width: 100%;
   border-top: 1px solid #1a1a1a;
-  margin-top: 28px;
 }
 
-.quotation-signature-block label {
-  display: flex;
+.quotation-signature-details {
+  display: grid;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.quotation-signature-details label {
+  display: grid;
+  grid-template-columns: 46px minmax(0, 1fr);
   align-items: center;
   gap: 8px;
+  min-height: 24px;
 }
 
-.quotation-signature-block input {
-  flex: 1;
+.quotation-signature-details span {
+  color: #1a1a1a;
+  font-size: 13px;
+}
+
+.quotation-signature-details input {
+  width: 100%;
 }
 
 .empty-mini {
