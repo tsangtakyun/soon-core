@@ -268,7 +268,13 @@ export function InvoiceEditor({ doc, onBack, onSaved }: Props) {
             ))}
           </select>
         </div>
-        <input value={invoice.invoiceNumber} onChange={(event) => update('invoiceNumber', event.target.value)} />
+        <span className="invoice-toolbar-spacer" />
+        <input
+          className="invoice-toolbar-number"
+          value={invoice.invoiceNumber}
+          onChange={(event) => update('invoiceNumber', event.target.value)}
+        />
+        <span className="invoice-toolbar-spacer" />
         <div className="brief-toolbar-actions">
           {saved && <span>{copy.saved}</span>}
           <button className="export-button export-pdf-button" type="button" onClick={exportPdf}>
