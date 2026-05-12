@@ -44,7 +44,7 @@ ${JSON.stringify(body.concepts ?? [], null, 2)}
       'anthropic-version': '2023-06-01',
     },
     body: JSON.stringify({
-      model: process.env.ANTHROPIC_MODEL ?? 'claude-3-5-sonnet-latest',
+      model: process.env.ANTHROPIC_MODEL ?? 'claude-sonnet-4-6',
       max_tokens: 2400,
       stream: true,
       system: '你係一個專業內容策劃顧問，專門審閱社交媒體 Concept Board。',
