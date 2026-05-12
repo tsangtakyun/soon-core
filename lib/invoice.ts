@@ -34,8 +34,11 @@ export type InvoiceContent = {
   invoiceNumber: string
   invoiceDate: string
   dueDate: string
+  sourceQuoteNumber: string
   billedToName: string
   billedToAddress: string
+  billedToPhone: string
+  billedToEmail: string
   billedToTaxId: string
   lineItems: InvoiceLineItem[]
   discount: InvoiceDiscount | null
@@ -189,8 +192,11 @@ export function createEmptyInvoice(settings = defaultSettings): InvoiceContent {
     invoiceNumber: buildInvoiceNumber(settings.invoice_prefix, new Date().getFullYear(), nextInvoiceSequence(settings)),
     invoiceDate: new Date().toISOString().slice(0, 10),
     dueDate: '',
+    sourceQuoteNumber: '',
     billedToName: '',
     billedToAddress: '',
+    billedToPhone: '',
+    billedToEmail: '',
     billedToTaxId: '',
     lineItems: [createLineItem(settings, 'Pre-production', 'Scriptwriting')],
     discount: null,

@@ -263,6 +263,14 @@ export function QuotationEditor({ doc, onBack, onSaved }: Props) {
         </section>
 
         <table className="quotation-items-table">
+          <colgroup>
+            <col className="quote-col-index" />
+            <col className="quote-col-phase" />
+            <col className="quote-col-deliverable" />
+            <col className="quote-col-details" />
+            <col className="quote-col-cost" />
+            <col className="quote-col-action soon-no-print" />
+          </colgroup>
           <thead>
             <tr>
               <th>#</th>

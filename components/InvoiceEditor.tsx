@@ -18,6 +18,7 @@ import {
   type InvoicePhase,
   type InvoiceSettings,
 } from '@/lib/invoice'
+import { parseQuotation } from '@/lib/quotation'
 import { supabase } from '@/lib/supabase'
 import type { CoreDoc } from '@/lib/types'
 
@@ -115,6 +116,9 @@ export function InvoiceEditor({ doc, onBack, onSaved }: Props) {
   const [invoice, setInvoice] = useState<InvoiceContent>(createEmptyInvoice())
   const [loading, setLoading] = useState(true)
   const [saved, setSaved] = useState(false)
+  const [quoteDocs, setQuoteDocs] = useState<CoreDoc[]>([])
+  const [quotePickerOpen, setQuotePickerOpen] = useState(false)
+  const [toast, setToast] = useState('')
   const copy = invoiceCopy[invoice.language]
 
   useEffect(() => {
@@ -147,6 +151,49 @@ export function InvoiceEditor({ doc, onBack, onSaved }: Props) {
     setSettings(loaded)
     setInvoice(parseInvoice(doc.content, loaded))
     setLoading(false)
+  }
+
+  async function openQuotePicker() {
+    const { data, error } = await supabase
+      .from('docs')
+      .select('*')
+      .filter('template_type', 'eq', 'quotation')
+      .order('created_at', { ascending: false })
+    if (error) {
+      window.alert(error.message)
+      return
+    }
+    setQuoteDocs((data ?? []) as CoreDoc[])
+    setQuotePickerOpen(true)
+  }
+
+  function importQuotation(doc: CoreDoc) {
+    const quote = parseQuotation(doc.content)
+    const importedItems: InvoiceLineItem[] = quote.items.map((item) => {
+      const descriptionInTemplate = phaseDescriptions[item.phase]?.includes(item.deliverable)
+      return {
+        id: crypto.randomUUID(),
+        phase: item.phase,
+        description: descriptionInTemplate ? item.deliverable : 'Custom',
+        customDescription: descriptionInTemplate ? '' : item.deliverable,
+        rate: Number(item.cost || 0),
+        quantity: 1,
+      }
+    })
+
+    setInvoice((current) => ({
+      ...current,
+      sourceQuoteNumber: quote.quoteNumber,
+      billedToName: quote.clientCompany,
+      billedToAddress: quote.clientAddress,
+      billedToPhone: quote.clientPhone,
+      billedToEmail: quote.clientEmail,
+      lineItems: importedItems.length > 0 ? importedItems : current.lineItems,
+    }))
+    setQuotePickerOpen(false)
+    setSaved(false)
+    setToast(`已匯入報價單 ${quote.quoteNumber}`)
+    window.setTimeout(() => setToast(''), 2500)
   }
 
   const totals = useMemo(() => {
@@ -255,6 +302,27 @@ export function InvoiceEditor({ doc, onBack, onSaved }: Props) {
               {copy.english}
             </button>
           </div>
+          <div className="quote-import-wrap">
+            <button className="quote-import-button" type="button" onClick={() => void openQuotePicker()}>
+              ↓ 匯入報價單
+            </button>
+            {quotePickerOpen && (
+              <div className="quote-import-menu">
+                {quoteDocs.map((quoteDoc) => {
+                  const quote = parseQuotation(quoteDoc.content)
+                  return (
+                    <button key={quoteDoc.id} type="button" onClick={() => importQuotation(quoteDoc)}>
+                      <strong>{quote.quoteNumber}</strong>
+                      <span>{quote.projectName || '未命名項目'}</span>
+                      <em>{quote.quoteDate || new Date(quoteDoc.created_at).toLocaleDateString('zh-HK')}</em>
+                      <small>{quote.clientCompany || '-'}</small>
+                    </button>
+                  )
+                })}
+                {quoteDocs.length === 0 && <p>未有報價單</p>}
+              </div>
+            )}
+          </div>
           <select
             className="invoice-currency-select"
             aria-label={copy.currency}
@@ -277,6 +345,7 @@ export function InvoiceEditor({ doc, onBack, onSaved }: Props) {
         <span className="invoice-toolbar-spacer" />
         <div className="brief-toolbar-actions">
           {saved && <span>{copy.saved}</span>}
+          {toast && <span>{toast}</span>}
           <button className="export-button export-pdf-button" type="button" onClick={exportPdf}>
             {copy.pdf}
           </button>
@@ -315,6 +384,12 @@ export function InvoiceEditor({ doc, onBack, onSaved }: Props) {
               <span>{copy.dueDate}</span>
               <input type="date" value={invoice.dueDate} onChange={(event) => update('dueDate', event.target.value)} />
             </label>
+            {invoice.sourceQuoteNumber && (
+              <div className="invoice-meta-row invoice-source-quote">
+                <span>來源報價單</span>
+                <strong>{invoice.sourceQuoteNumber}</strong>
+              </div>
+            )}
           </div>
         </section>
 
@@ -322,6 +397,8 @@ export function InvoiceEditor({ doc, onBack, onSaved }: Props) {
           <h2>{copy.billedTo}</h2>
           <input value={invoice.billedToName} onChange={(event) => update('billedToName', event.target.value)} placeholder={copy.customerName} />
           <input value={invoice.billedToAddress} onChange={(event) => update('billedToAddress', event.target.value)} placeholder={copy.address} />
+          <input value={invoice.billedToPhone} onChange={(event) => update('billedToPhone', event.target.value)} placeholder="聯絡電話" />
+          <input value={invoice.billedToEmail} onChange={(event) => update('billedToEmail', event.target.value)} placeholder="Email" />
           <input value={invoice.billedToTaxId} onChange={(event) => update('billedToTaxId', event.target.value)} placeholder={copy.taxId} />
         </section>
 

@@ -1629,6 +1629,83 @@ textarea:disabled {
   cursor: pointer;
 }
 
+.quote-import-wrap {
+  position: relative;
+}
+
+.quote-import-button {
+  border: 0.5px solid var(--soon-border);
+  border-radius: 6px;
+  background: var(--soon-surface2);
+  color: var(--soon-text);
+  font-size: 12px;
+  padding: 5px 12px;
+  white-space: nowrap;
+}
+
+.quote-import-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  z-index: 20;
+  display: grid;
+  width: 420px;
+  max-height: 300px;
+  overflow-y: auto;
+  border: 0.5px solid var(--soon-border);
+  border-radius: 10px;
+  background: var(--soon-surface);
+  box-shadow: 0 18px 48px rgba(0,0,0,0.45);
+  padding: 6px;
+}
+
+.quote-import-menu button {
+  display: grid;
+  grid-template-columns: 120px minmax(0, 1fr) 88px;
+  gap: 8px;
+  align-items: center;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--soon-text-secondary);
+  font-size: 12px;
+  padding: 9px;
+  text-align: left;
+}
+
+.quote-import-menu button:hover {
+  background: rgba(255,255,255,0.04);
+  color: var(--soon-text);
+}
+
+.quote-import-menu strong {
+  color: var(--soon-purple-light);
+  font-weight: 600;
+}
+
+.quote-import-menu span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.quote-import-menu em,
+.quote-import-menu small {
+  color: var(--soon-text-muted);
+  font-style: normal;
+}
+
+.quote-import-menu small {
+  grid-column: 2 / 4;
+}
+
+.quote-import-menu p {
+  margin: 0;
+  color: var(--soon-text-muted);
+  font-size: 12px;
+  padding: 12px;
+}
+
 .invoice-currency-select:focus {
   border-color: var(--soon-purple);
 }
@@ -1833,6 +1910,14 @@ textarea:disabled {
   text-align: right;
 }
 
+.invoice-source-quote strong {
+  width: 160px;
+  color: var(--soon-text-muted);
+  font-size: 12px;
+  font-weight: 500;
+  text-align: right;
+}
+
 .invoice-block,
 .invoice-payment {
   display: grid;
@@ -1970,8 +2055,29 @@ textarea:disabled {
 
 .quotation-items-table {
   width: 100%;
+  table-layout: fixed;
   border: 0.5px solid #e5e5e5;
   border-collapse: collapse;
+}
+
+.quote-col-index {
+  width: 40px;
+}
+
+.quote-col-phase {
+  width: 140px;
+}
+
+.quote-col-deliverable {
+  width: 180px;
+}
+
+.quote-col-cost {
+  width: 120px;
+}
+
+.quote-col-action {
+  width: 40px;
 }
 
 .quotation-items-table th {
@@ -1997,6 +2103,17 @@ textarea:disabled {
 .quotation-items-table td:first-child {
   width: 40px;
   text-align: center;
+}
+
+.quotation-items-table .phase-select {
+  min-width: 124px;
+  max-width: 124px;
+  overflow: hidden;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .quotation-items-table th:last-child,
