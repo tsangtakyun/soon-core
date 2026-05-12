@@ -1437,6 +1437,17 @@ textarea:disabled {
   font-weight: 500;
 }
 
+.settings-toggle-row {
+  display: flex !important;
+  grid-template-columns: none !important;
+  align-items: center;
+  gap: 10px !important;
+}
+
+.settings-toggle-row input {
+  width: auto;
+}
+
 .settings-rate-groups {
   display: grid;
   grid-template-columns: 1fr;
@@ -1784,6 +1795,114 @@ textarea:disabled {
   color: var(--soon-purple);
   font-size: 18px;
   font-weight: 700;
+}
+
+.quotation-document {
+  gap: 24px;
+}
+
+.quotation-client-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.quotation-client-grid h2 {
+  grid-column: 1 / -1;
+}
+
+.quotation-project-row {
+  display: grid;
+  grid-template-columns: 1fr 240px;
+  gap: 18px;
+}
+
+.quotation-project-row label {
+  display: grid;
+  gap: 6px;
+  color: #555;
+  font-size: 12px;
+}
+
+.quotation-items-table {
+  width: 100%;
+  border: 0.5px solid #e5e5e5;
+  border-collapse: collapse;
+}
+
+.quotation-items-table th {
+  background: #f5f5f5;
+  color: #555;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.quotation-items-table th,
+.quotation-items-table td {
+  border: 0.5px solid #e5e5e5;
+  padding: 8px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.quotation-items-table tbody tr:nth-child(even) {
+  background: #fafafa;
+}
+
+.quotation-items-table th:first-child,
+.quotation-items-table td:first-child {
+  width: 40px;
+  text-align: center;
+}
+
+.quotation-items-table th:last-child,
+.quotation-items-table td:last-child {
+  width: 34px;
+  text-align: center;
+}
+
+.quotation-items-table td:last-child button {
+  border: 0;
+  background: transparent;
+  color: #ef4444;
+}
+
+.quotation-items-table textarea {
+  min-height: 74px;
+  resize: vertical;
+}
+
+.quotation-signatures {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 48px;
+  margin-top: 48px;
+}
+
+.quotation-signature-block {
+  display: grid;
+  gap: 10px;
+  color: #1a1a1a;
+  font-size: 13px;
+}
+
+.quotation-signature-block h3 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.signature-line {
+  border-top: 1px solid #1a1a1a;
+  margin-top: 28px;
+}
+
+.quotation-signature-block label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.quotation-signature-block input {
+  flex: 1;
 }
 
 .empty-mini {

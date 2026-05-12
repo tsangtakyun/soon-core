@@ -4,7 +4,9 @@ import { type ChangeEvent, type ReactNode, useEffect, useMemo, useState } from '
 
 import { DashboardShell } from '@/components/DashboardShell'
 import { InvoiceEditor } from '@/components/InvoiceEditor'
+import { QuotationEditor } from '@/components/QuotationEditor'
 import { createEmptyInvoice, defaultSettings, normaliseCurrency, type InvoiceSettings } from '@/lib/invoice'
+import { createEmptyQuotation, defaultQuotationSettings, mergeQuotationSettings, type QuotationSettings } from '@/lib/quotation'
 import { supabase } from '@/lib/supabase'
 import type { CoreDoc, Workspace } from '@/lib/types'
 
@@ -255,11 +257,14 @@ export function DocsCenter() {
   async function createDoc(template: Template) {
     const initialBrief = { ...defaultProjectBrief, language: getStoredBriefLanguage() }
     const invoiceSettings = template.type === 'invoice' ? await reserveNextInvoiceSettings() : null
+    const quoteSettings = template.type === 'quotation' ? await reserveNextQuoteSettings() : null
     const initialContent =
       template.type === 'project_brief'
         ? JSON.stringify(initialBrief)
         : template.type === 'invoice'
           ? JSON.stringify(createEmptyInvoice(invoiceSettings ?? defaultSettings))
+        : template.type === 'quotation'
+          ? JSON.stringify(createEmptyQuotation(quoteSettings ?? defaultQuotationSettings))
         : template.preview.join('\n')
 
     const { data, error } = await supabase
@@ -317,6 +322,27 @@ export function DocsCenter() {
     )
     if (error) {
       console.warn('Invoice number counter could not be reserved. Falling back to local invoice number.', error.message)
+    }
+
+    return settings
+  }
+
+  async function reserveNextQuoteSettings(): Promise<QuotationSettings> {
+    const { data } = await supabase.from('settings').select('*').eq('user_id', 'tommy').maybeSingle()
+    const settings = mergeQuotationSettings(data)
+    const nextNumber = Number(settings.quote_current_number ?? 0) + 1 || 1
+
+    const { error } = await supabase.from('settings').upsert(
+      {
+        user_id: 'tommy',
+        quote_prefix: settings.quote_prefix,
+        quote_current_number: nextNumber,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: 'user_id' }
+    )
+    if (error) {
+      console.warn('Quote number counter could not be reserved. Falling back to local quote number.', error.message)
     }
 
     return settings
@@ -657,6 +683,21 @@ export function DocsCenter() {
     return (
       <DashboardShell activeSection="docs">
         <InvoiceEditor
+          doc={selectedDoc}
+          onBack={closeDoc}
+          onSaved={(doc) => {
+            setSelectedDoc(doc)
+            setDocs((current) => current.map((item) => (item.id === doc.id ? doc : item)))
+          }}
+        />
+      </DashboardShell>
+    )
+  }
+
+  if (selectedDoc?.template_type === 'quotation') {
+    return (
+      <DashboardShell activeSection="docs">
+        <QuotationEditor
           doc={selectedDoc}
           onBack={closeDoc}
           onSaved={(doc) => {

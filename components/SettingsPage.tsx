@@ -3,11 +3,12 @@
 import { type ChangeEvent, useEffect, useState } from 'react'
 
 import { DashboardShell } from '@/components/DashboardShell'
-import { buildInvoiceNumber, currencyOptions, defaultSettings, normaliseCurrency, settingsRateGroups, type InvoiceSettings } from '@/lib/invoice'
+import { buildInvoiceNumber, currencyOptions, normaliseCurrency, settingsRateGroups } from '@/lib/invoice'
+import { buildQuoteNumber, defaultQuotationSettings, mergeQuotationSettings, type QuotationSettings } from '@/lib/quotation'
 import { supabase } from '@/lib/supabase'
 
 export function SettingsPage() {
-  const [settings, setSettings] = useState<InvoiceSettings>(defaultSettings)
+  const [settings, setSettings] = useState<QuotationSettings>(defaultQuotationSettings)
   const [saved, setSaved] = useState(false)
 
   useEffect(() => {
@@ -18,26 +19,10 @@ export function SettingsPage() {
     const { data } = await supabase.from('settings').select('*').eq('user_id', 'tommy').maybeSingle()
     if (!data) return
 
-    setSettings({
-      display_name: data.display_name ?? 'Tommy',
-      logo_base64: data.logo_base64 ?? '',
-      company_name: data.company_name ?? 'SOON Studio',
-      email: data.email ?? '',
-      phone: data.phone ?? '',
-      address: data.address ?? '',
-      bank_name: data.bank_name ?? '',
-      account_name: data.account_name ?? '',
-      account_number: data.account_number ?? '',
-      default_currency: normaliseCurrency(data.default_currency),
-      invoice_prefix: data.invoice_prefix ?? 'INV',
-      invoice_start_number: Number(data.invoice_start_number ?? 1),
-      invoice_current_number: Number(data.invoice_current_number ?? 0),
-      tax_rate: Number(data.tax_rate ?? 0),
-      default_rates: (data.default_rates ?? {}) as Record<string, number>,
-    })
+    setSettings(mergeQuotationSettings(data))
   }
 
-  function update<K extends keyof InvoiceSettings>(key: K, value: InvoiceSettings[K]) {
+  function update<K extends keyof QuotationSettings>(key: K, value: QuotationSettings[K]) {
     setSettings((current) => ({ ...current, [key]: value }))
     setSaved(false)
   }
@@ -179,6 +164,70 @@ export function SettingsPage() {
             <span>目前號碼</span>
             <strong>{settings.invoice_current_number}</strong>
           </div>
+          <label>
+            報價單號碼前綴
+            <input value={settings.quote_prefix} onChange={(event) => update('quote_prefix', event.target.value)} />
+          </label>
+          <div className="settings-readonly-row">
+            <span>報價單號碼格式</span>
+            <strong>預覽：{buildQuoteNumber(settings, 1)}</strong>
+          </div>
+          <div className="settings-readonly-row">
+            <span>報價單目前號碼</span>
+            <strong>{settings.quote_current_number}</strong>
+          </div>
+        </section>
+
+        <section className="settings-card">
+          <h2>付款條款設定</h2>
+          <label className="settings-toggle-row">
+            <input type="checkbox" checked={settings.bank_transfer_enabled} onChange={(event) => update('bank_transfer_enabled', event.target.checked)} />
+            Bank Transfer
+          </label>
+          <label className="settings-toggle-row">
+            <input type="checkbox" checked={settings.cheque_enabled} onChange={(event) => update('cheque_enabled', event.target.checked)} />
+            Cheque
+          </label>
+          <label>
+            支票抬頭
+            <input value={settings.cheque_payable_to} onChange={(event) => update('cheque_payable_to', event.target.value)} />
+          </label>
+          <label>
+            郵寄地址
+            <textarea value={settings.cheque_address} onChange={(event) => update('cheque_address', event.target.value)} rows={3} />
+          </label>
+          <label className="settings-toggle-row">
+            <input type="checkbox" checked={settings.fps_enabled} onChange={(event) => update('fps_enabled', event.target.checked)} />
+            FPS / PayMe
+          </label>
+          <label>
+            FPS ID / 電話號碼
+            <input value={settings.fps_id} onChange={(event) => update('fps_id', event.target.value)} />
+          </label>
+          <label className="settings-toggle-row">
+            <input type="checkbox" checked={settings.paypal_enabled} onChange={(event) => update('paypal_enabled', event.target.checked)} />
+            PayPal
+          </label>
+          <label>
+            PayPal Email
+            <input value={settings.paypal_email} onChange={(event) => update('paypal_email', event.target.value)} />
+          </label>
+          <label>
+            付款期限
+            <input type="number" min="0" value={settings.payment_days} onChange={(event) => update('payment_days', Number(event.target.value || 0))} />
+          </label>
+          <label>
+            逾期利息
+            <input type="number" min="0" value={settings.interest_rate} onChange={(event) => update('interest_rate', Number(event.target.value || 0))} />
+          </label>
+        </section>
+
+        <section className="settings-card">
+          <h2>簽署設定</h2>
+          <label>
+            授權人姓名
+            <input value={settings.authorized_name} onChange={(event) => update('authorized_name', event.target.value)} />
+          </label>
         </section>
 
         <section className="settings-card">
