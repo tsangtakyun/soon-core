@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 import {
   conceptBoardLangStorageKey,
@@ -39,6 +39,31 @@ type PdfDocument = {
   getPage: (pageNumber: number) => Promise<{
     getTextContent: () => Promise<{ items: Array<{ str?: string }> }>
   }>
+}
+
+type AiFieldComment = {
+  issue: string | null
+  suggestion: string | null
+}
+
+type AiIndexedComment = AiFieldComment & {
+  index: number
+}
+
+type AiConceptReview = {
+  concept_index: number
+  fields?: {
+    title?: AiFieldComment
+    subtitle?: AiFieldComment
+    product_integration?: AiIndexedComment[]
+    breakdowns?: AiIndexedComment[]
+  }
+}
+
+type AiReview = {
+  overall_score?: number
+  concepts?: AiConceptReview[]
+  general_comments?: string
 }
 
 const conceptCopy = {
@@ -130,11 +155,26 @@ export function ConceptBoardEditor({ doc, onBack, onSaved }: Props) {
   const [board, setBoard] = useState<ConceptBoardContent>(() => parseConceptBoard(doc.content, getStoredLanguage()))
   const [saved, setSaved] = useState(false)
   const [briefs, setBriefs] = useState<ClientBrief[]>([])
-  const [aiOpen, setAiOpen] = useState(false)
   const [aiLoading, setAiLoading] = useState(false)
-  const [aiText, setAiText] = useState('')
+  const [aiReview, setAiReview] = useState<AiReview | null>(null)
+  const [logoBase64, setLogoBase64] = useState('')
+  const [companyName, setCompanyName] = useState('SOON Studio')
   const t = conceptCopy[board.language]
   const canReview = useMemo(() => board.concepts.some(conceptHasContent), [board.concepts])
+
+  useEffect(() => {
+    void loadSettings()
+  }, [])
+
+  async function loadSettings() {
+    const { data } = await supabase
+      .from('settings')
+      .select('logo_base64, company_name')
+      .eq('user_id', 'tommy')
+      .maybeSingle()
+    setLogoBase64(String(data?.logo_base64 ?? ''))
+    setCompanyName(String(data?.company_name ?? 'SOON Studio'))
+  }
 
   function setLanguage(language: ConceptBoardLanguage) {
     window.localStorage.setItem(conceptBoardLangStorageKey, language)
@@ -216,9 +256,8 @@ export function ConceptBoardEditor({ doc, onBack, onSaved }: Props) {
 
   async function runAiReview() {
     if (!canReview || aiLoading) return
-    setAiOpen(true)
-    setAiText('')
     setAiLoading(true)
+    setAiReview(null)
 
     try {
       const response = await fetch('/api/concept-board-review', {
@@ -227,20 +266,17 @@ export function ConceptBoardEditor({ doc, onBack, onSaved }: Props) {
         body: JSON.stringify({ briefs, concepts: board.concepts }),
       })
 
-      if (!response.ok || !response.body) {
-        const message = await response.text()
-        throw new Error(message || 'AI review failed')
+      const data = (await response.json()) as AiReview & { error?: string }
+      if (!response.ok || data.error) {
+        throw new Error(data.error || 'AI review failed')
       }
-
-      const reader = response.body.getReader()
-      const decoder = new TextDecoder()
-      while (true) {
-        const { value, done } = await reader.read()
-        if (done) break
-        setAiText((current) => current + decoder.decode(value, { stream: true }))
-      }
+      setAiReview(data)
     } catch (error) {
-      setAiText(error instanceof Error ? error.message : 'AI review failed')
+      setAiReview({
+        overall_score: 0,
+        concepts: [],
+        general_comments: error instanceof Error ? error.message : 'AI review failed',
+      })
     } finally {
       setAiLoading(false)
     }
@@ -281,7 +317,11 @@ export function ConceptBoardEditor({ doc, onBack, onSaved }: Props) {
         <button className="concept-brief-button" type="button" onClick={() => void importBriefs()}>{t.importBrief}</button>
         {briefs.length > 0 && <span className="concept-brief-badge">{t.briefUploaded(briefs.length)}</span>}
         <span className="toolbar-spacer" />
-        <button className="concept-ai-button" type="button" disabled={!canReview || aiLoading} onClick={() => void runAiReview()}>{t.ai}</button>
+        {typeof aiReview?.overall_score === 'number' && <AiScoreBadge score={aiReview.overall_score} />}
+        <button className="concept-ai-button" type="button" disabled={!canReview || aiLoading} onClick={() => void runAiReview()}>
+          {aiLoading && <span className="ai-spinner" />}
+          {aiLoading ? 'AI 分析中...' : t.ai}
+        </button>
         <button className="export-button export-pdf-button" type="button" onClick={exportPdf}>{t.pdf}</button>
         <button className="export-button export-word-button" type="button" onClick={exportWord}>{t.word}</button>
         <button className="primary-button" type="button" onClick={() => void saveBoard()}>{t.save}</button>
@@ -289,6 +329,9 @@ export function ConceptBoardEditor({ doc, onBack, onSaved }: Props) {
       </header>
 
       <article className="concept-document soon-print-doc">
+        <div className="doc-logo-area">
+          {logoBase64 ? <img src={logoBase64} alt="" /> : <span>{companyName}</span>}
+        </div>
         <input className="concept-doc-title" value={board.title} onChange={(event) => updateBoard({ title: event.target.value })} />
         <p className="concept-meta">{t.meta(created, updated)}</p>
 
@@ -308,26 +351,22 @@ export function ConceptBoardEditor({ doc, onBack, onSaved }: Props) {
             onDelete={() => deleteConcept(concept.id)}
             onUpdate={(patch) => updateConcept(concept.id, patch)}
             onUpdateItem={updateListItem}
+            aiReview={aiReview?.concepts?.find((review) => review.concept_index === index)}
           />
         ))}
+
+        {aiReview?.general_comments && <div className="ai-general-comments">{aiReview.general_comments}</div>}
 
         <button className="concept-add-button soon-no-print" type="button" onClick={addConcept}>{t.addConcept}</button>
       </article>
 
-      {aiOpen && (
-        <aside className="ai-review-panel soon-no-print">
-          <header>
-            <h2>{t.aiTitle}</h2>
-            <button type="button" onClick={() => setAiOpen(false)}>×</button>
-          </header>
-          <div className="ai-review-body">
-            {aiLoading && !aiText && <p>Loading...</p>}
-            <pre>{aiText}</pre>
-          </div>
-        </aside>
-      )}
     </section>
   )
+}
+
+function AiScoreBadge({ score }: { score: number }) {
+  const background = score >= 8 ? '#22c55e' : score >= 6 ? '#f59e0b' : '#ef4444'
+  return <span className="ai-score-badge" style={{ background }}>AI 評分：{score}/10</span>
 }
 
 function ConceptBlock({
@@ -339,6 +378,7 @@ function ConceptBlock({
   onDelete,
   onUpdate,
   onUpdateItem,
+  aiReview,
 }: {
   concept: ConceptSection
   index: number
@@ -353,6 +393,7 @@ function ConceptBlock({
     itemId: string,
     patch: Partial<T>
   ) => void
+  aiReview?: AiConceptReview
 }) {
   const conceptLabel = `Concept ${String(index + 1).padStart(2, '0')}`
 
@@ -421,20 +462,23 @@ function ConceptBlock({
       <section className="concept-field-section">
         <h2>{copy.titleLabel}</h2>
         <input className="concept-title-input" value={concept.title} placeholder={copy.titlePlaceholder} onChange={(event) => onUpdate({ title: event.target.value })} />
+        <AiCommentBox comment={aiReview?.fields?.title} onApply={(value) => onUpdate({ title: value })} />
       </section>
 
       <section className="concept-field-section">
         <h2>{copy.subtitle}</h2>
         <input className="concept-subtitle-input" value={concept.subtitle} placeholder={copy.subtitlePlaceholder} onChange={(event) => onUpdate({ subtitle: event.target.value })} />
+        <AiCommentBox comment={aiReview?.fields?.subtitle} onApply={(value) => onUpdate({ subtitle: value })} />
       </section>
 
       <section className="concept-field-section">
         <h2>{copy.productIntegration}</h2>
         <ol className="concept-numbered-list">
-          {concept.productIntegration.map((item) => (
+          {concept.productIntegration.map((item, itemIndex) => (
             <li key={item.id}>
               <input value={item.text} onChange={(event) => onUpdateItem<ConceptIntegrationItem>(concept.id, 'productIntegration', item.id, { text: event.target.value })} />
               <button className="danger-text-button soon-no-print" type="button" onClick={() => removeProductItem(item.id)}>×</button>
+              <AiCommentBox comment={findIndexedComment(aiReview?.fields?.product_integration, itemIndex)} onApply={(value) => onUpdateItem<ConceptIntegrationItem>(concept.id, 'productIntegration', item.id, { text: value })} />
             </li>
           ))}
         </ol>
@@ -444,10 +488,11 @@ function ConceptBlock({
       <section className="concept-field-section">
         <h2>{copy.breakdown}</h2>
         <div className="concept-breakdown-list">
-          {concept.breakdown.map((row) => (
+          {concept.breakdown.map((row, rowIndex) => (
             <div key={row.id} className="concept-breakdown-row">
               <input value={row.name} placeholder={copy.segmentName} onChange={(event) => onUpdateItem<ConceptBreakdownRow>(concept.id, 'breakdown', row.id, { name: event.target.value })} />
               <textarea value={row.description} placeholder={copy.segmentDescription} onChange={(event) => onUpdateItem<ConceptBreakdownRow>(concept.id, 'breakdown', row.id, { description: event.target.value })} />
+              <div className="print-text">{row.description}</div>
               <input value={row.time} placeholder={copy.segmentTime} onChange={(event) => onUpdateItem<ConceptBreakdownRow>(concept.id, 'breakdown', row.id, { time: event.target.value })} />
               <button className="mini-upload-button soon-no-print" type="button" onClick={() => void uploadBreakdownImages(row)}>{copy.addImage}</button>
               <div className="concept-thumbs">
@@ -458,6 +503,7 @@ function ConceptBlock({
                 ))}
               </div>
               <button className="danger-text-button soon-no-print" type="button" onClick={() => removeBreakdownRow(row.id)}>×</button>
+              <AiCommentBox comment={findIndexedComment(aiReview?.fields?.breakdowns, rowIndex)} onApply={(value) => onUpdateItem<ConceptBreakdownRow>(concept.id, 'breakdown', row.id, { description: value })} />
             </div>
           ))}
         </div>
@@ -478,6 +524,7 @@ function ConceptBlock({
               <input value={row.date} placeholder={copy.airDate} onChange={(event) => onUpdateItem<ConceptReferenceRow>(concept.id, 'references', row.id, { date: event.target.value })} />
               <input value={row.url} placeholder={copy.link} onChange={(event) => onUpdateItem<ConceptReferenceRow>(concept.id, 'references', row.id, { url: event.target.value })} />
               <textarea value={row.description} placeholder={copy.description} onChange={(event) => onUpdateItem<ConceptReferenceRow>(concept.id, 'references', row.id, { description: event.target.value })} />
+              <div className="print-text">{row.description}</div>
               <button className="danger-text-button soon-no-print" type="button" onClick={() => removeReferenceRow(row.id)}>×</button>
             </div>
           ))}
@@ -486,6 +533,25 @@ function ConceptBlock({
       </section>
     </section>
   )
+}
+
+function AiCommentBox({ comment, onApply }: { comment?: AiFieldComment | null; onApply: (value: string) => void }) {
+  if (!comment?.issue && !comment?.suggestion) return null
+  return (
+    <div className="ai-comment-box">
+      {comment.issue && <p className="ai-comment-issue">⚠️ {comment.issue}</p>}
+      {comment.suggestion && <p className="ai-comment-suggestion">💡 建議：{comment.suggestion}</p>}
+      {comment.suggestion && (
+        <button type="button" onClick={() => onApply(comment.suggestion ?? '')}>
+          採用建議
+        </button>
+      )}
+    </div>
+  )
+}
+
+function findIndexedComment(comments: AiIndexedComment[] | undefined, index: number) {
+  return comments?.find((comment) => comment.index === index)
 }
 
 function getStoredLanguage(): ConceptBoardLanguage {

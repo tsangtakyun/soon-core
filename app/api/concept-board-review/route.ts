@@ -3,12 +3,10 @@ import type { ClientBrief, ConceptSection } from '@/lib/concept-board'
 export const runtime = 'nodejs'
 export const maxDuration = 60
 
-const encoder = new TextEncoder()
-
 export async function POST(request: Request) {
   const apiKey = process.env.ANTHROPIC_API_KEY
   if (!apiKey) {
-    return new Response('Missing ANTHROPIC_API_KEY', { status: 500 })
+    return Response.json({ error: 'Missing ANTHROPIC_API_KEY' }, { status: 500 })
   }
 
   const body = (await request.json()) as {
@@ -34,7 +32,26 @@ ${JSON.stringify(body.concepts ?? [], null, 2)}
 4. 每個 Concept 逐一給出建議
 5. 整體評分（滿分10分）
 
-請用廣東話書面語回答。`
+請以以下 JSON 格式回應，不要有任何 markdown 或額外文字：
+{
+  "overall_score": 8,
+  "concepts": [
+    {
+      "concept_index": 0,
+      "fields": {
+        "title": { "issue": "問題描述或null", "suggestion": "建議內容或null" },
+        "subtitle": { "issue": "問題描述或null", "suggestion": "建議內容或null" },
+        "product_integration": [
+          { "index": 0, "issue": "問題描述或null", "suggestion": "建議內容或null" }
+        ],
+        "breakdowns": [
+          { "index": 0, "issue": "問題描述或null", "suggestion": "建議內容或null" }
+        ]
+      }
+    }
+  ],
+  "general_comments": "整體建議"
+}`
 
   const upstream = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
@@ -46,64 +63,32 @@ ${JSON.stringify(body.concepts ?? [], null, 2)}
     body: JSON.stringify({
       model: process.env.ANTHROPIC_MODEL ?? 'claude-sonnet-4-6',
       max_tokens: 2400,
-      stream: true,
-      system: '你係一個專業內容策劃顧問，專門審閱社交媒體 Concept Board。',
+      system: '你係一個專業內容策劃顧問。你必須只返回 JSON，不要任何其他文字。',
       messages: [{ role: 'user', content: userPrompt }],
     }),
   })
 
-  if (!upstream.ok || !upstream.body) {
-    return new Response(await upstream.text(), { status: upstream.status })
+  if (!upstream.ok) {
+    return Response.json({ error: await upstream.text() }, { status: upstream.status })
   }
 
-  const stream = new ReadableStream<Uint8Array>({
-    async start(controller) {
-      const reader = upstream.body!.getReader()
-      const decoder = new TextDecoder()
-      let buffer = ''
+  const data = (await upstream.json()) as {
+    content?: Array<{ type?: string; text?: string }>
+  }
+  const text = data.content?.find((part) => part.type === 'text')?.text ?? '{}'
+  const cleaned = text.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/```$/i, '').trim()
 
-      try {
-        while (true) {
-          const { value, done } = await reader.read()
-          if (done) break
-          buffer += decoder.decode(value, { stream: true })
-
-          const events = buffer.split('\n\n')
-          buffer = events.pop() ?? ''
-
-          for (const event of events) {
-            const dataLine = event
-              .split('\n')
-              .find((line) => line.startsWith('data: '))
-              ?.slice(6)
-            if (!dataLine || dataLine === '[DONE]') continue
-
-            try {
-              const payload = JSON.parse(dataLine) as {
-                type?: string
-                delta?: { text?: string }
-              }
-              if (payload.type === 'content_block_delta' && payload.delta?.text) {
-                controller.enqueue(encoder.encode(payload.delta.text))
-              }
-            } catch {
-              // Ignore non-JSON stream bookkeeping lines.
-            }
-          }
-        }
-      } catch (error) {
-        controller.error(error)
-        return
-      }
-
-      controller.close()
-    },
-  })
-
-  return new Response(stream, {
-    headers: {
-      'Content-Type': 'text/plain; charset=utf-8',
-      'Cache-Control': 'no-cache',
-    },
-  })
+  try {
+    return Response.json(JSON.parse(cleaned))
+  } catch {
+    return Response.json(
+      {
+        overall_score: 0,
+        concepts: [],
+        general_comments: 'AI 回應不是有效 JSON，請再試一次。',
+        raw_response: text,
+      },
+      { status: 502 }
+    )
+  }
 }
