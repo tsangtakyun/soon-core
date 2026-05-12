@@ -3,6 +3,8 @@
 import { type ChangeEvent, type ReactNode, useEffect, useMemo, useState } from 'react'
 
 import { DashboardShell } from '@/components/DashboardShell'
+import { InvoiceEditor } from '@/components/InvoiceEditor'
+import { createEmptyInvoice } from '@/lib/invoice'
 import { supabase } from '@/lib/supabase'
 import type { CoreDoc, Workspace } from '@/lib/types'
 
@@ -255,6 +257,8 @@ export function DocsCenter() {
     const initialContent =
       template.type === 'project_brief'
         ? JSON.stringify(initialBrief)
+        : template.type === 'invoice'
+          ? JSON.stringify(createEmptyInvoice())
         : template.preview.join('\n')
 
     const { data, error } = await supabase
@@ -604,6 +608,21 @@ export function DocsCenter() {
             </BriefSection>
           </article>
         </section>
+      </DashboardShell>
+    )
+  }
+
+  if (selectedDoc?.template_type === 'invoice') {
+    return (
+      <DashboardShell activeSection="docs">
+        <InvoiceEditor
+          doc={selectedDoc}
+          onBack={closeDoc}
+          onSaved={(doc) => {
+            setSelectedDoc(doc)
+            setDocs((current) => current.map((item) => (item.id === doc.id ? doc : item)))
+          }}
+        />
       </DashboardShell>
     )
   }

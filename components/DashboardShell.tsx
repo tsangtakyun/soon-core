@@ -9,7 +9,7 @@ import { supabase } from '@/lib/supabase'
 import type { Project, Workspace, WorkspaceType } from '@/lib/types'
 import { workspaceTypeOptions } from '@/lib/types'
 
-type Section = 'home' | 'work' | 'docs' | 'pipeline'
+type Section = 'home' | 'work' | 'docs' | 'settings' | 'pipeline'
 
 interface DashboardShellProps {
   activeSection: Section
@@ -232,6 +232,11 @@ export function DashboardShell({ activeSection, pipeline, tool, children }: Dash
             + 新增工作區
           </button>
         </section>
+
+        <Link href="/settings" className={`sidebar-settings-link ${activeSection === 'settings' ? 'active' : ''}`}>
+          <span>⚙️</span>
+          <span>設定</span>
+        </Link>
 
         <div className="sidebar-user">
           <div className="avatar">T</div>
