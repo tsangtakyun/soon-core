@@ -1038,7 +1038,7 @@ textarea:disabled {
   top: -28px;
   z-index: 5;
   display: grid;
-  grid-template-columns: 160px minmax(220px, 1fr) 180px;
+  grid-template-columns: 260px minmax(220px, 1fr) 180px;
   align-items: center;
   gap: 16px;
   border-bottom: 0.5px solid var(--soon-border);
@@ -1046,7 +1046,13 @@ textarea:disabled {
   padding: 0 0 16px;
 }
 
-.brief-toolbar > button {
+.brief-toolbar-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.brief-toolbar-left > button {
   width: fit-content;
   border: 0;
   background: transparent;
@@ -1055,8 +1061,28 @@ textarea:disabled {
   padding: 0;
 }
 
-.brief-toolbar > button:hover {
+.brief-toolbar-left > button:hover {
   color: var(--soon-purple-light);
+}
+
+.brief-language-toggle {
+  display: flex;
+  gap: 4px;
+}
+
+.brief-language-toggle button {
+  border: 0.5px solid var(--soon-border);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--soon-text-muted);
+  font-size: 12px;
+  padding: 4px 12px;
+}
+
+.brief-language-toggle button.active {
+  border-color: var(--soon-purple);
+  background: var(--soon-purple);
+  color: #fff;
 }
 
 .brief-toolbar > input {
@@ -1085,16 +1111,17 @@ textarea:disabled {
   display: grid;
   width: min(800px, 100%);
   justify-self: center;
-  border: 0.5px solid var(--soon-border);
+  border: 0.5px solid #e5e5e5;
   border-radius: 12px;
-  background: var(--soon-surface);
+  background: #ffffff;
+  color: #1a1a1a;
   padding: 48px;
 }
 
 .brief-title-input {
   border: 0;
   background: transparent;
-  color: var(--soon-text);
+  color: #1a1a1a;
   font-size: 32px;
   font-weight: 600;
   line-height: 1.15;
@@ -1103,25 +1130,25 @@ textarea:disabled {
 
 .brief-meta {
   margin-top: 8px;
-  color: var(--soon-text-muted);
+  color: #888888;
   font-size: 13px;
 }
 
 .brief-info-table {
   width: 100%;
   margin-top: 28px;
-  border: 0.5px solid var(--soon-border);
+  border: 0.5px solid #e5e5e5;
   border-collapse: collapse;
 }
 
 .brief-info-table tr:nth-child(even) {
-  background: rgba(255,255,255,0.02);
+  background: #f9f9f9;
 }
 
 .brief-info-table th,
 .brief-info-table td {
   height: 44px;
-  border-bottom: 0.5px solid var(--soon-border);
+  border-bottom: 0.5px solid #e5e5e5;
   padding: 0 12px;
   text-align: left;
   vertical-align: middle;
@@ -1134,7 +1161,7 @@ textarea:disabled {
 
 .brief-info-table th {
   width: 200px;
-  color: var(--soon-text-secondary);
+  color: #555555;
   font-size: 13px;
   font-weight: 500;
 }
@@ -1145,7 +1172,7 @@ textarea:disabled {
   border: 0;
   border-radius: 0;
   background: transparent;
-  color: var(--soon-text);
+  color: #1a1a1a;
   padding: 0;
 }
 
@@ -1162,14 +1189,14 @@ textarea:disabled {
 .brief-section {
   display: grid;
   gap: 12px;
-  border-top: 0.5px solid var(--soon-border);
+  border-top: 0.5px solid #e5e5e5;
   margin-top: 24px;
   padding-top: 24px;
 }
 
 .brief-section h2 {
   margin: 0;
-  color: var(--soon-text);
+  color: #1a1a1a;
   font-size: 18px;
   font-weight: 500;
 }
@@ -1181,7 +1208,7 @@ textarea:disabled {
 
 .brief-subsection h3 {
   margin: 0;
-  color: var(--soon-text-secondary);
+  color: #555555;
   font-size: 13px;
   font-weight: 500;
 }
@@ -1192,32 +1219,32 @@ textarea:disabled {
   border: 0;
   border-radius: 0;
   background: transparent;
-  color: var(--soon-text);
+  color: #1a1a1a;
   line-height: 1.7;
   padding: 0;
   resize: none;
 }
 
 .brief-textarea::placeholder {
-  color: var(--soon-text-muted);
+  color: #aaaaaa;
 }
 
 .stakeholder-table {
   width: 100%;
-  border: 0.5px solid var(--soon-border);
+  border: 0.5px solid #e5e5e5;
   border-collapse: collapse;
 }
 
 .stakeholder-table th,
 .stakeholder-table td {
   height: 40px;
-  border-bottom: 0.5px solid var(--soon-border);
+  border-bottom: 0.5px solid #e5e5e5;
   padding: 0 10px;
   text-align: left;
 }
 
 .stakeholder-table th {
-  color: var(--soon-text-secondary);
+  color: #555555;
   font-size: 12px;
   font-weight: 500;
 }
@@ -1228,10 +1255,10 @@ textarea:disabled {
 
 .add-row-button {
   width: fit-content;
-  border: 0.5px solid var(--soon-border);
+  border: 0.5px solid #e5e5e5;
   border-radius: 8px;
   background: transparent;
-  color: var(--soon-text-secondary);
+  color: #555555;
   font-size: 12px;
   padding: 6px 12px;
 }
@@ -1293,6 +1320,11 @@ textarea:disabled {
   .brief-toolbar {
     position: static;
     grid-template-columns: 1fr;
+  }
+
+  .brief-toolbar-left {
+    display: grid;
+    gap: 10px;
   }
 
   .brief-toolbar > input {
