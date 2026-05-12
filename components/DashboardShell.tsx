@@ -28,9 +28,14 @@ export function DashboardShell({ activeSection, pipeline, tool, children }: Dash
   const searchParams = useSearchParams()
   const router = useRouter()
   const activeWorkspace = searchParams.get('workspace')
+  const [activePipelineId, setActivePipelineId] = useState<PipelineConfig['id']>(pipeline?.id ?? 'youtube')
   const [workspaces, setWorkspaces] = useState<Workspace[]>([])
   const [projects, setProjects] = useState<Project[]>([])
   const [activeProject, setActiveProject] = useState<Project | null>(null)
+
+  useEffect(() => {
+    if (pipeline?.id) setActivePipelineId(pipeline.id)
+  }, [pipeline?.id])
 
   useEffect(() => {
     void loadSidebarData()
@@ -103,9 +108,8 @@ export function DashboardShell({ activeSection, pipeline, tool, children }: Dash
 
         <div className="core-divider" />
 
-        <PipelineToggle activeId={pipeline?.id ?? 'youtube'} />
-        <ToolNav pipeline={pipelines.ig} activePath={pathname} />
-        <ToolNav pipeline={pipelines.youtube} activePath={pathname} />
+        <PipelineToggle activeId={activePipelineId} onChange={setActivePipelineId} />
+        <ToolNav pipeline={pipelines[activePipelineId]} activePath={pathname} />
 
         <div className="core-divider" />
 
@@ -169,17 +173,24 @@ export function DashboardShell({ activeSection, pipeline, tool, children }: Dash
   )
 }
 
-function PipelineToggle({ activeId }: { activeId: PipelineConfig['id'] }) {
+function PipelineToggle({
+  activeId,
+  onChange,
+}: {
+  activeId: PipelineConfig['id']
+  onChange: (id: PipelineConfig['id']) => void
+}) {
   return (
     <div className="pipeline-toggle" aria-label="Pipeline selector">
       {Object.values(pipelines).map((item) => (
-        <Link
+        <button
           key={item.id}
-          href={`/${item.id}/${item.tools[0].id}`}
+          type="button"
           className={item.id === activeId ? 'active' : ''}
+          onClick={() => onChange(item.id)}
         >
           {item.label}
-        </Link>
+        </button>
       ))}
     </div>
   )
