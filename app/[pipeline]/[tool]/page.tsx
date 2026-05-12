@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation'
+import { Suspense } from 'react'
 
-import { PipelineDashboard } from '@/components/PipelineDashboard'
+import { DashboardShell } from '@/components/DashboardShell'
 import { getPipeline, getTool, pipelines } from '@/lib/pipelines'
 
 interface PipelineToolPageProps {
@@ -27,5 +28,9 @@ export default async function PipelineToolPage({ params }: PipelineToolPageProps
   const tool = getTool(pipeline.id, resolvedParams.tool)
   if (!tool) notFound()
 
-  return <PipelineDashboard pipeline={pipeline} tool={tool} />
+  return (
+    <Suspense>
+      <DashboardShell activeSection="pipeline" pipeline={pipeline} tool={tool} />
+    </Suspense>
+  )
 }

@@ -15,6 +15,8 @@ export interface PipelineConfig {
   tools: PipelineTool[]
 }
 
+export const pipelineSteps = ['idea', 'script', 'storyboard', 'production', 'subtitle', 'done'] as const
+
 export const pipelines: Record<PipelineId, PipelineConfig> = {
   ig: {
     id: 'ig',
@@ -86,4 +88,23 @@ export function getPipeline(id: string) {
 
 export function getTool(pipelineId: PipelineId, toolId: string) {
   return pipelines[pipelineId].tools.find((tool) => tool.id === toolId) ?? null
+}
+
+export function getProjectPipeline(type?: string | null, category?: string | null): PipelineId {
+  if (type === 'ig' || category === 'ig_reel' || category === 'ig_drama') return 'ig'
+  return 'youtube'
+}
+
+export function getPipelinePath(type: PipelineId, step?: string | null) {
+  const fallback = 'idea'
+  const normalized = pipelineSteps.includes(step as (typeof pipelineSteps)[number])
+    ? step
+    : fallback
+  const tool = normalized === 'done' ? 'subtitle' : normalized
+
+  if (type === 'ig' && (tool === 'production' || tool === 'subtitle')) {
+    return '/ig/storyboard'
+  }
+
+  return `/${type}/${tool}`
 }

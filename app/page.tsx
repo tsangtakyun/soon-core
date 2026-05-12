@@ -1,5 +1,11 @@
-import { redirect } from 'next/navigation'
+import { Suspense } from 'react'
+
+import { HomeDashboard } from '@/components/HomeDashboard'
 
 export default function Home() {
-  redirect('/youtube/idea')
+  return (
+    <Suspense>
+      <HomeDashboard />
+    </Suspense>
+  )
 }
