@@ -3,7 +3,7 @@
 import { type ChangeEvent, useEffect, useState } from 'react'
 
 import { DashboardShell } from '@/components/DashboardShell'
-import { currencyOptions, defaultSettings, normaliseCurrency, settingsRateGroups, type InvoiceSettings } from '@/lib/invoice'
+import { buildInvoiceNumber, currencyOptions, defaultSettings, normaliseCurrency, settingsRateGroups, type InvoiceSettings } from '@/lib/invoice'
 import { supabase } from '@/lib/supabase'
 
 export function SettingsPage() {
@@ -29,6 +29,9 @@ export function SettingsPage() {
       account_name: data.account_name ?? '',
       account_number: data.account_number ?? '',
       default_currency: normaliseCurrency(data.default_currency),
+      invoice_prefix: data.invoice_prefix ?? 'INV',
+      invoice_start_number: Number(data.invoice_start_number ?? 1),
+      invoice_current_number: Number(data.invoice_current_number ?? 0),
       tax_rate: Number(data.tax_rate ?? 0),
       default_rates: (data.default_rates ?? {}) as Record<string, number>,
     })
@@ -151,6 +154,31 @@ export function SettingsPage() {
               ))}
             </select>
           </label>
+        </section>
+
+        <section className="settings-card">
+          <h2>發票設定</h2>
+          <label>
+            發票號碼前綴
+            <input value={settings.invoice_prefix} onChange={(event) => update('invoice_prefix', event.target.value)} />
+          </label>
+          <div className="settings-readonly-row">
+            <span>發票號碼格式</span>
+            <strong>預覽：{buildInvoiceNumber(settings.invoice_prefix, new Date().getFullYear(), settings.invoice_start_number)}</strong>
+          </div>
+          <label>
+            起始號碼
+            <input
+              type="number"
+              min="1"
+              value={settings.invoice_start_number}
+              onChange={(event) => update('invoice_start_number', Number(event.target.value || 1))}
+            />
+          </label>
+          <div className="settings-readonly-row">
+            <span>目前號碼</span>
+            <strong>{settings.invoice_current_number}</strong>
+          </div>
         </section>
 
         <section className="settings-card">

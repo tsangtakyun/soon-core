@@ -4,7 +4,7 @@ import { type ChangeEvent, type ReactNode, useEffect, useMemo, useState } from '
 
 import { DashboardShell } from '@/components/DashboardShell'
 import { InvoiceEditor } from '@/components/InvoiceEditor'
-import { createEmptyInvoice } from '@/lib/invoice'
+import { createEmptyInvoice, defaultSettings, normaliseCurrency, type InvoiceSettings } from '@/lib/invoice'
 import { supabase } from '@/lib/supabase'
 import type { CoreDoc, Workspace } from '@/lib/types'
 
@@ -254,11 +254,12 @@ export function DocsCenter() {
 
   async function createDoc(template: Template) {
     const initialBrief = { ...defaultProjectBrief, language: getStoredBriefLanguage() }
+    const invoiceSettings = template.type === 'invoice' ? await reserveNextInvoiceSettings() : null
     const initialContent =
       template.type === 'project_brief'
         ? JSON.stringify(initialBrief)
         : template.type === 'invoice'
-          ? JSON.stringify(createEmptyInvoice())
+          ? JSON.stringify(createEmptyInvoice(invoiceSettings ?? defaultSettings))
         : template.preview.join('\n')
 
     const { data, error } = await supabase
@@ -279,6 +280,44 @@ export function DocsCenter() {
 
     notifyDocsChanged()
     openDoc(data as CoreDoc, [data as CoreDoc, ...docs])
+  }
+
+  async function reserveNextInvoiceSettings(): Promise<InvoiceSettings> {
+    const { data } = await supabase.from('settings').select('*').eq('user_id', 'tommy').maybeSingle()
+    const settings: InvoiceSettings = data
+      ? {
+          display_name: data.display_name ?? 'Tommy',
+          logo_base64: data.logo_base64 ?? '',
+          company_name: data.company_name ?? 'SOON Studio',
+          email: data.email ?? '',
+          phone: data.phone ?? '',
+          address: data.address ?? '',
+          bank_name: data.bank_name ?? '',
+          account_name: data.account_name ?? '',
+          account_number: data.account_number ?? '',
+          default_currency: normaliseCurrency(data.default_currency),
+          invoice_prefix: data.invoice_prefix ?? 'INV',
+          invoice_start_number: Number(data.invoice_start_number ?? 1),
+          invoice_current_number: Number(data.invoice_current_number ?? 0),
+          tax_rate: Number(data.tax_rate ?? 0),
+          default_rates: (data.default_rates ?? {}) as Record<string, number>,
+        }
+      : defaultSettings
+
+    const nextNumber = settings.invoice_current_number > 0 ? settings.invoice_current_number + 1 : settings.invoice_start_number
+    const { error } = await supabase.from('settings').upsert(
+      {
+        user_id: 'tommy',
+        invoice_prefix: settings.invoice_prefix,
+        invoice_start_number: settings.invoice_start_number,
+        invoice_current_number: nextNumber,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: 'user_id' }
+    )
+    if (error) window.alert(error.message)
+
+    return settings
   }
 
   async function deleteDoc(doc: CoreDoc) {

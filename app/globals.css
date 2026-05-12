@@ -1408,6 +1408,25 @@ textarea:disabled {
   object-fit: cover;
 }
 
+.settings-readonly-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  border: 0.5px solid var(--soon-border);
+  border-radius: 8px;
+  background: var(--soon-surface2);
+  color: var(--soon-text-secondary);
+  font-size: 12px;
+  padding: 10px 12px;
+}
+
+.settings-readonly-row strong {
+  color: var(--soon-purple-light);
+  font-size: 13px;
+  font-weight: 500;
+}
+
 .settings-rate-groups {
   display: grid;
   grid-template-columns: 1fr;
@@ -1542,6 +1561,30 @@ textarea:disabled {
 }
 
 .invoice-meta-box input {
+  text-align: right;
+}
+
+.invoice-meta-box .invoice-meta-row {
+  display: flex;
+  width: 100%;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.invoice-meta-row span {
+  min-width: 60px;
+  color: #888;
+  font-size: 12px;
+  text-align: right;
+}
+
+.invoice-meta-row input {
+  width: 160px;
+  border-bottom: 0.5px solid #e5e5e5;
+  color: #1a1a1a;
+  font-size: 13px;
   text-align: right;
 }
 

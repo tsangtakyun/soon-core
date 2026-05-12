@@ -136,6 +136,9 @@ export function InvoiceEditor({ doc, onBack, onSaved }: Props) {
           account_name: data.account_name ?? '',
           account_number: data.account_number ?? '',
           default_currency: normaliseCurrency(data.default_currency),
+          invoice_prefix: data.invoice_prefix ?? 'INV',
+          invoice_start_number: Number(data.invoice_start_number ?? 1),
+          invoice_current_number: Number(data.invoice_current_number ?? 0),
           tax_rate: Number(data.tax_rate ?? 0),
           default_rates: (data.default_rates ?? {}) as Record<string, number>,
         }
@@ -174,8 +177,8 @@ export function InvoiceEditor({ doc, onBack, onSaved }: Props) {
           next.customDescription = ''
           next.rate = Number(settings.default_rates[next.description] ?? 0)
         }
-        if (patch.description && patch.description !== 'Custom') {
-          next.rate = Number(settings.default_rates[patch.description] ?? 0)
+        if (patch.description) {
+          next.rate = patch.description === 'Custom' ? 0 : Number(settings.default_rates[patch.description] ?? 0)
         }
         return next
       }),
@@ -294,16 +297,16 @@ export function InvoiceEditor({ doc, onBack, onSaved }: Props) {
           </div>
           <div className="invoice-meta-box">
             <h1>{copy.invoice}</h1>
-            <label>
-              {copy.invoiceNumber}
+            <label className="invoice-meta-row">
+              <span>{copy.invoiceNumber}</span>
               <input value={invoice.invoiceNumber} onChange={(event) => update('invoiceNumber', event.target.value)} />
             </label>
-            <label>
-              {copy.invoiceDate}
+            <label className="invoice-meta-row">
+              <span>{copy.invoiceDate}</span>
               <input type="date" value={invoice.invoiceDate} onChange={(event) => update('invoiceDate', event.target.value)} />
             </label>
-            <label>
-              {copy.dueDate}
+            <label className="invoice-meta-row">
+              <span>{copy.dueDate}</span>
               <input type="date" value={invoice.dueDate} onChange={(event) => update('dueDate', event.target.value)} />
             </label>
           </div>

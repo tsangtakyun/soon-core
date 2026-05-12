@@ -59,6 +59,9 @@ export type InvoiceSettings = {
   account_name: string
   account_number: string
   default_currency: InvoiceCurrency
+  invoice_prefix: string
+  invoice_start_number: number
+  invoice_current_number: number
   tax_rate: number
   default_rates: Record<string, number>
 }
@@ -163,6 +166,9 @@ export const defaultSettings: InvoiceSettings = {
   account_name: '',
   account_number: '',
   default_currency: 'HK$',
+  invoice_prefix: 'INV',
+  invoice_start_number: 1,
+  invoice_current_number: 0,
   tax_rate: 0,
   default_rates: {},
 }
@@ -180,7 +186,7 @@ export function createEmptyInvoice(settings = defaultSettings): InvoiceContent {
     email: settings.email,
     phone: settings.phone,
     address: settings.address,
-    invoiceNumber: `INV-${new Date().getFullYear()}${String(Date.now()).slice(-5)}`,
+    invoiceNumber: buildInvoiceNumber(settings.invoice_prefix, new Date().getFullYear(), nextInvoiceSequence(settings)),
     invoiceDate: new Date().toISOString().slice(0, 10),
     dueDate: '',
     billedToName: '',
@@ -195,6 +201,18 @@ export function createEmptyInvoice(settings = defaultSettings): InvoiceContent {
     currency: normaliseCurrency(settings.default_currency),
     notes: '',
   }
+}
+
+export function nextInvoiceSequence(settings = defaultSettings) {
+  const current = Number(settings.invoice_current_number ?? 0)
+  const start = Number(settings.invoice_start_number ?? 1)
+  return current > 0 ? current + 1 : start
+}
+
+export function buildInvoiceNumber(prefix = 'INV', year = new Date().getFullYear(), sequence = 1) {
+  const safePrefix = prefix.trim() || 'INV'
+  const safeSequence = Math.max(1, Number(sequence || 1))
+  return `${safePrefix}-${year}-${String(safeSequence).padStart(3, '0')}`
 }
 
 export function createLineItem(
