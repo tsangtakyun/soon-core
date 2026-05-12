@@ -3,8 +3,10 @@
 import { type ChangeEvent, type ReactNode, useEffect, useMemo, useState } from 'react'
 
 import { DashboardShell } from '@/components/DashboardShell'
+import { ConceptBoardEditor } from '@/components/ConceptBoardEditor'
 import { InvoiceEditor } from '@/components/InvoiceEditor'
 import { QuotationEditor } from '@/components/QuotationEditor'
+import { conceptBoardLangStorageKey, createEmptyConceptBoard } from '@/lib/concept-board'
 import { createEmptyInvoice, defaultSettings, normaliseCurrency, type InvoiceSettings } from '@/lib/invoice'
 import { createEmptyQuotation, defaultQuotationSettings, mergeQuotationSettings, type QuotationSettings } from '@/lib/quotation'
 import { supabase } from '@/lib/supabase'
@@ -53,7 +55,17 @@ const templates = [
   },
 ] as const
 
-type Template = (typeof templates)[number]
+const conceptBoardTemplate = {
+  type: 'concept_board',
+  icon: '💡',
+  title: 'Concept Board',
+  accent: '#06b6d4',
+  preview: ['Concept 01 ___', '題目 ___', '副題 ___', '產品置入方向 ___'],
+} as const
+
+const docTemplates = [...templates, conceptBoardTemplate] as const
+
+type Template = (typeof docTemplates)[number]
 
 type Stakeholder = {
   name: string
@@ -82,8 +94,8 @@ type ProjectBriefContent = {
   updatedAt?: string
 }
 
-const templateLabels = Object.fromEntries(templates.map((template) => [template.type, template.title]))
-const templateIcons = Object.fromEntries(templates.map((template) => [template.type, template.icon]))
+const templateLabels = Object.fromEntries(docTemplates.map((template) => [template.type, template.title]))
+const templateIcons = Object.fromEntries(docTemplates.map((template) => [template.type, template.icon]))
 const projectBriefStatusOptions: BriefStatus[] = ['Planning', 'In Progress', 'On Hold', 'Done']
 
 const briefCopy = {
@@ -254,13 +266,21 @@ export function DocsCenter() {
     return window.localStorage.getItem(briefLangStorageKey) === 'en' ? 'en' : 'zh'
   }
 
+  function getStoredConceptLanguage() {
+    if (typeof window === 'undefined') return 'zh'
+    return window.localStorage.getItem(conceptBoardLangStorageKey) === 'en' ? 'en' : 'zh'
+  }
+
   async function createDoc(template: Template) {
     const initialBrief = { ...defaultProjectBrief, language: getStoredBriefLanguage() }
+    const initialConceptBoard = createEmptyConceptBoard(getStoredConceptLanguage())
     const invoiceSettings = template.type === 'invoice' ? await reserveNextInvoiceSettings() : null
     const quoteSettings = template.type === 'quotation' ? await reserveNextQuoteSettings() : null
     const initialContent =
       template.type === 'project_brief'
         ? JSON.stringify(initialBrief)
+        : template.type === 'concept_board'
+          ? JSON.stringify(initialConceptBoard)
         : template.type === 'invoice'
           ? JSON.stringify(createEmptyInvoice(invoiceSettings ?? defaultSettings))
         : template.type === 'quotation'
@@ -709,6 +729,22 @@ export function DocsCenter() {
     )
   }
 
+  if (selectedDoc?.template_type === 'concept_board') {
+    return (
+      <DashboardShell activeSection="docs">
+        <ConceptBoardEditor
+          doc={selectedDoc}
+          onBack={closeDoc}
+          onSaved={(doc) => {
+            setSelectedDoc(doc)
+            setDocs((current) => current.map((item) => (item.id === doc.id ? doc : item)))
+            notifyDocsChanged()
+          }}
+        />
+      </DashboardShell>
+    )
+  }
+
   return (
     <DashboardShell activeSection="docs">
       <section className="docs-page">
@@ -728,12 +764,12 @@ export function DocsCenter() {
         </header>
 
         <div className="template-grid docs-template-grid">
-          {templates.map((template) => (
+          {docTemplates.map((template) => (
             <article key={template.type} className="template-card docs-template-card">
               <div className="template-accent" style={{ background: template.accent }} />
               <div className="template-title-row">
                 <span className="template-icon" style={{ color: template.accent }}>
-                  {template.type === 'invoice' ? <InvoiceTemplateIcon /> : template.icon}
+                  {template.type === 'invoice' ? <InvoiceTemplateIcon /> : template.type === 'concept_board' ? <ConceptTemplateIcon /> : template.icon}
                 </span>
                 <h2>{template.title}</h2>
               </div>
@@ -819,6 +855,26 @@ function InvoiceTemplateIcon() {
       <line x1="16" y1="13" x2="8" y2="13" />
       <line x1="16" y1="17" x2="8" y2="17" />
       <polyline points="10 9 9 9 8 9" />
+    </svg>
+  )
+}
+
+function ConceptTemplateIcon() {
+  return (
+    <svg
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M9 18h6" />
+      <path d="M10 22h4" />
+      <path d="M8.5 14.5c-1.8-1.2-3-3.1-3-5.3A6.5 6.5 0 0 1 12 2.7a6.5 6.5 0 0 1 6.5 6.5c0 2.2-1.2 4.1-3 5.3-.7.5-1 1.2-1 2H9.5c0-.8-.3-1.5-1-2Z" />
     </svg>
   )
 }
