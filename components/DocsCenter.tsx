@@ -315,7 +315,9 @@ export function DocsCenter() {
       },
       { onConflict: 'user_id' }
     )
-    if (error) window.alert(error.message)
+    if (error) {
+      console.warn('Invoice number counter could not be reserved. Falling back to local invoice number.', error.message)
+    }
 
     return settings
   }
