@@ -920,10 +920,20 @@ textarea:disabled {
 }
 
 .template-icon {
+  display: inline-flex;
   width: 20px;
+  height: 20px;
+  align-items: center;
+  justify-content: center;
   font-size: 20px;
   line-height: 1;
   text-align: center;
+}
+
+.template-icon svg {
+  display: block;
+  width: 20px;
+  height: 20px;
 }
 
 .template-title-row h2 {
