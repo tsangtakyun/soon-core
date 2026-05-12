@@ -47,7 +47,7 @@ export function WorkBoard() {
 
   useEffect(() => {
     void load()
-  }, [])
+  }, [workspaceFilter])
 
   async function load() {
     const [{ data: projectData }, { data: workspaceData }] = await Promise.all([
@@ -93,7 +93,7 @@ export function WorkBoard() {
       ...draft,
       title: draft.title.trim(),
       type: category.type,
-      workspace_id: draft.workspace_id || null,
+      workspace_id: draft.workspace_id || workspaceFilter || null,
       shoot_date: draft.shoot_date || null,
       pipeline_step: 'idea',
       languages: 3,
@@ -104,7 +104,7 @@ export function WorkBoard() {
       return
     }
 
-    setDraft(emptyProject)
+    setDraft({ ...emptyProject, workspace_id: workspaceFilter ?? '' })
     setPanelOpen(false)
     await load()
   }
@@ -123,7 +123,14 @@ export function WorkBoard() {
             <h1>我的工作</h1>
             <p>內容製作 pipeline board</p>
           </div>
-          <button className="primary-button" type="button" onClick={() => setPanelOpen(true)}>
+          <button
+            className="primary-button"
+            type="button"
+            onClick={() => {
+              setDraft({ ...emptyProject, workspace_id: workspaceFilter ?? '' })
+              setPanelOpen(true)
+            }}
+          >
             + 新項目
           </button>
         </header>
