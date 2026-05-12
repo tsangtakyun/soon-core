@@ -1,11 +1,11 @@
 {
   "name": "SOON Core",
   "short_name": "SOON",
-  "description": "人人都係 Creator",
+  "description": "SOON production pipeline dashboard",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#080808",
-  "theme_color": "#080808",
+  "background_color": "#0a0a0a",
+  "theme_color": "#0a0a0a",
   "orientation": "portrait",
   "icons": [
     { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },

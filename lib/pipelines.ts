@@ -1,0 +1,89 @@
+export type PipelineId = 'ig' | 'youtube'
+export type ToolId = 'idea' | 'script' | 'storyboard' | 'production' | 'subtitle'
+
+export interface PipelineTool {
+  id: ToolId
+  label: string
+  icon: string
+  url: string
+}
+
+export interface PipelineConfig {
+  id: PipelineId
+  label: string
+  badge: string
+  tools: PipelineTool[]
+}
+
+export const pipelines: Record<PipelineId, PipelineConfig> = {
+  ig: {
+    id: 'ig',
+    label: 'IG',
+    badge: 'IG',
+    tools: [
+      {
+        id: 'idea',
+        label: 'Idea',
+        icon: '💡',
+        url: 'https://idea-brainstorm.vercel.app',
+      },
+      {
+        id: 'script',
+        label: 'Script',
+        icon: '📝',
+        url: 'https://script-generator-xi.vercel.app',
+      },
+      {
+        id: 'storyboard',
+        label: 'Storyboard',
+        icon: '🎬',
+        url: 'https://soon-storyboard.vercel.app',
+      },
+    ],
+  },
+  youtube: {
+    id: 'youtube',
+    label: 'YouTube',
+    badge: 'YouTube',
+    tools: [
+      {
+        id: 'idea',
+        label: 'Idea',
+        icon: '💡',
+        url: 'https://soon-youtube-idea.vercel.app',
+      },
+      {
+        id: 'script',
+        label: 'Script',
+        icon: '📝',
+        url: 'https://script-generator-youtube.vercel.app',
+      },
+      {
+        id: 'storyboard',
+        label: 'Storyboard',
+        icon: '🎬',
+        url: 'https://soon-storyboard-youtube.vercel.app',
+      },
+      {
+        id: 'production',
+        label: 'Production',
+        icon: '🎥',
+        url: 'https://soon-production-tool.vercel.app',
+      },
+      {
+        id: 'subtitle',
+        label: 'Subtitle',
+        icon: '🎞️',
+        url: 'https://soon-subtitle.vercel.app',
+      },
+    ],
+  },
+}
+
+export function getPipeline(id: string) {
+  return pipelines[id as PipelineId] ?? null
+}
+
+export function getTool(pipelineId: PipelineId, toolId: string) {
+  return pipelines[pipelineId].tools.find((tool) => tool.id === toolId) ?? null
+}
