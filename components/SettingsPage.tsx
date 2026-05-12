@@ -146,7 +146,6 @@ export function SettingsPage() {
       {
         user_id: 'tommy',
         signature_base64: settings.signature_base64,
-        authorized_name: settings.authorized_name,
         updated_at: new Date().toISOString(),
       },
       { onConflict: 'user_id' }
