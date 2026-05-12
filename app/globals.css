@@ -1110,7 +1110,8 @@ textarea:disabled {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 10px;
+  gap: 8px;
+  flex-wrap: nowrap;
 }
 
 .brief-toolbar-actions span {
@@ -1119,16 +1120,28 @@ textarea:disabled {
 }
 
 .export-button {
-  border: 0.5px solid var(--soon-border);
+  border: 0;
   border-radius: 6px;
-  background: transparent;
-  color: var(--soon-text-secondary);
-  font-size: 12px;
-  padding: 6px 12px;
+  color: #fff;
+  font-size: 13px;
+  padding: 6px 14px;
+  white-space: nowrap;
+}
+
+.export-pdf-button {
+  background: #1a1a1a;
+}
+
+.export-word-button {
+  background: #2563eb;
 }
 
 .export-button:hover {
-  background: var(--soon-surface2);
+  filter: brightness(1.1);
+}
+
+.brief-toolbar-actions .primary-button {
+  white-space: nowrap;
 }
 
 .brief-document {

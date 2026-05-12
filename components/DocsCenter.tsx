@@ -242,7 +242,7 @@ export function DocsCenter() {
   }
 
   function notifyDocsChanged() {
-    window.dispatchEvent(new Event('soon-docs-changed'))
+    window.dispatchEvent(new Event('soon-data-updated'))
   }
 
   function getStoredBriefLanguage(): BriefLang {
@@ -432,10 +432,10 @@ export function DocsCenter() {
             <div className="brief-toolbar-actions">
               {saveState === 'saved' && <span>{copy.saved}</span>}
               {saveState === 'saving' && <span>{copy.saving}</span>}
-              <button className="export-button soon-no-print" type="button" onClick={exportPdf}>
+              <button className="export-button export-pdf-button soon-no-print" type="button" onClick={exportPdf}>
                 {copy.exportPdf}
               </button>
-              <button className="export-button soon-no-print" type="button" onClick={exportWord}>
+              <button className="export-button export-word-button soon-no-print" type="button" onClick={exportWord}>
                 {copy.exportWord}
               </button>
               <button className="primary-button" type="button" onClick={() => void saveProjectBrief()}>

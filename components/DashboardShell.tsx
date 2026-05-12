@@ -59,8 +59,8 @@ export function DashboardShell({ activeSection, pipeline, tool, children }: Dash
 
   useEffect(() => {
     const refreshSidebar = () => void loadSidebarData()
-    window.addEventListener('soon-docs-changed', refreshSidebar)
-    return () => window.removeEventListener('soon-docs-changed', refreshSidebar)
+    window.addEventListener('soon-data-updated', refreshSidebar)
+    return () => window.removeEventListener('soon-data-updated', refreshSidebar)
   }, [])
 
   useEffect(() => {
