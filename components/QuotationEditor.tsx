@@ -399,16 +399,14 @@ function SignatureBlock({
   onDate: (value: string) => void
 }) {
   return (
-    <div className="quotation-signature-block">
-      <h3>{title}</h3>
-      <div className="quotation-signature-area">
+    <div className="sig-col">
+      <h3 className="sig-title">{title}</h3>
+      <div className="sig-image-area">
         {signatureBase64 && <img className="quotation-signature-image" src={signatureBase64} alt="" />}
       </div>
-      <div className="signature-line" />
-      <div className="quotation-signature-details">
-        <label><span>{nameLabel}:</span><input value={name} onChange={(event) => onName(event.target.value)} /></label>
-        <label><span>{dateLabel}:</span><input value={date} onChange={(event) => onDate(event.target.value)} /></label>
-      </div>
+      <div className="sig-line" />
+      <label className="sig-name"><span>{nameLabel}:</span><input value={name} onChange={(event) => onName(event.target.value)} /></label>
+      <label className="sig-date"><span>{dateLabel}:</span><input value={date} onChange={(event) => onDate(event.target.value)} /></label>
     </div>
   )
 }

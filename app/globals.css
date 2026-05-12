@@ -2159,30 +2159,29 @@ textarea:disabled {
 .quotation-signatures {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 48px;
-  align-items: end;
+  gap: 0 48px;
   margin-top: 48px;
 }
 
-.quotation-signature-block {
-  display: flex;
-  min-height: 120px;
-  flex-direction: column;
+.sig-col {
+  display: grid;
+  grid-template-rows: 24px 80px 1px auto auto;
+  gap: 0;
   color: #1a1a1a;
   font-size: 13px;
 }
 
-.quotation-signature-block h3 {
+.sig-title {
+  align-self: center;
   margin: 0;
   font-size: 13px;
   font-weight: 500;
 }
 
-.quotation-signature-area {
+.sig-image-area {
   display: flex;
-  min-height: 80px;
+  height: 80px;
   align-items: flex-end;
-  padding-top: 10px;
 }
 
 .quotation-signature-image {
@@ -2190,35 +2189,43 @@ textarea:disabled {
   min-width: 120px;
   max-width: 200px;
   max-height: 80px;
-  margin-bottom: 8px;
   object-fit: contain;
+  object-position: bottom left;
 }
 
-.signature-line {
+.sig-line {
   width: 100%;
-  border-top: 1px solid #1a1a1a;
-}
-
-.quotation-signature-details {
-  display: grid;
-  gap: 6px;
+  height: 1px;
   margin-top: 8px;
+  background: #1a1a1a;
 }
 
-.quotation-signature-details label {
+.sig-name,
+.sig-date {
   display: grid;
   grid-template-columns: 46px minmax(0, 1fr);
   align-items: center;
   gap: 8px;
   min-height: 24px;
+  font-size: 13px;
 }
 
-.quotation-signature-details span {
+.sig-name {
+  margin-top: 10px;
+}
+
+.sig-date {
+  margin-top: 6px;
+}
+
+.sig-name span,
+.sig-date span {
   color: #1a1a1a;
   font-size: 13px;
 }
 
-.quotation-signature-details input {
+.sig-name input,
+.sig-date input {
   width: 100%;
 }
 
