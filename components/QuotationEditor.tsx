@@ -402,7 +402,7 @@ function SignatureBlock({
     <div className="sig-col">
       <h3 className="sig-title">{title}</h3>
       <div className="sig-image-area">
-        {signatureBase64 && <img className="quotation-signature-image" src={signatureBase64} alt="" />}
+        {signatureBase64 && <img className="quotation-signature-image signature-img" src={signatureBase64} alt="" />}
       </div>
       <div className="sig-line" />
       <label className="sig-name"><span>{nameLabel}:</span><input value={name} onChange={(event) => onName(event.target.value)} /></label>
