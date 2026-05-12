@@ -1,6 +1,6 @@
 'use client'
 
-import { type ChangeEvent, useEffect, useState } from 'react'
+import { type ChangeEvent, type PointerEvent, useEffect, useRef, useState } from 'react'
 
 import { DashboardShell } from '@/components/DashboardShell'
 import { buildInvoiceNumber, currencyOptions, normaliseCurrency, settingsRateGroups } from '@/lib/invoice'
@@ -10,6 +10,9 @@ import { supabase } from '@/lib/supabase'
 export function SettingsPage() {
   const [settings, setSettings] = useState<QuotationSettings>(defaultQuotationSettings)
   const [saved, setSaved] = useState(false)
+  const [signatureMode, setSignatureMode] = useState<'draw' | 'upload'>('draw')
+  const [isDrawing, setIsDrawing] = useState(false)
+  const canvasRef = useRef<HTMLCanvasElement | null>(null)
 
   useEffect(() => {
     void load()
@@ -41,6 +44,60 @@ export function SettingsPage() {
     const reader = new FileReader()
     reader.onload = () => update('logo_base64', String(reader.result ?? ''))
     reader.readAsDataURL(file)
+  }
+
+  function uploadSignature(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = () => update('signature_base64', String(reader.result ?? ''))
+    reader.readAsDataURL(file)
+  }
+
+  function pointerPosition(event: PointerEvent<HTMLCanvasElement>) {
+    const rect = event.currentTarget.getBoundingClientRect()
+    return {
+      x: event.clientX - rect.left,
+      y: event.clientY - rect.top,
+    }
+  }
+
+  function startSignatureDraw(event: PointerEvent<HTMLCanvasElement>) {
+    const canvas = canvasRef.current
+    const context = canvas?.getContext('2d')
+    if (!canvas || !context) return
+    const position = pointerPosition(event)
+    context.strokeStyle = '#000000'
+    context.lineWidth = 2
+    context.lineCap = 'round'
+    context.lineJoin = 'round'
+    context.beginPath()
+    context.moveTo(position.x, position.y)
+    setIsDrawing(true)
+  }
+
+  function drawSignature(event: PointerEvent<HTMLCanvasElement>) {
+    if (!isDrawing) return
+    const context = canvasRef.current?.getContext('2d')
+    if (!context) return
+    const position = pointerPosition(event)
+    context.lineTo(position.x, position.y)
+    context.stroke()
+  }
+
+  function finishSignatureDraw() {
+    if (!isDrawing) return
+    setIsDrawing(false)
+    const dataUrl = canvasRef.current?.toDataURL('image/png')
+    if (dataUrl) update('signature_base64', dataUrl)
+  }
+
+  function clearSignature() {
+    const canvas = canvasRef.current
+    const context = canvas?.getContext('2d')
+    if (!canvas || !context) return
+    context.clearRect(0, 0, canvas.width, canvas.height)
+    update('signature_base64', '')
   }
 
   async function save() {
@@ -228,6 +285,38 @@ export function SettingsPage() {
             授權人姓名
             <input value={settings.authorized_name} onChange={(event) => update('authorized_name', event.target.value)} />
           </label>
+          <div className="signature-mode-toggle">
+            <button className={signatureMode === 'draw' ? 'active' : ''} type="button" onClick={() => setSignatureMode('draw')}>
+              手寫
+            </button>
+            <button className={signatureMode === 'upload' ? 'active' : ''} type="button" onClick={() => setSignatureMode('upload')}>
+              上傳圖片
+            </button>
+          </div>
+          {signatureMode === 'draw' ? (
+            <div className="signature-canvas-wrap">
+              <canvas
+                ref={canvasRef}
+                width={400}
+                height={120}
+                onPointerDown={startSignatureDraw}
+                onPointerMove={drawSignature}
+                onPointerUp={finishSignatureDraw}
+                onPointerLeave={finishSignatureDraw}
+              />
+              <button className="ghost-button inline-ghost-button" type="button" onClick={clearSignature}>
+                清除
+              </button>
+            </div>
+          ) : (
+            <label>
+              上傳簽名圖片
+              <div className="signature-upload-row">
+                {settings.signature_base64 && <img src={settings.signature_base64} alt="" />}
+                <input type="file" accept="image/*" onChange={uploadSignature} />
+              </div>
+            </label>
+          )}
         </section>
 
         <section className="settings-card">

@@ -6,6 +6,7 @@ import {
   normaliseCurrency,
   type InvoiceCurrency,
   type InvoiceDiscount,
+  type InvoicePhase,
   type InvoiceSettings,
 } from '@/lib/invoice'
 
@@ -13,6 +14,7 @@ export type QuotationLanguage = 'zh' | 'en'
 
 export type QuotationItem = {
   id: string
+  phase: InvoicePhase
   deliverable: string
   details: string
   cost: number
@@ -29,7 +31,6 @@ export type QuotationContent = {
   quoteNumber: string
   quoteDate: string
   validUntil: string
-  invoiceNumber: string
   clientCompany: string
   attention: string
   clientAddress: string
@@ -41,6 +42,7 @@ export type QuotationContent = {
   taxRate: number
   paymentTerms: string
   authorizedName: string
+  signatureBase64: string
   authorizedDate: string
   clientSignatureName: string
   clientSignatureDate: string
@@ -57,6 +59,7 @@ export type QuotationSettings = InvoiceSettings & {
   payment_days: number
   interest_rate: number
   authorized_name: string
+  signature_base64: string
   bank_transfer_enabled: boolean
   cheque_enabled: boolean
   fps_enabled: boolean
@@ -74,6 +77,7 @@ export const defaultQuotationSettings: QuotationSettings = {
   payment_days: 30,
   interest_rate: 5,
   authorized_name: 'Tommy',
+  signature_base64: '',
   bank_transfer_enabled: true,
   cheque_enabled: false,
   fps_enabled: false,
@@ -108,6 +112,7 @@ export function mergeQuotationSettings(data: Record<string, unknown> | null | un
     payment_days: Number(data.payment_days ?? 30),
     interest_rate: Number(data.interest_rate ?? 5),
     authorized_name: String(data.authorized_name ?? 'Tommy'),
+    signature_base64: String(data.signature_base64 ?? ''),
     bank_transfer_enabled: Boolean(data.bank_transfer_enabled ?? true),
     cheque_enabled: Boolean(data.cheque_enabled ?? false),
     fps_enabled: Boolean(data.fps_enabled ?? false),
@@ -136,18 +141,18 @@ export function createEmptyQuotation(settings = defaultQuotationSettings): Quota
     quoteNumber: buildQuoteNumber(settings),
     quoteDate: new Date().toISOString().slice(0, 10),
     validUntil: '',
-    invoiceNumber: '',
     clientCompany: '',
     attention: '',
     clientAddress: '',
     clientPhone: '',
     clientEmail: '',
     projectName: '',
-    items: [{ id: crypto.randomUUID(), deliverable: '', details: '', cost: 0 }],
+    items: [{ id: crypto.randomUUID(), phase: 'Pre-production', deliverable: '', details: '', cost: 0 }],
     discount: null,
     taxRate: Number(settings.tax_rate ?? 0),
     paymentTerms: buildPaymentTerms(settings),
     authorizedName: settings.authorized_name,
+    signatureBase64: settings.signature_base64,
     authorizedDate: new Date().toISOString().slice(0, 10),
     clientSignatureName: '',
     clientSignatureDate: '',
@@ -169,6 +174,11 @@ export function parseQuotation(content: string | null, settings = defaultQuotati
       phone: parsed.phone || settings.phone || '',
       address: parsed.address || settings.address || '',
       authorizedName: parsed.authorizedName || settings.authorized_name || 'Tommy',
+      signatureBase64: parsed.signatureBase64 || settings.signature_base64 || '',
+      items: (parsed.items ?? createEmptyQuotation(settings).items).map((item) => ({
+        ...item,
+        phase: item.phase || 'Pre-production',
+      })),
       taxRate: parsed.taxRate ?? Number(settings.tax_rate ?? 0),
     }
   } catch {

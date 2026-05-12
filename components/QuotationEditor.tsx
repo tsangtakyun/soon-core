@@ -2,7 +2,15 @@
 
 import { type ChangeEvent, type ReactNode, useEffect, useMemo, useState } from 'react'
 
-import { currencyOptions, type InvoiceCurrency, type InvoiceDiscount } from '@/lib/invoice'
+import {
+  currencyOptions,
+  invoicePhases,
+  phaseColors,
+  phaseDescriptions,
+  type InvoiceCurrency,
+  type InvoiceDiscount,
+  type InvoicePhase,
+} from '@/lib/invoice'
 import {
   defaultQuotationSettings,
   mergeQuotationSettings,
@@ -29,13 +37,14 @@ const quotationCopy = {
     quoteNumber: '報價單號碼',
     date: '日期',
     validUntil: '有效期至',
-    invoiceNo: 'Invoice no.',
     to: '致',
+    companyName: '公司名稱',
     attn: '負責人',
     address: '地址',
     contact: '聯絡電話',
     email: 'Email',
     project: '項目名稱',
+    phase: '階段',
     deliverable: '交付項目',
     details: '詳情',
     cost: '費用',
@@ -65,13 +74,14 @@ const quotationCopy = {
     quoteNumber: 'Quote #',
     date: 'Date',
     validUntil: 'Valid Until',
-    invoiceNo: 'Invoice no.',
     to: 'To',
+    companyName: 'Company Name',
     attn: 'Attn',
     address: 'Address',
     contact: 'Contact Number',
     email: 'Email',
     project: 'Project',
+    phase: 'Phase',
     deliverable: 'Deliverable',
     details: 'Details',
     cost: 'Cost',
@@ -135,7 +145,17 @@ export function QuotationEditor({ doc, onBack, onSaved }: Props) {
   function updateItem(id: string, patch: Partial<QuotationItem>) {
     setQuote((current) => ({
       ...current,
-      items: current.items.map((item) => (item.id === id ? { ...item, ...patch } : item)),
+      items: current.items.map((item) => {
+        if (item.id !== id) return item
+        const next = { ...item, ...patch }
+        if (patch.phase) {
+          next.deliverable = phaseDescriptions[patch.phase][0]
+        }
+        if (patch.deliverable === 'Custom') {
+          next.deliverable = ''
+        }
+        return next
+      }),
     }))
     setSaved(false)
   }
@@ -161,7 +181,7 @@ export function QuotationEditor({ doc, onBack, onSaved }: Props) {
   function addItem() {
     setQuote((current) => ({
       ...current,
-      items: [...current.items, { id: crypto.randomUUID(), deliverable: '', details: '', cost: 0 }],
+      items: [...current.items, { id: crypto.randomUUID(), phase: 'Pre-production', deliverable: '', details: '', cost: 0 }],
     }))
     setSaved(false)
   }
@@ -226,17 +246,15 @@ export function QuotationEditor({ doc, onBack, onSaved }: Props) {
             <MetaRow label={t.quoteNumber}><input value={quote.quoteNumber} onChange={(event) => update('quoteNumber', event.target.value)} /></MetaRow>
             <MetaRow label={t.date}><input type="date" value={quote.quoteDate} onChange={(event) => update('quoteDate', event.target.value)} /></MetaRow>
             <MetaRow label={t.validUntil}><input type="date" value={quote.validUntil} onChange={(event) => update('validUntil', event.target.value)} /></MetaRow>
-            <MetaRow label={t.invoiceNo}><input value={quote.invoiceNumber} onChange={(event) => update('invoiceNumber', event.target.value)} /></MetaRow>
           </div>
         </section>
 
         <section className="invoice-block quotation-client-grid">
-          <h2>{t.to}</h2>
-          <input value={quote.clientCompany} onChange={(event) => update('clientCompany', event.target.value)} placeholder={t.to} />
-          <input value={quote.attention} onChange={(event) => update('attention', event.target.value)} placeholder={t.attn} />
-          <input value={quote.clientAddress} onChange={(event) => update('clientAddress', event.target.value)} placeholder={t.address} />
-          <input value={quote.clientPhone} onChange={(event) => update('clientPhone', event.target.value)} placeholder={t.contact} />
-          <input value={quote.clientEmail} onChange={(event) => update('clientEmail', event.target.value)} placeholder={t.email} />
+          <label>{t.companyName}<input value={quote.clientCompany} onChange={(event) => update('clientCompany', event.target.value)} /></label>
+          <label>{t.attn}<input value={quote.attention} onChange={(event) => update('attention', event.target.value)} /></label>
+          <label>{t.address}<input value={quote.clientAddress} onChange={(event) => update('clientAddress', event.target.value)} /></label>
+          <label>{t.contact}<input value={quote.clientPhone} onChange={(event) => update('clientPhone', event.target.value)} /></label>
+          <label>{t.email}<input value={quote.clientEmail} onChange={(event) => update('clientEmail', event.target.value)} /></label>
         </section>
 
         <section className="quotation-project-row">
@@ -248,6 +266,7 @@ export function QuotationEditor({ doc, onBack, onSaved }: Props) {
           <thead>
             <tr>
               <th>#</th>
+              <th>{t.phase}</th>
               <th>{t.deliverable}</th>
               <th>{t.details}</th>
               <th>{t.cost} ({quote.currency})</th>
@@ -258,7 +277,24 @@ export function QuotationEditor({ doc, onBack, onSaved }: Props) {
             {quote.items.map((item, index) => (
               <tr key={item.id}>
                 <td>{index + 1}</td>
-                <td><input value={item.deliverable} onChange={(event) => updateItem(item.id, { deliverable: event.target.value })} /></td>
+                <td>
+                  <select
+                    className="phase-select"
+                    style={{ color: phaseColors[item.phase] }}
+                    value={item.phase}
+                    onChange={(event) => updateItem(item.id, { phase: event.target.value as InvoicePhase })}
+                  >
+                    {invoicePhases.map((phase) => <option key={phase} value={phase}>{phase}</option>)}
+                  </select>
+                </td>
+                <td>
+                  <select value={phaseDescriptions[item.phase].includes(item.deliverable) ? item.deliverable : 'Custom'} onChange={(event) => updateItem(item.id, { deliverable: event.target.value })}>
+                    {phaseDescriptions[item.phase].map((description) => <option key={description} value={description}>{description}</option>)}
+                  </select>
+                  {!phaseDescriptions[item.phase].includes(item.deliverable) && (
+                    <input value={item.deliverable} onChange={(event) => updateItem(item.id, { deliverable: event.target.value })} />
+                  )}
+                </td>
                 <td><textarea rows={3} value={item.details} onChange={(event) => updateItem(item.id, { details: event.target.value })} /></td>
                 <td><input type="number" value={item.cost} onChange={(event) => updateItem(item.id, { cost: Number(event.target.value || 0) })} placeholder="XXXX" /></td>
                 <td className="soon-no-print"><button type="button" onClick={() => update('items', quote.items.filter((current) => current.id !== item.id))}>×</button></td>
@@ -283,7 +319,7 @@ export function QuotationEditor({ doc, onBack, onSaved }: Props) {
         </section>
 
         <section className="quotation-signatures">
-          <SignatureBlock title={t.authorizedSignature} nameLabel={t.name} dateLabel={t.date} name={quote.authorizedName} date={quote.authorizedDate} onName={(value) => update('authorizedName', value)} onDate={(value) => update('authorizedDate', value)} />
+          <SignatureBlock title={t.authorizedSignature} signatureBase64={quote.signatureBase64} nameLabel={t.name} dateLabel={t.date} name={quote.authorizedName} date={quote.authorizedDate} onName={(value) => update('authorizedName', value)} onDate={(value) => update('authorizedDate', value)} />
           <SignatureBlock title={t.clientSignature} nameLabel={t.name} dateLabel={t.date} name={quote.clientSignatureName} date={quote.clientSignatureDate} onName={(value) => update('clientSignatureName', value)} onDate={(value) => update('clientSignatureDate', value)} />
         </section>
       </article>
@@ -337,6 +373,7 @@ function DiscountRow({
 
 function SignatureBlock({
   title,
+  signatureBase64,
   nameLabel,
   dateLabel,
   name,
@@ -345,6 +382,7 @@ function SignatureBlock({
   onDate,
 }: {
   title: string
+  signatureBase64?: string
   nameLabel: string
   dateLabel: string
   name: string
@@ -355,6 +393,7 @@ function SignatureBlock({
   return (
     <div className="quotation-signature-block">
       <h3>{title}</h3>
+      {signatureBase64 && <img className="quotation-signature-image" src={signatureBase64} alt="" />}
       <div className="signature-line" />
       <label>{nameLabel}: <input value={name} onChange={(event) => onName(event.target.value)} /></label>
       <label>{dateLabel}: <input value={date} onChange={(event) => onDate(event.target.value)} /></label>
@@ -371,8 +410,9 @@ function formatCurrency(currency: InvoiceCurrency, value: number) {
 }
 
 function buildWordHtml(quote: QuotationContent, t: (typeof quotationCopy)[QuotationContent['language']], totals: { subtotal: number; discount: number; tax: number; total: number }) {
-  const rows = quote.items.map((item, index) => `<tr><td>${index + 1}</td><td>${escapeHtml(item.deliverable)}</td><td>${escapeHtml(item.details).replaceAll('\n', '<br>')}</td><td>${formatCurrency(quote.currency, item.cost)}</td></tr>`).join('')
-  return `<html><head><meta charset="utf-8"><style>body{font-family:Arial,sans-serif;margin:40px;color:#1a1a1a}h1{color:#7c3aed}table{border-collapse:collapse;width:100%;margin:20px 0}td,th{border:1px solid #e5e5e5;padding:8px 12px;font-size:13px;text-align:left}.right{text-align:right;white-space:pre-wrap}.sig{display:grid;grid-template-columns:1fr 1fr;gap:48px;margin-top:48px}.line{border-top:1px solid #1a1a1a;margin:34px 0 12px}</style></head><body><h1>${t.quotation}</h1><p><strong>${escapeHtml(quote.companyName)}</strong><br>${escapeHtml(quote.email)}<br>${escapeHtml(quote.phone)}<br>${escapeHtml(quote.address)}</p><p><strong>${t.quoteNumber}:</strong> ${escapeHtml(quote.quoteNumber)}<br><strong>${t.date}:</strong> ${quote.quoteDate}<br><strong>${t.validUntil}:</strong> ${quote.validUntil}</p><h2>${t.to}</h2><p>${escapeHtml(quote.clientCompany)}<br>${escapeHtml(quote.attention)}<br>${escapeHtml(quote.clientAddress)}<br>${escapeHtml(quote.clientPhone)}<br>${escapeHtml(quote.clientEmail)}</p><h2>${escapeHtml(quote.projectName)}</h2><table><tr><th>#</th><th>${t.deliverable}</th><th>${t.details}</th><th>${t.cost}</th></tr>${rows}</table><p class="right">${t.subtotal}: ${formatCurrency(quote.currency, totals.subtotal)}<br>${t.tax}: ${formatCurrency(quote.currency, totals.tax)}<br><strong>${t.total}: ${formatCurrency(quote.currency, totals.total)}</strong></p><h2>${t.paymentTerms}</h2><p style="white-space:pre-wrap">${escapeHtml(quote.paymentTerms)}</p><div class="sig"><div><h3>${t.authorizedSignature}</h3><div class="line"></div><p>${t.name}: ${escapeHtml(quote.authorizedName)}<br>${t.date}: ${quote.authorizedDate}</p></div><div><h3>${t.clientSignature}</h3><div class="line"></div><p>${t.name}: ${escapeHtml(quote.clientSignatureName)}<br>${t.date}: ${quote.clientSignatureDate}</p></div></div></body></html>`
+  const rows = quote.items.map((item, index) => `<tr><td>${index + 1}</td><td>${escapeHtml(item.phase)}</td><td>${escapeHtml(item.deliverable)}</td><td>${escapeHtml(item.details).replaceAll('\n', '<br>')}</td><td>${formatCurrency(quote.currency, item.cost)}</td></tr>`).join('')
+  const signature = quote.signatureBase64 ? `<img src="${quote.signatureBase64}" style="max-width:200px;max-height:80px;display:block;margin-bottom:8px">` : ''
+  return `<html><head><meta charset="utf-8"><style>body{font-family:Arial,sans-serif;margin:40px;color:#1a1a1a}h1{color:#7c3aed}table{border-collapse:collapse;width:100%;margin:20px 0}td,th{border:1px solid #e5e5e5;padding:8px 12px;font-size:13px;text-align:left}.right{text-align:right;white-space:pre-wrap}.sig{display:grid;grid-template-columns:1fr 1fr;gap:48px;margin-top:48px}.line{border-top:1px solid #1a1a1a;margin:34px 0 12px}</style></head><body><h1>${t.quotation}</h1><p><strong>${escapeHtml(quote.companyName)}</strong><br>${escapeHtml(quote.email)}<br>${escapeHtml(quote.phone)}<br>${escapeHtml(quote.address)}</p><p><strong>${t.quoteNumber}:</strong> ${escapeHtml(quote.quoteNumber)}<br><strong>${t.date}:</strong> ${quote.quoteDate}<br><strong>${t.validUntil}:</strong> ${quote.validUntil}</p><h2>${t.to}</h2><p>${escapeHtml(quote.clientCompany)}<br>${escapeHtml(quote.attention)}<br>${escapeHtml(quote.clientAddress)}<br>${escapeHtml(quote.clientPhone)}<br>${escapeHtml(quote.clientEmail)}</p><h2>${escapeHtml(quote.projectName)}</h2><table><tr><th>#</th><th>${t.phase}</th><th>${t.deliverable}</th><th>${t.details}</th><th>${t.cost}</th></tr>${rows}</table><p class="right">${t.subtotal}: ${formatCurrency(quote.currency, totals.subtotal)}<br>${t.tax}: ${formatCurrency(quote.currency, totals.tax)}<br><strong>${t.total}: ${formatCurrency(quote.currency, totals.total)}</strong></p><h2>${t.paymentTerms}</h2><p style="white-space:pre-wrap">${escapeHtml(quote.paymentTerms)}</p><div class="sig"><div><h3>${t.authorizedSignature}</h3>${signature}<div class="line"></div><p>${t.name}: ${escapeHtml(quote.authorizedName)}<br>${t.date}: ${quote.authorizedDate}</p></div><div><h3>${t.clientSignature}</h3><div class="line"></div><p>${t.name}: ${escapeHtml(quote.clientSignatureName)}<br>${t.date}: ${quote.clientSignatureDate}</p></div></div></body></html>`
 }
 
 function escapeHtml(value: string) {
