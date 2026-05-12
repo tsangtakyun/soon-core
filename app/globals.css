@@ -2166,6 +2166,7 @@ textarea:disabled {
 .sig-col {
   display: flex;
   flex-direction: column;
+  gap: 0;
   color: #1a1a1a;
   font-size: 13px;
 }
@@ -2180,7 +2181,7 @@ textarea:disabled {
 .sig-image-area {
   display: flex;
   height: auto;
-  min-height: 100px;
+  min-height: 120px;
   flex: 1;
   align-items: flex-end;
   padding-bottom: 0;
@@ -2189,10 +2190,10 @@ textarea:disabled {
 
 .quotation-signature-image {
   display: block;
-  min-width: 150px;
-  max-width: 280px;
-  max-height: 120px;
-  margin-bottom: -4px;
+  min-width: 200px;
+  max-width: 400px;
+  max-height: 160px;
+  margin-bottom: 0;
   object-fit: contain;
   object-position: bottom left;
 }
@@ -2202,6 +2203,7 @@ textarea:disabled {
   border-top: 1px solid #1a1a1a;
   margin-top: 0;
   margin-bottom: 10px;
+  padding-top: 0;
 }
 
 .sig-name,
