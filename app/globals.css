@@ -1027,6 +1027,220 @@ textarea:disabled {
   line-height: 1.6;
 }
 
+.brief-editor-page {
+  display: grid;
+  gap: 24px;
+  min-height: 100%;
+}
+
+.brief-toolbar {
+  position: sticky;
+  top: -28px;
+  z-index: 5;
+  display: grid;
+  grid-template-columns: 160px minmax(220px, 1fr) 180px;
+  align-items: center;
+  gap: 16px;
+  border-bottom: 0.5px solid var(--soon-border);
+  background: var(--soon-bg);
+  padding: 0 0 16px;
+}
+
+.brief-toolbar > button {
+  width: fit-content;
+  border: 0;
+  background: transparent;
+  color: var(--soon-text-secondary);
+  font-size: 13px;
+  padding: 0;
+}
+
+.brief-toolbar > button:hover {
+  color: var(--soon-purple-light);
+}
+
+.brief-toolbar > input {
+  border: 0;
+  background: transparent;
+  color: var(--soon-text);
+  font-size: 15px;
+  font-weight: 500;
+  padding: 0;
+  text-align: center;
+}
+
+.brief-toolbar-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.brief-toolbar-actions span {
+  color: var(--soon-success);
+  font-size: 12px;
+}
+
+.brief-document {
+  display: grid;
+  width: min(800px, 100%);
+  justify-self: center;
+  border: 0.5px solid var(--soon-border);
+  border-radius: 12px;
+  background: var(--soon-surface);
+  padding: 48px;
+}
+
+.brief-title-input {
+  border: 0;
+  background: transparent;
+  color: var(--soon-text);
+  font-size: 32px;
+  font-weight: 600;
+  line-height: 1.15;
+  padding: 0;
+}
+
+.brief-meta {
+  margin-top: 8px;
+  color: var(--soon-text-muted);
+  font-size: 13px;
+}
+
+.brief-info-table {
+  width: 100%;
+  margin-top: 28px;
+  border: 0.5px solid var(--soon-border);
+  border-collapse: collapse;
+}
+
+.brief-info-table tr:nth-child(even) {
+  background: rgba(255,255,255,0.02);
+}
+
+.brief-info-table th,
+.brief-info-table td {
+  height: 44px;
+  border-bottom: 0.5px solid var(--soon-border);
+  padding: 0 12px;
+  text-align: left;
+  vertical-align: middle;
+}
+
+.brief-info-table tr:last-child th,
+.brief-info-table tr:last-child td {
+  border-bottom: 0;
+}
+
+.brief-info-table th {
+  width: 200px;
+  color: var(--soon-text-secondary);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.brief-info-table input,
+.brief-info-table select,
+.stakeholder-table input {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--soon-text);
+  padding: 0;
+}
+
+.brief-info-table input:focus,
+.brief-info-table select:focus,
+.stakeholder-table input:focus,
+.brief-title-input:focus,
+.brief-toolbar > input:focus,
+.brief-textarea:focus {
+  border-color: transparent;
+  outline: none;
+}
+
+.brief-section {
+  display: grid;
+  gap: 12px;
+  border-top: 0.5px solid var(--soon-border);
+  margin-top: 24px;
+  padding-top: 24px;
+}
+
+.brief-section h2 {
+  margin: 0;
+  color: var(--soon-text);
+  font-size: 18px;
+  font-weight: 500;
+}
+
+.brief-subsection {
+  display: grid;
+  gap: 6px;
+}
+
+.brief-subsection h3 {
+  margin: 0;
+  color: var(--soon-text-secondary);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.brief-textarea {
+  min-height: 40px;
+  overflow: hidden;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--soon-text);
+  line-height: 1.7;
+  padding: 0;
+  resize: none;
+}
+
+.brief-textarea::placeholder {
+  color: var(--soon-text-muted);
+}
+
+.stakeholder-table {
+  width: 100%;
+  border: 0.5px solid var(--soon-border);
+  border-collapse: collapse;
+}
+
+.stakeholder-table th,
+.stakeholder-table td {
+  height: 40px;
+  border-bottom: 0.5px solid var(--soon-border);
+  padding: 0 10px;
+  text-align: left;
+}
+
+.stakeholder-table th {
+  color: var(--soon-text-secondary);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.stakeholder-table tr:last-child td {
+  border-bottom: 0;
+}
+
+.add-row-button {
+  width: fit-content;
+  border: 0.5px solid var(--soon-border);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--soon-text-secondary);
+  font-size: 12px;
+  padding: 6px 12px;
+}
+
+.add-row-button:hover {
+  border-color: var(--soon-purple);
+  color: var(--soon-purple-light);
+}
+
 .empty-mini {
   margin: 0;
   color: var(--soon-text-muted);
@@ -1074,5 +1288,26 @@ textarea:disabled {
   .doc-type-badge,
   .doc-row time {
     display: none;
+  }
+
+  .brief-toolbar {
+    position: static;
+    grid-template-columns: 1fr;
+  }
+
+  .brief-toolbar > input {
+    text-align: left;
+  }
+
+  .brief-toolbar-actions {
+    justify-content: flex-start;
+  }
+
+  .brief-document {
+    padding: 24px;
+  }
+
+  .brief-info-table th {
+    width: 130px;
   }
 }
