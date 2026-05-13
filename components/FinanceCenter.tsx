@@ -41,6 +41,7 @@ type Expense = {
 type ExpenseDraft = {
   id: string
   receiptImages: string[]
+  sourceNames: string[]
   merchant: string
   date: string
   description: string
@@ -51,6 +52,19 @@ type ExpenseDraft = {
   exchangeRate: number
   category: string
   notes: string
+}
+
+type ReceiptOcrResult = {
+  merchant?: string | null
+  date?: string | null
+  items?: string[] | null
+  original_amount?: number | null
+  original_currency?: string | null
+  converted_amount?: number | null
+  converted_currency?: string | null
+  exchange_rate?: number | null
+  category?: string | null
+  notes?: string | null
 }
 
 const statusOptions: Array<{ value: InvoiceStatus | 'all'; label: string }> = [
@@ -235,43 +249,54 @@ export function FinanceCenter() {
   async function handleReceiptUpload(event: ChangeEvent<HTMLInputElement>) {
     const files = Array.from(event.target.files ?? [])
     const nextDrafts = await Promise.all(files.map(async (file) => {
-      const image = await fileToDataUrl(file)
-      return createExpenseDraft([image], defaultCurrency)
+      const dataUrl = await fileToDataUrl(file)
+      return createExpenseDraft([dataUrl], defaultCurrency, [file.name])
     }))
     setReceiptDrafts((current) => [...current, ...nextDrafts])
+    event.target.value = ''
   }
 
   async function analyseReceipts() {
     if (!receiptDrafts.length) return
     setAnalysingReceipts(true)
     try {
-      const analysed = await Promise.all(receiptDrafts.map(async (draft) => {
+      const analysedGroups = await Promise.all(receiptDrafts.map(async (draft) => {
         const response = await fetch('/api/receipt-ocr', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ image: draft.receiptImages[0], targetCurrency: defaultCurrency }),
+          body: JSON.stringify({ file: draft.receiptImages[0], targetCurrency: defaultCurrency }),
         })
         const data = await response.json()
         if (!response.ok || data.error) throw new Error(data.error || 'Receipt analysis failed')
-        return {
+        const receipts = Array.isArray(data.receipts) ? data.receipts as ReceiptOcrResult[] : [data as ReceiptOcrResult]
+        if (!receipts.length) return [draft]
+        return receipts.map((receipt, index) => ({
           ...draft,
-          merchant: String(data.merchant ?? draft.merchant),
-          date: String(data.date ?? draft.date),
-          description: Array.isArray(data.items) ? data.items.join(', ') : draft.description,
-          originalAmount: toNumber(data.original_amount ?? draft.originalAmount),
-          originalCurrency: String(data.original_currency ?? draft.originalCurrency),
-          convertedAmount: toNumber(data.converted_amount ?? data.original_amount ?? draft.convertedAmount),
-          convertedCurrency: String(data.converted_currency ?? defaultCurrency),
-          exchangeRate: toNumber(data.exchange_rate ?? 1),
-          category: String(data.category ?? draft.category),
-          notes: String(data.notes ?? draft.notes),
-        }
+          id: crypto.randomUUID(),
+          merchant: String(receipt.merchant ?? draft.merchant),
+          date: String(receipt.date ?? draft.date),
+          description: Array.isArray(receipt.items) ? receipt.items.join(', ') : draft.description,
+          originalAmount: toNumber(receipt.original_amount ?? draft.originalAmount),
+          originalCurrency: String(receipt.original_currency ?? draft.originalCurrency),
+          convertedAmount: toNumber(receipt.converted_amount ?? receipt.original_amount ?? draft.convertedAmount),
+          convertedCurrency: String(receipt.converted_currency ?? defaultCurrency),
+          exchangeRate: toNumber(receipt.exchange_rate ?? 1),
+          category: String(receipt.category ?? draft.category),
+          notes: String(receipt.notes ?? draft.notes),
+          sourceNames: receipts.length > 1 ? draft.sourceNames.map((name) => `${name} #${index + 1}`) : draft.sourceNames,
+        }))
       }))
-      setReceiptDrafts(analysed)
+      setReceiptDrafts(analysedGroups.flat())
     } catch (error) {
       window.alert(error instanceof Error ? error.message : 'Receipt analysis failed')
     } finally {
       setAnalysingReceipts(false)
+    }
+  }
+
+  async function saveAllExpenseDrafts() {
+    for (const draft of receiptDrafts) {
+      await saveExpenseDraft(draft)
     }
   }
 
@@ -417,14 +442,17 @@ export function FinanceCenter() {
             </div>
           </div>
           <label className="receipt-upload-zone">
-            <span>上傳收據 / Upload Receipts</span>
-            <input type="file" accept="image/*" multiple onChange={(event) => void handleReceiptUpload(event)} />
+            <span>上傳收據（圖片或 PDF）</span>
+            <input type="file" accept="image/*,application/pdf" multiple onChange={(event) => void handleReceiptUpload(event)} />
           </label>
           {receiptDrafts.length > 0 && (
             <div className="receipt-drafts">
-              <button className="finance-primary-button" type="button" disabled={analysingReceipts} onClick={() => void analyseReceipts()}>{analysingReceipts ? '分析中...' : '✨ AI 分析收據'}</button>
+              <div className="receipt-draft-actions">
+                <button className="finance-primary-button" type="button" disabled={analysingReceipts} onClick={() => void analyseReceipts()}>{analysingReceipts ? '分析中...' : '✨ AI 分析收據'}</button>
+                <button className="finance-secondary-button" type="button" onClick={() => void saveAllExpenseDrafts()}>全部儲存</button>
+              </div>
               <div className="receipt-draft-grid">
-                {receiptDrafts.map((draft) => <ExpenseDraftCard key={draft.id} draft={draft} onChange={(next) => setReceiptDrafts((current) => current.map((item) => item.id === draft.id ? next : item))} onSave={() => void saveExpenseDraft(draft)} />)}
+                {receiptDrafts.map((draft, index) => <ExpenseDraftCard key={draft.id} draft={draft} index={index} onChange={(next) => setReceiptDrafts((current) => current.map((item) => item.id === draft.id ? next : item))} onRemove={() => setReceiptDrafts((current) => current.filter((item) => item.id !== draft.id))} onSave={() => void saveExpenseDraft(draft)} />)}
               </div>
             </div>
           )}
@@ -470,8 +498,8 @@ export function FinanceCenter() {
   )
 }
 
-function createExpenseDraft(images: string[], currency: string): ExpenseDraft {
-  return { id: crypto.randomUUID(), receiptImages: images, merchant: '', date: today(), description: '', originalAmount: 0, originalCurrency: currency.replace('$', '').trim() || 'HKD', convertedAmount: 0, convertedCurrency: currency, exchangeRate: 1, category: '雜項', notes: '' }
+function createExpenseDraft(files: string[], currency: string, sourceNames: string[] = []): ExpenseDraft {
+  return { id: crypto.randomUUID(), receiptImages: files, sourceNames, merchant: '', date: today(), description: '', originalAmount: 0, originalCurrency: currency.replace('$', '').trim() || 'HKD', convertedAmount: 0, convertedCurrency: currency, exchangeRate: 1, category: '雜項', notes: '' }
 }
 
 function FinanceMetric({ label, amount, color, currency }: { label: string; amount: number; color: string; currency: string }) {
@@ -491,10 +519,20 @@ function CategoryBar({ category, amount, total }: { category: string; amount: nu
   return <div className="expense-category-bar"><span>{category}</span><div><i style={{ width: `${total ? (amount / total) * 100 : 0}%`, background: categoryColors[category] ?? '#6b7280' }} /></div><em>{money('', amount)}</em></div>
 }
 
-function ExpenseDraftCard({ draft, onChange, onSave }: { draft: ExpenseDraft; onChange: (draft: ExpenseDraft) => void; onSave: () => void }) {
+function ExpenseDraftCard({ draft, index, onChange, onRemove, onSave }: { draft: ExpenseDraft; index: number; onChange: (draft: ExpenseDraft) => void; onRemove: () => void; onSave: () => void }) {
   return (
     <article className="expense-draft-card">
-      <div className="receipt-thumb-grid">{draft.receiptImages.map((image) => <img key={image} src={image} alt="" />)}</div>
+      <header className="expense-draft-head">
+        <strong>收據 {index + 1}</strong>
+        <CategoryBadge category={draft.category || '雜項'} />
+        <button type="button" onClick={onRemove}>移除</button>
+      </header>
+      {draft.sourceNames.length > 0 && <small className="receipt-source-name">{draft.sourceNames.join(', ')}</small>}
+      <div className="receipt-thumb-grid">
+        {draft.receiptImages.map((file) => file.startsWith('data:application/pdf')
+          ? <div className="receipt-pdf-thumb" key={file}>PDF</div>
+          : <img key={file} src={file} alt="" />)}
+      </div>
       <input value={draft.merchant} placeholder="商店" onChange={(event) => onChange({ ...draft, merchant: event.target.value })} />
       <input type="date" value={draft.date} onChange={(event) => onChange({ ...draft, date: event.target.value })} />
       <input value={draft.description} placeholder="描述" onChange={(event) => onChange({ ...draft, description: event.target.value })} />

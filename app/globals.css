@@ -4538,6 +4538,13 @@ textarea:disabled {
   margin: 16px 0;
 }
 
+.receipt-draft-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
 .receipt-draft-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -4554,6 +4561,30 @@ textarea:disabled {
   padding: 12px;
 }
 
+.expense-draft-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.expense-draft-head strong {
+  flex: 1;
+  font-size: 13px;
+}
+
+.expense-draft-head button {
+  border: 0;
+  background: transparent;
+  color: #ef4444;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.receipt-source-name {
+  color: var(--soon-text-secondary);
+  font-size: 11px;
+}
+
 .receipt-thumb-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -4565,6 +4596,18 @@ textarea:disabled {
   height: 72px;
   object-fit: cover;
   width: 100%;
+}
+
+.receipt-pdf-thumb {
+  display: grid;
+  height: 72px;
+  place-items: center;
+  border: 0.5px solid var(--soon-border);
+  border-radius: 6px;
+  background: rgba(124,58,237,0.15);
+  color: var(--soon-purple-light);
+  font-size: 12px;
+  font-weight: 700;
 }
 
 .finance-report-controls {
