@@ -84,7 +84,7 @@ const categoryColors: Record<string, string> = {
 }
 
 const categories = Object.keys(categoryColors)
-const timeFilters = ['最近7日', '最近14日', '最近30日', '本月', '自訂'] as const
+const timeFilters = ['全部', '最近7日', '最近14日', '最近30日', '本月', '自訂'] as const
 
 function today() {
   return new Date().toISOString().slice(0, 10)
@@ -122,7 +122,7 @@ export function FinanceCenter() {
   const [defaultCurrency, setDefaultCurrency] = useState('HK$')
   const [statusFilter, setStatusFilter] = useState<InvoiceStatus | 'all'>('all')
   const [importOpen, setImportOpen] = useState(false)
-  const [timeFilter, setTimeFilter] = useState<(typeof timeFilters)[number]>('本月')
+  const [timeFilter, setTimeFilter] = useState<(typeof timeFilters)[number]>('全部')
   const [customStart, setCustomStart] = useState(today())
   const [customEnd, setCustomEnd] = useState(today())
   const [receiptDrafts, setReceiptDrafts] = useState<ExpenseDraft[]>([])
@@ -162,6 +162,7 @@ export function FinanceCenter() {
   }, [invoices, statusFilter])
 
   const expenseRange = useMemo(() => {
+    if (timeFilter === '全部') return null
     const end = new Date(today())
     const start = new Date(today())
     if (timeFilter === '最近7日') start.setDate(end.getDate() - 6)
@@ -173,6 +174,7 @@ export function FinanceCenter() {
   }, [customEnd, customStart, timeFilter])
 
   const filteredExpenses = useMemo(() => {
+    if (!expenseRange) return expenses
     return expenses.filter((expense) => expense.date >= expenseRange.start && expense.date <= expenseRange.end)
   }, [expenses, expenseRange])
 
@@ -299,9 +301,7 @@ export function FinanceCenter() {
     }
     const savedExpense = data as Expense
     setExpenses((current) => [savedExpense, ...current])
-    setTimeFilter('自訂')
-    setCustomStart(savedExpense.date)
-    setCustomEnd(savedExpense.date)
+    setTimeFilter('全部')
     setReceiptDrafts((current) => current.filter((item) => item.id !== draft.id))
   }
 
