@@ -6,7 +6,7 @@ export type BlockType = 'camera' | 'vo' | 'visual' | 'behind' | 'insert' | 'othe
 
 export type ScriptBlock = {
   id: string
-  type: BlockType
+  type: BlockType | null
   speaker: string
   content: string
 }
@@ -63,7 +63,7 @@ function makeId() {
   return Math.random().toString(36).slice(2)
 }
 
-export function createEmptyBlock(type: BlockType = 'camera'): ScriptBlock {
+export function createEmptyBlock(type: BlockType | null = null): ScriptBlock {
   return {
     id: makeId(),
     type,

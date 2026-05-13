@@ -3208,6 +3208,22 @@ textarea:disabled {
   padding: 4px 9px;
 }
 
+.script-block-types .script-selected-block-type {
+  align-items: center;
+  border-radius: 12px;
+  color: #fff;
+  display: inline-flex;
+  font-size: 12px;
+  font-weight: 500;
+  gap: 4px;
+  padding: 4px 10px;
+}
+
+.script-selected-block-type span {
+  font-size: 10px;
+  opacity: 0.8;
+}
+
 .script-speaker-input {
   width: 180px;
   margin-top: 8px;

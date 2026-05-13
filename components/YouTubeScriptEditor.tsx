@@ -145,10 +145,20 @@ export function YouTubeScriptEditor({ doc, onBack, onSaved }: Props) {
   const [draggedBlock, setDraggedBlock] = useState<{ segmentId: string; blockId: string } | null>(null)
   const [segmentReviews, setSegmentReviews] = useState<Record<string, SegmentReview>>({})
   const [reviewingSegmentId, setReviewingSegmentId] = useState<string | null>(null)
+  const [editingBlockTypeIds, setEditingBlockTypeIds] = useState<string[]>([])
   const t = scriptCopy[script.language]
 
   useEffect(() => {
     void loadSettings()
+  }, [])
+
+  useEffect(() => {
+    function closeTypeSelectors() {
+      setEditingBlockTypeIds([])
+    }
+
+    document.addEventListener('click', closeTypeSelectors)
+    return () => document.removeEventListener('click', closeTypeSelectors)
   }, [])
 
   async function loadSettings() {
@@ -277,8 +287,8 @@ export function YouTubeScriptEditor({ doc, onBack, onSaved }: Props) {
           segmentTypeLabel: t.segmentTypes[segment.type],
           segmentTitle: segment.title,
           blocks: segment.blocks.map((block) => ({
-            type: block.type,
-            typeLabel: t.blockTypes[block.type],
+            type: block.type ?? 'other',
+            typeLabel: block.type ? t.blockTypes[block.type] : '未選類型',
             speaker: block.speaker,
             content: block.content,
           })),
@@ -435,12 +445,16 @@ export function YouTubeScriptEditor({ doc, onBack, onSaved }: Props) {
               <div className="script-blocks">
                 {segment.blocks.map((block, blockIndex) => {
                   const blockReview = review?.blocks?.find((item) => item.block_index === blockIndex)
+                  const selectedBlockType = block.type
+                  const blockColor = selectedBlockType ? blockTypeColors[selectedBlockType] : '#d1d5db'
+                  const isEditingType = editingBlockTypeIds.includes(block.id)
+                  const showAllBlockTypes = !selectedBlockType || isEditingType
                   return (
                   <div
                     key={block.id}
                     className="script-block"
                     draggable
-                    style={{ borderLeftColor: blockTypeColors[block.type], background: hexToRgba(blockTypeColors[block.type], 0.04) }}
+                    style={{ borderLeftColor: blockColor, background: selectedBlockType ? hexToRgba(blockColor, 0.04) : '#fafafa' }}
                     onDragStart={(event) => {
                       event.stopPropagation()
                       setDraggedBlock({ segmentId: segment.id, blockId: block.id })
@@ -452,27 +466,42 @@ export function YouTubeScriptEditor({ doc, onBack, onSaved }: Props) {
                     }}
                   >
                     <button className="script-block-delete soon-no-print" type="button" onClick={() => deleteBlock(segment.id, block.id)}>×</button>
-                    <div className="script-block-types">
-                      {blockTypeOptions.map((type) => {
-                        const active = block.type === type
-                        return (
-                          <button
-                            key={type}
-                            type="button"
-                            style={{ background: active ? blockTypeColors[type] : 'transparent', color: active ? '#fff' : blockTypeColors[type], borderColor: blockTypeColors[type] }}
-                            onClick={() => updateBlock(segment.id, block.id, { type })}
-                          >
-                            {t.blockTypes[type]}
-                          </button>
-                        )
-                      })}
+                    <div className="script-block-types" onClick={(event) => event.stopPropagation()}>
+                      {showAllBlockTypes ? (
+                        blockTypeOptions.map((type) => {
+                          const active = selectedBlockType === type
+                          return (
+                            <button
+                              key={type}
+                              type="button"
+                              style={{ background: active ? blockTypeColors[type] : 'transparent', color: active ? '#fff' : blockTypeColors[type], borderColor: blockTypeColors[type] }}
+                              onClick={() => {
+                                updateBlock(segment.id, block.id, { type })
+                                setEditingBlockTypeIds((current) => current.filter((id) => id !== block.id))
+                              }}
+                            >
+                              {t.blockTypes[type]}
+                            </button>
+                          )
+                        })
+                      ) : (
+                        <button
+                          className="script-selected-block-type"
+                          type="button"
+                          style={{ background: blockColor, borderColor: blockColor }}
+                          onClick={() => setEditingBlockTypeIds((current) => (current.includes(block.id) ? current : [...current, block.id]))}
+                        >
+                          {t.blockTypes[selectedBlockType]}
+                          <span>▾</span>
+                        </button>
+                      )}
                     </div>
                     {(block.type === 'camera' || block.type === 'behind') && (
                       <input className="script-speaker-input" value={block.speaker} placeholder={t.speaker} onChange={(event) => updateBlock(segment.id, block.id, { speaker: event.target.value })} />
                     )}
                     <textarea
                       value={block.content}
-                      placeholder={blockPlaceholders[block.type]}
+                      placeholder={block.type ? blockPlaceholders[block.type] : '...'}
                       rows={3}
                       onChange={(event) => {
                         autoResize(event.currentTarget)
@@ -581,8 +610,10 @@ function buildWordHtml(script: YouTubeScriptContent, t: (typeof scriptCopy)[YouT
     .map((segment, segmentIndex) => {
       const blocks = segment.blocks
         .map(
-          (block) =>
-            `<div style="border-left:3px solid ${blockTypeColors[block.type]};padding:8px 12px;margin:8px 0;background:#fafafa"><strong>${escapeHtml(t.blockTypes[block.type])}${block.speaker ? ` · ${escapeHtml(block.speaker)}` : ''}</strong><p>${escapeHtml(block.content).replaceAll('\n', '<br>')}</p></div>`
+          (block) => {
+            const blockType = block.type ?? 'other'
+            return `<div style="border-left:3px solid ${blockTypeColors[blockType]};padding:8px 12px;margin:8px 0;background:#fafafa"><strong>${escapeHtml(t.blockTypes[blockType])}${block.speaker ? ` · ${escapeHtml(block.speaker)}` : ''}</strong><p>${escapeHtml(block.content).replaceAll('\n', '<br>')}</p></div>`
+          }
         )
         .join('')
       return `<section><h2>#${String(segmentIndex + 1).padStart(2, '0')} ${escapeHtml(t.segmentTypes[segment.type])} · ${escapeHtml(segment.title)}</h2>${blocks}</section>`
