@@ -3241,6 +3241,23 @@ textarea:disabled {
   opacity: 0.8;
 }
 
+.ig-suggested-time {
+  align-items: center;
+  color: #888;
+  display: inline-flex;
+  font-size: 11px;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.ig-suggested-time input {
+  width: 80px;
+  border-bottom: 0.5px solid #e5e5e5 !important;
+  color: #555 !important;
+  font-size: 11px !important;
+  padding: 4px 0 !important;
+}
+
 .script-speaker-input {
   width: 180px;
   margin-top: 8px;

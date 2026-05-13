@@ -4,10 +4,12 @@ import { type ChangeEvent, type ReactNode, useEffect, useMemo, useState } from '
 
 import { DashboardShell } from '@/components/DashboardShell'
 import { ConceptBoardEditor } from '@/components/ConceptBoardEditor'
+import { IGScriptEditor } from '@/components/IGScriptEditor'
 import { InvoiceEditor } from '@/components/InvoiceEditor'
 import { QuotationEditor } from '@/components/QuotationEditor'
 import { YouTubeScriptEditor } from '@/components/YouTubeScriptEditor'
 import { conceptBoardLangStorageKey, createEmptyConceptBoard } from '@/lib/concept-board'
+import { createEmptyIGScript, igScriptLangStorageKey } from '@/lib/ig-script'
 import { createEmptyInvoice, defaultSettings, normaliseCurrency, type InvoiceSettings } from '@/lib/invoice'
 import { createEmptyQuotation, defaultQuotationSettings, mergeQuotationSettings, type QuotationSettings } from '@/lib/quotation'
 import { supabase } from '@/lib/supabase'
@@ -282,10 +284,16 @@ export function DocsCenter() {
     return window.localStorage.getItem(youtubeScriptLangStorageKey) === 'en' ? 'en' : 'zh'
   }
 
+  function getStoredIGScriptLanguage() {
+    if (typeof window === 'undefined') return 'zh'
+    return window.localStorage.getItem(igScriptLangStorageKey) === 'en' ? 'en' : 'zh'
+  }
+
   async function createDoc(template: Template) {
     const initialBrief = { ...defaultProjectBrief, language: getStoredBriefLanguage() }
     const initialConceptBoard = createEmptyConceptBoard(getStoredConceptLanguage())
     const initialYouTubeScript = createEmptyYouTubeScript(getStoredYouTubeScriptLanguage())
+    const initialIGScript = createEmptyIGScript(getStoredIGScriptLanguage())
     const invoiceSettings = template.type === 'invoice' ? await reserveNextInvoiceSettings() : null
     const quoteSettings = template.type === 'quotation' ? await reserveNextQuoteSettings() : null
     const initialContent =
@@ -295,11 +303,13 @@ export function DocsCenter() {
           ? JSON.stringify(initialConceptBoard)
         : template.type === 'youtube_script'
           ? JSON.stringify(initialYouTubeScript)
+        : template.type === 'ig_script'
+          ? JSON.stringify(initialIGScript)
         : template.type === 'invoice'
           ? JSON.stringify(createEmptyInvoice(invoiceSettings ?? defaultSettings))
         : template.type === 'quotation'
           ? JSON.stringify(createEmptyQuotation(quoteSettings ?? defaultQuotationSettings))
-        : template.preview.join('\n')
+        : ''
 
     const { data, error } = await supabase
       .from('docs')
@@ -804,6 +814,22 @@ export function DocsCenter() {
     return (
       <DashboardShell activeSection="docs">
         <YouTubeScriptEditor
+          doc={selectedDoc}
+          onBack={closeDoc}
+          onSaved={(doc) => {
+            setSelectedDoc(doc)
+            setDocs((current) => current.map((item) => (item.id === doc.id ? doc : item)))
+            notifyDocsChanged()
+          }}
+        />
+      </DashboardShell>
+    )
+  }
+
+  if (selectedDoc?.template_type === 'ig_script') {
+    return (
+      <DashboardShell activeSection="docs">
+        <IGScriptEditor
           doc={selectedDoc}
           onBack={closeDoc}
           onSaved={(doc) => {
