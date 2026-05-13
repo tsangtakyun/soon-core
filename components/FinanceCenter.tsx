@@ -297,7 +297,11 @@ export function FinanceCenter() {
       window.alert(error.message)
       return
     }
-    setExpenses((current) => [data as Expense, ...current])
+    const savedExpense = data as Expense
+    setExpenses((current) => [savedExpense, ...current])
+    setTimeFilter('自訂')
+    setCustomStart(savedExpense.date)
+    setCustomEnd(savedExpense.date)
     setReceiptDrafts((current) => current.filter((item) => item.id !== draft.id))
   }
 
