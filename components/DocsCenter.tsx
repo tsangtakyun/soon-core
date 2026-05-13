@@ -6,11 +6,13 @@ import { DashboardShell } from '@/components/DashboardShell'
 import { ConceptBoardEditor } from '@/components/ConceptBoardEditor'
 import { InvoiceEditor } from '@/components/InvoiceEditor'
 import { QuotationEditor } from '@/components/QuotationEditor'
+import { YouTubeScriptEditor } from '@/components/YouTubeScriptEditor'
 import { conceptBoardLangStorageKey, createEmptyConceptBoard } from '@/lib/concept-board'
 import { createEmptyInvoice, defaultSettings, normaliseCurrency, type InvoiceSettings } from '@/lib/invoice'
 import { createEmptyQuotation, defaultQuotationSettings, mergeQuotationSettings, type QuotationSettings } from '@/lib/quotation'
 import { supabase } from '@/lib/supabase'
 import type { CoreDoc, Workspace } from '@/lib/types'
+import { createEmptyYouTubeScript, youtubeScriptLangStorageKey } from '@/lib/youtube-script'
 
 type BriefLang = 'zh' | 'en'
 type BriefStatus = 'Planning' | 'In Progress' | 'On Hold' | 'Done'
@@ -275,9 +277,15 @@ export function DocsCenter() {
     return window.localStorage.getItem(conceptBoardLangStorageKey) === 'en' ? 'en' : 'zh'
   }
 
+  function getStoredYouTubeScriptLanguage() {
+    if (typeof window === 'undefined') return 'zh'
+    return window.localStorage.getItem(youtubeScriptLangStorageKey) === 'en' ? 'en' : 'zh'
+  }
+
   async function createDoc(template: Template) {
     const initialBrief = { ...defaultProjectBrief, language: getStoredBriefLanguage() }
     const initialConceptBoard = createEmptyConceptBoard(getStoredConceptLanguage())
+    const initialYouTubeScript = createEmptyYouTubeScript(getStoredYouTubeScriptLanguage())
     const invoiceSettings = template.type === 'invoice' ? await reserveNextInvoiceSettings() : null
     const quoteSettings = template.type === 'quotation' ? await reserveNextQuoteSettings() : null
     const initialContent =
@@ -285,6 +293,8 @@ export function DocsCenter() {
         ? JSON.stringify(initialBrief)
         : template.type === 'concept_board'
           ? JSON.stringify(initialConceptBoard)
+        : template.type === 'youtube_script'
+          ? JSON.stringify(initialYouTubeScript)
         : template.type === 'invoice'
           ? JSON.stringify(createEmptyInvoice(invoiceSettings ?? defaultSettings))
         : template.type === 'quotation'
@@ -778,6 +788,22 @@ export function DocsCenter() {
     return (
       <DashboardShell activeSection="docs">
         <ConceptBoardEditor
+          doc={selectedDoc}
+          onBack={closeDoc}
+          onSaved={(doc) => {
+            setSelectedDoc(doc)
+            setDocs((current) => current.map((item) => (item.id === doc.id ? doc : item)))
+            notifyDocsChanged()
+          }}
+        />
+      </DashboardShell>
+    )
+  }
+
+  if (selectedDoc?.template_type === 'youtube_script') {
+    return (
+      <DashboardShell activeSection="docs">
+        <YouTubeScriptEditor
           doc={selectedDoc}
           onBack={closeDoc}
           onSaved={(doc) => {

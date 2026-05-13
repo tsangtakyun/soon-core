@@ -2952,3 +2952,277 @@ textarea:disabled {
     grid-template-columns: 1fr;
   }
 }
+
+.script-editor-page {
+  min-height: 100vh;
+  background: var(--soon-bg);
+}
+
+.script-toolbar .toolbar-spacer {
+  flex: 1;
+}
+
+.script-document {
+  max-width: 900px;
+  margin: 32px auto 80px;
+  padding: 48px;
+  border-radius: var(--soon-radius-lg);
+  background: #fff;
+  color: #1a1a1a;
+}
+
+.script-document input,
+.script-document textarea,
+.script-document select {
+  border: 0;
+  background: transparent;
+  color: #1a1a1a;
+  font-family: system-ui, sans-serif;
+  outline: none;
+}
+
+.script-doc-title {
+  width: 100%;
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.script-meta {
+  margin: 8px 0 24px;
+  color: #888;
+  font-size: 13px;
+}
+
+.script-info-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 28px;
+}
+
+.script-info-table th,
+.script-info-table td {
+  border: 0.5px solid #e5e5e5;
+  padding: 10px 12px;
+  font-size: 13px;
+  text-align: left;
+}
+
+.script-info-table th {
+  width: 110px;
+  background: #f9f9f9;
+  color: #555;
+  font-weight: 600;
+}
+
+.script-info-table input {
+  width: 100%;
+}
+
+.script-field-section {
+  margin: 24px 0;
+}
+
+.script-field-section h2,
+.script-title-field span {
+  display: block;
+  margin: 0 0 10px;
+  color: #555;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.script-upload-zone {
+  display: grid;
+  width: 100%;
+  min-height: 150px;
+  max-height: 240px;
+  place-items: center;
+  border: 1px dashed #cbd5e1;
+  border-radius: 8px;
+  background: #f8fafc;
+  color: #64748b;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.script-upload-zone img {
+  width: auto;
+  max-width: 100%;
+  max-height: 180px;
+  object-fit: contain;
+}
+
+.script-print-cover {
+  display: none;
+}
+
+.script-title-field {
+  display: grid;
+  margin: 24px 0;
+}
+
+.script-title-field input {
+  width: 100%;
+  border-bottom: 0.5px solid #e5e5e5;
+  font-size: 24px;
+  font-weight: 700;
+  padding: 6px 0;
+}
+
+.script-segments {
+  display: grid;
+  gap: 16px;
+}
+
+.script-segment {
+  border: 0.5px solid #e5e5e5;
+  border-radius: 8px;
+  padding: 16px;
+  background: #fff;
+}
+
+.script-segment-header {
+  display: grid;
+  grid-template-columns: 24px 44px 136px minmax(180px, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+  border-bottom: 0.5px solid #f0f0f0;
+}
+
+.drag-handle {
+  color: #999;
+  cursor: grab;
+  font-size: 18px;
+}
+
+.script-segment-header strong {
+  color: #1a1a1a;
+  font-size: 13px;
+}
+
+.script-segment-header select {
+  min-height: 30px;
+  border: 1px solid;
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.script-segment-header input {
+  width: 100%;
+  border-bottom: 0.5px solid #e5e5e5;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.script-blocks {
+  display: grid;
+  gap: 8px;
+}
+
+.script-block {
+  position: relative;
+  border-left: 3px solid;
+  border-radius: 0 6px 6px 0;
+  padding: 8px 12px;
+}
+
+.script-block-delete {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  border: 0;
+  background: transparent;
+  color: #ef4444;
+  cursor: pointer;
+  opacity: 0;
+}
+
+.script-block:hover .script-block-delete {
+  opacity: 1;
+}
+
+.script-block-types {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding-right: 24px;
+}
+
+.script-block-types button {
+  border: 0.5px solid;
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 11px;
+  padding: 4px 9px;
+}
+
+.script-speaker-input {
+  width: 180px;
+  margin-top: 8px;
+  border-bottom: 0.5px solid #e5e5e5 !important;
+  color: #555 !important;
+  font-size: 12px;
+}
+
+.script-block textarea {
+  width: 100%;
+  min-height: 76px;
+  margin-top: 8px;
+  resize: vertical;
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.script-add-segment {
+  width: 100%;
+  margin-top: 24px;
+  border: 0.5px solid #ef4444;
+  border-radius: 8px;
+  background: transparent;
+  color: #ef4444;
+  cursor: pointer;
+  font-size: 13px;
+  padding: 10px;
+}
+
+@media print {
+  .script-document textarea {
+    display: none !important;
+  }
+
+  .script-print-cover {
+    display: block !important;
+    max-width: 100% !important;
+    max-height: 180px !important;
+    border-radius: 8px;
+    object-fit: cover;
+  }
+
+  .script-upload-zone {
+    display: none !important;
+  }
+
+  .script-segment {
+    page-break-inside: avoid;
+  }
+}
+
+@media (max-width: 1100px) {
+  .script-document {
+    margin: 16px;
+    padding: 28px;
+  }
+
+  .script-segment-header {
+    grid-template-columns: 24px 44px 1fr;
+  }
+
+  .script-segment-header input,
+  .script-segment-header .danger-text-button {
+    grid-column: 1 / -1;
+  }
+}
