@@ -7,6 +7,7 @@ import { DashboardShell } from '@/components/DashboardShell'
 import { ConceptBoardEditor } from '@/components/ConceptBoardEditor'
 import { IGScriptEditor } from '@/components/IGScriptEditor'
 import { InvoiceEditor } from '@/components/InvoiceEditor'
+import { createEmptyMeetingNotes, MeetingNotesEditor } from '@/components/MeetingNotesEditor'
 import { QuotationEditor } from '@/components/QuotationEditor'
 import { YouTubeScriptEditor } from '@/components/YouTubeScriptEditor'
 import { conceptBoardLangStorageKey, createEmptyConceptBoard } from '@/lib/concept-board'
@@ -83,7 +84,16 @@ const blankTemplate = {
   preview: [],
 } as const
 
-const docTemplates = [...templates, conceptBoardTemplate, blankTemplate] as const
+const meetingNotesTemplate = {
+  type: 'meeting_notes',
+  icon: '📅',
+  title: 'Meeting Notes',
+  altTitle: '會議記錄',
+  accent: '#10b981',
+  preview: [],
+} as const
+
+const docTemplates = [...templates, conceptBoardTemplate, blankTemplate, meetingNotesTemplate] as const
 
 type Template = (typeof docTemplates)[number]
 
@@ -323,11 +333,17 @@ export function DocsCenter() {
     return window.localStorage.getItem(igScriptLangStorageKey) === 'en' ? 'en' : 'zh'
   }
 
+  function getStoredMeetingNotesLanguage() {
+    if (typeof window === 'undefined') return 'zh'
+    return window.localStorage.getItem('soon-meeting-notes-lang') === 'en' ? 'en' : 'zh'
+  }
+
   async function createDoc(template: Template) {
     const initialBrief = { ...defaultProjectBrief, language: getStoredBriefLanguage() }
     const initialConceptBoard = createEmptyConceptBoard(getStoredConceptLanguage())
     const initialYouTubeScript = createEmptyYouTubeScript(getStoredYouTubeScriptLanguage())
     const initialIGScript = createEmptyIGScript(getStoredIGScriptLanguage())
+    const initialMeetingNotes = createEmptyMeetingNotes(getStoredMeetingNotesLanguage())
     const invoiceSettings = template.type === 'invoice' ? await reserveNextInvoiceSettings() : null
     const quoteSettings = template.type === 'quotation' ? await reserveNextQuoteSettings() : null
     const initialContent =
@@ -339,6 +355,8 @@ export function DocsCenter() {
           ? JSON.stringify(initialYouTubeScript)
         : template.type === 'ig_script'
           ? JSON.stringify(initialIGScript)
+        : template.type === 'meeting_notes'
+          ? JSON.stringify(initialMeetingNotes)
         : template.type === 'invoice'
           ? JSON.stringify(createEmptyInvoice(invoiceSettings ?? defaultSettings))
         : template.type === 'quotation'
@@ -938,6 +956,22 @@ export function DocsCenter() {
     )
   }
 
+  if (selectedDoc?.template_type === 'meeting_notes') {
+    return (
+      <DashboardShell activeSection="docs">
+        <MeetingNotesEditor
+          doc={selectedDoc}
+          onBack={closeDoc}
+          onSaved={(doc) => {
+            setSelectedDoc(doc)
+            setDocs((current) => current.map((item) => (item.id === doc.id ? doc : item)))
+            notifyDocsChanged()
+          }}
+        />
+      </DashboardShell>
+    )
+  }
+
   return (
     <DashboardShell activeSection="docs">
       <section className="docs-page">
@@ -967,7 +1001,7 @@ export function DocsCenter() {
               <div className="template-accent" style={{ background: template.accent }} />
               <div className="template-title-row">
                 <span className="template-icon" style={{ color: template.accent }}>
-                  {template.type === 'invoice' ? <InvoiceTemplateIcon /> : template.type === 'concept_board' ? <ConceptTemplateIcon /> : template.type === 'blank' ? <DocumentTemplateIcon /> : template.icon}
+                  {template.type === 'invoice' ? <InvoiceTemplateIcon /> : template.type === 'concept_board' ? <ConceptTemplateIcon /> : template.type === 'blank' ? <DocumentTemplateIcon /> : template.type === 'meeting_notes' ? <CalendarTemplateIcon /> : template.icon}
                 </span>
                 <div>
                   <h2>{template.title}</h2>
@@ -1200,6 +1234,30 @@ function DocumentTemplateIcon() {
       <path d="M14 2v6h6" />
       <path d="M8 13h8" />
       <path d="M8 17h6" />
+    </svg>
+  )
+}
+
+function CalendarTemplateIcon() {
+  return (
+    <svg
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <rect x="3" y="4" width="18" height="18" rx="2" />
+      <path d="M16 2v4" />
+      <path d="M8 2v4" />
+      <path d="M3 10h18" />
+      <path d="M8 14h.01" />
+      <path d="M12 14h.01" />
+      <path d="M16 14h.01" />
     </svg>
   )
 }
