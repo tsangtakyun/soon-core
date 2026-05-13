@@ -56,6 +56,7 @@ export interface Project {
 export interface CoreDoc {
   id: string
   workspace_id: string | null
+  folder_id?: string | null
   title: string
   template_type: string | null
   content: string | null

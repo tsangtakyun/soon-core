@@ -2,6 +2,7 @@
 
 import { type ChangeEvent, type ReactNode, useEffect, useMemo, useState } from 'react'
 
+import { BlankDocumentEditor } from '@/components/BlankDocumentEditor'
 import { DashboardShell } from '@/components/DashboardShell'
 import { ConceptBoardEditor } from '@/components/ConceptBoardEditor'
 import { IGScriptEditor } from '@/components/IGScriptEditor'
@@ -26,6 +27,7 @@ const templates = [
     type: 'project_brief',
     icon: '📋',
     title: 'Project Brief',
+    altTitle: '項目簡報',
     accent: '#7c3aed',
     preview: ['客戶名稱 _____', '項目類型 _____', '預算範圍 _____', '拍攝日期 _____'],
   },
@@ -33,6 +35,7 @@ const templates = [
     type: 'invoice',
     icon: '🧾',
     title: 'Invoice',
+    altTitle: '發票',
     accent: '#0ea5e9',
     preview: ['發票號碼 INV-001', '客戶 _____', '服務項目 _____', '總金額 HK$_____'],
   },
@@ -40,6 +43,7 @@ const templates = [
     type: 'quotation',
     icon: '💬',
     title: 'Quotation',
+    altTitle: '報價單',
     accent: '#f97316',
     preview: ['報價單 QUO-001', '有效期 30日', '拍攝費用 _____', '後期費用 _____'],
   },
@@ -47,6 +51,7 @@ const templates = [
     type: 'ig_script',
     icon: '📱',
     title: 'IG Script Template',
+    altTitle: 'IG 腳本',
     accent: '#ec4899',
     preview: ['Hook _____', '背景介紹 _____', '轉場 _____', '結尾 _____'],
   },
@@ -54,6 +59,7 @@ const templates = [
     type: 'youtube_script',
     icon: '▶',
     title: 'YouTube Script Template',
+    altTitle: 'YouTube 腳本',
     accent: '#ef4444',
     preview: ['開場白 _____', '主題介紹 _____', '內容分段 _____', 'CTA _____'],
   },
@@ -63,13 +69,30 @@ const conceptBoardTemplate = {
   type: 'concept_board',
   icon: '💡',
   title: 'Concept Board',
+  altTitle: '概念板',
   accent: '#06b6d4',
   preview: ['Concept 01 ___', '題目 ___', '副題 ___', '產品置入方向 ___'],
 } as const
 
-const docTemplates = [...templates, conceptBoardTemplate] as const
+const blankTemplate = {
+  type: 'blank',
+  icon: '📄',
+  title: 'Blank Document',
+  altTitle: '空白文件',
+  accent: '#6b7280',
+  preview: [],
+} as const
+
+const docTemplates = [...templates, conceptBoardTemplate, blankTemplate] as const
 
 type Template = (typeof docTemplates)[number]
+
+type DocFolder = {
+  id: string
+  name: string
+  workspace_id: string | null
+  created_at: string
+}
 
 type Stakeholder = {
   name: string
@@ -231,6 +254,10 @@ const defaultProjectBrief: ProjectBriefContent = {
 export function DocsCenter() {
   const [docs, setDocs] = useState<CoreDoc[]>([])
   const [workspaces, setWorkspaces] = useState<Workspace[]>([])
+  const [folders, setFolders] = useState<DocFolder[]>([])
+  const [activeFolderId, setActiveFolderId] = useState('')
+  const [creatingFolder, setCreatingFolder] = useState(false)
+  const [newFolderName, setNewFolderName] = useState('')
   const [selectedDoc, setSelectedDoc] = useState<CoreDoc | null>(null)
   const [content, setContent] = useState('')
   const [projectBrief, setProjectBrief] = useState<ProjectBriefContent>(defaultProjectBrief)
@@ -242,6 +269,11 @@ export function DocsCenter() {
   const copy = useMemo(() => briefCopy[projectBrief.language], [projectBrief.language])
   const allDocsSelected = docs.length > 0 && selectedDocIds.length === docs.length
   const hasDocSelection = selectedDocIds.length > 0
+  const visibleDocs = useMemo(
+    () => docs.filter((doc) => !activeFolderId || doc.folder_id === activeFolderId),
+    [activeFolderId, docs]
+  )
+  const allVisibleDocsSelected = visibleDocs.length > 0 && visibleDocs.every((doc) => selectedDocIds.includes(doc.id))
 
   useEffect(() => {
     void load()
@@ -256,13 +288,15 @@ export function DocsCenter() {
   }, [selectedDoc, projectBrief])
 
   async function load() {
-    const [{ data: docData }, { data: workspaceData }] = await Promise.all([
+    const [{ data: docData }, { data: workspaceData }, { data: folderData, error: folderError }] = await Promise.all([
       supabase.from('docs').select('*').order('created_at', { ascending: false }),
       supabase.from('workspaces').select('*').order('created_at', { ascending: false }),
+      supabase.from('doc_folders').select('*').order('created_at', { ascending: false }),
     ])
 
     setDocs((docData ?? []) as CoreDoc[])
     setWorkspaces((workspaceData ?? []) as Workspace[])
+    if (!folderError) setFolders((folderData ?? []) as DocFolder[])
   }
 
   function notifyDocsChanged() {
@@ -424,7 +458,53 @@ export function DocsCenter() {
   }
 
   function toggleAllDocs(checked: boolean) {
-    setSelectedDocIds(checked ? docs.map((doc) => doc.id) : [])
+    setSelectedDocIds(checked ? visibleDocs.map((doc) => doc.id) : [])
+  }
+
+  async function createFolder() {
+    const name = newFolderName.trim()
+    if (!name) return
+    const { error } = await supabase.from('doc_folders').insert({ name, workspace_id: workspaceId || null })
+    if (error) {
+      window.alert(error.message)
+      return
+    }
+    setNewFolderName('')
+    setCreatingFolder(false)
+    await load()
+  }
+
+  async function renameFolder(folder: DocFolder) {
+    const name = window.prompt('新文件夾名稱', folder.name)?.trim()
+    if (!name) return
+    const { error } = await supabase.from('doc_folders').update({ name }).eq('id', folder.id)
+    if (error) {
+      window.alert(error.message)
+      return
+    }
+    await load()
+  }
+
+  async function deleteFolder(folder: DocFolder) {
+    if (!window.confirm(`確定刪除文件夾「${folder.name}」？文件會保留並移出文件夾。`)) return
+    await supabase.from('docs').update({ folder_id: null }).eq('folder_id', folder.id)
+    const { error } = await supabase.from('doc_folders').delete().eq('id', folder.id)
+    if (error) {
+      window.alert(error.message)
+      return
+    }
+    if (activeFolderId === folder.id) setActiveFolderId('')
+    await load()
+  }
+
+  async function moveDocToFolder(docId: string, folderId: string) {
+    const { error } = await supabase.from('docs').update({ folder_id: folderId || null }).eq('id', docId)
+    if (error) {
+      window.alert(error.message)
+      return
+    }
+    setDocs((current) => current.map((doc) => (doc.id === docId ? { ...doc, folder_id: folderId || null } : doc)))
+    await load()
   }
 
   async function deleteSelectedDocs() {
@@ -842,6 +922,22 @@ export function DocsCenter() {
     )
   }
 
+  if (selectedDoc?.template_type === 'blank') {
+    return (
+      <DashboardShell activeSection="docs">
+        <BlankDocumentEditor
+          doc={selectedDoc}
+          onBack={closeDoc}
+          onSaved={(doc) => {
+            setSelectedDoc(doc)
+            setDocs((current) => current.map((item) => (item.id === doc.id ? doc : item)))
+            notifyDocsChanged()
+          }}
+        />
+      </DashboardShell>
+    )
+  }
+
   return (
     <DashboardShell activeSection="docs">
       <section className="docs-page">
@@ -850,14 +946,19 @@ export function DocsCenter() {
             <h1>文件中心</h1>
             <p>建立常用 production 文件同模板</p>
           </div>
-          <select value={workspaceId} onChange={(event) => setWorkspaceId(event.target.value)}>
-            <option value="">全部工作區</option>
-            {workspaces.map((workspace) => (
-              <option key={workspace.id} value={workspace.id}>
-                {workspace.name}
-              </option>
-            ))}
-          </select>
+          <div className="docs-header-actions">
+            <select value={workspaceId} onChange={(event) => setWorkspaceId(event.target.value)}>
+              <option value="">全部工作區</option>
+              {workspaces.map((workspace) => (
+                <option key={workspace.id} value={workspace.id}>
+                  {workspace.name}
+                </option>
+              ))}
+            </select>
+            <button className="blank-doc-button" type="button" onClick={() => void createDoc(blankTemplate)}>
+              空白文件
+            </button>
+          </div>
         </header>
 
         <div className="template-grid docs-template-grid">
@@ -866,14 +967,12 @@ export function DocsCenter() {
               <div className="template-accent" style={{ background: template.accent }} />
               <div className="template-title-row">
                 <span className="template-icon" style={{ color: template.accent }}>
-                  {template.type === 'invoice' ? <InvoiceTemplateIcon /> : template.type === 'concept_board' ? <ConceptTemplateIcon /> : template.icon}
+                  {template.type === 'invoice' ? <InvoiceTemplateIcon /> : template.type === 'concept_board' ? <ConceptTemplateIcon /> : template.type === 'blank' ? <DocumentTemplateIcon /> : template.icon}
                 </span>
-                <h2>{template.title}</h2>
-              </div>
-              <div className="template-preview">
-                {template.preview.map((line) => (
-                  <span key={line}>{line}</span>
-                ))}
+                <div>
+                  <h2>{template.title}</h2>
+                  <p>{template.altTitle}</p>
+                </div>
               </div>
               <button className="template-create-button" type="button" onClick={() => void createDoc(template)}>
                 新建
@@ -885,6 +984,53 @@ export function DocsCenter() {
         <section className="existing-docs-section">
           <h2>已有文件</h2>
           {toastMessage && <div className="docs-toast">{toastMessage}</div>}
+          <div className="doc-folder-panel">
+            <div className="doc-folder-row-wrap">
+              <button
+                className={activeFolderId === '' ? 'doc-folder-row active' : 'doc-folder-row'}
+                type="button"
+                onClick={() => setActiveFolderId('')}
+              >
+                <span>全部</span>
+                <small>{docs.length}</small>
+              </button>
+              {folders.map((folder) => {
+                const count = docs.filter((doc) => doc.folder_id === folder.id).length
+                return (
+                  <div key={folder.id} className={activeFolderId === folder.id ? 'doc-folder-row active' : 'doc-folder-row'}>
+                    <button type="button" onClick={() => setActiveFolderId(folder.id)}>
+                      <span>📁 {folder.name}</span>
+                      <small>{count}</small>
+                    </button>
+                    <div className="doc-folder-actions">
+                      <button type="button" onClick={() => void renameFolder(folder)}>重命名</button>
+                      <button type="button" onClick={() => void deleteFolder(folder)}>刪除</button>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+            {creatingFolder ? (
+              <div className="new-folder-inline">
+                <input
+                  autoFocus
+                  value={newFolderName}
+                  placeholder="文件夾名稱"
+                  onChange={(event) => setNewFolderName(event.target.value)}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter') void createFolder()
+                    if (event.key === 'Escape') setCreatingFolder(false)
+                  }}
+                />
+                <button type="button" onClick={() => void createFolder()}>確認</button>
+                <button type="button" onClick={() => setCreatingFolder(false)}>取消</button>
+              </div>
+            ) : (
+              <button className="add-folder-button" type="button" onClick={() => setCreatingFolder(true)}>
+                + 新增文件夾
+              </button>
+            )}
+          </div>
           {hasDocSelection && (
             <div className="docs-bulk-action-bar">
               <span>已選取 {selectedDocIds.length} 份文件</span>
@@ -898,12 +1044,12 @@ export function DocsCenter() {
             </div>
           )}
           <div className="existing-docs-list">
-            {docs.length > 0 && (
+            {visibleDocs.length > 0 && (
               <div className={hasDocSelection ? 'docs-list-header selection-visible' : 'docs-list-header'}>
                 <label className="doc-checkbox-wrap">
                   <input
                     aria-label="全選文件"
-                    checked={allDocsSelected}
+                    checked={allVisibleDocsSelected}
                     type="checkbox"
                     onChange={(event) => toggleAllDocs(event.target.checked)}
                   />
@@ -914,7 +1060,7 @@ export function DocsCenter() {
                 <span />
               </div>
             )}
-            {docs.map((doc) => {
+            {visibleDocs.map((doc) => {
               const isChecked = selectedDocIds.includes(doc.id)
               const rowClassName = [
                 'doc-row',
@@ -942,6 +1088,18 @@ export function DocsCenter() {
                 </span>
                 <time>{new Date(doc.created_at).toLocaleDateString('zh-HK')}</time>
                 <div className="doc-row-actions">
+                  <select
+                    className="doc-move-select"
+                    value={doc.folder_id ?? ''}
+                    onChange={(event) => void moveDocToFolder(doc.id, event.target.value)}
+                  >
+                    <option value="">移至：無文件夾</option>
+                    {folders.map((folder) => (
+                      <option key={folder.id} value={folder.id}>
+                        移至：{folder.name}
+                      </option>
+                    ))}
+                  </select>
                   <button type="button" onClick={() => openDoc(doc)}>
                     開啟
                   </button>
@@ -952,7 +1110,7 @@ export function DocsCenter() {
               </div>
               )
             })}
-            {docs.length === 0 && <p className="docs-empty">未有文件</p>}
+            {visibleDocs.length === 0 && <p className="docs-empty">未有文件</p>}
           </div>
         </section>
 
@@ -1021,6 +1179,27 @@ function ConceptTemplateIcon() {
       <path d="M9 18h6" />
       <path d="M10 22h4" />
       <path d="M8.5 14.5c-1.8-1.2-3-3.1-3-5.3A6.5 6.5 0 0 1 12 2.7a6.5 6.5 0 0 1 6.5 6.5c0 2.2-1.2 4.1-3 5.3-.7.5-1 1.2-1 2H9.5c0-.8-.3-1.5-1-2Z" />
+    </svg>
+  )
+}
+
+function DocumentTemplateIcon() {
+  return (
+    <svg
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+      <path d="M14 2v6h6" />
+      <path d="M8 13h8" />
+      <path d="M8 17h6" />
     </svg>
   )
 }
