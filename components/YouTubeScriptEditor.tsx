@@ -486,8 +486,10 @@ export function YouTubeScriptEditor({ doc, onBack, onSaved }: Props) {
                     <button className="script-block-delete soon-no-print" type="button" onClick={() => deleteBlock(segment.id, block.id)}>×</button>
                     <div
                       className="script-block-types"
+                      draggable={false}
                       onClick={(event) => event.stopPropagation()}
                       onPointerDown={(event) => event.stopPropagation()}
+                      onDragStart={(event) => event.preventDefault()}
                     >
                       {showAllBlockTypes ? (
                         blockTypeOptions.map((type) => {
@@ -496,6 +498,7 @@ export function YouTubeScriptEditor({ doc, onBack, onSaved }: Props) {
                             <button
                               key={type}
                               type="button"
+                              draggable={false}
                               style={{ background: active ? blockTypeColors[type] : 'transparent', color: active ? '#fff' : blockTypeColors[type], borderColor: blockTypeColors[type] }}
                               onClick={() => {
                                 updateBlock(segment.id, block.id, { type })
@@ -509,9 +512,22 @@ export function YouTubeScriptEditor({ doc, onBack, onSaved }: Props) {
                       ) : (
                         <div
                           className="script-selected-block-type"
+                          draggable={false}
                           role="button"
                           tabIndex={0}
                           style={{ background: blockColor, borderColor: blockColor }}
+                          onMouseDownCapture={(event) => {
+                            event.preventDefault()
+                            event.stopPropagation()
+                            event.nativeEvent.stopImmediatePropagation()
+                            openBlockTypeSelector(block.id)
+                          }}
+                          onPointerDownCapture={(event) => {
+                            event.preventDefault()
+                            event.stopPropagation()
+                            event.nativeEvent.stopImmediatePropagation()
+                            openBlockTypeSelector(block.id)
+                          }}
                           onPointerDown={(event) => {
                             event.preventDefault()
                             event.stopPropagation()
