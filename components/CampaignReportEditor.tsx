@@ -38,6 +38,7 @@ type CampaignVideo = {
   id: string
   platform: Platform
   url: string
+  apiError?: string
   title: string
   thumbnail: string
   publishDate: string
@@ -233,6 +234,7 @@ function createEmptyVideo(platform: Platform = 'youtube'): CampaignVideo {
     id: makeId(),
     platform,
     url: '',
+    apiError: '',
     title: '',
     thumbnail: '',
     publishDate: '',
@@ -524,7 +526,14 @@ export function CampaignReportEditor({ doc, onBack, onSaved }: Props) {
         body: JSON.stringify({ url: video.url }),
       })
       const data = await response.json()
-      if (!response.ok || data.error) throw new Error(data.error || 'Fetch failed')
+      if (!response.ok || data.error) {
+        const friendlyMetaError =
+          video.platform === 'instagram' && (data.code === 190 || String(data.error ?? '').includes('OAuthException'))
+            ? 'Meta access token 已過期或無效。請到設定重新輸入有效嘅 access token。'
+            : String(data.error ?? 'Fetch failed')
+        updateVideo(video.id, { apiError: friendlyMetaError })
+        return
+      }
       const source: Source = video.platform === 'youtube' ? 'youtube' : 'meta'
       const nextMetrics = {
         ...video.metrics,
@@ -544,9 +553,10 @@ export function CampaignReportEditor({ doc, onBack, onSaved }: Props) {
         duration: data.duration ?? video.duration,
         metrics: nextMetrics,
         manual: false,
+        apiError: '',
       })
     } catch (error) {
-      window.alert(error instanceof Error ? error.message : 'Fetch failed')
+      updateVideo(video.id, { apiError: error instanceof Error ? error.message : 'Fetch failed' })
     } finally {
       setFetchingVideoId(null)
     }
@@ -651,16 +661,18 @@ export function CampaignReportEditor({ doc, onBack, onSaved }: Props) {
               </div>
             </label>
           </div>
-          <div className="campaign-client-logo">
-            {content.clientLogo ? <img src={content.clientLogo} alt="Client logo" /> : <span>{c.uploadClientLogo}</span>}
-            <input type="file" accept="image/*" onChange={(event) => void uploadClientLogo(event)} />
+          <div className="campaign-prepared-fields">
             <label>
               {c.preparedBy}
               <input value={content.preparedBy} onChange={(event) => update({ preparedBy: event.target.value })} />
             </label>
             <label>
               {c.preparedFor}
-              <input value={content.preparedFor} onChange={(event) => update({ preparedFor: event.target.value })} />
+              <input
+                value={content.preparedFor}
+                placeholder={content.language === 'zh' ? '客戶名稱' : 'Client name'}
+                onChange={(event) => update({ preparedFor: event.target.value })}
+              />
             </label>
           </div>
         </header>
@@ -917,6 +929,21 @@ function VideoBlock({
           ×
         </button>
       </div>
+      {video.apiError && (
+        <div className="campaign-api-warning">
+          <span>{video.apiError}</span>
+          {video.apiError.includes('Meta access token') && (
+            <button
+              type="button"
+              onClick={() => {
+                window.location.href = '/settings'
+              }}
+            >
+              前往設定
+            </button>
+          )}
+        </div>
+      )}
 
       <div className="campaign-video-info">
         <div>

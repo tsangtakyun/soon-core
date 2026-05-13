@@ -3595,8 +3595,83 @@ textarea:disabled {
 }
 
 .campaign-report-editor .doc-toolbar {
+  align-items: center;
+  background: var(--soon-bg);
+  border-bottom: 0.5px solid var(--soon-border);
+  display: flex;
   gap: 8px;
+  height: 48px;
+  overflow: hidden;
+  padding: 0 16px;
   white-space: nowrap;
+}
+
+.campaign-report-editor .doc-toolbar > button {
+  border: 0;
+  border-radius: 6px;
+  color: #fff;
+  cursor: pointer;
+  font-size: 12px;
+  padding: 5px 12px;
+  white-space: nowrap;
+}
+
+.campaign-report-editor .doc-toolbar > button:nth-of-type(1) {
+  background: transparent;
+  color: var(--soon-text-secondary);
+  order: 1;
+}
+
+.campaign-report-editor .doc-language-toggle {
+  order: 2;
+}
+
+.campaign-report-editor .doc-toolbar > button:nth-of-type(2) {
+  background: #ef4444;
+  order: 3;
+}
+
+.campaign-report-editor .doc-toolbar > button:nth-of-type(3) {
+  background: #ec4899;
+  order: 4;
+}
+
+.campaign-report-editor .toolbar-spacer {
+  flex: 1;
+  order: 5;
+}
+
+.campaign-report-editor .doc-toolbar > button:nth-of-type(4) {
+  background: #7c3aed;
+  order: 6;
+}
+
+.campaign-report-editor .doc-toolbar > button:nth-of-type(5) {
+  background: #1a1a1a;
+  order: 7;
+}
+
+.campaign-report-editor .doc-toolbar > button:nth-of-type(6) {
+  background: #2563eb;
+  order: 8;
+}
+
+.campaign-report-editor .doc-toolbar > button:nth-of-type(7) {
+  background: #7c3aed;
+  order: 9;
+}
+
+.campaign-report-editor .doc-saved-indicator {
+  order: 10;
+}
+
+.campaign-connected-dot {
+  background: #34d399;
+  border-radius: 999px;
+  display: inline-block;
+  height: 7px;
+  margin-right: 6px;
+  width: 7px;
 }
 
 .campaign-report-editor {
@@ -3687,9 +3762,28 @@ textarea:disabled {
   gap: 10px;
 }
 
-.campaign-client-logo {
+.campaign-client-logo,
+.campaign-prepared-fields {
   display: grid;
   gap: 12px;
+}
+
+.campaign-prepared-fields {
+  align-content: start;
+  grid-template-columns: 1fr 1fr;
+}
+
+.campaign-prepared-fields label {
+  color: #888888;
+  font-size: 12px;
+}
+
+.campaign-prepared-fields input {
+  background: transparent;
+  border: 0;
+  border-bottom: 0.5px solid #e5e5e5;
+  color: #1a1a1a;
+  font-size: 13px;
 }
 
 .campaign-client-logo > span,
@@ -3804,6 +3898,31 @@ textarea:disabled {
   grid-template-columns: auto 120px 1fr auto auto auto;
   gap: 8px;
   margin-bottom: 14px;
+}
+
+.campaign-api-warning {
+  align-items: center;
+  background: rgba(251,191,36,0.12);
+  border-left: 3px solid #f59e0b;
+  border-radius: 0 6px 6px 0;
+  color: #92400e;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  margin: -4px 0 14px;
+  padding: 10px 12px;
+  font-size: 12px;
+}
+
+.campaign-api-warning button {
+  background: #f59e0b;
+  border: 0;
+  border-radius: 4px;
+  color: #1a1a1a;
+  cursor: pointer;
+  font-size: 12px;
+  padding: 5px 10px;
+  white-space: nowrap;
 }
 
 .platform-badge {

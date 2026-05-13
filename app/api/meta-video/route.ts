@@ -17,7 +17,23 @@ export async function POST(request: Request) {
   endpoint.searchParams.set('fields', 'timestamp,media_type,thumbnail_url,like_count,comments_count,reach,saved,shares,video_views,ig_reels_avg_watch_time,ig_reels_video_view_total_time')
   endpoint.searchParams.set('access_token', accessToken)
   const response = await fetch(endpoint)
-  if (!response.ok) return Response.json({ error: await response.text() }, { status: response.status })
+  if (!response.ok) {
+    const errorText = await response.text()
+    try {
+      const parsed = JSON.parse(errorText) as { error?: { message?: string; code?: number; type?: string } }
+      const code = parsed.error?.code
+      const type = parsed.error?.type ?? ''
+      if (code === 190 || type === 'OAuthException') {
+        return Response.json(
+          { error: 'Meta access token 已過期或無效。請到設定重新輸入有效嘅 access token。', code: 190 },
+          { status: 401 },
+        )
+      }
+      return Response.json({ error: parsed.error?.message ?? errorText, code }, { status: response.status })
+    } catch {
+      return Response.json({ error: errorText }, { status: response.status })
+    }
+  }
   const data = await response.json() as Record<string, unknown>
 
   return Response.json({
