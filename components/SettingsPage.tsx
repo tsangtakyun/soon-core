@@ -8,7 +8,7 @@ import { buildQuoteNumber, defaultQuotationSettings, mergeQuotationSettings, typ
 import { supabase } from '@/lib/supabase'
 
 type SignatureMode = 'draw' | 'upload'
-type SectionKey = 'user' | 'company' | 'payment' | 'paymentTerms' | 'signature' | 'invoice' | 'rates' | 'tax'
+type SectionKey = 'user' | 'company' | 'payment' | 'api' | 'paymentTerms' | 'signature' | 'invoice' | 'rates' | 'tax'
 
 const collapsedStorageKey = 'soon-settings-collapsed'
 
@@ -16,6 +16,7 @@ const defaultCollapsed: Record<SectionKey, boolean> = {
   user: false,
   company: false,
   payment: true,
+  api: true,
   paymentTerms: true,
   signature: false,
   invoice: true,
@@ -232,6 +233,34 @@ export function SettingsPage() {
               {currencyOptions.map((currency) => <option key={currency} value={currency}>{currency}</option>)}
             </select>
           </label>
+        </SettingsCard>
+
+        <SettingsCard title="API 連接設定" collapsed={collapsed.api} onToggle={() => toggleSection('api')}>
+          <div className="api-status-row">
+            <span className={settings.youtube_client_id && settings.youtube_client_secret ? 'api-status connected' : 'api-status'}>
+              YouTube {settings.youtube_client_id && settings.youtube_client_secret ? '✓ 已連接' : '未連接'}
+            </span>
+            <span className={settings.meta_app_id && settings.meta_app_secret ? 'api-status connected' : 'api-status'}>
+              Meta {settings.meta_app_id && settings.meta_app_secret ? '✓ 已連接' : '未連接'}
+            </span>
+          </div>
+          <label>
+            YouTube Data API Client ID
+            <input value={settings.youtube_client_id} onChange={(event) => update('youtube_client_id', event.target.value)} />
+          </label>
+          <label>
+            YouTube Data API Client Secret
+            <input type="password" value={settings.youtube_client_secret} onChange={(event) => update('youtube_client_secret', event.target.value)} />
+          </label>
+          <label>
+            Meta Business API App ID
+            <input value={settings.meta_app_id} onChange={(event) => update('meta_app_id', event.target.value)} />
+          </label>
+          <label>
+            Meta Business API App Secret
+            <input type="password" value={settings.meta_app_secret} onChange={(event) => update('meta_app_secret', event.target.value)} />
+          </label>
+          <button className="primary-button" type="button" onClick={() => void save()}>Save API Settings</button>
         </SettingsCard>
 
         <SettingsCard title="發票設定" collapsed={collapsed.invoice} onToggle={() => toggleSection('invoice')}>

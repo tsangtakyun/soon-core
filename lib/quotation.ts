@@ -64,6 +64,10 @@ export type QuotationSettings = InvoiceSettings & {
   cheque_enabled: boolean
   fps_enabled: boolean
   paypal_enabled: boolean
+  youtube_client_id: string
+  youtube_client_secret: string
+  meta_app_id: string
+  meta_app_secret: string
 }
 
 export const defaultQuotationSettings: QuotationSettings = {
@@ -82,6 +86,10 @@ export const defaultQuotationSettings: QuotationSettings = {
   cheque_enabled: false,
   fps_enabled: false,
   paypal_enabled: false,
+  youtube_client_id: '',
+  youtube_client_secret: '',
+  meta_app_id: '',
+  meta_app_secret: '',
 }
 
 export function mergeQuotationSettings(data: Record<string, unknown> | null | undefined): QuotationSettings {
@@ -117,6 +125,10 @@ export function mergeQuotationSettings(data: Record<string, unknown> | null | un
     cheque_enabled: Boolean(data.cheque_enabled ?? false),
     fps_enabled: Boolean(data.fps_enabled ?? false),
     paypal_enabled: Boolean(data.paypal_enabled ?? false),
+    youtube_client_id: String(data.youtube_client_id ?? ''),
+    youtube_client_secret: String(data.youtube_client_secret ?? ''),
+    meta_app_id: String(data.meta_app_id ?? ''),
+    meta_app_secret: String(data.meta_app_secret ?? ''),
   }
 }
 

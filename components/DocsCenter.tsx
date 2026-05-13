@@ -3,6 +3,7 @@
 import { type ChangeEvent, type ReactNode, useEffect, useMemo, useState } from 'react'
 
 import { BlankDocumentEditor } from '@/components/BlankDocumentEditor'
+import { CampaignReportEditor, createEmptyCampaignReport } from '@/components/CampaignReportEditor'
 import { DashboardShell } from '@/components/DashboardShell'
 import { ConceptBoardEditor } from '@/components/ConceptBoardEditor'
 import { IGScriptEditor } from '@/components/IGScriptEditor'
@@ -93,7 +94,16 @@ const meetingNotesTemplate = {
   preview: [],
 } as const
 
-const docTemplates = [...templates, conceptBoardTemplate, blankTemplate, meetingNotesTemplate] as const
+const campaignReportTemplate = {
+  type: 'campaign_report',
+  icon: '📊',
+  title: 'Campaign Report',
+  altTitle: '成效報告',
+  accent: '#f59e0b',
+  preview: [],
+} as const
+
+const docTemplates = [...templates, conceptBoardTemplate, blankTemplate, meetingNotesTemplate, campaignReportTemplate] as const
 
 type Template = (typeof docTemplates)[number]
 
@@ -338,12 +348,18 @@ export function DocsCenter() {
     return window.localStorage.getItem('soon-meeting-notes-lang') === 'en' ? 'en' : 'zh'
   }
 
+  function getStoredCampaignReportLanguage() {
+    if (typeof window === 'undefined') return 'zh'
+    return window.localStorage.getItem('soon-campaign-report-lang') === 'en' ? 'en' : 'zh'
+  }
+
   async function createDoc(template: Template) {
     const initialBrief = { ...defaultProjectBrief, language: getStoredBriefLanguage() }
     const initialConceptBoard = createEmptyConceptBoard(getStoredConceptLanguage())
     const initialYouTubeScript = createEmptyYouTubeScript(getStoredYouTubeScriptLanguage())
     const initialIGScript = createEmptyIGScript(getStoredIGScriptLanguage())
     const initialMeetingNotes = createEmptyMeetingNotes(getStoredMeetingNotesLanguage())
+    const initialCampaignReport = createEmptyCampaignReport(getStoredCampaignReportLanguage())
     const invoiceSettings = template.type === 'invoice' ? await reserveNextInvoiceSettings() : null
     const quoteSettings = template.type === 'quotation' ? await reserveNextQuoteSettings() : null
     const initialContent =
@@ -357,6 +373,8 @@ export function DocsCenter() {
           ? JSON.stringify(initialIGScript)
         : template.type === 'meeting_notes'
           ? JSON.stringify(initialMeetingNotes)
+        : template.type === 'campaign_report'
+          ? JSON.stringify(initialCampaignReport)
         : template.type === 'invoice'
           ? JSON.stringify(createEmptyInvoice(invoiceSettings ?? defaultSettings))
         : template.type === 'quotation'
@@ -972,6 +990,22 @@ export function DocsCenter() {
     )
   }
 
+  if (selectedDoc?.template_type === 'campaign_report') {
+    return (
+      <DashboardShell activeSection="docs">
+        <CampaignReportEditor
+          doc={selectedDoc}
+          onBack={closeDoc}
+          onSaved={(doc) => {
+            setSelectedDoc(doc)
+            setDocs((current) => current.map((item) => (item.id === doc.id ? doc : item)))
+            notifyDocsChanged()
+          }}
+        />
+      </DashboardShell>
+    )
+  }
+
   return (
     <DashboardShell activeSection="docs">
       <section className="docs-page">
@@ -1001,7 +1035,7 @@ export function DocsCenter() {
               <div className="template-accent" style={{ background: template.accent }} />
               <div className="template-title-row">
                 <span className="template-icon" style={{ color: template.accent }}>
-                  {template.type === 'invoice' ? <InvoiceTemplateIcon /> : template.type === 'concept_board' ? <ConceptTemplateIcon /> : template.type === 'blank' ? <DocumentTemplateIcon /> : template.type === 'meeting_notes' ? <CalendarTemplateIcon /> : template.icon}
+                  {template.type === 'invoice' ? <InvoiceTemplateIcon /> : template.type === 'concept_board' ? <ConceptTemplateIcon /> : template.type === 'blank' ? <DocumentTemplateIcon /> : template.type === 'meeting_notes' ? <CalendarTemplateIcon /> : template.type === 'campaign_report' ? <ChartTemplateIcon /> : template.icon}
                 </span>
                 <div>
                   <h2>{template.title}</h2>
@@ -1258,6 +1292,28 @@ function CalendarTemplateIcon() {
       <path d="M8 14h.01" />
       <path d="M12 14h.01" />
       <path d="M16 14h.01" />
+    </svg>
+  )
+}
+
+function ChartTemplateIcon() {
+  return (
+    <svg
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M4 19V5" />
+      <path d="M4 19h16" />
+      <rect x="7" y="11" width="3" height="5" rx="1" />
+      <rect x="12" y="7" width="3" height="9" rx="1" />
+      <rect x="17" y="3" width="3" height="13" rx="1" />
     </svg>
   )
 }
