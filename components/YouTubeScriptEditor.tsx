@@ -146,6 +146,7 @@ export function YouTubeScriptEditor({ doc, onBack, onSaved }: Props) {
   const [segmentReviews, setSegmentReviews] = useState<Record<string, SegmentReview>>({})
   const [reviewingSegmentId, setReviewingSegmentId] = useState<string | null>(null)
   const [editingBlockTypeIds, setEditingBlockTypeIds] = useState<string[]>([])
+  const [hiddenAiCommentKeys, setHiddenAiCommentKeys] = useState<string[]>([])
   const t = scriptCopy[script.language]
 
   useEffect(() => {
@@ -277,6 +278,7 @@ export function YouTubeScriptEditor({ doc, onBack, onSaved }: Props) {
   async function reviewSegment(segment: ScriptSegment) {
     if (reviewingSegmentId) return
     setReviewingSegmentId(segment.id)
+    setHiddenAiCommentKeys((current) => current.filter((key) => !key.startsWith(`${segment.id}:`)))
 
     try {
       const response = await fetch('/api/youtube-script-review', {
@@ -318,6 +320,19 @@ export function YouTubeScriptEditor({ doc, onBack, onSaved }: Props) {
       delete next[segmentId]
       return next
     })
+    setHiddenAiCommentKeys((current) => current.filter((key) => !key.startsWith(`${segmentId}:`)))
+  }
+
+  function openBlockTypeSelector(blockId: string) {
+    setEditingBlockTypeIds((current) => (current.includes(blockId) ? current : [...current, blockId]))
+  }
+
+  function closeBlockTypeSelector(blockId: string) {
+    setEditingBlockTypeIds((current) => current.filter((id) => id !== blockId))
+  }
+
+  function hideAiComment(commentKey: string) {
+    setHiddenAiCommentKeys((current) => (current.includes(commentKey) ? current : [...current, commentKey]))
   }
 
   function exportPdf() {
@@ -445,6 +460,7 @@ export function YouTubeScriptEditor({ doc, onBack, onSaved }: Props) {
               <div className="script-blocks">
                 {segment.blocks.map((block, blockIndex) => {
                   const blockReview = review?.blocks?.find((item) => item.block_index === blockIndex)
+                  const commentKey = `${segment.id}:${blockIndex}`
                   const selectedBlockType = block.type
                   const blockColor = selectedBlockType ? blockTypeColors[selectedBlockType] : '#d1d5db'
                   const isEditingType = editingBlockTypeIds.includes(block.id)
@@ -477,7 +493,7 @@ export function YouTubeScriptEditor({ doc, onBack, onSaved }: Props) {
                               style={{ background: active ? blockTypeColors[type] : 'transparent', color: active ? '#fff' : blockTypeColors[type], borderColor: blockTypeColors[type] }}
                               onClick={() => {
                                 updateBlock(segment.id, block.id, { type })
-                                setEditingBlockTypeIds((current) => current.filter((id) => id !== block.id))
+                                closeBlockTypeSelector(block.id)
                               }}
                             >
                               {t.blockTypes[type]}
@@ -489,7 +505,10 @@ export function YouTubeScriptEditor({ doc, onBack, onSaved }: Props) {
                           className="script-selected-block-type"
                           type="button"
                           style={{ background: blockColor, borderColor: blockColor }}
-                          onClick={() => setEditingBlockTypeIds((current) => (current.includes(block.id) ? current : [...current, block.id]))}
+                          onClick={(event) => {
+                            event.stopPropagation()
+                            openBlockTypeSelector(block.id)
+                          }}
                         >
                           {t.blockTypes[selectedBlockType]}
                           <span>▾</span>
@@ -510,8 +529,9 @@ export function YouTubeScriptEditor({ doc, onBack, onSaved }: Props) {
                     />
                     <div className="print-text">{block.content}</div>
                     <ScriptAiCommentBox
-                      comment={blockReview}
+                      comment={hiddenAiCommentKeys.includes(commentKey) ? undefined : blockReview}
                       onApply={(value) => updateBlock(segment.id, block.id, { content: value })}
+                      onClose={() => hideAiComment(commentKey)}
                     />
                   </div>
                 )})}
@@ -538,13 +558,18 @@ function ScoreBadge({ score }: { score: number }) {
 function ScriptAiCommentBox({
   comment,
   onApply,
+  onClose,
 }: {
   comment?: SegmentReviewBlock
   onApply: (value: string) => void
+  onClose: () => void
 }) {
   if (!comment?.issue && !comment?.suggestion) return null
   return (
     <div className="ai-comment-box script-ai-comment-box">
+      <button className="ai-comment-close" type="button" aria-label="Close comment" onClick={onClose}>
+        ×
+      </button>
       {comment.issue && <p className="ai-comment-issue">⚠️ {comment.issue}</p>}
       {comment.suggestion && <p className="ai-comment-suggestion">💡 建議：{comment.suggestion}</p>}
       {comment.suggestion && (

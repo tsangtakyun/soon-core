@@ -2834,6 +2834,7 @@ textarea:disabled {
 }
 
 .ai-comment-box {
+  position: relative;
   margin-top: 4px;
   padding: 8px 12px;
   border-left: 3px solid #fbbf24;
@@ -2863,6 +2864,20 @@ textarea:disabled {
   cursor: pointer;
   font-size: 11px;
   padding: 3px 10px;
+}
+
+.ai-comment-box .ai-comment-close {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  margin-top: 0;
+  padding: 0 4px;
+  border: none;
+  background: transparent;
+  color: #f59e0b;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
 }
 
 .ai-general-comments {
