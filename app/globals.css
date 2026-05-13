@@ -991,9 +991,79 @@ textarea:disabled {
   background: var(--soon-surface);
 }
 
+.docs-bulk-action-bar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 16px;
+  border: 0.5px solid var(--soon-border);
+  border-radius: 8px;
+  background: var(--soon-surface2);
+}
+
+.docs-bulk-action-bar span:first-child {
+  color: var(--soon-text);
+  font-size: 13px;
+}
+
+.docs-bulk-spacer {
+  flex: 1;
+}
+
+.docs-ghost-button {
+  border: 0;
+  background: transparent;
+  color: var(--soon-text-secondary);
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.docs-bulk-delete-button {
+  border: 0;
+  border-radius: 6px;
+  background: #ef4444;
+  color: #fff;
+  cursor: pointer;
+  font-size: 13px;
+  padding: 6px 14px;
+}
+
+.docs-toast {
+  width: fit-content;
+  border: 0.5px solid rgba(52, 211, 153, 0.35);
+  border-radius: 8px;
+  background: rgba(52, 211, 153, 0.12);
+  color: var(--soon-success);
+  font-size: 13px;
+  padding: 8px 12px;
+}
+
+.docs-list-header {
+  display: grid;
+  grid-template-columns: 28px 28px minmax(180px, 1fr) auto auto auto;
+  align-items: center;
+  gap: 12px;
+  min-height: 38px;
+  border-bottom: 0.5px solid rgba(255,255,255,0.08);
+  padding: 0 16px;
+  color: var(--soon-text-muted);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.docs-list-header .doc-checkbox-wrap {
+  grid-column: 1;
+}
+
+.docs-list-header span:nth-of-type(1) {
+  grid-column: 2 / 4;
+}
+
 .doc-row {
   display: grid;
-  grid-template-columns: 28px minmax(180px, 1fr) auto auto auto;
+  grid-template-columns: 28px 28px minmax(180px, 1fr) auto auto auto;
   align-items: center;
   gap: 12px;
   min-height: 44px;
@@ -1010,6 +1080,37 @@ textarea:disabled {
 .doc-row:hover,
 .doc-row.active {
   background: rgba(255,255,255,0.03);
+}
+
+.doc-row.selected {
+  background: rgba(124,58,237,0.08);
+}
+
+.doc-checkbox-wrap {
+  display: grid;
+  place-items: center;
+}
+
+.doc-checkbox-wrap input {
+  width: 16px;
+  height: 16px;
+  border: 1.5px solid var(--soon-border);
+  border-radius: 3px;
+  accent-color: var(--soon-purple);
+  cursor: pointer;
+  opacity: 0;
+}
+
+.doc-row:hover .doc-checkbox-wrap input,
+.doc-row.selected .doc-checkbox-wrap input,
+.doc-row.selection-visible .doc-checkbox-wrap input,
+.docs-list-header:hover .doc-checkbox-wrap input,
+.docs-list-header.selection-visible .doc-checkbox-wrap input {
+  opacity: 1;
+}
+
+.doc-row.selected .doc-checkbox-wrap input {
+  border-color: var(--soon-purple);
 }
 
 .doc-row-icon {

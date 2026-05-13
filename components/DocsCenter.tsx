@@ -232,8 +232,12 @@ export function DocsCenter() {
   const [projectBrief, setProjectBrief] = useState<ProjectBriefContent>(defaultProjectBrief)
   const [workspaceId, setWorkspaceId] = useState('')
   const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved'>('idle')
+  const [selectedDocIds, setSelectedDocIds] = useState<string[]>([])
+  const [toastMessage, setToastMessage] = useState('')
 
   const copy = useMemo(() => briefCopy[projectBrief.language], [projectBrief.language])
+  const allDocsSelected = docs.length > 0 && selectedDocIds.length === docs.length
+  const hasDocSelection = selectedDocIds.length > 0
 
   useEffect(() => {
     void load()
@@ -385,6 +389,47 @@ export function DocsCenter() {
     }
     setDocs((current) => current.filter((item) => item.id !== doc.id))
     notifyDocsChanged()
+    await load()
+  }
+
+  function showToast(message: string) {
+    setToastMessage(message)
+    window.setTimeout(() => setToastMessage(''), 2400)
+  }
+
+  function toggleDocSelection(docId: string, checked: boolean) {
+    setSelectedDocIds((current) =>
+      checked ? Array.from(new Set([...current, docId])) : current.filter((id) => id !== docId)
+    )
+  }
+
+  function toggleAllDocs(checked: boolean) {
+    setSelectedDocIds(checked ? docs.map((doc) => doc.id) : [])
+  }
+
+  async function deleteSelectedDocs() {
+    const count = selectedDocIds.length
+    if (count === 0) return
+
+    const confirmed = window.confirm(`確定刪除 ${count} 份文件？此動作不可撤回`)
+    if (!confirmed) return
+
+    const { error } = await supabase.from('docs').delete().in('id', selectedDocIds)
+    if (error) {
+      window.alert(error.message)
+      return
+    }
+
+    if (selectedDoc && selectedDocIds.includes(selectedDoc.id)) {
+      setSelectedDoc(null)
+      setContent('')
+      setSaveState('idle')
+    }
+
+    setDocs((current) => current.filter((doc) => !selectedDocIds.includes(doc.id)))
+    setSelectedDocIds([])
+    notifyDocsChanged()
+    showToast(`已刪除 ${count} 份文件`)
     await load()
   }
 
@@ -787,9 +832,57 @@ export function DocsCenter() {
 
         <section className="existing-docs-section">
           <h2>已有文件</h2>
+          {toastMessage && <div className="docs-toast">{toastMessage}</div>}
+          {hasDocSelection && (
+            <div className="docs-bulk-action-bar">
+              <span>已選取 {selectedDocIds.length} 份文件</span>
+              <span className="docs-bulk-spacer" />
+              <button className="docs-ghost-button" type="button" onClick={() => setSelectedDocIds([])}>
+                取消選取
+              </button>
+              <button className="docs-bulk-delete-button" type="button" onClick={() => void deleteSelectedDocs()}>
+                刪除所選
+              </button>
+            </div>
+          )}
           <div className="existing-docs-list">
-            {docs.map((doc) => (
-              <div key={doc.id} className={selectedDoc?.id === doc.id ? 'doc-row active' : 'doc-row'}>
+            {docs.length > 0 && (
+              <div className={hasDocSelection ? 'docs-list-header selection-visible' : 'docs-list-header'}>
+                <label className="doc-checkbox-wrap">
+                  <input
+                    aria-label="全選文件"
+                    checked={allDocsSelected}
+                    type="checkbox"
+                    onChange={(event) => toggleAllDocs(event.target.checked)}
+                  />
+                </label>
+                <span>文件</span>
+                <span>類型</span>
+                <span>日期</span>
+                <span />
+              </div>
+            )}
+            {docs.map((doc) => {
+              const isChecked = selectedDocIds.includes(doc.id)
+              const rowClassName = [
+                'doc-row',
+                selectedDoc?.id === doc.id ? 'active' : '',
+                isChecked ? 'selected' : '',
+                hasDocSelection ? 'selection-visible' : '',
+              ]
+                .filter(Boolean)
+                .join(' ')
+
+              return (
+              <div key={doc.id} className={rowClassName}>
+                <label className="doc-checkbox-wrap">
+                  <input
+                    aria-label={`選取 ${doc.title}`}
+                    checked={isChecked}
+                    type="checkbox"
+                    onChange={(event) => toggleDocSelection(doc.id, event.target.checked)}
+                  />
+                </label>
                 <span className="doc-row-icon">{templateIcons[doc.template_type ?? ''] ?? '📄'}</span>
                 <strong>{doc.title}</strong>
                 <span className="doc-type-badge">
@@ -805,7 +898,8 @@ export function DocsCenter() {
                   </button>
                 </div>
               </div>
-            ))}
+              )
+            })}
             {docs.length === 0 && <p className="docs-empty">未有文件</p>}
           </div>
         </section>
