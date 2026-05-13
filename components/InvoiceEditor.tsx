@@ -240,6 +240,11 @@ export function InvoiceEditor({ doc, onBack, onSaved }: Props) {
       .update({
         title: invoice.invoiceNumber || 'Invoice',
         content: JSON.stringify(payload),
+        invoice_amount: totals.total,
+        invoice_client: invoice.billedToName || null,
+        invoice_date: invoice.invoiceDate || null,
+        invoice_due_date: invoice.dueDate || null,
+        invoice_currency: invoice.currency,
       })
       .eq('id', doc.id)
       .select()

@@ -1,5 +1,6 @@
 'use client'
 
+import { useSearchParams } from 'next/navigation'
 import { type ChangeEvent, type ReactNode, useEffect, useMemo, useState } from 'react'
 
 import { AcceptanceOfEngagementEditor, createEmptyAcceptance } from '@/components/AcceptanceOfEngagementEditor'
@@ -282,6 +283,7 @@ const defaultProjectBrief: ProjectBriefContent = {
 }
 
 export function DocsCenter() {
+  const searchParams = useSearchParams()
   const [docs, setDocs] = useState<CoreDoc[]>([])
   const [workspaces, setWorkspaces] = useState<Workspace[]>([])
   const [folders, setFolders] = useState<DocFolder[]>([])
@@ -327,6 +329,10 @@ export function DocsCenter() {
     setDocs((docData ?? []) as CoreDoc[])
     setWorkspaces((workspaceData ?? []) as Workspace[])
     if (!folderError) setFolders((folderData ?? []) as DocFolder[])
+    const openDocId = searchParams.get('open')
+    const nextDocs = (docData ?? []) as CoreDoc[]
+    const docToOpen = openDocId ? nextDocs.find((doc) => doc.id === openDocId) : null
+    if (docToOpen) openDoc(docToOpen, nextDocs)
   }
 
   function notifyDocsChanged() {

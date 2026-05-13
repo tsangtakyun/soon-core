@@ -4288,6 +4288,349 @@ textarea:disabled {
   width: 100%;
 }
 
+.finance-page {
+  background: var(--soon-bg);
+  color: var(--soon-text);
+  min-height: 100vh;
+  padding: 32px;
+}
+
+.finance-header h1 {
+  font-size: 32px;
+  margin: 0;
+}
+
+.finance-header p,
+.finance-section-head p {
+  color: var(--soon-text-muted);
+  font-size: 13px;
+  margin: 6px 0 0;
+}
+
+.finance-metric-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin: 24px 0 16px;
+}
+
+.finance-metric-card,
+.finance-section,
+.monthly-report-card,
+.expense-summary {
+  background: var(--soon-surface);
+  border: 0.5px solid var(--soon-border);
+  border-radius: var(--soon-radius-lg);
+}
+
+.finance-metric-card {
+  padding: 24px;
+}
+
+.finance-metric-card strong {
+  display: block;
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.finance-metric-card span {
+  color: var(--soon-text-muted);
+  display: block;
+  font-size: 12px;
+  margin-top: 8px;
+}
+
+.finance-overdue-alert {
+  background: rgba(239,68,68,0.1);
+  border: 0.5px solid rgba(239,68,68,0.3);
+  border-radius: 8px;
+  color: #ef4444;
+  margin: 16px 0;
+  padding: 12px 16px;
+}
+
+.finance-section {
+  margin-top: 24px;
+  padding: 20px;
+}
+
+.finance-section-head {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.finance-section-head h2 {
+  font-size: 20px;
+  margin: 0;
+}
+
+.finance-primary-button,
+.finance-secondary-button {
+  border: 0;
+  border-radius: 8px;
+  color: #fff;
+  cursor: pointer;
+  font-size: 13px;
+  padding: 8px 14px;
+}
+
+.finance-primary-button {
+  background: var(--soon-purple);
+}
+
+.finance-secondary-button {
+  background: var(--soon-surface2);
+  border: 0.5px solid var(--soon-border);
+  color: var(--soon-text);
+}
+
+.finance-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 12px 0 16px;
+}
+
+.finance-tabs button {
+  background: transparent;
+  border: 0.5px solid var(--soon-border);
+  border-radius: 999px;
+  color: var(--soon-text-secondary);
+  cursor: pointer;
+  font-size: 12px;
+  padding: 6px 12px;
+}
+
+.finance-tabs button.active {
+  background: var(--soon-purple);
+  border-color: var(--soon-purple);
+  color: #fff;
+}
+
+.finance-tabs span {
+  margin-left: 6px;
+  opacity: 0.75;
+}
+
+.finance-table-wrap {
+  overflow-x: auto;
+}
+
+.finance-table {
+  border-collapse: collapse;
+  min-width: 900px;
+  width: 100%;
+}
+
+.finance-table th {
+  border-bottom: 0.5px solid var(--soon-border);
+  color: var(--soon-text-muted);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  padding: 10px 8px;
+  text-align: left;
+  text-transform: uppercase;
+}
+
+.finance-table td {
+  border-bottom: 0.5px solid rgba(255,255,255,0.06);
+  color: var(--soon-text-secondary);
+  font-size: 13px;
+  padding: 10px 8px;
+}
+
+.finance-status-badge,
+.expense-category-badge {
+  border-radius: 4px;
+  color: #fff;
+  display: inline-block;
+  font-size: 11px;
+  min-width: 80px;
+  padding: 4px 8px;
+  text-align: center;
+}
+
+.overdue-days {
+  color: #ef4444 !important;
+  font-weight: 700;
+}
+
+.finance-actions {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+}
+
+.finance-actions select,
+.finance-date-range input,
+.finance-report-controls select,
+.expense-draft-card input,
+.expense-draft-card select {
+  background: var(--soon-surface2);
+  border: 0.5px solid var(--soon-border);
+  border-radius: 6px;
+  color: var(--soon-text);
+  padding: 6px 8px;
+}
+
+.finance-actions a {
+  color: var(--soon-purple-light);
+  font-size: 12px;
+}
+
+.expense-summary {
+  padding: 16px;
+}
+
+.expense-summary > strong {
+  color: #ef4444;
+  display: block;
+  font-size: 24px;
+  margin-bottom: 12px;
+}
+
+.expense-category-bars {
+  display: grid;
+  gap: 8px;
+}
+
+.expense-category-bar {
+  align-items: center;
+  display: grid;
+  grid-template-columns: 100px 1fr 90px;
+  gap: 10px;
+  font-size: 12px;
+}
+
+.expense-category-bar div {
+  background: rgba(255,255,255,0.08);
+  border-radius: 999px;
+  height: 6px;
+  overflow: hidden;
+}
+
+.expense-category-bar i {
+  display: block;
+  height: 100%;
+}
+
+.receipt-upload-zone {
+  align-items: center;
+  border: 1px dashed var(--soon-purple);
+  border-radius: 12px;
+  color: var(--soon-purple-light);
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  margin: 16px 0;
+  padding: 32px;
+}
+
+.receipt-upload-zone input {
+  display: none;
+}
+
+.receipt-drafts {
+  margin: 16px 0;
+}
+
+.receipt-draft-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.expense-draft-card {
+  background: var(--soon-surface2);
+  border: 0.5px solid var(--soon-border);
+  border-radius: 10px;
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+}
+
+.receipt-thumb-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+
+.receipt-thumb-grid img {
+  border-radius: 6px;
+  height: 72px;
+  object-fit: cover;
+  width: 100%;
+}
+
+.finance-report-controls {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.monthly-report-card {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  padding: 18px;
+}
+
+.monthly-report-card span {
+  color: var(--soon-text-muted);
+  display: block;
+  font-size: 12px;
+}
+
+.monthly-report-card strong {
+  display: block;
+  font-size: 22px;
+  margin-top: 6px;
+}
+
+.finance-modal-backdrop {
+  background: rgba(0,0,0,0.7);
+  inset: 0;
+  position: fixed;
+  z-index: 80;
+}
+
+.finance-modal {
+  background: var(--soon-surface);
+  border-left: 0.5px solid var(--soon-border);
+  bottom: 0;
+  overflow-y: auto;
+  padding: 24px;
+  position: fixed;
+  right: 0;
+  top: 0;
+  width: 520px;
+}
+
+.finance-modal header,
+.finance-import-row {
+  align-items: center;
+  display: grid;
+  gap: 10px;
+}
+
+.finance-modal header {
+  grid-template-columns: 1fr auto;
+  margin-bottom: 18px;
+}
+
+.finance-import-row {
+  border-bottom: 0.5px solid var(--soon-border);
+  grid-template-columns: 1.2fr 1fr 1fr auto;
+  padding: 10px 0;
+}
+
 @media print {
   .script-document textarea {
     display: none !important;
