@@ -3631,6 +3631,10 @@ textarea:disabled {
   order: 3;
 }
 
+.campaign-report-editor .doc-secondary-button {
+  display: none;
+}
+
 .campaign-report-editor .doc-toolbar > button:nth-of-type(3) {
   background: #ec4899;
   order: 4;
@@ -3864,6 +3868,11 @@ textarea:disabled {
   color: #6b7280;
 }
 
+.source-badge.screenshot {
+  background: #fef3c7;
+  color: #92400e;
+}
+
 .campaign-summary-textarea {
   min-height: 110px !important;
 }
@@ -3878,6 +3887,28 @@ textarea:disabled {
   font-size: 12px;
   padding: 6px 10px;
   width: fit-content;
+}
+
+.campaign-upload-insights {
+  align-items: center;
+  display: inline-flex !important;
+  justify-content: center;
+  white-space: nowrap;
+}
+
+.campaign-upload-insights input {
+  display: none;
+}
+
+.campaign-ai-read-button {
+  background: #7c3aed;
+  border: 0;
+  border-radius: 6px;
+  color: #fff;
+  cursor: pointer;
+  font-size: 12px;
+  padding: 5px 12px;
+  white-space: nowrap;
 }
 
 .campaign-video-list {

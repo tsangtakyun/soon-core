@@ -6,7 +6,7 @@ import { supabase } from '@/lib/supabase'
 import type { CoreDoc } from '@/lib/types'
 
 type Lang = 'zh' | 'en'
-type Source = 'manual' | 'youtube' | 'meta'
+type Source = 'manual' | 'youtube' | 'screenshot'
 type Platform = 'youtube' | 'instagram'
 
 type MetricValue = {
@@ -324,7 +324,7 @@ function formatNumber(value: number) {
 
 function sourceLabel(source: Source, language: Lang) {
   if (source === 'youtube') return 'via YouTube Analytics'
-  if (source === 'meta') return 'via Meta Insights'
+  if (source === 'screenshot') return 'via Screenshot + AI'
   return language === 'zh' ? '手動填入' : 'Manual'
 }
 
@@ -352,6 +352,7 @@ export function CampaignReportEditor({ doc, onBack, onSaved }: Props) {
   const [saving, setSaving] = useState(false)
   const [aiLoading, setAiLoading] = useState(false)
   const [fetchingVideoId, setFetchingVideoId] = useState<string | null>(null)
+  const [analysingVideoId, setAnalysingVideoId] = useState<string | null>(null)
   const c = copy[content.language]
 
   useEffect(() => {
@@ -372,8 +373,8 @@ export function CampaignReportEditor({ doc, onBack, onSaved }: Props) {
       display_name: String(data.display_name ?? 'Tommy'),
       youtube_client_id: String(data.youtube_client_id ?? ''),
       youtube_client_secret: String(data.youtube_client_secret ?? ''),
-      meta_app_id: String(data.meta_app_id ?? ''),
-      meta_app_secret: String(data.meta_app_secret ?? ''),
+      meta_app_id: '',
+      meta_app_secret: '',
     })
     setContent((current) => ({ ...current, preparedBy: current.preparedBy || String(data.display_name ?? 'Tommy') }))
   }
@@ -496,13 +497,14 @@ export function CampaignReportEditor({ doc, onBack, onSaved }: Props) {
   }
 
   async function uploadScreenshots(videoId: string, event: ChangeEvent<HTMLInputElement>) {
-    const files = Array.from(event.target.files ?? [])
+    const currentCount = content.videos.find((video) => video.id === videoId)?.screenshots.length ?? 0
+    const files = Array.from(event.target.files ?? []).slice(0, Math.max(0, 5 - currentCount))
     if (!files.length) return
     const nextScreenshots = await Promise.all(
       files.map(async (file) => ({
         id: makeId(),
         src: await fileToDataUrl(file),
-        caption: content.language === 'zh' ? 'Instagram Insights 截圖' : 'Insights screenshot',
+        caption: content.language === 'zh' ? 'IG Insights 截圖（客戶核實用）' : 'IG Insights screenshot (client verification)',
       })),
     )
     update({
@@ -519,7 +521,7 @@ export function CampaignReportEditor({ doc, onBack, onSaved }: Props) {
     }
     setFetchingVideoId(video.id)
     try {
-      const endpoint = video.platform === 'youtube' ? '/api/youtube-video' : '/api/meta-video'
+      const endpoint = '/api/youtube-video'
       const response = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -527,14 +529,10 @@ export function CampaignReportEditor({ doc, onBack, onSaved }: Props) {
       })
       const data = await response.json()
       if (!response.ok || data.error) {
-        const friendlyMetaError =
-          video.platform === 'instagram' && (data.code === 190 || String(data.error ?? '').includes('OAuthException'))
-            ? 'Meta access token 已過期或無效。請到設定重新輸入有效嘅 access token。'
-            : String(data.error ?? 'Fetch failed')
-        updateVideo(video.id, { apiError: friendlyMetaError })
+        updateVideo(video.id, { apiError: String(data.error ?? 'Fetch failed') })
         return
       }
-      const source: Source = video.platform === 'youtube' ? 'youtube' : 'meta'
+      const source: Source = 'youtube'
       const nextMetrics = {
         ...video.metrics,
         views: { value: String(data.views ?? ''), source },
@@ -559,6 +557,58 @@ export function CampaignReportEditor({ doc, onBack, onSaved }: Props) {
       updateVideo(video.id, { apiError: error instanceof Error ? error.message : 'Fetch failed' })
     } finally {
       setFetchingVideoId(null)
+    }
+  }
+
+  async function analyseInstagramScreenshots(video: CampaignVideo) {
+    if (!video.screenshots.length) {
+      updateVideo(video.id, { apiError: '請先上傳 IG Insights 截圖。' })
+      return
+    }
+    setAnalysingVideoId(video.id)
+    try {
+      const response = await fetch('/api/instagram-screenshot-ocr', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ screenshots: video.screenshots.map((screenshot) => screenshot.src) }),
+      })
+      const data = await response.json()
+      if (!response.ok || data.error) throw new Error(data.error || 'Screenshot analysis failed')
+      const source: Source = 'screenshot'
+      updateVideo(video.id, {
+        apiError: '',
+        metrics: {
+          ...video.metrics,
+          views: { value: String(data.views ?? data.reach ?? video.metrics.views.value ?? ''), source },
+          likes: { value: String(data.likes ?? video.metrics.likes.value ?? ''), source },
+          comments: { value: String(data.comments ?? video.metrics.comments.value ?? ''), source },
+          saves: { value: String(data.saves ?? video.metrics.saves.value ?? ''), source },
+          shares: { value: String(data.shares ?? video.metrics.shares.value ?? ''), source },
+          profileActivity: { value: String(data.profile_activity ?? video.metrics.profileActivity.value ?? ''), source },
+          skipRate: { value: String(data.skip_rate ?? video.metrics.skipRate.value ?? ''), source },
+          retentionRate: { value: String(data.retention_rate ?? video.metrics.retentionRate.value ?? ''), source },
+          avgWatchTime: { value: String(data.avg_watch_time ?? video.metrics.avgWatchTime.value ?? ''), source },
+          totalWatchTime: { value: String(data.watch_time ?? video.metrics.totalWatchTime.value ?? ''), source },
+        },
+        audience: {
+          ...video.audience,
+          gender: [
+            { id: video.audience.gender[0]?.id ?? makeId(), label: '男性', percent: String(data.audience_gender?.male ?? video.audience.gender[0]?.percent ?? '') },
+            { id: video.audience.gender[1]?.id ?? makeId(), label: '女性', percent: String(data.audience_gender?.female ?? video.audience.gender[1]?.percent ?? '') },
+          ],
+          traffic: Array.isArray(data.traffic_sources) && data.traffic_sources.length
+            ? data.traffic_sources.map((row: { source?: string; percentage?: number | string }) => ({
+                id: makeId(),
+                label: String(row.source ?? ''),
+                percent: String(row.percentage ?? ''),
+              }))
+            : video.audience.traffic,
+        },
+      })
+    } catch (error) {
+      updateVideo(video.id, { apiError: error instanceof Error ? error.message : 'Screenshot analysis failed' })
+    } finally {
+      setAnalysingVideoId(null)
     }
   }
 
@@ -595,11 +645,8 @@ export function CampaignReportEditor({ doc, onBack, onSaved }: Props) {
     URL.revokeObjectURL(url)
   }
 
-  function connectionClick(kind: 'youtube' | 'meta') {
-    const connected =
-      kind === 'youtube'
-        ? settings.youtube_client_id && settings.youtube_client_secret
-        : settings.meta_app_id && settings.meta_app_secret
+  function connectionClick(_kind?: 'youtube' | 'meta') {
+    const connected = settings.youtube_client_id && settings.youtube_client_secret
     if (!connected) window.alert(c.apiNotReady)
   }
 
@@ -621,8 +668,7 @@ export function CampaignReportEditor({ doc, onBack, onSaved }: Props) {
             </button>
           ))}
         </div>
-        <div className="toolbar-spacer" />
-        <button className="doc-secondary-button" type="button" onClick={() => connectionClick('youtube')}>
+        <button className="campaign-youtube-button" type="button" onClick={() => connectionClick()}>
           {settings.youtube_client_id && settings.youtube_client_secret ? c.youtubeConnected : `🔗 ${c.connectYoutube}`}
         </button>
         <button className="doc-secondary-button" type="button" onClick={() => connectionClick('meta')}>
@@ -704,7 +750,9 @@ export function CampaignReportEditor({ doc, onBack, onSaved }: Props) {
                 language={content.language}
                 labels={c}
                 fetching={fetchingVideoId === video.id}
+                analysing={analysingVideoId === video.id}
                 onFetch={() => void fetchVideoData(video)}
+                onAnalyseScreenshots={() => void analyseInstagramScreenshots(video)}
                 onUpdate={(patch) => updateVideo(video.id, patch)}
                 onMetric={(key, value, source) => updateVideoMetric(video.id, key, value, source)}
                 onImageUpload={(event) => void uploadVideoImage(video.id, event)}
@@ -882,7 +930,9 @@ function VideoBlock({
   language,
   labels,
   fetching,
+  analysing,
   onFetch,
+  onAnalyseScreenshots,
   onUpdate,
   onMetric,
   onImageUpload,
@@ -895,7 +945,9 @@ function VideoBlock({
   language: Lang
   labels: (typeof copy)[Lang]
   fetching: boolean
+  analysing: boolean
   onFetch: () => void
+  onAnalyseScreenshots: () => void
   onUpdate: (patch: Partial<CampaignVideo>) => void
   onMetric: (key: keyof CampaignVideo['metrics'], value: string, source?: Source) => void
   onImageUpload: (event: ChangeEvent<HTMLInputElement>) => void
@@ -918,9 +970,21 @@ function VideoBlock({
           <option value="instagram">Instagram</option>
         </select>
         <input value={video.url} placeholder={labels.videoUrl} onChange={(event) => onUpdate({ url: event.target.value })} />
-        <button className="campaign-fetch-button soon-no-print" type="button" disabled={fetching} onClick={onFetch}>
-          {fetching ? 'Fetching...' : labels.fetchApi}
-        </button>
+        {video.platform === 'youtube' ? (
+          <button className="campaign-fetch-button soon-no-print" type="button" disabled={fetching} onClick={onFetch}>
+            {fetching ? 'Fetching...' : labels.fetchApi}
+          </button>
+        ) : (
+          <label className="campaign-fetch-button campaign-upload-insights soon-no-print">
+            上傳 IG Insights 截圖
+            <input type="file" accept="image/*" multiple onChange={onScreenshots} />
+          </label>
+        )}
+        {video.platform === 'instagram' && video.screenshots.length > 0 && (
+          <button className="campaign-ai-read-button soon-no-print" type="button" disabled={analysing} onClick={onAnalyseScreenshots}>
+            {analysing ? '分析中...' : '✨ AI 讀取數據'}
+          </button>
+        )}
         <label className="campaign-manual-toggle soon-no-print">
           <input type="checkbox" checked={video.manual} onChange={(event) => onUpdate({ manual: event.target.checked })} />
           {labels.manual}

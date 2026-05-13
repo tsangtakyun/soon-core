@@ -240,9 +240,9 @@ export function SettingsPage() {
             <span className={settings.youtube_client_id && settings.youtube_client_secret ? 'api-status connected' : 'api-status'}>
               YouTube {settings.youtube_client_id && settings.youtube_client_secret ? '✓ 已連接' : '未連接'}
             </span>
-            <span className={settings.meta_app_id && settings.meta_app_secret ? 'api-status connected' : 'api-status'}>
+            {false && <span className={settings.meta_app_id && settings.meta_app_secret ? 'api-status connected' : 'api-status'}>
               Meta {settings.meta_app_id && settings.meta_app_secret ? '✓ 已連接' : '未連接'}
-            </span>
+            </span>}
           </div>
           <label>
             YouTube Data API Client ID
@@ -252,14 +252,14 @@ export function SettingsPage() {
             YouTube Data API Client Secret
             <input type="password" value={settings.youtube_client_secret} onChange={(event) => update('youtube_client_secret', event.target.value)} />
           </label>
-          <label>
+          {false && <label>
             Meta Business API App ID
             <input value={settings.meta_app_id} onChange={(event) => update('meta_app_id', event.target.value)} />
-          </label>
-          <label>
+          </label>}
+          {false && <label>
             Meta Business API App Secret
             <input type="password" value={settings.meta_app_secret} onChange={(event) => update('meta_app_secret', event.target.value)} />
-          </label>
+          </label>}
           <button className="primary-button" type="button" onClick={() => void save()}>Save API Settings</button>
         </SettingsCard>
 
