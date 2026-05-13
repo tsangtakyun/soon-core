@@ -27,6 +27,21 @@ type Props = {
   onSaved: (doc: CoreDoc) => void
 }
 
+type SegmentReviewBlock = {
+  block_index: number
+  type: string
+  issue: string | null
+  suggestion: string | null
+}
+
+type SegmentReview = {
+  overall?: string
+  score?: number
+  blocks?: SegmentReviewBlock[]
+  clarity?: string
+  typos?: string | null
+}
+
 const scriptCopy = {
   zh: {
     back: '← 文件中心',
@@ -128,6 +143,8 @@ export function YouTubeScriptEditor({ doc, onBack, onSaved }: Props) {
   const [saved, setSaved] = useState(false)
   const [draggedSegmentId, setDraggedSegmentId] = useState<string | null>(null)
   const [draggedBlock, setDraggedBlock] = useState<{ segmentId: string; blockId: string } | null>(null)
+  const [segmentReviews, setSegmentReviews] = useState<Record<string, SegmentReview>>({})
+  const [reviewingSegmentId, setReviewingSegmentId] = useState<string | null>(null)
   const t = scriptCopy[script.language]
 
   useEffect(() => {
@@ -247,6 +264,52 @@ export function YouTubeScriptEditor({ doc, onBack, onSaved }: Props) {
     onSaved(data as CoreDoc)
   }
 
+  async function reviewSegment(segment: ScriptSegment) {
+    if (reviewingSegmentId) return
+    setReviewingSegmentId(segment.id)
+
+    try {
+      const response = await fetch('/api/youtube-script-review', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          segmentType: segment.type,
+          segmentTypeLabel: t.segmentTypes[segment.type],
+          segmentTitle: segment.title,
+          blocks: segment.blocks.map((block) => ({
+            type: block.type,
+            typeLabel: t.blockTypes[block.type],
+            speaker: block.speaker,
+            content: block.content,
+          })),
+        }),
+      })
+      const data = (await response.json()) as SegmentReview & { error?: string }
+      if (!response.ok || data.error) throw new Error(data.error || 'AI review failed')
+      setSegmentReviews((current) => ({ ...current, [segment.id]: data }))
+    } catch (error) {
+      setSegmentReviews((current) => ({
+        ...current,
+        [segment.id]: {
+          score: 0,
+          blocks: [],
+          clarity: error instanceof Error ? error.message : 'AI review failed',
+          typos: null,
+        },
+      }))
+    } finally {
+      setReviewingSegmentId(null)
+    }
+  }
+
+  function clearSegmentReview(segmentId: string) {
+    setSegmentReviews((current) => {
+      const next = { ...current }
+      delete next[segmentId]
+      return next
+    })
+  }
+
   function exportPdf() {
     window.print()
   }
@@ -327,6 +390,11 @@ export function YouTubeScriptEditor({ doc, onBack, onSaved }: Props) {
 
         <div className="script-segments">
           {script.segments.map((segment, segmentIndex) => (
+            (() => {
+              const review = segmentReviews[segment.id]
+              const hasTypos = Boolean(review?.typos && review.typos !== 'null')
+              const isReviewing = reviewingSegmentId === segment.id
+              return (
             <section
               key={segment.id}
               className="script-segment"
@@ -347,12 +415,27 @@ export function YouTubeScriptEditor({ doc, onBack, onSaved }: Props) {
                     <option key={type} value={type}>{t.segmentTypes[type]}</option>
                   ))}
                 </select>
+                {typeof review?.score === 'number' && <ScoreBadge score={review.score} />}
+                {hasTypos && <span className="script-typo-badge">⚠️ 有錯字</span>}
                 <input value={segment.title} placeholder="Segment title" onChange={(event) => updateSegment(segment.id, { title: event.target.value })} />
-                <button className="danger-text-button soon-no-print" type="button" onClick={() => deleteSegment(segment.id)}>{t.deleteSegment}</button>
+                <div className="script-segment-actions soon-no-print">
+                  <button className="script-ai-review-button" type="button" disabled={isReviewing} onClick={() => void reviewSegment(segment)}>
+                    {isReviewing && <span className="ai-spinner" />}
+                    {isReviewing ? '分析中...' : '✨ AI 審閱'}
+                  </button>
+                  {review && (
+                    <button className="script-clear-review-button" type="button" onClick={() => clearSegmentReview(segment.id)}>
+                      清除審閱
+                    </button>
+                  )}
+                  <button className="danger-text-button" type="button" onClick={() => deleteSegment(segment.id)}>{t.deleteSegment}</button>
+                </div>
               </header>
 
               <div className="script-blocks">
-                {segment.blocks.map((block) => (
+                {segment.blocks.map((block, blockIndex) => {
+                  const blockReview = review?.blocks?.find((item) => item.block_index === blockIndex)
+                  return (
                   <div
                     key={block.id}
                     className="script-block"
@@ -397,17 +480,50 @@ export function YouTubeScriptEditor({ doc, onBack, onSaved }: Props) {
                       }}
                     />
                     <div className="print-text">{block.content}</div>
+                    <ScriptAiCommentBox
+                      comment={blockReview}
+                      onApply={(value) => updateBlock(segment.id, block.id, { content: value })}
+                    />
                   </div>
-                ))}
+                )})}
               </div>
+              {review?.clarity && <div className="script-clarity-card">{review.clarity}</div>}
               <button className="add-row-button soon-no-print" type="button" onClick={() => addBlock(segment.id)}>{t.addBlock}</button>
             </section>
+              )
+            })()
           ))}
         </div>
 
         <button className="script-add-segment soon-no-print" type="button" onClick={addSegment}>{t.addSegment}</button>
       </article>
     </section>
+  )
+}
+
+function ScoreBadge({ score }: { score: number }) {
+  const background = score >= 8 ? '#22c55e' : score >= 6 ? '#f59e0b' : '#ef4444'
+  return <span className="script-score-badge" style={{ background }}>{score}/10</span>
+}
+
+function ScriptAiCommentBox({
+  comment,
+  onApply,
+}: {
+  comment?: SegmentReviewBlock
+  onApply: (value: string) => void
+}) {
+  if (!comment?.issue && !comment?.suggestion) return null
+  return (
+    <div className="ai-comment-box script-ai-comment-box">
+      {comment.issue && <p className="ai-comment-issue">⚠️ {comment.issue}</p>}
+      {comment.suggestion && <p className="ai-comment-suggestion">💡 建議：{comment.suggestion}</p>}
+      {comment.suggestion && (
+        <button type="button" onClick={() => onApply(comment.suggestion ?? '')}>
+          採用建議
+        </button>
+      )}
+    </div>
   )
 }
 

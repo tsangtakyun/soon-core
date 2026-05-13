@@ -3083,7 +3083,7 @@ textarea:disabled {
 
 .script-segment-header {
   display: grid;
-  grid-template-columns: 24px 44px 136px minmax(180px, 1fr) auto;
+  grid-template-columns: 24px 44px 136px auto auto minmax(180px, 1fr) auto;
   align-items: center;
   gap: 10px;
   margin-bottom: 12px;
@@ -3116,6 +3116,54 @@ textarea:disabled {
   border-bottom: 0.5px solid #e5e5e5;
   font-size: 14px;
   font-weight: 600;
+}
+
+.script-score-badge,
+.script-typo-badge {
+  width: fit-content;
+  border-radius: 4px;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 8px;
+  white-space: nowrap;
+}
+
+.script-typo-badge {
+  background: #ef4444;
+}
+
+.script-segment-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.script-ai-review-button,
+.script-clear-review-button {
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 11px;
+  padding: 3px 10px;
+  white-space: nowrap;
+}
+
+.script-ai-review-button {
+  border: 0.5px solid #7c3aed;
+  background: transparent;
+  color: #7c3aed;
+}
+
+.script-ai-review-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.script-clear-review-button {
+  border: 0.5px solid #9ca3af;
+  background: transparent;
+  color: #6b7280;
 }
 
 .script-blocks {
@@ -3177,6 +3225,21 @@ textarea:disabled {
   line-height: 1.7;
 }
 
+.script-ai-comment-box {
+  margin-top: 8px;
+}
+
+.script-clarity-card {
+  margin: 10px 0 12px;
+  padding: 8px 12px;
+  border-left: 3px solid #7c3aed;
+  border-radius: 0 6px 6px 0;
+  background: rgba(124,58,237,0.08);
+  color: #1a1a1a;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
 .script-add-segment {
   width: 100%;
   margin-top: 24px;
@@ -3222,6 +3285,7 @@ textarea:disabled {
   }
 
   .script-segment-header input,
+  .script-segment-actions,
   .script-segment-header .danger-text-button {
     grid-column: 1 / -1;
   }
