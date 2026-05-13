@@ -4,7 +4,7 @@ export const runtime = 'nodejs'
 export const maxDuration = 60
 
 type ReviewBlock = {
-  type: BlockType
+  type: BlockType | 'other'
   typeLabel: string
   speaker: string
   content: string
@@ -38,16 +38,16 @@ ${block.content}`
 段落類型：${body.segmentTypeLabel}
 段落標題：${body.segmentTitle || '(未命名)'}
 內容：
-${blockText || '(空白)'}
+${blockText || '(沒有內容)'}
 
-請以 JSON 格式回應：
+請以 JSON 格式回應，不要 markdown，不要額外文字：
 {
   "overall": "整體評語（1-2句）",
   "score": 8,
   "blocks": [
     {
       "block_index": 0,
-      "type": "對鏡頭",
+      "type": "對白",
       "issue": "問題描述或null",
       "suggestion": "建議修改內容或null"
     }
@@ -86,7 +86,7 @@ ${blockText || '(空白)'}
   } catch {
     return Response.json(
       {
-        overall: 'AI 回應不是有效 JSON，請再試一次。',
+        overall: 'AI 回應不是有效 JSON，請稍後重試。',
         score: 0,
         blocks: [],
         clarity: '',
