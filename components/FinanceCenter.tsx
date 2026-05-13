@@ -122,6 +122,19 @@ function fileToDataUrl(file: File) {
   })
 }
 
+async function readJsonResponse(response: Response) {
+  const text = await response.text()
+  try {
+    return JSON.parse(text)
+  } catch {
+    const lower = text.toLowerCase()
+    if (lower.includes('request entity too large') || response.status === 413) {
+      throw new Error('PDF 檔案太大，Vercel 拒絕接收。請改用較細 PDF，或者截圖後用圖片上傳。')
+    }
+    throw new Error(text || `Request failed (${response.status})`)
+  }
+}
+
 function daysOverdue(dueDate: string | null, status: InvoiceStatus) {
   if (!dueDate || status === 'paid') return 0
   const todayDate = new Date(today())
@@ -248,6 +261,13 @@ export function FinanceCenter() {
 
   async function handleReceiptUpload(event: ChangeEvent<HTMLInputElement>) {
     const files = Array.from(event.target.files ?? [])
+    const maxBytes = 3 * 1024 * 1024
+    const oversized = files.find((file) => file.type === 'application/pdf' && file.size > maxBytes)
+    if (oversized) {
+      window.alert(`${oversized.name} 太大，暫時支援 3MB 以下 PDF。請壓縮 PDF，或者截圖後用圖片上傳。`)
+      event.target.value = ''
+      return
+    }
     const nextDrafts = await Promise.all(files.map(async (file) => {
       const dataUrl = await fileToDataUrl(file)
       return createExpenseDraft([dataUrl], defaultCurrency, [file.name])
@@ -266,7 +286,7 @@ export function FinanceCenter() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ file: draft.receiptImages[0], targetCurrency: defaultCurrency }),
         })
-        const data = await response.json()
+        const data = await readJsonResponse(response)
         if (!response.ok || data.error) throw new Error(data.error || 'Receipt analysis failed')
         const receipts = Array.isArray(data.receipts) ? data.receipts as ReceiptOcrResult[] : [data as ReceiptOcrResult]
         if (!receipts.length) return [draft]
