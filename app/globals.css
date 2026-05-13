@@ -4134,6 +4134,160 @@ textarea:disabled {
   font-weight: 700;
 }
 
+.acceptance-editor {
+  background: var(--soon-bg);
+}
+
+.acceptance-toolbar {
+  align-items: center;
+  background: var(--soon-bg);
+  border-bottom: 0.5px solid var(--soon-border);
+  display: flex;
+  gap: 8px;
+  height: 48px;
+  overflow: hidden;
+  padding: 0 16px;
+  white-space: nowrap;
+}
+
+.acceptance-doc {
+  background: #fff;
+  border-radius: 12px;
+  color: #1a1a1a;
+  margin: 0 auto;
+  max-width: 800px;
+  padding: 48px;
+}
+
+.acceptance-logo {
+  display: block;
+  max-height: 60px;
+  max-width: 120px;
+  object-fit: contain;
+  object-position: left center;
+  margin-bottom: 20px;
+}
+
+.acceptance-company {
+  color: #1a1a1a;
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 20px;
+}
+
+.acceptance-title {
+  background: transparent;
+  border: 0;
+  color: #1a1a1a;
+  display: block;
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0 auto 24px;
+  outline: none;
+  text-align: center;
+  text-decoration: underline;
+  width: 100%;
+}
+
+.acceptance-top-info {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.acceptance-top-info label {
+  color: #1a1a1a;
+  font-size: 13px;
+}
+
+.acceptance-doc input,
+.acceptance-doc select,
+.acceptance-doc textarea {
+  background: transparent;
+  border: 0;
+  border-bottom: 0.5px solid #e5e5e5;
+  color: #1a1a1a;
+  font-family: inherit;
+  font-size: 13px;
+  outline: none;
+  padding: 5px 0;
+}
+
+.acceptance-rate-row {
+  align-items: end;
+  display: grid;
+  grid-template-columns: 130px 100px 120px 1fr;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.acceptance-rate-row strong {
+  color: #1a1a1a;
+  font-size: 13px;
+}
+
+.acceptance-info-table,
+.acceptance-total-table {
+  border-collapse: collapse;
+  margin: 20px 0;
+  width: 100%;
+}
+
+.acceptance-info-table th,
+.acceptance-info-table td,
+.acceptance-total-table th,
+.acceptance-total-table td {
+  border: 0.5px solid #1a1a1a;
+  padding: 8px 12px;
+  text-align: left;
+}
+
+.acceptance-info-table th {
+  background: #f9f9f9;
+  color: #1a1a1a;
+  font-size: 13px;
+  font-weight: 500;
+  width: 200px;
+}
+
+.acceptance-info-table input {
+  border: 0;
+  width: 100%;
+}
+
+.acceptance-legal,
+.acceptance-payment {
+  border: 0;
+  color: #555;
+  display: block;
+  font-size: 12px;
+  line-height: 1.7;
+  min-height: 72px;
+  resize: vertical;
+  width: 100%;
+}
+
+.acceptance-legal {
+  font-style: italic;
+}
+
+.acceptance-total-table th {
+  background: #f9f9f9;
+  color: #1a1a1a;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.acceptance-total-table td {
+  color: #1a1a1a;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.acceptance-signatures input {
+  width: 100%;
+}
+
 @media print {
   .script-document textarea {
     display: none !important;
