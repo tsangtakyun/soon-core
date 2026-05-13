@@ -3225,8 +3225,10 @@ textarea:disabled {
 
 .script-block-types .script-selected-block-type {
   align-items: center;
+  border: 0.5px solid;
   border-radius: 12px;
   color: #fff;
+  cursor: pointer;
   display: inline-flex;
   font-size: 12px;
   font-weight: 500;

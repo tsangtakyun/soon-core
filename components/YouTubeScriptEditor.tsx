@@ -154,12 +154,14 @@ export function YouTubeScriptEditor({ doc, onBack, onSaved }: Props) {
   }, [])
 
   useEffect(() => {
-    function closeTypeSelectors() {
+    function closeTypeSelectors(event: PointerEvent) {
+      const target = event.target instanceof Element ? event.target : null
+      if (target?.closest('.script-block-types')) return
       setEditingBlockTypeIds([])
     }
 
-    document.addEventListener('click', closeTypeSelectors)
-    return () => document.removeEventListener('click', closeTypeSelectors)
+    document.addEventListener('pointerdown', closeTypeSelectors)
+    return () => document.removeEventListener('pointerdown', closeTypeSelectors)
   }, [])
 
   async function loadSettings() {
@@ -501,18 +503,25 @@ export function YouTubeScriptEditor({ doc, onBack, onSaved }: Props) {
                           )
                         })
                       ) : (
-                        <button
+                        <div
                           className="script-selected-block-type"
-                          type="button"
+                          role="button"
+                          tabIndex={0}
                           style={{ background: blockColor, borderColor: blockColor }}
                           onClick={(event) => {
+                            event.stopPropagation()
+                            openBlockTypeSelector(block.id)
+                          }}
+                          onKeyDown={(event) => {
+                            if (event.key !== 'Enter' && event.key !== ' ') return
+                            event.preventDefault()
                             event.stopPropagation()
                             openBlockTypeSelector(block.id)
                           }}
                         >
                           {t.blockTypes[selectedBlockType]}
                           <span>▾</span>
-                        </button>
+                        </div>
                       )}
                     </div>
                     {(block.type === 'camera' || block.type === 'behind') && (
