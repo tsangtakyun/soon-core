@@ -484,7 +484,11 @@ export function YouTubeScriptEditor({ doc, onBack, onSaved }: Props) {
                     }}
                   >
                     <button className="script-block-delete soon-no-print" type="button" onClick={() => deleteBlock(segment.id, block.id)}>×</button>
-                    <div className="script-block-types" onClick={(event) => event.stopPropagation()}>
+                    <div
+                      className="script-block-types"
+                      onClick={(event) => event.stopPropagation()}
+                      onPointerDown={(event) => event.stopPropagation()}
+                    >
                       {showAllBlockTypes ? (
                         blockTypeOptions.map((type) => {
                           const active = selectedBlockType === type
@@ -508,6 +512,11 @@ export function YouTubeScriptEditor({ doc, onBack, onSaved }: Props) {
                           role="button"
                           tabIndex={0}
                           style={{ background: blockColor, borderColor: blockColor }}
+                          onPointerDown={(event) => {
+                            event.preventDefault()
+                            event.stopPropagation()
+                            openBlockTypeSelector(block.id)
+                          }}
                           onClick={(event) => {
                             event.stopPropagation()
                             openBlockTypeSelector(block.id)
