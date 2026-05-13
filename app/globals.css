@@ -3599,8 +3599,28 @@ textarea:disabled {
   white-space: nowrap;
 }
 
+.campaign-report-editor {
+  background: var(--soon-bg);
+}
+
+.campaign-report-doc {
+  background: #ffffff;
+  border-radius: 12px;
+  color: #1a1a1a;
+  margin: 0 auto;
+  max-width: 960px;
+  padding: 48px;
+}
+
 .campaign-document {
   max-width: 960px;
+  color: #1a1a1a;
+}
+
+.campaign-document h1,
+.campaign-document h2,
+.campaign-document h3,
+.campaign-document strong {
   color: #1a1a1a;
 }
 
@@ -3616,6 +3636,11 @@ textarea:disabled {
   outline: none;
   padding: 6px 0;
   width: 100%;
+}
+
+.campaign-document input::placeholder,
+.campaign-document textarea::placeholder {
+  color: #aaaaaa;
 }
 
 .campaign-document textarea {
@@ -3689,7 +3714,7 @@ textarea:disabled {
 .campaign-section h2 {
   color: #1a1a1a;
   font-size: 19px;
-  font-weight: 700;
+  font-weight: 600;
   margin-bottom: 16px;
 }
 
@@ -3701,6 +3726,7 @@ textarea:disabled {
 }
 
 .campaign-metric-card {
+  background: #f9f9f9;
   border: 0.5px solid #e5e5e5;
   border-radius: 8px;
   padding: 14px;
@@ -3715,6 +3741,7 @@ textarea:disabled {
 }
 
 .campaign-metric-card span {
+  color: #555555;
   display: block;
   font-size: 12px;
   margin-bottom: 6px;
@@ -3765,9 +3792,10 @@ textarea:disabled {
 }
 
 .campaign-video-block {
+  background: #ffffff;
   border: 0.5px solid #e5e5e5;
-  border-radius: 10px;
-  padding: 16px;
+  border-radius: 8px;
+  padding: 20px;
 }
 
 .campaign-video-header {

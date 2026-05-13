@@ -633,7 +633,7 @@ export function CampaignReportEditor({ doc, onBack, onSaved }: Props) {
         {saved && <span className="doc-saved-indicator">{c.saved}</span>}
       </div>
 
-      <article className="doc-paper campaign-document soon-print-doc">
+      <article className="campaign-report-doc campaign-document soon-print-doc">
         <header className="campaign-cover">
           <div>
             {settings.logo_base64 ? <img className="campaign-company-logo" src={settings.logo_base64} alt="Company logo" /> : <strong>{settings.company_name}</strong>}
