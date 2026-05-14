@@ -4904,6 +4904,26 @@ textarea:disabled {
   padding: 10px 0;
 }
 
+.finance-import-row strong,
+.finance-import-row small {
+  display: block;
+}
+
+.finance-import-row strong {
+  font-size: 13px;
+}
+
+.finance-import-row small {
+  color: var(--soon-text-muted);
+  font-size: 11px;
+  margin-top: 3px;
+}
+
+.finance-import-row button:disabled {
+  cursor: wait;
+  opacity: 0.55;
+}
+
 @media print {
   .script-document textarea {
     display: none !important;

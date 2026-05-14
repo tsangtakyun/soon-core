@@ -307,9 +307,10 @@ export function FinanceCenter() {
       .single()
     if (error) {
       window.alert(error.message)
-      return
+      return false
     }
     setInvoices((current) => current.map((item) => (item.id === doc.id ? (data as FinanceDoc) : item)))
+    return true
   }
 
   async function handleReceiptUpload(event: ChangeEvent<HTMLInputElement>) {
@@ -714,7 +715,7 @@ export function FinanceCenter() {
           </div>
         </section>
 
-        {importOpen && <InvoiceImportModal invoices={invoices} onClose={() => setImportOpen(false)} onImport={(invoice) => void importInvoice(invoice)} defaultCurrency={defaultCurrency} />}
+        {importOpen && <InvoiceImportModal invoices={invoices} onClose={() => setImportOpen(false)} onImport={importInvoice} defaultCurrency={defaultCurrency} />}
       </section>
     </DashboardShell>
   )
@@ -802,17 +803,40 @@ function FieldWarning() {
   return <div className="expense-field-warning">⚠️ AI 未能識別，請手動填寫</div>
 }
 
-function InvoiceImportModal({ invoices, onClose, onImport, defaultCurrency }: { invoices: FinanceDoc[]; onClose: () => void; onImport: (invoice: FinanceDoc) => void; defaultCurrency: string }) {
+function InvoiceImportModal({ invoices, onClose, onImport, defaultCurrency }: { invoices: FinanceDoc[]; onClose: () => void; onImport: (invoice: FinanceDoc) => Promise<boolean>; defaultCurrency: string }) {
+  const [importingId, setImportingId] = useState<string | null>(null)
+
+  async function handleImport(invoice: FinanceDoc) {
+    setImportingId(invoice.id)
+    const imported = await onImport(invoice)
+    setImportingId(null)
+    if (imported) onClose()
+  }
+
   return (
     <div className="finance-modal-backdrop">
       <div className="finance-modal">
         <header><h2>匯入發票</h2><button type="button" onClick={onClose}>關閉</button></header>
-        {invoices.map((invoice) => (
-          <div key={invoice.id} className="finance-import-row">
-            <span>{invoice.title}</span><span>{invoice.invoice_client || '-'}</span><span>{money(invoice.invoice_currency || defaultCurrency, toNumber(invoice.invoice_amount))}</span>
-            <button type="button" onClick={() => onImport(invoice)}>Import</button>
-          </div>
-        ))}
+        {invoices.map((invoice) => {
+          const invoiceContent = parseInvoice(invoice.content)
+          const invoiceNumber = invoiceContent.invoiceNumber || invoice.title
+          const client = invoice.invoice_client || invoiceContent.billedToName || '-'
+          const amount = invoice.invoice_amount || invoiceContent.lineItems.reduce((sum, item) => sum + toNumber(item.rate) * toNumber(item.quantity), 0)
+          const currency = invoice.invoice_currency || invoiceContent.currency || defaultCurrency
+          return (
+            <div key={invoice.id} className="finance-import-row">
+              <span>
+                <strong>{invoiceNumber}</strong>
+                <small>{invoice.title}</small>
+              </span>
+              <span>{client}</span>
+              <span>{money(currency, toNumber(amount))}</span>
+              <button type="button" disabled={importingId === invoice.id} onClick={() => void handleImport(invoice)}>
+                {importingId === invoice.id ? 'Importing...' : 'Import'}
+              </button>
+            </div>
+          )
+        })}
       </div>
     </div>
   )
