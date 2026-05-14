@@ -245,6 +245,9 @@ export function QuotationEditor({ doc, onBack, onSaved }: Props) {
       </header>
 
       <article className="invoice-document quotation-document soon-print-doc">
+        {settings.document_header_base64 && (
+          <img className="document-header-banner" src={settings.document_header_base64} alt="" />
+        )}
         <section className="invoice-header">
           <div className="invoice-company">
             <label className="invoice-logo">

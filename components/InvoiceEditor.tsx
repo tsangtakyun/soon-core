@@ -132,6 +132,7 @@ export function InvoiceEditor({ doc, onBack, onSaved }: Props) {
       ? {
           display_name: data.display_name ?? 'Tommy',
           logo_base64: data.logo_base64 ?? '',
+          document_header_base64: data.document_header_base64 ?? '',
           company_name: data.company_name ?? '',
           email: data.email ?? '',
           phone: data.phone ?? '',
@@ -371,6 +372,9 @@ export function InvoiceEditor({ doc, onBack, onSaved }: Props) {
       )}
 
       <article className="invoice-document soon-print-doc">
+        {settings.document_header_base64 && (
+          <img className="document-header-banner" src={settings.document_header_base64} alt="" />
+        )}
         <section className="invoice-header">
           <div className="invoice-company">
             <label className="invoice-logo">

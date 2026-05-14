@@ -8,16 +8,19 @@ import { buildQuoteNumber, defaultQuotationSettings, mergeQuotationSettings, typ
 import { supabase } from '@/lib/supabase'
 
 type SignatureMode = 'draw' | 'upload'
-type SectionKey =
+type PanelKey =
   | 'user'
   | 'company'
+  | 'brand'
   | 'payment'
   | 'paymentTerms'
   | 'invoice'
   | 'rates'
   | 'signature'
   | 'api'
-  | 'reply'
+  | 'replyEmail'
+  | 'replyMessage'
+  | 'replyFans'
 type ReplyInboxType = 'email' | 'message' | 'fans'
 type ReplySettingDraft = {
   user_id: string
@@ -29,23 +32,63 @@ type ReplySettingDraft = {
   avoid_topics: string
 }
 
-const defaultCollapsed: Record<SectionKey, boolean> = {
-  user: false,
-  company: true,
-  payment: false,
-  paymentTerms: true,
-  invoice: true,
-  rates: true,
-  signature: true,
-  api: false,
-  reply: false,
+const navGroups: Array<{
+  icon: string
+  title: string
+  items: Array<{ key: PanelKey; label: string }>
+}> = [
+  {
+    icon: '👤',
+    title: '帳戶',
+    items: [
+      { key: 'user', label: '基本資料' },
+      { key: 'company', label: '公司資料' },
+      { key: 'brand', label: '品牌' },
+    ],
+  },
+  {
+    icon: '💳',
+    title: '財務',
+    items: [
+      { key: 'payment', label: '付款資料' },
+      { key: 'paymentTerms', label: '付款條款' },
+      { key: 'invoice', label: '發票設定' },
+      { key: 'rates', label: '預設費率' },
+      { key: 'signature', label: '簽署設定' },
+    ],
+  },
+  { icon: '🔗', title: '整合', items: [{ key: 'api', label: 'API 連接' }] },
+  {
+    icon: '💬',
+    title: '回覆中心',
+    items: [
+      { key: 'replyEmail', label: 'Email 助理' },
+      { key: 'replyMessage', label: 'Message 助理' },
+      { key: 'replyFans', label: 'Fans 助理' },
+    ],
+  },
+]
+
+const panelMeta: Record<PanelKey, { title: string; subtitle: string }> = {
+  user: { title: '基本資料', subtitle: '設定你喺 SOON CORE 入面顯示嘅名稱同頭像。' },
+  company: { title: '公司資料', subtitle: '公司名稱、聯絡資料同文件用 Logo。' },
+  brand: { title: '品牌', subtitle: '上傳文件標頭，供文件模板輸出使用。' },
+  payment: { title: '付款資料', subtitle: '銀行、FPS、PayPal 同支票付款設定。' },
+  paymentTerms: { title: '付款條款', subtitle: '設定付款期限同逾期利息。' },
+  invoice: { title: '發票設定', subtitle: '管理發票 / 報價單號碼、貨幣同稅率。' },
+  rates: { title: '預設費率', subtitle: '設定 Invoice 預設 service rate。' },
+  signature: { title: '簽署設定', subtitle: '設定授權人姓名同簽名圖。' },
+  api: { title: 'API 連接', subtitle: '管理 YouTube / Meta 等外部 API 設定。' },
+  replyEmail: { title: 'Email 助理', subtitle: 'Email inbox 嘅回覆語氣同背景資料。' },
+  replyMessage: { title: 'Message 助理', subtitle: 'Message inbox 嘅回覆語氣同背景資料。' },
+  replyFans: { title: 'Fans 助理', subtitle: 'Fans inbox 嘅回覆語氣同背景資料。' },
 }
 
-const replyInboxOptions: Array<{ value: ReplyInboxType; label: string }> = [
-  { value: 'email', label: 'Email' },
-  { value: 'message', label: 'Message' },
-  { value: 'fans', label: 'Fans' },
-]
+const replyPanelMap: Partial<Record<PanelKey, ReplyInboxType>> = {
+  replyEmail: 'email',
+  replyMessage: 'message',
+  replyFans: 'fans',
+}
 
 const createReplySetting = (inboxType: ReplyInboxType): ReplySettingDraft => ({
   user_id: 'tommy',
@@ -57,15 +100,13 @@ const createReplySetting = (inboxType: ReplyInboxType): ReplySettingDraft => ({
   avoid_topics: '',
 })
 
-const collapsedKey = (key: SectionKey) => `soon-settings-${key}-collapsed`
-
 export function SettingsPage() {
   const [settings, setSettings] = useState<QuotationSettings>(defaultQuotationSettings)
+  const [activePanel, setActivePanel] = useState<PanelKey>('user')
   const [saved, setSaved] = useState(false)
   const [signatureSaved, setSignatureSaved] = useState(false)
   const [signatureMode, setSignatureMode] = useState<SignatureMode>('draw')
   const [isDrawing, setIsDrawing] = useState(false)
-  const [collapsed, setCollapsed] = useState<Record<SectionKey, boolean>>(defaultCollapsed)
   const [replySettings, setReplySettings] = useState<Record<ReplyInboxType, ReplySettingDraft>>({
     email: createReplySetting('email'),
     message: createReplySetting('message'),
@@ -75,14 +116,6 @@ export function SettingsPage() {
 
   useEffect(() => {
     void load()
-    setCollapsed(
-      Object.fromEntries(
-        (Object.keys(defaultCollapsed) as SectionKey[]).map((key) => {
-          const stored = window.localStorage.getItem(collapsedKey(key))
-          return [key, stored === null ? defaultCollapsed[key] : stored === 'true']
-        })
-      ) as Record<SectionKey, boolean>
-    )
   }, [])
 
   async function load() {
@@ -91,6 +124,7 @@ export function SettingsPage() {
       supabase.from('reply_settings').select('*').eq('user_id', 'tommy'),
     ])
     if (data) setSettings(mergeQuotationSettings(data))
+
     const nextReplySettings = {
       email: createReplySetting('email'),
       message: createReplySetting('message'),
@@ -100,14 +134,6 @@ export function SettingsPage() {
       nextReplySettings[item.inbox_type] = { ...createReplySetting(item.inbox_type), ...item }
     })
     setReplySettings(nextReplySettings)
-  }
-
-  function toggleSection(key: SectionKey) {
-    setCollapsed((current) => {
-      const next = { ...current, [key]: !current[key] }
-      window.localStorage.setItem(collapsedKey(key), String(next[key]))
-      return next
-    })
   }
 
   function update<K extends keyof QuotationSettings>(key: K, value: QuotationSettings[K]) {
@@ -131,24 +157,20 @@ export function SettingsPage() {
     setSaved(false)
   }
 
-  function uploadLogo(event: ChangeEvent<HTMLInputElement>) {
+  function readImage(event: ChangeEvent<HTMLInputElement>, onLoad: (value: string) => void) {
     const file = event.target.files?.[0]
     if (!file) return
     const reader = new FileReader()
-    reader.onload = () => update('logo_base64', String(reader.result ?? ''))
+    reader.onload = () => onLoad(String(reader.result ?? ''))
     reader.readAsDataURL(file)
   }
 
   function uploadSignature(event: ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0]
-    if (!file) return
-    const reader = new FileReader()
-    reader.onload = () => {
+    readImage(event, (value) => {
       const image = new Image()
       image.onload = () => update('signature_base64', autoCropSignature(image))
-      image.src = String(reader.result ?? '')
-    }
-    reader.readAsDataURL(file)
+      image.src = value
+    })
   }
 
   function pointerPosition(event: PointerEvent<HTMLCanvasElement>) {
@@ -193,12 +215,11 @@ export function SettingsPage() {
     update('signature_base64', '')
   }
 
-  async function save() {
+  async function saveSettingsOnly() {
     const { error } = await supabase.from('settings').upsert(
       { user_id: 'tommy', ...settings, updated_at: new Date().toISOString() },
       { onConflict: 'user_id' }
     )
-
     if (error) {
       window.alert(error.message)
       return false
@@ -207,9 +228,8 @@ export function SettingsPage() {
     return true
   }
 
-  async function saveReplySettings() {
-    const payload = replyInboxOptions.map((inbox) => replySettings[inbox.value])
-    const { error } = await supabase.from('reply_settings').upsert(payload, { onConflict: 'user_id,inbox_type' })
+  async function saveReplyOnly(inboxType: ReplyInboxType) {
+    const { error } = await supabase.from('reply_settings').upsert(replySettings[inboxType], { onConflict: 'user_id,inbox_type' })
     if (error) {
       window.alert(error.message)
       return false
@@ -217,53 +237,86 @@ export function SettingsPage() {
     return true
   }
 
-  async function saveAll() {
-    const settingsSaved = await save()
-    if (!settingsSaved) return
-    const replySaved = await saveReplySettings()
-    if (!replySaved) return
+  async function saveCurrentPanel() {
+    const inboxType = replyPanelMap[activePanel]
+    const ok = inboxType ? await saveReplyOnly(inboxType) : await saveSettingsOnly()
+    if (!ok) return
     setSaved(true)
-    window.setTimeout(() => setSaved(false), 2500)
+    window.setTimeout(() => setSaved(false), 2200)
   }
 
   async function saveSignature() {
-    const { error } = await supabase.from('settings').upsert(
-      {
-        user_id: 'tommy',
-        signature_base64: settings.signature_base64,
-        authorized_name: settings.authorized_name,
-        updated_at: new Date().toISOString(),
-      },
-      { onConflict: 'user_id' }
-    )
-
-    if (error) {
-      window.alert(error.message)
-      return
-    }
+    const ok = await saveSettingsOnly()
+    if (!ok) return
     setSignatureSaved(true)
-    window.dispatchEvent(new Event('soon-data-updated'))
     window.setTimeout(() => setSignatureSaved(false), 2000)
   }
 
+  const meta = panelMeta[activePanel]
+
   return (
     <DashboardShell activeSection="settings">
-      <section className="settings-page settings-page-v2">
-        <header className="settings-page-head">
-          <div>
-            <h1>設定</h1>
-            <p>管理帳戶、財務、整合同回覆設定</p>
-          </div>
-          <div className="settings-fixed-save">
+      <section className="settings-board">
+        <aside className="settings-local-sidebar">
+          <div className="settings-local-title">設定</div>
+          {navGroups.map((group) => (
+            <nav key={group.title} className="settings-local-group" aria-label={group.title}>
+              <div className="settings-local-group-title">
+                <span>{group.icon}</span>
+                <span>{group.title}</span>
+              </div>
+              {group.items.map((item) => (
+                <button
+                  key={item.key}
+                  className={activePanel === item.key ? 'active' : ''}
+                  type="button"
+                  onClick={() => setActivePanel(item.key)}
+                >
+                  {item.label}
+                </button>
+              ))}
+            </nav>
+          ))}
+        </aside>
+
+        <main className="settings-detail">
+          <select className="settings-mobile-select" value={activePanel} onChange={(event) => setActivePanel(event.target.value as PanelKey)}>
+            {navGroups.flatMap((group) => group.items).map((item) => (
+              <option key={item.key} value={item.key}>
+                {item.label}
+              </option>
+            ))}
+          </select>
+
+          <header className="settings-detail-head">
+            <div>
+              <h1>{meta.title}</h1>
+              <p>{meta.subtitle}</p>
+            </div>
+          </header>
+
+          <div className="settings-detail-divider" />
+          <div className="settings-detail-form">{renderPanel()}</div>
+
+          <div className="settings-section-save">
             {saved && <span>已儲存</span>}
-            <button className="primary-button" type="button" onClick={() => void saveAll()}>
-              儲存設定
+            <button className="primary-button" type="button" onClick={() => void saveCurrentPanel()}>
+              儲存
             </button>
           </div>
-        </header>
+        </main>
+      </section>
+    </DashboardShell>
+  )
 
-        <SettingsGroup icon="👤" title="帳戶" subtitle="用戶資料同公司設定">
-          <SettingsSubsection title="用戶資料" collapsed={collapsed.user} onToggle={() => toggleSection('user')}>
+  function renderPanel() {
+    const replyInbox = replyPanelMap[activePanel]
+    if (replyInbox) return <ReplyPanel inboxType={replyInbox} item={replySettings[replyInbox]} onChange={updateReplySetting} />
+
+    switch (activePanel) {
+      case 'user':
+        return (
+          <>
             <label>
               Display name
               <input value={settings.display_name} onChange={(event) => update('display_name', event.target.value)} />
@@ -272,12 +325,14 @@ export function SettingsPage() {
               頭像 / Logo upload
               <div className="settings-logo-row">
                 {settings.logo_base64 ? <img src={settings.logo_base64} alt="" /> : <span className="settings-logo-placeholder">Logo</span>}
-                <input type="file" accept="image/*" onChange={uploadLogo} />
+                <input type="file" accept="image/*" onChange={(event) => readImage(event, (value) => update('logo_base64', value))} />
               </div>
             </label>
-          </SettingsSubsection>
-
-          <SettingsSubsection title="公司資料" collapsed={collapsed.company} onToggle={() => toggleSection('company')}>
+          </>
+        )
+      case 'company':
+        return (
+          <>
             <label>
               公司名稱
               <input value={settings.company_name} onChange={(event) => update('company_name', event.target.value)} />
@@ -298,14 +353,29 @@ export function SettingsPage() {
               公司 Logo upload
               <div className="settings-logo-row">
                 {settings.logo_base64 ? <img src={settings.logo_base64} alt="" /> : <span className="settings-logo-placeholder">Logo</span>}
-                <input type="file" accept="image/*" onChange={uploadLogo} />
+                <input type="file" accept="image/*" onChange={(event) => readImage(event, (value) => update('logo_base64', value))} />
               </div>
             </label>
-          </SettingsSubsection>
-        </SettingsGroup>
-
-        <SettingsGroup icon="💳" title="財務" subtitle="財務相關設定">
-          <SettingsSubsection title="付款資料" collapsed={collapsed.payment} onToggle={() => toggleSection('payment')}>
+          </>
+        )
+      case 'brand':
+        return (
+          <label>
+            文件標頭
+            <span className="settings-field-help">建議解析度：580x80px，PNG 透明背景</span>
+            <div className="document-header-upload">
+              {settings.document_header_base64 ? (
+                <img src={settings.document_header_base64} alt="Document header preview" />
+              ) : (
+                <span>點擊上傳文件標頭</span>
+              )}
+              <input type="file" accept="image/*" onChange={(event) => readImage(event, (value) => update('document_header_base64', value))} />
+            </div>
+          </label>
+        )
+      case 'payment':
+        return (
+          <>
             <label>
               銀行名稱
               <input value={settings.bank_name} onChange={(event) => update('bank_name', event.target.value)} />
@@ -326,22 +396,21 @@ export function SettingsPage() {
               PayPal Email
               <input value={settings.paypal_email} onChange={(event) => update('paypal_email', event.target.value)} />
             </label>
-            <label className="payment-method-item">
-              <input type="checkbox" checked={settings.bank_transfer_enabled} onChange={(event) => update('bank_transfer_enabled', event.target.checked)} />
-              <span>Bank Transfer</span>
-            </label>
-            <label className="payment-method-item">
-              <input type="checkbox" checked={settings.cheque_enabled} onChange={(event) => update('cheque_enabled', event.target.checked)} />
-              <span>Cheque</span>
-            </label>
-            <label className="payment-method-item">
-              <input type="checkbox" checked={settings.fps_enabled} onChange={(event) => update('fps_enabled', event.target.checked)} />
-              <span>FPS / PayMe</span>
-            </label>
-            <label className="payment-method-item">
-              <input type="checkbox" checked={settings.paypal_enabled} onChange={(event) => update('paypal_enabled', event.target.checked)} />
-              <span>PayPal</span>
-            </label>
+            {[
+              ['bank_transfer_enabled', 'Bank Transfer'],
+              ['cheque_enabled', 'Cheque'],
+              ['fps_enabled', 'FPS / PayMe'],
+              ['paypal_enabled', 'PayPal'],
+            ].map(([key, label]) => (
+              <label className="payment-method-item" key={key}>
+                <input
+                  type="checkbox"
+                  checked={Boolean(settings[key as keyof QuotationSettings])}
+                  onChange={(event) => update(key as keyof QuotationSettings, event.target.checked as never)}
+                />
+                <span>{label}</span>
+              </label>
+            ))}
             <label>
               支票抬頭
               <input value={settings.cheque_payable_to} onChange={(event) => update('cheque_payable_to', event.target.value)} />
@@ -350,9 +419,11 @@ export function SettingsPage() {
               郵寄地址
               <textarea value={settings.cheque_address} onChange={(event) => update('cheque_address', event.target.value)} rows={3} />
             </label>
-          </SettingsSubsection>
-
-          <SettingsSubsection title="付款條款設定" collapsed={collapsed.paymentTerms} onToggle={() => toggleSection('paymentTerms')}>
+          </>
+        )
+      case 'paymentTerms':
+        return (
+          <>
             <label>
               付款期限
               <input type="number" min="0" value={settings.payment_days} onChange={(event) => update('payment_days', Number(event.target.value || 0))} />
@@ -361,9 +432,11 @@ export function SettingsPage() {
               逾期利息
               <input type="number" min="0" value={settings.interest_rate} onChange={(event) => update('interest_rate', Number(event.target.value || 0))} />
             </label>
-          </SettingsSubsection>
-
-          <SettingsSubsection title="發票設定" collapsed={collapsed.invoice} onToggle={() => toggleSection('invoice')}>
+          </>
+        )
+      case 'invoice':
+        return (
+          <>
             <label>
               發票號碼前綴
               <input value={settings.invoice_prefix} onChange={(event) => update('invoice_prefix', event.target.value)} />
@@ -388,10 +461,6 @@ export function SettingsPage() {
               <span>報價單號碼格式</span>
               <strong>預覽：{buildQuoteNumber(settings, 1)}</strong>
             </div>
-            <div className="settings-readonly-row">
-              <span>報價單目前號碼</span>
-              <strong>{settings.quote_current_number}</strong>
-            </div>
             <label>
               預設貨幣
               <select value={settings.default_currency} onChange={(event) => update('default_currency', normaliseCurrency(event.target.value))}>
@@ -406,51 +475,39 @@ export function SettingsPage() {
               Tax rate %
               <input type="number" min="0" value={settings.tax_rate} onChange={(event) => update('tax_rate', Number(event.target.value || 0))} />
             </label>
-          </SettingsSubsection>
-
-          <SettingsSubsection title="Invoice 預設費率" collapsed={collapsed.rates} onToggle={() => toggleSection('rates')}>
-            <div className="settings-rate-groups">
-              {settingsRateGroups.map((group) => (
-                <div key={group.phase} className="settings-rate-group">
-                  <h3>{group.phase}</h3>
-                  {group.items.map((item) => (
-                    <label key={item}>
-                      {item}
-                      <input type="number" min="0" value={settings.default_rates[item] ?? 0} onChange={(event) => updateRate(item, event.target.value)} />
-                    </label>
-                  ))}
-                </div>
-              ))}
-            </div>
-          </SettingsSubsection>
-
-          <SettingsSubsection title="簽署設定" collapsed={collapsed.signature} onToggle={() => toggleSection('signature')}>
+          </>
+        )
+      case 'rates':
+        return (
+          <div className="settings-rate-groups">
+            {settingsRateGroups.map((group) => (
+              <div key={group.phase} className="settings-rate-group">
+                <h3>{group.phase}</h3>
+                {group.items.map((item) => (
+                  <label key={item}>
+                    {item}
+                    <input type="number" min="0" value={settings.default_rates[item] ?? 0} onChange={(event) => updateRate(item, event.target.value)} />
+                  </label>
+                ))}
+              </div>
+            ))}
+          </div>
+        )
+      case 'signature':
+        return (
+          <>
             <label>
               授權人姓名
               <input value={settings.authorized_name} onChange={(event) => update('authorized_name', event.target.value)} />
             </label>
             <div className="signature-mode-toggle">
-              <button className={signatureMode === 'draw' ? 'active' : ''} type="button" onClick={() => setSignatureMode('draw')}>
-                手寫
-              </button>
-              <button className={signatureMode === 'upload' ? 'active' : ''} type="button" onClick={() => setSignatureMode('upload')}>
-                上傳圖片
-              </button>
+              <button className={signatureMode === 'draw' ? 'active' : ''} type="button" onClick={() => setSignatureMode('draw')}>手寫</button>
+              <button className={signatureMode === 'upload' ? 'active' : ''} type="button" onClick={() => setSignatureMode('upload')}>上傳圖片</button>
             </div>
             {signatureMode === 'draw' ? (
               <div className="signature-canvas-wrap">
-                <canvas
-                  ref={canvasRef}
-                  width={400}
-                  height={120}
-                  onPointerDown={startSignatureDraw}
-                  onPointerMove={drawSignature}
-                  onPointerUp={finishSignatureDraw}
-                  onPointerLeave={finishSignatureDraw}
-                />
-                <button className="ghost-button inline-ghost-button" type="button" onClick={clearSignature}>
-                  清除
-                </button>
+                <canvas ref={canvasRef} width={400} height={120} onPointerDown={startSignatureDraw} onPointerMove={drawSignature} onPointerUp={finishSignatureDraw} onPointerLeave={finishSignatureDraw} />
+                <button className="ghost-button inline-ghost-button" type="button" onClick={clearSignature}>清除</button>
               </div>
             ) : (
               <label>
@@ -462,16 +519,14 @@ export function SettingsPage() {
               </label>
             )}
             <div className="signature-save-row">
-              <button className="signature-save-button" type="button" onClick={() => void saveSignature()}>
-                儲存簽名
-              </button>
+              <button className="signature-save-button" type="button" onClick={() => void saveSignature()}>儲存簽名</button>
               {signatureSaved && <span>已儲存</span>}
             </div>
-          </SettingsSubsection>
-        </SettingsGroup>
-
-        <SettingsGroup icon="🔗" title="整合" subtitle="API 連接設定">
-          <SettingsSubsection title="API 連接設定" collapsed={collapsed.api} onToggle={() => toggleSection('api')}>
+          </>
+        )
+      case 'api':
+        return (
+          <>
             <div className="api-status-row">
               <span className={settings.youtube_client_id && settings.youtube_client_secret ? 'api-status connected' : 'api-status'}>
                 YouTube {settings.youtube_client_id && settings.youtube_client_secret ? '✓ 已連接' : '未連接'}
@@ -496,106 +551,58 @@ export function SettingsPage() {
               Meta App Secret
               <input type="password" value={settings.meta_app_secret} onChange={(event) => update('meta_app_secret', event.target.value)} />
             </label>
-          </SettingsSubsection>
-        </SettingsGroup>
-
-        <SettingsGroup icon="💬" title="回覆中心" subtitle="虛擬助理設定">
-          <SettingsSubsection title="回覆設定" collapsed={collapsed.reply} onToggle={() => toggleSection('reply')}>
-            <div className="reply-settings-grid">
-              {replyInboxOptions.map((inbox) => {
-                const item = replySettings[inbox.value]
-                return (
-                  <section className="reply-settings-card" key={inbox.value}>
-                    <h3>{inbox.label}</h3>
-                    <label>
-                      助理名稱
-                      <input value={item.assistant_name} onChange={(event) => updateReplySetting(inbox.value, 'assistant_name', event.target.value)} />
-                    </label>
-                    <div className="settings-mini-toggle">
-                      {[
-                        { value: 'professional', label: '專業' },
-                        { value: 'friendly', label: '親切' },
-                        { value: 'casual', label: '活潑' },
-                      ].map((option) => (
-                        <button key={option.value} className={item.tone === option.value ? 'active' : ''} type="button" onClick={() => updateReplySetting(inbox.value, 'tone', option.value as ReplySettingDraft['tone'])}>
-                          {option.label}
-                        </button>
-                      ))}
-                    </div>
-                    <div className="settings-mini-toggle">
-                      {[
-                        { value: 'brief', label: '簡短' },
-                        { value: 'standard', label: '標準' },
-                        { value: 'detailed', label: '詳細' },
-                      ].map((option) => (
-                        <button key={option.value} className={item.reply_length === option.value ? 'active' : ''} type="button" onClick={() => updateReplySetting(inbox.value, 'reply_length', option.value as ReplySettingDraft['reply_length'])}>
-                          {option.label}
-                        </button>
-                      ))}
-                    </div>
-                    <label>
-                      Creator 背景資料
-                      <textarea value={item.creator_context} placeholder="介紹你係邊個、做咩類型內容、目標觀眾..." rows={4} onChange={(event) => updateReplySetting(inbox.value, 'creator_context', event.target.value)} />
-                    </label>
-                    <label>
-                      唔回覆話題
-                      <textarea value={item.avoid_topics} placeholder="例如：唔報價、唔透露個人資料..." rows={3} onChange={(event) => updateReplySetting(inbox.value, 'avoid_topics', event.target.value)} />
-                    </label>
-                  </section>
-                )
-              })}
-            </div>
-          </SettingsSubsection>
-        </SettingsGroup>
-      </section>
-    </DashboardShell>
-  )
+          </>
+        )
+    }
+  }
 }
 
-function SettingsGroup({
-  icon,
-  title,
-  subtitle,
-  children,
+function ReplyPanel({
+  inboxType,
+  item,
+  onChange,
 }: {
-  icon: string
-  title: string
-  subtitle: string
-  children: ReactNode
+  inboxType: ReplyInboxType
+  item: ReplySettingDraft
+  onChange: <K extends keyof ReplySettingDraft>(inboxType: ReplyInboxType, key: K, value: ReplySettingDraft[K]) => void
 }) {
   return (
-    <section className="settings-group-card">
-      <header className="settings-group-head">
-        <span>{icon}</span>
-        <div>
-          <h2>{title}</h2>
-          <p>{subtitle}</p>
-        </div>
-      </header>
-      <div className="settings-group-body">{children}</div>
-    </section>
-  )
-}
-
-function SettingsSubsection({
-  title,
-  collapsed,
-  onToggle,
-  children,
-}: {
-  title: string
-  collapsed: boolean
-  onToggle: () => void
-  children: ReactNode
-}) {
-  return (
-    <section className={`settings-subsection ${collapsed ? 'collapsed' : 'expanded'}`}>
-      <button className="settings-subsection-header" type="button" onClick={onToggle} aria-expanded={!collapsed}>
-        <span>{title}</span>
-        <strong>{collapsed ? '▶' : '▼'}</strong>
-      </button>
-      <div className="settings-subsection-body">{children}</div>
-    </section>
+    <>
+      <label>
+        助理名稱
+        <input value={item.assistant_name} onChange={(event) => onChange(inboxType, 'assistant_name', event.target.value)} />
+      </label>
+      <div className="settings-mini-toggle">
+        {[
+          { value: 'professional', label: '專業' },
+          { value: 'friendly', label: '親切' },
+          { value: 'casual', label: '活潑' },
+        ].map((option) => (
+          <button key={option.value} className={item.tone === option.value ? 'active' : ''} type="button" onClick={() => onChange(inboxType, 'tone', option.value as ReplySettingDraft['tone'])}>
+            {option.label}
+          </button>
+        ))}
+      </div>
+      <div className="settings-mini-toggle">
+        {[
+          { value: 'brief', label: '簡短' },
+          { value: 'standard', label: '標準' },
+          { value: 'detailed', label: '詳細' },
+        ].map((option) => (
+          <button key={option.value} className={item.reply_length === option.value ? 'active' : ''} type="button" onClick={() => onChange(inboxType, 'reply_length', option.value as ReplySettingDraft['reply_length'])}>
+            {option.label}
+          </button>
+        ))}
+      </div>
+      <label>
+        Creator 背景資料
+        <textarea value={item.creator_context} placeholder="介紹你係邊個、做咩類型內容、目標觀眾..." rows={5} onChange={(event) => onChange(inboxType, 'creator_context', event.target.value)} />
+      </label>
+      <label>
+        唔回覆話題
+        <textarea value={item.avoid_topics} placeholder="例如：唔報價、唔透露個人資料..." rows={4} onChange={(event) => onChange(inboxType, 'avoid_topics', event.target.value)} />
+      </label>
+    </>
   )
 }
 

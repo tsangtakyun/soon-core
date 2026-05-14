@@ -54,6 +54,7 @@ export type InvoiceContent = {
 export type InvoiceSettings = {
   display_name: string
   logo_base64: string
+  document_header_base64: string
   company_name: string
   email: string
   phone: string
@@ -161,6 +162,7 @@ export const settingsRateGroups: Array<{ phase: InvoicePhase; items: string[] }>
 export const defaultSettings: InvoiceSettings = {
   display_name: 'Tommy',
   logo_base64: '',
+  document_header_base64: '',
   company_name: 'SOON Studio',
   email: '',
   phone: '',

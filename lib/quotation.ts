@@ -98,6 +98,7 @@ export function mergeQuotationSettings(data: Record<string, unknown> | null | un
     ...defaultQuotationSettings,
     display_name: String(data.display_name ?? defaultQuotationSettings.display_name),
     logo_base64: String(data.logo_base64 ?? ''),
+    document_header_base64: String(data.document_header_base64 ?? ''),
     company_name: String(data.company_name ?? defaultQuotationSettings.company_name),
     email: String(data.email ?? ''),
     phone: String(data.phone ?? ''),

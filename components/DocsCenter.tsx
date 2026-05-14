@@ -293,6 +293,7 @@ export function DocsCenter() {
   const [selectedDoc, setSelectedDoc] = useState<CoreDoc | null>(null)
   const [content, setContent] = useState('')
   const [projectBrief, setProjectBrief] = useState<ProjectBriefContent>(defaultProjectBrief)
+  const [documentHeaderBase64, setDocumentHeaderBase64] = useState('')
   const [workspaceId, setWorkspaceId] = useState('')
   const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved'>('idle')
   const [selectedDocIds, setSelectedDocIds] = useState<string[]>([])
@@ -320,15 +321,17 @@ export function DocsCenter() {
   }, [selectedDoc, projectBrief])
 
   async function load() {
-    const [{ data: docData }, { data: workspaceData }, { data: folderData, error: folderError }] = await Promise.all([
+    const [{ data: docData }, { data: workspaceData }, { data: folderData, error: folderError }, { data: settingsData }] = await Promise.all([
       supabase.from('docs').select('*').order('created_at', { ascending: false }),
       supabase.from('workspaces').select('*').order('created_at', { ascending: false }),
       supabase.from('doc_folders').select('*').order('created_at', { ascending: false }),
+      supabase.from('settings').select('document_header_base64').eq('user_id', 'tommy').maybeSingle(),
     ])
 
     setDocs((docData ?? []) as CoreDoc[])
     setWorkspaces((workspaceData ?? []) as Workspace[])
     if (!folderError) setFolders((folderData ?? []) as DocFolder[])
+    setDocumentHeaderBase64(String(settingsData?.document_header_base64 ?? ''))
     const openDocId = searchParams.get('open')
     const nextDocs = (docData ?? []) as CoreDoc[]
     const docToOpen = openDocId ? nextDocs.find((doc) => doc.id === openDocId) : null
@@ -431,6 +434,7 @@ export function DocsCenter() {
       ? {
           display_name: data.display_name ?? 'Tommy',
           logo_base64: data.logo_base64 ?? '',
+          document_header_base64: data.document_header_base64 ?? '',
           company_name: data.company_name ?? 'SOON Studio',
           email: data.email ?? '',
           phone: data.phone ?? '',
@@ -741,6 +745,7 @@ export function DocsCenter() {
           </header>
 
           <article className="brief-document soon-print-doc">
+            {documentHeaderBase64 && <img className="document-header-banner" src={documentHeaderBase64} alt="" />}
             <input
               className="brief-title-input"
               value={projectBrief.title}
