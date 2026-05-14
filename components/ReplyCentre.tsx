@@ -299,7 +299,7 @@ export function ReplyCentre() {
           <div className="reply-inbox-tabs">
             {inboxTabs.map((tab) => (
               <button key={tab.value} className={activeInbox === tab.value ? 'active' : ''} type="button" onClick={() => setActiveInbox(tab.value)}>
-                {tab.icon} {tab.label}<span>{counts[tab.value]}</span>
+                <b>{tab.icon} {tab.label}</b><span>{counts[tab.value]}</span>
               </button>
             ))}
           </div>

@@ -4460,16 +4460,26 @@ textarea:disabled {
 }
 
 .reply-inbox-tabs button {
-  display: inline-flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  justify-content: center;
-  gap: 4px;
+  gap: 3px;
+  min-width: 0;
   border: 0;
   border-bottom: 2px solid transparent;
   background: transparent;
   color: var(--soon-text-secondary);
-  font-size: 11px;
-  padding: 10px 4px;
+  font-size: 10px;
+  padding: 10px 2px;
+  white-space: nowrap;
+}
+
+.reply-inbox-tabs button > b {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  font-weight: 600;
+  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
@@ -4480,6 +4490,7 @@ textarea:disabled {
 
 .reply-inbox-tabs span {
   display: inline-grid;
+  flex: 0 0 auto;
   min-width: 16px;
   height: 16px;
   place-items: center;
