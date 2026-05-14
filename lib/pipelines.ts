@@ -91,7 +91,7 @@ export function getTool(pipelineId: PipelineId, toolId: string) {
 }
 
 export function getProjectPipeline(type?: string | null, category?: string | null): PipelineId {
-  if (type === 'ig' || category === 'ig_reel' || category === 'ig_drama') return 'ig'
+  if (type === 'ig' || category?.startsWith('ig_') || category === 'threads' || category === 'facebook_feed') return 'ig'
   return 'youtube'
 }
 

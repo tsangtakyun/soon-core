@@ -22,7 +22,7 @@ import {
 const pipelineOptions: PipelineStep[] = ['idea', 'script', 'storyboard', 'production', 'subtitle', 'done']
 const sortStorageKey = 'soon-work-sort'
 
-type SortKey = 'created_at' | 'shoot_date' | 'title' | 'status' | 'current_stage'
+type SortKey = 'created_at' | 'shoot_date' | 'publish_date' | 'title' | 'status' | 'current_stage'
 type SortDirection = 'asc' | 'desc'
 type SortState = {
   key: SortKey
@@ -36,6 +36,7 @@ type ProjectDraft = {
   host: string
   owner: string
   shoot_date: string
+  publish_date: string
   status: ProjectStatus
   current_stage: ProjectStage
   workspace_id: string
@@ -50,6 +51,8 @@ const sortOptions: SortState[] = [
   { key: 'created_at', direction: 'asc', label: '最舊建立' },
   { key: 'shoot_date', direction: 'asc', label: '拍攝日期 近→遠' },
   { key: 'shoot_date', direction: 'desc', label: '拍攝日期 遠→近' },
+  { key: 'publish_date', direction: 'asc', label: '發佈時間 近→遠' },
+  { key: 'publish_date', direction: 'desc', label: '發佈時間 遠→近' },
   { key: 'title', direction: 'asc', label: '題目 A→Z' },
   { key: 'status', direction: 'asc', label: 'Status 1→7' },
   { key: 'status', direction: 'desc', label: 'Status 7→1' },
@@ -61,6 +64,7 @@ const emptyProject: ProjectDraft = {
   host: '',
   owner: '',
   shoot_date: '',
+  publish_date: '',
   status: '1. 未拍攝',
   current_stage: '未寫稿',
   workspace_id: '',
@@ -169,6 +173,7 @@ export function WorkBoard() {
       host: project.host ?? '',
       owner: project.owner ?? '',
       shoot_date: project.shoot_date ?? '',
+      publish_date: project.publish_date ?? '',
       status: project.status,
       current_stage: project.current_stage,
       workspace_id: project.workspace_id ?? '',
@@ -197,6 +202,7 @@ export function WorkBoard() {
       host: draft.host.trim() || null,
       owner: draft.owner.trim() || null,
       shoot_date: draft.shoot_date || null,
+      publish_date: draft.publish_date || null,
       status: draft.status,
       current_stage: draft.current_stage,
       workspace_id: draft.workspace_id || null,
@@ -302,6 +308,7 @@ export function WorkBoard() {
                 <th>主持</th>
                 <th>負責人</th>
                 <SortableHeader label="拍攝日期" sortKey="shoot_date" activeSort={sort} onSort={toggleColumnSort} />
+                <SortableHeader label="發佈時間" sortKey="publish_date" activeSort={sort} onSort={toggleColumnSort} />
                 <th>Pipeline</th>
                 <th>Output</th>
               </tr>
@@ -343,6 +350,9 @@ export function WorkBoard() {
                   </td>
                   <td>
                     <span className="shoot-date">{project.shoot_date ?? '未定'}</span>
+                  </td>
+                  <td>
+                    <span className="shoot-date">{project.publish_date ?? '未定'}</span>
                   </td>
                   <td>
                     <button
@@ -447,6 +457,14 @@ export function WorkBoard() {
             />
           </label>
           <label>
+            發佈時間
+            <input
+              type="date"
+              value={draft.publish_date}
+              onChange={(event) => setDraft({ ...draft, publish_date: event.target.value })}
+            />
+          </label>
+          <label>
             Pipeline step
             <select
               value={draft.pipeline_step}
@@ -495,6 +513,7 @@ export function WorkBoard() {
 const columnSortLabels: Record<SortKey, string> = {
   created_at: '建立日期',
   shoot_date: '拍攝日期',
+  publish_date: '發佈時間',
   title: '題目',
   status: 'Status',
   current_stage: '當前工序',
@@ -514,6 +533,7 @@ function compareProjects(a: Project, b: Project, sort: SortState) {
 
 function getSortValue(project: Project, key: SortKey) {
   if (key === 'shoot_date') return project.shoot_date ?? '9999-12-31'
+  if (key === 'publish_date') return project.publish_date ?? '9999-12-31'
   if (key === 'created_at') return project.created_at
   if (key === 'current_stage') return project.current_stage
   return project.title

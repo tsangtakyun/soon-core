@@ -1,4 +1,4 @@
-import type { ProjectStage, ProjectStatus } from '@/lib/types'
+import { categoryOptions, type ProjectStage, type ProjectStatus } from '@/lib/types'
 
 const stageStyles: Record<string, { background: string; color?: string; border?: string }> = {
   未寫稿: { background: '#ef4444' },
@@ -31,14 +31,9 @@ export function StageBadge({ stage }: { stage?: ProjectStage | string | null }) 
 }
 
 export function CategoryTag({ category }: { category?: string | null }) {
-  const label =
-    category === 'ig_reel' ? 'IG Reel' : category === 'ig_drama' ? 'IG Drama' : 'YouTube'
-  const className =
-    category === 'ig_reel'
-      ? 'category-tag category-ig-reel'
-      : category === 'ig_drama'
-        ? 'category-tag category-ig-drama'
-        : 'category-tag category-youtube'
+  const option = categoryOptions.find((item) => item.value === category)
+  const label = option?.label ?? (category === 'ig_drama' ? 'IG Drama' : 'YouTube')
+  const className = `category-tag category-${String(category ?? 'youtube').replaceAll('_', '-')}`
 
   return <span className={className}>{label}</span>
 }

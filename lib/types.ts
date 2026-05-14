@@ -21,7 +21,7 @@ export type ProjectStage =
   | '處理字幕中'
   | '已完成'
 
-export type ProjectCategory = 'youtube' | 'ig_reel' | 'ig_drama'
+export type ProjectCategory = 'youtube' | 'ig_story' | 'ig_feed' | 'ig_reel' | 'threads' | 'facebook_feed' | 'ig_drama'
 export type ProjectType = 'youtube' | 'ig'
 export type WorkspaceType = ProjectType | 'mixed'
 export type PipelineStep = 'idea' | 'script' | 'storyboard' | 'production' | 'subtitle' | 'done'
@@ -43,6 +43,7 @@ export interface Project {
   host: string | null
   owner: string | null
   shoot_date: string | null
+  publish_date: string | null
   status: ProjectStatus
   current_stage: ProjectStage
   pipeline_step: PipelineStep
@@ -90,8 +91,11 @@ export const stageOptions: ProjectStage[] = [
 
 export const categoryOptions: Array<{ value: ProjectCategory; label: string; type: ProjectType }> = [
   { value: 'youtube', label: 'YouTube', type: 'youtube' },
+  { value: 'ig_story', label: 'IG Story', type: 'ig' },
+  { value: 'ig_feed', label: 'IG Feed', type: 'ig' },
   { value: 'ig_reel', label: 'IG Reel', type: 'ig' },
-  { value: 'ig_drama', label: 'IG Drama', type: 'ig' },
+  { value: 'threads', label: 'Threads', type: 'ig' },
+  { value: 'facebook_feed', label: 'Facebook Feed', type: 'ig' },
 ]
 
 export const workspaceTypeOptions: Array<{ value: WorkspaceType; label: string }> = [

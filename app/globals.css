@@ -541,9 +541,30 @@ iframe {
   color: #ef4444;
 }
 
-.category-ig-reel {
+.category-ig-story {
+  border: 0.5px solid #f97316;
+  color: #f97316;
+}
+
+.category-ig-feed {
   border: 0.5px solid #ec4899;
   color: #ec4899;
+}
+
+.category-ig-reel {
+  border: 0.5px solid #a855f7;
+  color: #a855f7;
+}
+
+.category-threads {
+  border: 0.5px solid #1a1a1a;
+  color: #1a1a1a;
+  background: #f5f5f5;
+}
+
+.category-facebook-feed {
+  border: 0.5px solid #3b82f6;
+  color: #3b82f6;
 }
 
 .category-ig-drama {
@@ -632,7 +653,7 @@ textarea:focus {
 
 .work-table {
   width: 100%;
-  min-width: 1120px;
+  min-width: 1240px;
   border-collapse: collapse;
   background: var(--soon-surface);
 }
