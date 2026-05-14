@@ -69,22 +69,15 @@ type ReceiptOcrResult = {
   notes?: string | null
 }
 
-const statusOptions: Array<{ value: InvoiceStatus | 'all'; label: string }> = [
-  { value: 'all', label: '全部' },
-  { value: 'draft', label: 'Draft' },
-  { value: 'issued', label: 'Issued' },
-  { value: 'sent_for_approval', label: 'Sent for Approval' },
-  { value: 'paid', label: 'Paid' },
-  { value: 'overdue', label: 'Overdue' },
-]
-
 const statusMeta: Record<InvoiceStatus, { label: string; color: string }> = {
-  draft: { label: 'Draft', color: '#6b7280' },
-  issued: { label: 'Issued', color: '#3b82f6' },
-  sent_for_approval: { label: 'Sent for Approval', color: '#f59e0b' },
-  paid: { label: 'Paid', color: '#22c55e' },
-  overdue: { label: 'Overdue', color: '#ef4444' },
+  overdue: { label: '逾期', color: '#ef4444' },
+  sent_for_approval: { label: '待審批', color: '#f59e0b' },
+  issued: { label: '已發出', color: '#3b82f6' },
+  draft: { label: '草稿', color: '#6b7280' },
+  paid: { label: '已收款', color: '#22c55e' },
 }
+
+const receivableStatusOrder: InvoiceStatus[] = ['overdue', 'sent_for_approval', 'issued', 'draft', 'paid']
 
 const categoryColors: Record<string, string> = {
   餐飲: '#f97316',
@@ -182,12 +175,28 @@ function daysOverdue(dueDate: string | null, status: InvoiceStatus) {
   return Math.max(0, diff)
 }
 
+function effectiveInvoiceStatus(invoice: FinanceDoc): InvoiceStatus {
+  const status = invoice.invoice_status ?? 'draft'
+  if (status !== 'paid' && (status === 'overdue' || daysOverdue(invoice.invoice_due_date, status) > 0)) {
+    return 'overdue'
+  }
+  return status
+}
+
+function invoiceContentTotal(invoice: ReturnType<typeof parseInvoice>) {
+  const subtotal = invoice.lineItems.reduce((sum, item) => sum + toNumber(item.rate) * toNumber(item.quantity), 0)
+  const discount = invoice.discount ? (invoice.discount.type === 'percentage' ? subtotal * (invoice.discount.value / 100) : invoice.discount.value) : 0
+  const taxable = Math.max(0, subtotal - discount)
+  return taxable + taxable * (toNumber(invoice.taxRate) / 100)
+}
+
 export function FinanceCenter() {
   const [invoices, setInvoices] = useState<FinanceDoc[]>([])
   const [expenses, setExpenses] = useState<Expense[]>([])
   const [defaultCurrency, setDefaultCurrency] = useState('HK$')
-  const [statusFilter, setStatusFilter] = useState<InvoiceStatus | 'all'>('all')
   const [importOpen, setImportOpen] = useState(false)
+  const [showEmptyInvoiceStatuses, setShowEmptyInvoiceStatuses] = useState(false)
+  const [expandedInvoiceStatuses, setExpandedInvoiceStatuses] = useState<Set<InvoiceStatus>>(() => new Set(receivableStatusOrder))
   const [timeFilter, setTimeFilter] = useState<(typeof timeFilters)[number]>('全部')
   const [customStart, setCustomStart] = useState(today())
   const [customEnd, setCustomEnd] = useState(today())
@@ -226,10 +235,15 @@ export function FinanceCenter() {
     return { paid, issued, draft, overdueInvoices, overdueTotal }
   }, [invoices])
 
-  const filteredInvoices = useMemo(() => {
-    if (statusFilter === 'all') return invoices
-    return invoices.filter((invoice) => (invoice.invoice_status ?? 'draft') === statusFilter)
-  }, [invoices, statusFilter])
+  const groupedInvoices = useMemo(() => {
+    return receivableStatusOrder.map((status) => {
+      const records = invoices
+        .filter((invoice) => effectiveInvoiceStatus(invoice) === status)
+        .sort((a, b) => String(b.invoice_date ?? b.created_at).localeCompare(String(a.invoice_date ?? a.created_at)))
+      const total = records.reduce((sum, item) => sum + toNumber(item.invoice_amount || invoiceContentTotal(parseInvoice(item.content))), 0)
+      return { status, records, total }
+    }).filter((group) => showEmptyInvoiceStatuses || group.records.length > 0)
+  }, [invoices, showEmptyInvoiceStatuses])
 
   const expenseRange = useMemo(() => {
     if (timeFilter === '全部') return null
@@ -489,6 +503,15 @@ export function FinanceCenter() {
     })
   }
 
+  function toggleInvoiceStatusGroup(status: InvoiceStatus) {
+    setExpandedInvoiceStatuses((current) => {
+      const next = new Set(current)
+      if (next.has(status)) next.delete(status)
+      else next.add(status)
+      return next
+    })
+  }
+
   function toggleExpenseDescription(id: string) {
     setExpandedExpenseDescriptions((current) => {
       const next = new Set(current)
@@ -508,6 +531,14 @@ export function FinanceCenter() {
 
   function collapseAllExpenseCategories() {
     setExpandedExpenseCategories(new Set())
+  }
+
+  function expandAllInvoiceStatuses() {
+    setExpandedInvoiceStatuses(new Set(receivableStatusOrder))
+  }
+
+  function collapseAllInvoiceStatuses() {
+    setExpandedInvoiceStatuses(new Set())
   }
 
   function exportExcel() {
@@ -554,46 +585,82 @@ export function FinanceCenter() {
         )}
 
         <section className="finance-section">
-          <div className="finance-section-head">
+          <div className="finance-section-head receivable-section-head">
             <div>
               <h2>應收帳款</h2>
               <p>Accounts Receivable</p>
             </div>
-            <button className="finance-primary-button" type="button" onClick={() => setImportOpen(true)}>匯入發票</button>
+            <div className="receivable-controls">
+              <button type="button" onClick={() => setShowEmptyInvoiceStatuses((current) => !current)}>
+                {showEmptyInvoiceStatuses ? '隱藏空狀態' : '顯示空狀態'}
+              </button>
+              <button type="button" onClick={expandAllInvoiceStatuses}>全部展開</button>
+              <button type="button" onClick={collapseAllInvoiceStatuses}>全部收合</button>
+              <button className="finance-primary-button" type="button" onClick={() => setImportOpen(true)}>匯入發票</button>
+            </div>
           </div>
-          <div className="finance-tabs">
-            {statusOptions.map((status) => {
-              const count = status.value === 'all' ? invoices.length : invoices.filter((invoice) => (invoice.invoice_status ?? 'draft') === status.value).length
-              return <button key={status.value} className={statusFilter === status.value ? 'active' : ''} type="button" onClick={() => setStatusFilter(status.value)}>{status.label}<span>{count}</span></button>
+          {dashboard.overdueInvoices.length > 0 && (
+            <div className="receivable-overdue-alert">
+              ⚠️ {dashboard.overdueInvoices.length} 張發票已逾期，總金額 {money(defaultCurrency, dashboard.overdueTotal)}
+            </div>
+          )}
+          <div className="receivable-status-list">
+            {groupedInvoices.map((group) => {
+              const meta = statusMeta[group.status]
+              const expanded = expandedInvoiceStatuses.has(group.status)
+              return (
+                <section className="receivable-status-section" key={group.status}>
+                  <button className="receivable-status-header" type="button" onClick={() => toggleInvoiceStatusGroup(group.status)}>
+                    <span className="receivable-status-title">
+                      <StatusBadge status={group.status} />
+                      <strong>{meta.label}</strong>
+                      <small>({group.records.length})</small>
+                    </span>
+                    <span className="receivable-status-total">
+                      {money(defaultCurrency, group.total)}
+                      <i>{expanded ? '▼' : '▶'}</i>
+                    </span>
+                  </button>
+                  {expanded && (
+                    <div className="receivable-status-body">
+                      {group.records.length === 0 && <div className="receivable-empty-row">未有記錄</div>}
+                      {group.records.map((invoice) => {
+                        const invoiceContent = parseInvoice(invoice.content)
+                        const storedStatus = invoice.invoice_status ?? 'draft'
+                        const effectiveStatus = effectiveInvoiceStatus(invoice)
+                        const overdueDays = daysOverdue(invoice.invoice_due_date, storedStatus)
+                        const invoiceNumber = invoiceContent.invoiceNumber || invoice.title || 'Invoice'
+                        const invoiceDate = invoice.invoice_date || invoiceContent.invoiceDate || '-'
+                        const dueDate = invoice.invoice_due_date || invoiceContent.dueDate || '-'
+                        const client = invoice.invoice_client || invoiceContent.billedToName || '-'
+                        const amount = toNumber(invoice.invoice_amount || invoiceContentTotal(invoiceContent))
+                        const currency = invoice.invoice_currency || invoiceContent.currency || defaultCurrency
+                        return (
+                          <article className={`receivable-row-card ${effectiveStatus === 'overdue' ? 'receivable-row-overdue' : ''}`} key={invoice.id}>
+                            <div className="receivable-row-number">
+                              <a href={`/docs?open=${invoice.id}`}>{invoiceNumber}</a>
+                              <span>{invoiceDate}</span>
+                            </div>
+                            <div className="receivable-row-client">
+                              <strong>{client}</strong>
+                              <span>到期日：{dueDate}</span>
+                              {overdueDays > 0 && <em>逾期 {overdueDays} 天</em>}
+                            </div>
+                            <div className="receivable-row-amount">{money(currency, amount)}</div>
+                            <div className="receivable-row-actions">
+                              <select value={storedStatus} onChange={(event) => void updateInvoiceStatus(invoice.id, event.target.value as InvoiceStatus)}>
+                                {Object.entries(statusMeta).map(([value, option]) => <option key={value} value={value}>{option.label}</option>)}
+                              </select>
+                              <a href={`/docs?open=${invoice.id}`}>開啟</a>
+                            </div>
+                          </article>
+                        )
+                      })}
+                    </div>
+                  )}
+                </section>
+              )
             })}
-          </div>
-          <div className="finance-table-wrap">
-            <table className="finance-table">
-              <thead><tr><th>發票號碼</th><th>客戶</th><th>金額</th><th>發票日期</th><th>到期日</th><th>狀態</th><th>逾期天數</th><th>操作</th></tr></thead>
-              <tbody>
-                {filteredInvoices.map((invoice) => {
-                  const status = invoice.invoice_status ?? 'draft'
-                  const overdueDays = daysOverdue(invoice.invoice_due_date, status)
-                  return (
-                    <tr key={invoice.id}>
-                      <td>{invoice.title}</td>
-                      <td>{invoice.invoice_client || '-'}</td>
-                      <td>{money(invoice.invoice_currency || defaultCurrency, toNumber(invoice.invoice_amount))}</td>
-                      <td>{invoice.invoice_date || '-'}</td>
-                      <td>{invoice.invoice_due_date || '-'}</td>
-                      <td><StatusBadge status={status} /></td>
-                      <td className={overdueDays > 0 ? 'overdue-days' : ''}>{overdueDays || '-'}</td>
-                      <td className="finance-actions">
-                        <select value={status} onChange={(event) => void updateInvoiceStatus(invoice.id, event.target.value as InvoiceStatus)}>
-                          {Object.entries(statusMeta).map(([value, meta]) => <option key={value} value={value}>{meta.label}</option>)}
-                        </select>
-                        <a href={`/docs?open=${invoice.id}`}>開啟</a>
-                      </td>
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </table>
           </div>
         </section>
 
