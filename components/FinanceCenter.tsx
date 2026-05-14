@@ -45,13 +45,14 @@ type ExpenseDraft = {
   merchant: string
   date: string
   description: string
-  originalAmount: number
+  originalAmount: number | null
   originalCurrency: string
   convertedAmount: number
   convertedCurrency: string
   exchangeRate: number
   category: string
   notes: string
+  aiMissingFields: string[]
 }
 
 type ReceiptOcrResult = {
@@ -99,6 +100,16 @@ const categoryColors: Record<string, string> = {
 
 const categories = Object.keys(categoryColors)
 const timeFilters = ['全部', '最近7日', '最近14日', '最近30日', '本月', '自訂'] as const
+const currencyOptions = [
+  { code: 'HKD', label: 'HK$' },
+  { code: 'USD', label: 'USD $' },
+  { code: 'GBP', label: 'GBP £' },
+  { code: 'EUR', label: 'EUR €' },
+  { code: 'SGD', label: 'SGD $' },
+  { code: 'TWD', label: 'TWD NT$' },
+  { code: 'CNY', label: 'CNY ¥' },
+  { code: 'JPY', label: 'JPY ¥' },
+]
 
 function today() {
   return new Date().toISOString().slice(0, 10)
@@ -111,6 +122,36 @@ function money(currency: string, value: number) {
 function toNumber(value: unknown) {
   const number = Number(value ?? 0)
   return Number.isFinite(number) ? number : 0
+}
+
+function currencyCodeFromSetting(value: string) {
+  const upper = value.toUpperCase()
+  const match = currencyOptions.find((currency) => upper.includes(currency.code))
+  if (match) return match.code
+  if (upper.includes('HK')) return 'HKD'
+  if (upper.includes('US')) return 'USD'
+  if (upper.includes('GB') || upper.includes('£')) return 'GBP'
+  if (upper.includes('EU') || upper.includes('€')) return 'EUR'
+  if (upper.includes('SG')) return 'SGD'
+  if (upper.includes('TW') || upper.includes('NT')) return 'TWD'
+  if (upper.includes('CN') || upper.includes('¥')) return 'CNY'
+  return 'HKD'
+}
+
+function currencyLabel(code: string) {
+  return currencyOptions.find((currency) => currency.code === code)?.label ?? code
+}
+
+function currencySymbol(code: string) {
+  if (code === 'HKD') return 'HK$'
+  if (code === 'USD') return '$'
+  if (code === 'GBP') return '£'
+  if (code === 'EUR') return '€'
+  if (code === 'SGD') return 'S$'
+  if (code === 'TWD') return 'NT$'
+  if (code === 'CNY') return '¥'
+  if (code === 'JPY') return '¥'
+  return `${code} `
 }
 
 function fileToDataUrl(file: File) {
@@ -307,16 +348,22 @@ export function FinanceCenter() {
         return receipts.map((receipt, index) => ({
           ...draft,
           id: crypto.randomUUID(),
-          merchant: String(receipt.merchant ?? draft.merchant),
-          date: String(receipt.date ?? draft.date),
+          merchant: receipt.merchant ? String(receipt.merchant) : draft.merchant,
+          date: receipt.date ? String(receipt.date) : draft.date,
           description: Array.isArray(receipt.items) ? receipt.items.join(', ') : draft.description,
-          originalAmount: toNumber(receipt.original_amount ?? draft.originalAmount),
-          originalCurrency: String(receipt.original_currency ?? draft.originalCurrency),
+          originalAmount: receipt.original_amount == null ? null : toNumber(receipt.original_amount),
+          originalCurrency: String(receipt.original_currency ?? draft.originalCurrency).toUpperCase(),
           convertedAmount: toNumber(receipt.converted_amount ?? receipt.original_amount ?? draft.convertedAmount),
           convertedCurrency: String(receipt.converted_currency ?? defaultCurrency),
           exchangeRate: toNumber(receipt.exchange_rate ?? 1),
-          category: String(receipt.category ?? draft.category),
+          category: receipt.category ? String(receipt.category) : draft.category,
           notes: String(receipt.notes ?? draft.notes),
+          aiMissingFields: [
+            !receipt.merchant ? 'merchant' : '',
+            !receipt.date ? 'date' : '',
+            receipt.original_amount == null ? 'amount' : '',
+            !receipt.category ? 'category' : '',
+          ].filter(Boolean),
           sourceNames: receipts.length > 1 ? draft.sourceNames.map((name) => `${name} #${index + 1}`) : draft.sourceNames,
         }))
       }))
@@ -334,6 +381,33 @@ export function FinanceCenter() {
     }
   }
 
+  async function updateExpenseDraftAmount(id: string, originalCurrency: string, originalAmount: number | null) {
+    const defaultCode = currencyCodeFromSetting(defaultCurrency)
+    let convertedAmount = originalAmount ?? 0
+    let exchangeRate = 1
+    if (originalAmount && originalCurrency !== defaultCode) {
+      try {
+        const response = await fetch(`https://api.frankfurter.app/latest?from=${originalCurrency}&to=${defaultCode}`)
+        const data = await response.json() as { rates?: Record<string, number> }
+        exchangeRate = Number(data.rates?.[defaultCode] ?? 1)
+        convertedAmount = originalAmount * exchangeRate
+      } catch {
+        convertedAmount = originalAmount
+      }
+    }
+    setReceiptDrafts((current) => current.map((draft) => draft.id === id
+      ? {
+        ...draft,
+        originalCurrency,
+        originalAmount,
+        convertedAmount,
+        convertedCurrency: defaultCurrency,
+        exchangeRate,
+        aiMissingFields: originalAmount ? draft.aiMissingFields.filter((field) => field !== 'amount') : [...new Set([...draft.aiMissingFields, 'amount'])],
+      }
+      : draft))
+  }
+
   async function saveExpenseDraft(draft: ExpenseDraft) {
     const { data, error } = await supabase
       .from('expenses')
@@ -342,7 +416,7 @@ export function FinanceCenter() {
         merchant: draft.merchant,
         description: draft.description,
         amount: draft.convertedAmount,
-        original_amount: draft.originalAmount,
+        original_amount: draft.originalAmount ?? 0,
         original_currency: draft.originalCurrency,
         converted_amount: draft.convertedAmount,
         converted_currency: draft.convertedCurrency,
@@ -541,7 +615,7 @@ export function FinanceCenter() {
                 <button className="finance-secondary-button" type="button" onClick={() => void saveAllExpenseDrafts()}>全部儲存</button>
               </div>
               <div className="receipt-draft-grid">
-                {receiptDrafts.map((draft, index) => <ExpenseDraftCard key={draft.id} draft={draft} index={index} onChange={(next) => setReceiptDrafts((current) => current.map((item) => item.id === draft.id ? next : item))} onRemove={() => setReceiptDrafts((current) => current.filter((item) => item.id !== draft.id))} onSave={() => void saveExpenseDraft(draft)} />)}
+                {receiptDrafts.map((draft, index) => <ExpenseDraftCard key={draft.id} draft={draft} index={index} defaultCurrency={defaultCurrency} onChange={(next) => setReceiptDrafts((current) => current.map((item) => item.id === draft.id ? next : item))} onAmountChange={(currency, amount) => void updateExpenseDraftAmount(draft.id, currency, amount)} onRemove={() => setReceiptDrafts((current) => current.filter((item) => item.id !== draft.id))} onSave={() => void saveExpenseDraft(draft)} />)}
               </div>
             </div>
           )}
@@ -581,7 +655,9 @@ export function FinanceCenter() {
                         const originalAmount = toNumber(expense.original_amount)
                         const originalCurrency = expense.original_currency || ''
                         const convertedCurrency = expense.converted_currency || defaultCurrency
-                        const showConverted = Boolean(originalCurrency) && originalCurrency !== convertedCurrency
+                        const convertedCurrencyCode = currencyCodeFromSetting(convertedCurrency)
+                        const originalCurrencyCode = originalCurrency || convertedCurrencyCode
+                        const showConverted = Boolean(originalCurrencyCode) && originalCurrencyCode !== convertedCurrencyCode
                         return (
                           <article className="expense-row-card" key={expense.id}>
                             <div className="expense-row-meta">
@@ -592,8 +668,11 @@ export function FinanceCenter() {
                               {visibleDescription}
                             </button>
                             <div className="expense-row-amount">
-                              <span>{originalCurrency}{money('', originalAmount)}</span>
-                              {showConverted && <strong>{money(convertedCurrency, convertedAmount)}</strong>}
+                              {showConverted ? (
+                                <span>{money(currencySymbol(originalCurrencyCode), originalAmount)} → {money(convertedCurrency, convertedAmount)}</span>
+                              ) : (
+                                <strong>{money(convertedCurrency, convertedAmount)}</strong>
+                              )}
                             </div>
                             <div className="expense-row-actions">
                               <button type="button" onClick={() => void editExpense(expense)}>編輯</button>
@@ -636,7 +715,7 @@ export function FinanceCenter() {
 }
 
 function createExpenseDraft(files: string[], currency: string, sourceNames: string[] = []): ExpenseDraft {
-  return { id: crypto.randomUUID(), receiptImages: files, sourceNames, merchant: '', date: today(), description: '', originalAmount: 0, originalCurrency: currency.replace('$', '').trim() || 'HKD', convertedAmount: 0, convertedCurrency: currency, exchangeRate: 1, category: '雜項', notes: '' }
+  return { id: crypto.randomUUID(), receiptImages: files, sourceNames, merchant: '', date: today(), description: '', originalAmount: null, originalCurrency: currencyCodeFromSetting(currency), convertedAmount: 0, convertedCurrency: currency, exchangeRate: 1, category: '雜項', notes: '', aiMissingFields: ['merchant', 'amount', 'category'] }
 }
 
 function FinanceMetric({ label, amount, color, currency }: { label: string; amount: number; color: string; currency: string }) {
@@ -656,7 +735,10 @@ function CategoryBar({ category, amount, total }: { category: string; amount: nu
   return <div className="expense-category-bar"><span>{category}</span><div><i style={{ width: `${total ? (amount / total) * 100 : 0}%`, background: categoryColors[category] ?? '#6b7280' }} /></div><em>{money('', amount)}</em></div>
 }
 
-function ExpenseDraftCard({ draft, index, onChange, onRemove, onSave }: { draft: ExpenseDraft; index: number; onChange: (draft: ExpenseDraft) => void; onRemove: () => void; onSave: () => void }) {
+function ExpenseDraftCard({ draft, index, defaultCurrency, onChange, onAmountChange, onRemove, onSave }: { draft: ExpenseDraft; index: number; defaultCurrency: string; onChange: (draft: ExpenseDraft) => void; onAmountChange: (currency: string, amount: number | null) => void; onRemove: () => void; onSave: () => void }) {
+  const missing = new Set(draft.aiMissingFields)
+  const defaultCode = currencyCodeFromSetting(defaultCurrency)
+  const hasConversion = Boolean(draft.originalAmount) && draft.originalCurrency !== defaultCode
   return (
     <article className="expense-draft-card">
       <header className="expense-draft-head">
@@ -665,20 +747,46 @@ function ExpenseDraftCard({ draft, index, onChange, onRemove, onSave }: { draft:
         <button type="button" onClick={onRemove}>移除</button>
       </header>
       {draft.sourceNames.length > 0 && <small className="receipt-source-name">{draft.sourceNames.join(', ')}</small>}
-      <div className="receipt-thumb-grid">
+      <div className={draft.receiptImages.length > 1 ? 'receipt-preview-row' : 'receipt-full-preview'}>
         {draft.receiptImages.map((file) => file.startsWith('data:application/pdf')
           ? <div className="receipt-pdf-thumb" key={file}>PDF</div>
           : <img key={file} src={file} alt="" />)}
       </div>
-      <input value={draft.merchant} placeholder="商店" onChange={(event) => onChange({ ...draft, merchant: event.target.value })} />
-      <input type="date" value={draft.date} onChange={(event) => onChange({ ...draft, date: event.target.value })} />
+      <div>
+        <input value={draft.merchant} placeholder="商店" onChange={(event) => onChange({ ...draft, merchant: event.target.value, aiMissingFields: event.target.value ? draft.aiMissingFields.filter((field) => field !== 'merchant') : [...new Set([...draft.aiMissingFields, 'merchant'])] })} />
+        {missing.has('merchant') && <FieldWarning />}
+      </div>
+      <div>
+        <input type="date" value={draft.date} onChange={(event) => onChange({ ...draft, date: event.target.value, aiMissingFields: event.target.value ? draft.aiMissingFields.filter((field) => field !== 'date') : [...new Set([...draft.aiMissingFields, 'date'])] })} />
+        {missing.has('date') && <FieldWarning />}
+      </div>
       <input value={draft.description} placeholder="描述" onChange={(event) => onChange({ ...draft, description: event.target.value })} />
-      <input type="number" value={draft.originalAmount} onChange={(event) => onChange({ ...draft, originalAmount: Number(event.target.value || 0) })} />
-      <select value={draft.category} onChange={(event) => onChange({ ...draft, category: event.target.value })}>{categories.map((category) => <option key={category}>{category}</option>)}</select>
-      <strong>{money(draft.convertedCurrency, draft.convertedAmount)}</strong>
-      <button className="finance-primary-button" type="button" onClick={onSave}>確認並儲存</button>
+      <div>
+        <div className="expense-amount-row">
+          <select value={draft.originalCurrency} onChange={(event) => onAmountChange(event.target.value, draft.originalAmount)}>
+            {currencyOptions.map((currency) => <option key={currency.code} value={currency.code}>{currency.label}</option>)}
+          </select>
+          <input type="number" value={draft.originalAmount ?? ''} placeholder="0.00" onChange={(event) => onAmountChange(draft.originalCurrency, event.target.value ? Number(event.target.value) : null)} />
+        </div>
+        {missing.has('amount') && <div className="expense-field-warning">⚠️ AI 未能讀取金額，請手動輸入</div>}
+        {hasConversion && (
+          <div className="expense-conversion-note">
+            ≈ {money(defaultCurrency, draft.convertedAmount)}（匯率: 1 {draft.originalCurrency} = {draft.exchangeRate.toFixed(4)} {defaultCode}）
+          </div>
+        )}
+      </div>
+      <div>
+        <select value={draft.category} onChange={(event) => onChange({ ...draft, category: event.target.value, aiMissingFields: event.target.value ? draft.aiMissingFields.filter((field) => field !== 'category') : [...new Set([...draft.aiMissingFields, 'category'])] })}>{categories.map((category) => <option key={category}>{category}</option>)}</select>
+        {missing.has('category') && <FieldWarning />}
+      </div>
+      <strong>{draft.originalAmount ? money(currencySymbol(draft.originalCurrency), draft.originalAmount) : '未輸入金額'}</strong>
+      <button className="finance-primary-button" type="button" disabled={!draft.originalAmount} onClick={onSave}>確認並儲存</button>
     </article>
   )
+}
+
+function FieldWarning() {
+  return <div className="expense-field-warning">⚠️ AI 未能識別，請手動填寫</div>
 }
 
 function InvoiceImportModal({ invoices, onClose, onImport, defaultCurrency }: { invoices: FinanceDoc[]; onClose: () => void; onImport: (invoice: FinanceDoc) => void; defaultCurrency: string }) {
