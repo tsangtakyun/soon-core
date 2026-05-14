@@ -22,6 +22,7 @@ type PanelKey =
   | 'replyMessage'
   | 'replyFans'
 type ReplyInboxType = 'email' | 'message' | 'fans'
+type NavGroupKey = 'account' | 'finance' | 'integration' | 'reply'
 type ReplySettingDraft = {
   user_id: string
   inbox_type: ReplyInboxType
@@ -33,11 +34,13 @@ type ReplySettingDraft = {
 }
 
 const navGroups: Array<{
+  key: NavGroupKey
   icon: string
   title: string
   items: Array<{ key: PanelKey; label: string }>
 }> = [
   {
+    key: 'account',
     icon: '👤',
     title: '帳戶',
     items: [
@@ -47,6 +50,7 @@ const navGroups: Array<{
     ],
   },
   {
+    key: 'finance',
     icon: '💳',
     title: '財務',
     items: [
@@ -57,8 +61,9 @@ const navGroups: Array<{
       { key: 'signature', label: '簽署設定' },
     ],
   },
-  { icon: '🔗', title: '整合', items: [{ key: 'api', label: 'API 連接' }] },
+  { key: 'integration', icon: '🔗', title: '整合', items: [{ key: 'api', label: 'API 連接' }] },
   {
+    key: 'reply',
     icon: '💬',
     title: '回覆中心',
     items: [
@@ -100,9 +105,17 @@ const createReplySetting = (inboxType: ReplyInboxType): ReplySettingDraft => ({
   avoid_topics: '',
 })
 
+const defaultNavCollapsed: Record<NavGroupKey, boolean> = {
+  account: false,
+  finance: false,
+  integration: false,
+  reply: false,
+}
+
 export function SettingsPage() {
   const [settings, setSettings] = useState<QuotationSettings>(defaultQuotationSettings)
   const [activePanel, setActivePanel] = useState<PanelKey>('user')
+  const [navCollapsed, setNavCollapsed] = useState<Record<NavGroupKey, boolean>>(defaultNavCollapsed)
   const [saved, setSaved] = useState(false)
   const [signatureSaved, setSignatureSaved] = useState(false)
   const [signatureMode, setSignatureMode] = useState<SignatureMode>('draw')
@@ -116,6 +129,12 @@ export function SettingsPage() {
 
   useEffect(() => {
     void load()
+    try {
+      const stored = window.localStorage.getItem('soon-settings-nav-collapsed')
+      if (stored) setNavCollapsed({ ...defaultNavCollapsed, ...(JSON.parse(stored) as Partial<Record<NavGroupKey, boolean>>) })
+    } catch {
+      setNavCollapsed(defaultNavCollapsed)
+    }
   }, [])
 
   async function load() {
@@ -252,6 +271,15 @@ export function SettingsPage() {
     window.setTimeout(() => setSignatureSaved(false), 2000)
   }
 
+  function updateNavCollapsed(next: Record<NavGroupKey, boolean>) {
+    setNavCollapsed(next)
+    window.localStorage.setItem('soon-settings-nav-collapsed', JSON.stringify(next))
+  }
+
+  function toggleNavGroup(key: NavGroupKey) {
+    updateNavCollapsed({ ...navCollapsed, [key]: !navCollapsed[key] })
+  }
+
   const meta = panelMeta[activePanel]
 
   return (
@@ -259,22 +287,32 @@ export function SettingsPage() {
       <section className="settings-board">
         <aside className="settings-local-sidebar">
           <div className="settings-local-title">設定</div>
+          <div className="settings-nav-controls">
+            <button type="button" onClick={() => updateNavCollapsed(defaultNavCollapsed)}>
+              全部展開
+            </button>
+            <button type="button" onClick={() => updateNavCollapsed({ account: true, finance: true, integration: true, reply: true })}>
+              全部收埋
+            </button>
+          </div>
           {navGroups.map((group) => (
-            <nav key={group.title} className="settings-local-group" aria-label={group.title}>
-              <div className="settings-local-group-title">
+            <nav key={group.title} className={`settings-local-group ${navCollapsed[group.key] ? 'collapsed' : ''}`} aria-label={group.title}>
+              <button className="settings-local-group-title" type="button" onClick={() => toggleNavGroup(group.key)}>
                 <span>{group.icon}</span>
                 <span>{group.title}</span>
-              </div>
-              {group.items.map((item) => (
-                <button
-                  key={item.key}
-                  className={activePanel === item.key ? 'active' : ''}
-                  type="button"
-                  onClick={() => setActivePanel(item.key)}
-                >
-                  {item.label}
-                </button>
-              ))}
+                <strong>{navCollapsed[group.key] ? '▶' : '▼'}</strong>
+              </button>
+              {!navCollapsed[group.key] &&
+                group.items.map((item) => (
+                  <button
+                    key={item.key}
+                    className={activePanel === item.key ? 'active' : ''}
+                    type="button"
+                    onClick={() => setActivePanel(item.key)}
+                  >
+                    {item.label}
+                  </button>
+                ))}
             </nav>
           ))}
         </aside>

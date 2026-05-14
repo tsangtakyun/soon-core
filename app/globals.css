@@ -2107,16 +2107,52 @@ textarea:disabled {
   padding: 20px 16px;
 }
 
+.settings-nav-controls {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  border-bottom: 0.5px solid var(--soon-border);
+  padding: 10px 12px;
+}
+
+.settings-nav-controls button {
+  border: 0.5px solid var(--soon-border);
+  border-radius: 6px;
+  background: var(--soon-surface2);
+  color: var(--soon-text-secondary);
+  font-size: 11px;
+  padding: 6px 0;
+}
+
+.settings-nav-controls button:hover {
+  border-color: rgba(124,58,237,0.35);
+  color: var(--soon-purple-light);
+}
+
 .settings-local-group-title {
   display: flex;
+  width: 100%;
   align-items: center;
   gap: 8px;
+  border: 0;
+  background: transparent;
   color: var(--soon-text-muted);
-  cursor: default;
+  cursor: pointer;
   font-size: 12px;
   font-weight: 500;
   letter-spacing: 0.06em;
   padding: 16px 16px 8px;
+  text-align: left;
+}
+
+.settings-local-group-title span:nth-child(2) {
+  flex: 1;
+}
+
+.settings-local-group-title strong {
+  color: var(--soon-text-muted);
+  font-size: 10px;
+  font-weight: 500;
 }
 
 .settings-local-group button {
