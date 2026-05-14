@@ -29,7 +29,12 @@ export async function middleware(req: NextRequest) {
   } = await supabase.auth.getSession()
 
   const pathname = req.nextUrl.pathname
-  const isPublicPath = pathname === '/login' || pathname === '/invite' || pathname.startsWith('/auth/callback')
+  const isPublicPath =
+    pathname === '/login' ||
+    pathname === '/register' ||
+    pathname === '/invite' ||
+    pathname === '/setup-workspace' ||
+    pathname.startsWith('/auth/callback')
 
   if (!session && !isPublicPath) {
     return NextResponse.redirect(new URL('/login', req.url))

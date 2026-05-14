@@ -7,6 +7,7 @@ export async function GET(request: Request) {
   const requestUrl = new URL(request.url)
   const code = requestUrl.searchParams.get('code')
   const next = requestUrl.searchParams.get('next') ?? '/'
+  const skipBootstrap = requestUrl.searchParams.get('skipBootstrap') === '1'
 
   if (code) {
     const supabase = await createSupabaseRouteClient()
@@ -14,7 +15,7 @@ export async function GET(request: Request) {
     const {
       data: { session },
     } = await supabase.auth.getSession()
-    if (session?.user && !next.startsWith('/invite')) {
+    if (session?.user && !next.startsWith('/invite') && !skipBootstrap) {
       try {
         await bootstrapUserWorkspace(session.user)
       } catch {

@@ -175,11 +175,27 @@ a {
   padding: 9px 10px;
 }
 
+.login-message {
+  margin-top: 14px;
+  border: 0.5px solid rgba(52, 211, 153, 0.35);
+  border-radius: 8px;
+  background: rgba(52, 211, 153, 0.1);
+  color: #86efac;
+  font-size: 12px;
+  padding: 9px 10px;
+}
+
 .login-note {
   margin-top: 18px;
   color: var(--soon-text-muted);
   font-size: 12px;
   text-align: center;
+}
+
+.login-note a {
+  color: var(--soon-purple-light);
+  font-size: 12px;
+  font-weight: 600;
 }
 
 .core-shell {
