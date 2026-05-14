@@ -8,7 +8,17 @@ import { buildQuoteNumber, defaultQuotationSettings, mergeQuotationSettings, typ
 import { supabase } from '@/lib/supabase'
 
 type SignatureMode = 'draw' | 'upload'
-type SectionKey = 'user' | 'company' | 'payment' | 'api' | 'paymentTerms' | 'signature' | 'invoice' | 'rates' | 'tax'
+type SectionKey = 'user' | 'company' | 'payment' | 'api' | 'reply' | 'paymentTerms' | 'signature' | 'invoice' | 'rates' | 'tax'
+type ReplyInboxType = 'email' | 'message' | 'fans'
+type ReplySettingDraft = {
+  user_id: string
+  inbox_type: ReplyInboxType
+  assistant_name: string
+  tone: 'professional' | 'friendly' | 'casual'
+  reply_length: 'brief' | 'standard' | 'detailed'
+  creator_context: string
+  avoid_topics: string
+}
 
 const collapsedStorageKey = 'soon-settings-collapsed'
 
@@ -17,12 +27,29 @@ const defaultCollapsed: Record<SectionKey, boolean> = {
   company: false,
   payment: true,
   api: true,
+  reply: true,
   paymentTerms: true,
   signature: false,
   invoice: true,
   rates: true,
   tax: true,
 }
+
+const replyInboxOptions: Array<{ value: ReplyInboxType; label: string }> = [
+  { value: 'email', label: 'Email' },
+  { value: 'message', label: 'Message' },
+  { value: 'fans', label: 'Fans' },
+]
+
+const createReplySetting = (inboxType: ReplyInboxType): ReplySettingDraft => ({
+  user_id: 'tommy',
+  inbox_type: inboxType,
+  assistant_name: 'Mayan',
+  tone: 'friendly',
+  reply_length: 'standard',
+  creator_context: '',
+  avoid_topics: '',
+})
 
 export function SettingsPage() {
   const [settings, setSettings] = useState<QuotationSettings>(defaultQuotationSettings)
@@ -31,6 +58,11 @@ export function SettingsPage() {
   const [signatureMode, setSignatureMode] = useState<SignatureMode>('draw')
   const [isDrawing, setIsDrawing] = useState(false)
   const [collapsed, setCollapsed] = useState<Record<SectionKey, boolean>>(defaultCollapsed)
+  const [replySettings, setReplySettings] = useState<Record<ReplyInboxType, ReplySettingDraft>>({
+    email: createReplySetting('email'),
+    message: createReplySetting('message'),
+    fans: createReplySetting('fans'),
+  })
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
 
   useEffect(() => {
@@ -45,8 +77,20 @@ export function SettingsPage() {
   }, [])
 
   async function load() {
-    const { data } = await supabase.from('settings').select('*').eq('user_id', 'tommy').maybeSingle()
+    const [{ data }, { data: replyData }] = await Promise.all([
+      supabase.from('settings').select('*').eq('user_id', 'tommy').maybeSingle(),
+      supabase.from('reply_settings').select('*').eq('user_id', 'tommy'),
+    ])
     if (data) setSettings(mergeQuotationSettings(data))
+    const nextReplySettings = {
+      email: createReplySetting('email'),
+      message: createReplySetting('message'),
+      fans: createReplySetting('fans'),
+    }
+    ;((replyData ?? []) as ReplySettingDraft[]).forEach((item) => {
+      nextReplySettings[item.inbox_type] = { ...createReplySetting(item.inbox_type), ...item }
+    })
+    setReplySettings(nextReplySettings)
   }
 
   function toggleSection(key: SectionKey) {
@@ -68,6 +112,13 @@ export function SettingsPage() {
       default_rates: { ...current.default_rates, [key]: Number(value || 0) },
     }))
     setSaved(false)
+  }
+
+  function updateReplySetting<K extends keyof ReplySettingDraft>(inboxType: ReplyInboxType, key: K, value: ReplySettingDraft[K]) {
+    setReplySettings((current) => ({
+      ...current,
+      [inboxType]: { ...current[inboxType], [key]: value },
+    }))
   }
 
   function uploadLogo(event: ChangeEvent<HTMLInputElement>) {
@@ -163,6 +214,16 @@ export function SettingsPage() {
     setSignatureSaved(true)
     window.dispatchEvent(new Event('soon-data-updated'))
     window.setTimeout(() => setSignatureSaved(false), 2000)
+  }
+
+  async function saveReplySettings() {
+    const payload = replyInboxOptions.map((inbox) => replySettings[inbox.value])
+    const { error } = await supabase.from('reply_settings').upsert(payload, { onConflict: 'user_id,inbox_type' })
+    if (error) {
+      window.alert(error.message)
+      return
+    }
+    setSaved(true)
   }
 
   return (
@@ -261,6 +322,50 @@ export function SettingsPage() {
             <input type="password" value={settings.meta_app_secret} onChange={(event) => update('meta_app_secret', event.target.value)} />
           </label>}
           <button className="primary-button" type="button" onClick={() => void save()}>Save API Settings</button>
+        </SettingsCard>
+
+        <SettingsCard title="回覆設定" collapsed={collapsed.reply} onToggle={() => toggleSection('reply')}>
+          <div className="reply-settings-grid">
+            {replyInboxOptions.map((inbox) => {
+              const item = replySettings[inbox.value]
+              return (
+                <section className="reply-settings-card" key={inbox.value}>
+                  <h3>{inbox.label}</h3>
+                  <label>
+                    助理名稱
+                    <input value={item.assistant_name} onChange={(event) => updateReplySetting(inbox.value, 'assistant_name', event.target.value)} />
+                  </label>
+                  <div className="settings-mini-toggle">
+                    {[
+                      { value: 'professional', label: '專業' },
+                      { value: 'friendly', label: '親切' },
+                      { value: 'casual', label: '活潑' },
+                    ].map((option) => (
+                      <button key={option.value} className={item.tone === option.value ? 'active' : ''} type="button" onClick={() => updateReplySetting(inbox.value, 'tone', option.value as ReplySettingDraft['tone'])}>{option.label}</button>
+                    ))}
+                  </div>
+                  <div className="settings-mini-toggle">
+                    {[
+                      { value: 'brief', label: '簡短' },
+                      { value: 'standard', label: '標準' },
+                      { value: 'detailed', label: '詳細' },
+                    ].map((option) => (
+                      <button key={option.value} className={item.reply_length === option.value ? 'active' : ''} type="button" onClick={() => updateReplySetting(inbox.value, 'reply_length', option.value as ReplySettingDraft['reply_length'])}>{option.label}</button>
+                    ))}
+                  </div>
+                  <label>
+                    Creator 背景資料
+                    <textarea value={item.creator_context} placeholder="介紹你係邊個、做咩類型內容、目標觀眾..." rows={4} onChange={(event) => updateReplySetting(inbox.value, 'creator_context', event.target.value)} />
+                  </label>
+                  <label>
+                    唔回覆話題
+                    <textarea value={item.avoid_topics} placeholder="例如：唔報價、唔透露個人資料..." rows={3} onChange={(event) => updateReplySetting(inbox.value, 'avoid_topics', event.target.value)} />
+                  </label>
+                </section>
+              )
+            })}
+          </div>
+          <button className="primary-button" type="button" onClick={() => void saveReplySettings()}>儲存回覆設定</button>
         </SettingsCard>
 
         <SettingsCard title="發票設定" collapsed={collapsed.invoice} onToggle={() => toggleSection('invoice')}>
