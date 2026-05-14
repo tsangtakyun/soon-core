@@ -119,6 +119,15 @@ a {
   background: var(--soon-border);
 }
 
+.sidebar-start-label {
+  display: block;
+  color: var(--soon-text-muted);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  padding: 8px 0 4px;
+  text-align: center;
+}
+
 .pipeline-toggle {
   display: flex;
   gap: 4px;

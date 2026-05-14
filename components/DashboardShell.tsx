@@ -220,6 +220,7 @@ export function DashboardShell({ activeSection, pipeline, tool, children }: Dash
 
         <div className="core-divider" />
 
+        <span className="sidebar-start-label">開始創作</span>
         <PipelineToggle activeId={activePipelineId} onChange={setActivePipelineId} />
         <ToolNav pipeline={pipelines[activePipelineId]} activePath={pathname} />
 
