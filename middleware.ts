@@ -1,8 +1,10 @@
 import { createServerClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@supabase/supabase-js'
 import { NextResponse, type NextRequest } from 'next/server'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
 export async function middleware(req: NextRequest) {
   let res = NextResponse.next({ request: req })
@@ -46,6 +48,30 @@ export async function middleware(req: NextRequest) {
 
   if (session && pathname === '/login') {
     return NextResponse.redirect(new URL('/', req.url))
+  }
+
+  if (
+    session &&
+    pathname !== '/setup-workspace' &&
+    pathname !== '/invite' &&
+    !pathname.startsWith('/auth/callback')
+  ) {
+    const membershipClient =
+      supabaseUrl && supabaseServiceRoleKey
+        ? createClient(supabaseUrl, supabaseServiceRoleKey, {
+            auth: { autoRefreshToken: false, persistSession: false },
+          })
+        : supabase
+
+    const { data: memberships, error: membershipError } = await membershipClient
+      .from('workspace_members')
+      .select('id')
+      .eq('user_id', session.user.id)
+      .limit(1)
+
+    if (!membershipError && !memberships?.length) {
+      return NextResponse.redirect(new URL('/setup-workspace', req.url))
+    }
   }
 
   return res

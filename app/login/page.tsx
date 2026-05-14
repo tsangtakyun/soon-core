@@ -17,6 +17,14 @@ function GoogleIcon() {
   )
 }
 
+function friendlyLoginError(message: string) {
+  const lower = message.toLowerCase()
+  if (lower.includes('invalid login credentials')) return '電郵或密碼不正確，請再試一次。'
+  if (lower.includes('email not confirmed')) return '請先到電郵確認帳戶，再登入。'
+  if (lower.includes('too many')) return '登入嘗試太多，請稍後再試。'
+  return '登入失敗，請檢查資料後再試。'
+}
+
 export default function LoginPage() {
   const router = useRouter()
   const [logoFailed, setLogoFailed] = useState(false)
@@ -31,7 +39,7 @@ export default function LoginPage() {
     const { error: signInError } = await supabase.auth.signInWithPassword({ email, password })
     if (signInError) {
       setLoading(false)
-      setError(signInError.message)
+      setError(friendlyLoginError(signInError.message))
       return
     }
 
@@ -52,7 +60,7 @@ export default function LoginPage() {
     })
     if (oauthError) {
       setLoading(false)
-      setError(oauthError.message)
+      setError('Google 登入失敗，請稍後再試。')
     }
   }
 
