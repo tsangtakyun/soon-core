@@ -41,6 +41,12 @@ export const pipelines: Record<PipelineId, PipelineConfig> = {
         icon: '🎬',
         url: 'https://soon-storyboard.vercel.app?embedded=true',
       },
+      {
+        id: 'subtitle',
+        label: 'Subtitle',
+        icon: '🎞️',
+        url: 'https://soon-subtitle.vercel.app?embedded=true',
+      },
     ],
   },
   youtube: {
@@ -102,7 +108,7 @@ export function getPipelinePath(type: PipelineId, step?: string | null) {
     : fallback
   const tool = normalized === 'done' ? 'subtitle' : normalized
 
-  if (type === 'ig' && (tool === 'production' || tool === 'subtitle')) {
+  if (type === 'ig' && tool === 'production') {
     return '/ig/storyboard'
   }
 
