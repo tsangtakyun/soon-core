@@ -49,10 +49,11 @@ type ExpenseDraft = {
   originalCurrency: string
   convertedAmount: number
   convertedCurrency: string
-  exchangeRate: number
+  exchangeRate: number | null
   category: string
   notes: string
   aiMissingFields: string[]
+  conversionError: boolean
 }
 
 type ReceiptOcrResult = {
@@ -115,8 +116,21 @@ function today() {
   return new Date().toISOString().slice(0, 10)
 }
 
+function currencyPrefix(value: string) {
+  const upper = value.toUpperCase()
+  if (upper === 'HKD' || value === 'HK$') return 'HK$'
+  if (upper === 'USD' || value === 'USD $') return '$'
+  if (upper === 'GBP' || value === 'GBP £') return '£'
+  if (upper === 'EUR' || value === 'EUR €') return '€'
+  if (upper === 'SGD' || value === 'SGD $') return 'S$'
+  if (upper === 'TWD' || value === 'TWD NT$') return 'NT$'
+  if (upper === 'CNY' || value === 'CNY ¥') return '¥'
+  if (upper === 'JPY' || value === 'JPY ¥') return '¥'
+  return value
+}
+
 function money(currency: string, value: number) {
-  return `${currency}${new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value || 0)}`
+  return `${currencyPrefix(currency)}${new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value || 0)}`
 }
 
 function toNumber(value: unknown) {
@@ -136,22 +150,6 @@ function currencyCodeFromSetting(value: string) {
   if (upper.includes('TW') || upper.includes('NT')) return 'TWD'
   if (upper.includes('CN') || upper.includes('¥')) return 'CNY'
   return 'HKD'
-}
-
-function currencyLabel(code: string) {
-  return currencyOptions.find((currency) => currency.code === code)?.label ?? code
-}
-
-function currencySymbol(code: string) {
-  if (code === 'HKD') return 'HK$'
-  if (code === 'USD') return '$'
-  if (code === 'GBP') return '£'
-  if (code === 'EUR') return '€'
-  if (code === 'SGD') return 'S$'
-  if (code === 'TWD') return 'NT$'
-  if (code === 'CNY') return '¥'
-  if (code === 'JPY') return '¥'
-  return `${code} `
 }
 
 function fileToDataUrl(file: File) {
@@ -214,7 +212,7 @@ export function FinanceCenter() {
     ])
     setInvoices((docsData ?? []) as FinanceDoc[])
     setExpenses((expenseData ?? []) as Expense[])
-    setDefaultCurrency(String(settingsData?.default_currency ?? 'HK$'))
+    setDefaultCurrency(currencyCodeFromSetting(String(settingsData?.default_currency ?? 'HK$')))
   }
 
   const dashboard = useMemo(() => {
@@ -352,10 +350,10 @@ export function FinanceCenter() {
           date: receipt.date ? String(receipt.date) : draft.date,
           description: Array.isArray(receipt.items) ? receipt.items.join(', ') : draft.description,
           originalAmount: receipt.original_amount == null ? null : toNumber(receipt.original_amount),
-          originalCurrency: String(receipt.original_currency ?? draft.originalCurrency).toUpperCase(),
+          originalCurrency: currencyCodeFromSetting(String(receipt.original_currency ?? draft.originalCurrency)),
           convertedAmount: toNumber(receipt.converted_amount ?? receipt.original_amount ?? draft.convertedAmount),
-          convertedCurrency: String(receipt.converted_currency ?? defaultCurrency),
-          exchangeRate: toNumber(receipt.exchange_rate ?? 1),
+          convertedCurrency: currencyCodeFromSetting(String(receipt.converted_currency ?? defaultCurrency)),
+          exchangeRate: receipt.exchange_rate == null ? null : toNumber(receipt.exchange_rate),
           category: receipt.category ? String(receipt.category) : draft.category,
           notes: String(receipt.notes ?? draft.notes),
           aiMissingFields: [
@@ -364,6 +362,7 @@ export function FinanceCenter() {
             receipt.original_amount == null ? 'amount' : '',
             !receipt.category ? 'category' : '',
           ].filter(Boolean),
+          conversionError: false,
           sourceNames: receipts.length > 1 ? draft.sourceNames.map((name) => `${name} #${index + 1}`) : draft.sourceNames,
         }))
       }))
@@ -384,15 +383,21 @@ export function FinanceCenter() {
   async function updateExpenseDraftAmount(id: string, originalCurrency: string, originalAmount: number | null) {
     const defaultCode = currencyCodeFromSetting(defaultCurrency)
     let convertedAmount = originalAmount ?? 0
-    let exchangeRate = 1
+    let exchangeRate: number | null = 1
+    let conversionError = false
     if (originalAmount && originalCurrency !== defaultCode) {
       try {
         const response = await fetch(`https://api.frankfurter.app/latest?from=${originalCurrency}&to=${defaultCode}`)
+        if (!response.ok) throw new Error('Exchange rate request failed')
         const data = await response.json() as { rates?: Record<string, number> }
-        exchangeRate = Number(data.rates?.[defaultCode] ?? 1)
+        const rate = Number(data.rates?.[defaultCode])
+        if (!Number.isFinite(rate) || rate <= 0) throw new Error('Exchange rate missing')
+        exchangeRate = rate
         convertedAmount = originalAmount * exchangeRate
       } catch {
         convertedAmount = originalAmount
+        exchangeRate = null
+        conversionError = true
       }
     }
     setReceiptDrafts((current) => current.map((draft) => draft.id === id
@@ -401,8 +406,9 @@ export function FinanceCenter() {
         originalCurrency,
         originalAmount,
         convertedAmount,
-        convertedCurrency: defaultCurrency,
+        convertedCurrency: defaultCode,
         exchangeRate,
+        conversionError,
         aiMissingFields: originalAmount ? draft.aiMissingFields.filter((field) => field !== 'amount') : [...new Set([...draft.aiMissingFields, 'amount'])],
       }
       : draft))
@@ -669,7 +675,7 @@ export function FinanceCenter() {
                             </button>
                             <div className="expense-row-amount">
                               {showConverted ? (
-                                <span>{money(currencySymbol(originalCurrencyCode), originalAmount)} → {money(convertedCurrency, convertedAmount)}</span>
+                                <span>{money(originalCurrencyCode, originalAmount)} → {money(convertedCurrency, convertedAmount)}</span>
                               ) : (
                                 <strong>{money(convertedCurrency, convertedAmount)}</strong>
                               )}
@@ -715,7 +721,8 @@ export function FinanceCenter() {
 }
 
 function createExpenseDraft(files: string[], currency: string, sourceNames: string[] = []): ExpenseDraft {
-  return { id: crypto.randomUUID(), receiptImages: files, sourceNames, merchant: '', date: today(), description: '', originalAmount: null, originalCurrency: currencyCodeFromSetting(currency), convertedAmount: 0, convertedCurrency: currency, exchangeRate: 1, category: '雜項', notes: '', aiMissingFields: ['merchant', 'amount', 'category'] }
+  const code = currencyCodeFromSetting(currency)
+  return { id: crypto.randomUUID(), receiptImages: files, sourceNames, merchant: '', date: today(), description: '', originalAmount: null, originalCurrency: code, convertedAmount: 0, convertedCurrency: code, exchangeRate: 1, category: '雜項', notes: '', aiMissingFields: ['merchant', 'amount', 'category'], conversionError: false }
 }
 
 function FinanceMetric({ label, amount, color, currency }: { label: string; amount: number; color: string; currency: string }) {
@@ -738,7 +745,7 @@ function CategoryBar({ category, amount, total }: { category: string; amount: nu
 function ExpenseDraftCard({ draft, index, defaultCurrency, onChange, onAmountChange, onRemove, onSave }: { draft: ExpenseDraft; index: number; defaultCurrency: string; onChange: (draft: ExpenseDraft) => void; onAmountChange: (currency: string, amount: number | null) => void; onRemove: () => void; onSave: () => void }) {
   const missing = new Set(draft.aiMissingFields)
   const defaultCode = currencyCodeFromSetting(defaultCurrency)
-  const hasConversion = Boolean(draft.originalAmount) && draft.originalCurrency !== defaultCode
+  const hasConversion = Boolean(draft.originalAmount) && draft.originalCurrency !== defaultCode && !draft.conversionError && draft.exchangeRate
   return (
     <article className="expense-draft-card">
       <header className="expense-draft-head">
@@ -771,7 +778,13 @@ function ExpenseDraftCard({ draft, index, defaultCurrency, onChange, onAmountCha
         {missing.has('amount') && <div className="expense-field-warning">⚠️ AI 未能讀取金額，請手動輸入</div>}
         {hasConversion && (
           <div className="expense-conversion-note">
-            ≈ {money(defaultCurrency, draft.convertedAmount)}（匯率: 1 {draft.originalCurrency} = {draft.exchangeRate.toFixed(4)} {defaultCode}）
+            ≈ {money(defaultCode, draft.convertedAmount)}（匯率: 1 {draft.originalCurrency} = {Number(draft.exchangeRate).toFixed(4)} {defaultCode}）
+          </div>
+        )}
+        {draft.conversionError && (
+          <div className="expense-field-warning">
+            ⚠️ 匯率獲取失敗，請手動輸入換算金額
+            <input type="number" value={draft.convertedAmount || ''} placeholder="換算金額" onChange={(event) => onChange({ ...draft, convertedAmount: Number(event.target.value || 0), convertedCurrency: defaultCode, exchangeRate: null })} />
           </div>
         )}
       </div>
@@ -779,7 +792,7 @@ function ExpenseDraftCard({ draft, index, defaultCurrency, onChange, onAmountCha
         <select value={draft.category} onChange={(event) => onChange({ ...draft, category: event.target.value, aiMissingFields: event.target.value ? draft.aiMissingFields.filter((field) => field !== 'category') : [...new Set([...draft.aiMissingFields, 'category'])] })}>{categories.map((category) => <option key={category}>{category}</option>)}</select>
         {missing.has('category') && <FieldWarning />}
       </div>
-      <strong>{draft.originalAmount ? money(currencySymbol(draft.originalCurrency), draft.originalAmount) : '未輸入金額'}</strong>
+      <strong>{draft.originalAmount ? money(draft.originalCurrency, draft.originalAmount) : '未輸入金額'}</strong>
       <button className="finance-primary-button" type="button" disabled={!draft.originalAmount} onClick={onSave}>確認並儲存</button>
     </article>
   )
