@@ -8,7 +8,16 @@ import { buildQuoteNumber, defaultQuotationSettings, mergeQuotationSettings, typ
 import { supabase } from '@/lib/supabase'
 
 type SignatureMode = 'draw' | 'upload'
-type SectionKey = 'user' | 'company' | 'payment' | 'api' | 'reply' | 'paymentTerms' | 'signature' | 'invoice' | 'rates' | 'tax'
+type SectionKey =
+  | 'user'
+  | 'company'
+  | 'payment'
+  | 'paymentTerms'
+  | 'invoice'
+  | 'rates'
+  | 'signature'
+  | 'api'
+  | 'reply'
 type ReplyInboxType = 'email' | 'message' | 'fans'
 type ReplySettingDraft = {
   user_id: string
@@ -20,19 +29,16 @@ type ReplySettingDraft = {
   avoid_topics: string
 }
 
-const collapsedStorageKey = 'soon-settings-collapsed'
-
 const defaultCollapsed: Record<SectionKey, boolean> = {
   user: false,
-  company: false,
-  payment: true,
-  api: true,
-  reply: true,
+  company: true,
+  payment: false,
   paymentTerms: true,
-  signature: false,
   invoice: true,
   rates: true,
-  tax: true,
+  signature: true,
+  api: false,
+  reply: false,
 }
 
 const replyInboxOptions: Array<{ value: ReplyInboxType; label: string }> = [
@@ -51,6 +57,8 @@ const createReplySetting = (inboxType: ReplyInboxType): ReplySettingDraft => ({
   avoid_topics: '',
 })
 
+const collapsedKey = (key: SectionKey) => `soon-settings-${key}-collapsed`
+
 export function SettingsPage() {
   const [settings, setSettings] = useState<QuotationSettings>(defaultQuotationSettings)
   const [saved, setSaved] = useState(false)
@@ -67,13 +75,14 @@ export function SettingsPage() {
 
   useEffect(() => {
     void load()
-    const stored = window.localStorage.getItem(collapsedStorageKey)
-    if (!stored) return
-    try {
-      setCollapsed({ ...defaultCollapsed, ...(JSON.parse(stored) as Partial<Record<SectionKey, boolean>>) })
-    } catch {
-      setCollapsed(defaultCollapsed)
-    }
+    setCollapsed(
+      Object.fromEntries(
+        (Object.keys(defaultCollapsed) as SectionKey[]).map((key) => {
+          const stored = window.localStorage.getItem(collapsedKey(key))
+          return [key, stored === null ? defaultCollapsed[key] : stored === 'true']
+        })
+      ) as Record<SectionKey, boolean>
+    )
   }, [])
 
   async function load() {
@@ -96,7 +105,7 @@ export function SettingsPage() {
   function toggleSection(key: SectionKey) {
     setCollapsed((current) => {
       const next = { ...current, [key]: !current[key] }
-      window.localStorage.setItem(collapsedStorageKey, JSON.stringify(next))
+      window.localStorage.setItem(collapsedKey(key), String(next[key]))
       return next
     })
   }
@@ -119,6 +128,7 @@ export function SettingsPage() {
       ...current,
       [inboxType]: { ...current[inboxType], [key]: value },
     }))
+    setSaved(false)
   }
 
   function uploadLogo(event: ChangeEvent<HTMLInputElement>) {
@@ -191,10 +201,29 @@ export function SettingsPage() {
 
     if (error) {
       window.alert(error.message)
-      return
+      return false
     }
-    setSaved(true)
     window.dispatchEvent(new Event('soon-data-updated'))
+    return true
+  }
+
+  async function saveReplySettings() {
+    const payload = replyInboxOptions.map((inbox) => replySettings[inbox.value])
+    const { error } = await supabase.from('reply_settings').upsert(payload, { onConflict: 'user_id,inbox_type' })
+    if (error) {
+      window.alert(error.message)
+      return false
+    }
+    return true
+  }
+
+  async function saveAll() {
+    const settingsSaved = await save()
+    if (!settingsSaved) return
+    const replySaved = await saveReplySettings()
+    if (!replySaved) return
+    setSaved(true)
+    window.setTimeout(() => setSaved(false), 2500)
   }
 
   async function saveSignature() {
@@ -202,6 +231,7 @@ export function SettingsPage() {
       {
         user_id: 'tommy',
         signature_base64: settings.signature_base64,
+        authorized_name: settings.authorized_name,
         updated_at: new Date().toISOString(),
       },
       { onConflict: 'user_id' }
@@ -216,297 +246,338 @@ export function SettingsPage() {
     window.setTimeout(() => setSignatureSaved(false), 2000)
   }
 
-  async function saveReplySettings() {
-    const payload = replyInboxOptions.map((inbox) => replySettings[inbox.value])
-    const { error } = await supabase.from('reply_settings').upsert(payload, { onConflict: 'user_id,inbox_type' })
-    if (error) {
-      window.alert(error.message)
-      return
-    }
-    setSaved(true)
-  }
-
   return (
     <DashboardShell activeSection="settings">
-      <section className="settings-page">
-        <header className="docs-header settings-header">
+      <section className="settings-page settings-page-v2">
+        <header className="settings-page-head">
           <div>
             <h1>設定</h1>
-            <p>管理用戶資料、公司資料、付款資料、文件編號、費率同簽署設定</p>
+            <p>管理帳戶、財務、整合同回覆設定</p>
           </div>
-          <div className="settings-save-row">
+          <div className="settings-fixed-save">
             {saved && <span>已儲存</span>}
-            <button className="primary-button" type="button" onClick={() => void save()}>
+            <button className="primary-button" type="button" onClick={() => void saveAll()}>
               儲存設定
             </button>
           </div>
         </header>
 
-        <SettingsCard title="用戶資料" collapsed={collapsed.user} onToggle={() => toggleSection('user')}>
-          <label>
-            Display name
-            <input value={settings.display_name} onChange={(event) => update('display_name', event.target.value)} />
-          </label>
-        </SettingsCard>
-
-        <SettingsCard title="公司資料" collapsed={collapsed.company} onToggle={() => toggleSection('company')}>
-          <label>
-            公司名稱
-            <input value={settings.company_name} onChange={(event) => update('company_name', event.target.value)} />
-          </label>
-          <label>
-            Logo upload
-            <div className="settings-logo-row">
-              {settings.logo_base64 ? <img src={settings.logo_base64} alt="" /> : <span className="settings-logo-placeholder">Logo</span>}
-              <input type="file" accept="image/*" onChange={uploadLogo} />
-            </div>
-          </label>
-          <label>
-            Email
-            <input value={settings.email} onChange={(event) => update('email', event.target.value)} />
-          </label>
-          <label>
-            電話
-            <input value={settings.phone} onChange={(event) => update('phone', event.target.value)} />
-          </label>
-          <label>
-            地址
-            <textarea value={settings.address} onChange={(event) => update('address', event.target.value)} rows={3} />
-          </label>
-        </SettingsCard>
-
-        <SettingsCard title="付款資料" collapsed={collapsed.payment} onToggle={() => toggleSection('payment')}>
-          <label>
-            銀行名稱
-            <input value={settings.bank_name} onChange={(event) => update('bank_name', event.target.value)} />
-          </label>
-          <label>
-            Account Name
-            <input value={settings.account_name} onChange={(event) => update('account_name', event.target.value)} />
-          </label>
-          <label>
-            Account Number
-            <input value={settings.account_number} onChange={(event) => update('account_number', event.target.value)} />
-          </label>
-          <label>
-            預設貨幣
-            <select value={settings.default_currency} onChange={(event) => update('default_currency', normaliseCurrency(event.target.value))}>
-              {currencyOptions.map((currency) => <option key={currency} value={currency}>{currency}</option>)}
-            </select>
-          </label>
-        </SettingsCard>
-
-        <SettingsCard title="API 連接設定" collapsed={collapsed.api} onToggle={() => toggleSection('api')}>
-          <div className="api-status-row">
-            <span className={settings.youtube_client_id && settings.youtube_client_secret ? 'api-status connected' : 'api-status'}>
-              YouTube {settings.youtube_client_id && settings.youtube_client_secret ? '✓ 已連接' : '未連接'}
-            </span>
-            {false && <span className={settings.meta_app_id && settings.meta_app_secret ? 'api-status connected' : 'api-status'}>
-              Meta {settings.meta_app_id && settings.meta_app_secret ? '✓ 已連接' : '未連接'}
-            </span>}
-          </div>
-          <label>
-            YouTube Data API Client ID
-            <input value={settings.youtube_client_id} onChange={(event) => update('youtube_client_id', event.target.value)} />
-          </label>
-          <label>
-            YouTube Data API Client Secret
-            <input type="password" value={settings.youtube_client_secret} onChange={(event) => update('youtube_client_secret', event.target.value)} />
-          </label>
-          {false && <label>
-            Meta Business API App ID
-            <input value={settings.meta_app_id} onChange={(event) => update('meta_app_id', event.target.value)} />
-          </label>}
-          {false && <label>
-            Meta Business API App Secret
-            <input type="password" value={settings.meta_app_secret} onChange={(event) => update('meta_app_secret', event.target.value)} />
-          </label>}
-          <button className="primary-button" type="button" onClick={() => void save()}>Save API Settings</button>
-        </SettingsCard>
-
-        <SettingsCard title="回覆設定" collapsed={collapsed.reply} onToggle={() => toggleSection('reply')}>
-          <div className="reply-settings-grid">
-            {replyInboxOptions.map((inbox) => {
-              const item = replySettings[inbox.value]
-              return (
-                <section className="reply-settings-card" key={inbox.value}>
-                  <h3>{inbox.label}</h3>
-                  <label>
-                    助理名稱
-                    <input value={item.assistant_name} onChange={(event) => updateReplySetting(inbox.value, 'assistant_name', event.target.value)} />
-                  </label>
-                  <div className="settings-mini-toggle">
-                    {[
-                      { value: 'professional', label: '專業' },
-                      { value: 'friendly', label: '親切' },
-                      { value: 'casual', label: '活潑' },
-                    ].map((option) => (
-                      <button key={option.value} className={item.tone === option.value ? 'active' : ''} type="button" onClick={() => updateReplySetting(inbox.value, 'tone', option.value as ReplySettingDraft['tone'])}>{option.label}</button>
-                    ))}
-                  </div>
-                  <div className="settings-mini-toggle">
-                    {[
-                      { value: 'brief', label: '簡短' },
-                      { value: 'standard', label: '標準' },
-                      { value: 'detailed', label: '詳細' },
-                    ].map((option) => (
-                      <button key={option.value} className={item.reply_length === option.value ? 'active' : ''} type="button" onClick={() => updateReplySetting(inbox.value, 'reply_length', option.value as ReplySettingDraft['reply_length'])}>{option.label}</button>
-                    ))}
-                  </div>
-                  <label>
-                    Creator 背景資料
-                    <textarea value={item.creator_context} placeholder="介紹你係邊個、做咩類型內容、目標觀眾..." rows={4} onChange={(event) => updateReplySetting(inbox.value, 'creator_context', event.target.value)} />
-                  </label>
-                  <label>
-                    唔回覆話題
-                    <textarea value={item.avoid_topics} placeholder="例如：唔報價、唔透露個人資料..." rows={3} onChange={(event) => updateReplySetting(inbox.value, 'avoid_topics', event.target.value)} />
-                  </label>
-                </section>
-              )
-            })}
-          </div>
-          <button className="primary-button" type="button" onClick={() => void saveReplySettings()}>儲存回覆設定</button>
-        </SettingsCard>
-
-        <SettingsCard title="發票設定" collapsed={collapsed.invoice} onToggle={() => toggleSection('invoice')}>
-          <label>
-            發票號碼前綴
-            <input value={settings.invoice_prefix} onChange={(event) => update('invoice_prefix', event.target.value)} />
-          </label>
-          <div className="settings-readonly-row">
-            <span>發票號碼格式</span>
-            <strong>預覽：{buildInvoiceNumber(settings.invoice_prefix, new Date().getFullYear(), settings.invoice_start_number)}</strong>
-          </div>
-          <label>
-            起始號碼
-            <input type="number" min="1" value={settings.invoice_start_number} onChange={(event) => update('invoice_start_number', Number(event.target.value || 1))} />
-          </label>
-          <div className="settings-readonly-row">
-            <span>目前號碼</span>
-            <strong>{settings.invoice_current_number}</strong>
-          </div>
-          <label>
-            報價單號碼前綴
-            <input value={settings.quote_prefix} onChange={(event) => update('quote_prefix', event.target.value)} />
-          </label>
-          <div className="settings-readonly-row">
-            <span>報價單號碼格式</span>
-            <strong>預覽：{buildQuoteNumber(settings, 1)}</strong>
-          </div>
-          <div className="settings-readonly-row">
-            <span>報價單目前號碼</span>
-            <strong>{settings.quote_current_number}</strong>
-          </div>
-        </SettingsCard>
-
-        <SettingsCard title="付款條款設定" collapsed={collapsed.paymentTerms} onToggle={() => toggleSection('paymentTerms')}>
-          <label className="settings-toggle-row">
-            <input type="checkbox" checked={settings.bank_transfer_enabled} onChange={(event) => update('bank_transfer_enabled', event.target.checked)} />
-            Bank Transfer
-          </label>
-          <label className="settings-toggle-row">
-            <input type="checkbox" checked={settings.cheque_enabled} onChange={(event) => update('cheque_enabled', event.target.checked)} />
-            Cheque
-          </label>
-          <label>
-            支票抬頭
-            <input value={settings.cheque_payable_to} onChange={(event) => update('cheque_payable_to', event.target.value)} />
-          </label>
-          <label>
-            郵寄地址
-            <textarea value={settings.cheque_address} onChange={(event) => update('cheque_address', event.target.value)} rows={3} />
-          </label>
-          <label className="settings-toggle-row">
-            <input type="checkbox" checked={settings.fps_enabled} onChange={(event) => update('fps_enabled', event.target.checked)} />
-            FPS / PayMe
-          </label>
-          <label>
-            FPS ID / 電話號碼
-            <input value={settings.fps_id} onChange={(event) => update('fps_id', event.target.value)} />
-          </label>
-          <label className="settings-toggle-row">
-            <input type="checkbox" checked={settings.paypal_enabled} onChange={(event) => update('paypal_enabled', event.target.checked)} />
-            PayPal
-          </label>
-          <label>
-            PayPal Email
-            <input value={settings.paypal_email} onChange={(event) => update('paypal_email', event.target.value)} />
-          </label>
-          <label>
-            付款期限
-            <input type="number" min="0" value={settings.payment_days} onChange={(event) => update('payment_days', Number(event.target.value || 0))} />
-          </label>
-          <label>
-            逾期利息
-            <input type="number" min="0" value={settings.interest_rate} onChange={(event) => update('interest_rate', Number(event.target.value || 0))} />
-          </label>
-        </SettingsCard>
-
-        <SettingsCard title="簽署設定" collapsed={collapsed.signature} onToggle={() => toggleSection('signature')}>
-          <label>
-            授權人姓名
-            <input value={settings.authorized_name} onChange={(event) => update('authorized_name', event.target.value)} />
-          </label>
-          <div className="signature-mode-toggle">
-            <button className={signatureMode === 'draw' ? 'active' : ''} type="button" onClick={() => setSignatureMode('draw')}>手寫</button>
-            <button className={signatureMode === 'upload' ? 'active' : ''} type="button" onClick={() => setSignatureMode('upload')}>上傳圖片</button>
-          </div>
-          {signatureMode === 'draw' ? (
-            <div className="signature-canvas-wrap">
-              <canvas
-                ref={canvasRef}
-                width={400}
-                height={120}
-                onPointerDown={startSignatureDraw}
-                onPointerMove={drawSignature}
-                onPointerUp={finishSignatureDraw}
-                onPointerLeave={finishSignatureDraw}
-              />
-              <button className="ghost-button inline-ghost-button" type="button" onClick={clearSignature}>清除</button>
-            </div>
-          ) : (
+        <SettingsGroup icon="👤" title="帳戶" subtitle="用戶資料同公司設定">
+          <SettingsSubsection title="用戶資料" collapsed={collapsed.user} onToggle={() => toggleSection('user')}>
             <label>
-              上傳簽名圖片
-              <div className="signature-upload-row">
-                {settings.signature_base64 && <img src={settings.signature_base64} alt="" />}
-                <input type="file" accept="image/*" onChange={uploadSignature} />
+              Display name
+              <input value={settings.display_name} onChange={(event) => update('display_name', event.target.value)} />
+            </label>
+            <label>
+              頭像 / Logo upload
+              <div className="settings-logo-row">
+                {settings.logo_base64 ? <img src={settings.logo_base64} alt="" /> : <span className="settings-logo-placeholder">Logo</span>}
+                <input type="file" accept="image/*" onChange={uploadLogo} />
               </div>
             </label>
-          )}
-          <div className="signature-save-row">
-            <button className="signature-save-button" type="button" onClick={() => void saveSignature()}>儲存簽名</button>
-            {signatureSaved && <span>已儲存</span>}
-          </div>
-        </SettingsCard>
+          </SettingsSubsection>
 
-        <SettingsCard title="Invoice 預設費率" collapsed={collapsed.rates} onToggle={() => toggleSection('rates')}>
-          <div className="settings-rate-groups">
-            {settingsRateGroups.map((group) => (
-              <div key={group.phase} className="settings-rate-group">
-                <h3>{group.phase}</h3>
-                {group.items.map((item) => (
-                  <label key={item}>
-                    {item}
-                    <input type="number" min="0" value={settings.default_rates[item] ?? 0} onChange={(event) => updateRate(item, event.target.value)} />
-                  </label>
-                ))}
+          <SettingsSubsection title="公司資料" collapsed={collapsed.company} onToggle={() => toggleSection('company')}>
+            <label>
+              公司名稱
+              <input value={settings.company_name} onChange={(event) => update('company_name', event.target.value)} />
+            </label>
+            <label>
+              Email
+              <input value={settings.email} onChange={(event) => update('email', event.target.value)} />
+            </label>
+            <label>
+              電話
+              <input value={settings.phone} onChange={(event) => update('phone', event.target.value)} />
+            </label>
+            <label>
+              地址
+              <textarea value={settings.address} onChange={(event) => update('address', event.target.value)} rows={3} />
+            </label>
+            <label>
+              公司 Logo upload
+              <div className="settings-logo-row">
+                {settings.logo_base64 ? <img src={settings.logo_base64} alt="" /> : <span className="settings-logo-placeholder">Logo</span>}
+                <input type="file" accept="image/*" onChange={uploadLogo} />
               </div>
-            ))}
-          </div>
-        </SettingsCard>
+            </label>
+          </SettingsSubsection>
+        </SettingsGroup>
 
-        <SettingsCard title="稅率" collapsed={collapsed.tax} onToggle={() => toggleSection('tax')}>
-          <label>
-            Tax rate %
-            <input type="number" min="0" value={settings.tax_rate} onChange={(event) => update('tax_rate', Number(event.target.value || 0))} />
-          </label>
-        </SettingsCard>
+        <SettingsGroup icon="💳" title="財務" subtitle="財務相關設定">
+          <SettingsSubsection title="付款資料" collapsed={collapsed.payment} onToggle={() => toggleSection('payment')}>
+            <label>
+              銀行名稱
+              <input value={settings.bank_name} onChange={(event) => update('bank_name', event.target.value)} />
+            </label>
+            <label>
+              Account Name
+              <input value={settings.account_name} onChange={(event) => update('account_name', event.target.value)} />
+            </label>
+            <label>
+              Account Number
+              <input value={settings.account_number} onChange={(event) => update('account_number', event.target.value)} />
+            </label>
+            <label>
+              FPS / PayMe ID
+              <input value={settings.fps_id} onChange={(event) => update('fps_id', event.target.value)} />
+            </label>
+            <label>
+              PayPal Email
+              <input value={settings.paypal_email} onChange={(event) => update('paypal_email', event.target.value)} />
+            </label>
+            <label className="settings-toggle-row">
+              <input type="checkbox" checked={settings.bank_transfer_enabled} onChange={(event) => update('bank_transfer_enabled', event.target.checked)} />
+              Bank Transfer
+            </label>
+            <label className="settings-toggle-row">
+              <input type="checkbox" checked={settings.cheque_enabled} onChange={(event) => update('cheque_enabled', event.target.checked)} />
+              Cheque
+            </label>
+            <label className="settings-toggle-row">
+              <input type="checkbox" checked={settings.fps_enabled} onChange={(event) => update('fps_enabled', event.target.checked)} />
+              FPS / PayMe
+            </label>
+            <label className="settings-toggle-row">
+              <input type="checkbox" checked={settings.paypal_enabled} onChange={(event) => update('paypal_enabled', event.target.checked)} />
+              PayPal
+            </label>
+            <label>
+              支票抬頭
+              <input value={settings.cheque_payable_to} onChange={(event) => update('cheque_payable_to', event.target.value)} />
+            </label>
+            <label>
+              郵寄地址
+              <textarea value={settings.cheque_address} onChange={(event) => update('cheque_address', event.target.value)} rows={3} />
+            </label>
+          </SettingsSubsection>
+
+          <SettingsSubsection title="付款條款設定" collapsed={collapsed.paymentTerms} onToggle={() => toggleSection('paymentTerms')}>
+            <label>
+              付款期限
+              <input type="number" min="0" value={settings.payment_days} onChange={(event) => update('payment_days', Number(event.target.value || 0))} />
+            </label>
+            <label>
+              逾期利息
+              <input type="number" min="0" value={settings.interest_rate} onChange={(event) => update('interest_rate', Number(event.target.value || 0))} />
+            </label>
+          </SettingsSubsection>
+
+          <SettingsSubsection title="發票設定" collapsed={collapsed.invoice} onToggle={() => toggleSection('invoice')}>
+            <label>
+              發票號碼前綴
+              <input value={settings.invoice_prefix} onChange={(event) => update('invoice_prefix', event.target.value)} />
+            </label>
+            <div className="settings-readonly-row">
+              <span>發票號碼格式</span>
+              <strong>預覽：{buildInvoiceNumber(settings.invoice_prefix, new Date().getFullYear(), settings.invoice_start_number)}</strong>
+            </div>
+            <label>
+              起始號碼
+              <input type="number" min="1" value={settings.invoice_start_number} onChange={(event) => update('invoice_start_number', Number(event.target.value || 1))} />
+            </label>
+            <div className="settings-readonly-row">
+              <span>目前號碼</span>
+              <strong>{settings.invoice_current_number}</strong>
+            </div>
+            <label>
+              報價單號碼前綴
+              <input value={settings.quote_prefix} onChange={(event) => update('quote_prefix', event.target.value)} />
+            </label>
+            <div className="settings-readonly-row">
+              <span>報價單號碼格式</span>
+              <strong>預覽：{buildQuoteNumber(settings, 1)}</strong>
+            </div>
+            <div className="settings-readonly-row">
+              <span>報價單目前號碼</span>
+              <strong>{settings.quote_current_number}</strong>
+            </div>
+            <label>
+              預設貨幣
+              <select value={settings.default_currency} onChange={(event) => update('default_currency', normaliseCurrency(event.target.value))}>
+                {currencyOptions.map((currency) => (
+                  <option key={currency} value={currency}>
+                    {currency}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label>
+              Tax rate %
+              <input type="number" min="0" value={settings.tax_rate} onChange={(event) => update('tax_rate', Number(event.target.value || 0))} />
+            </label>
+          </SettingsSubsection>
+
+          <SettingsSubsection title="Invoice 預設費率" collapsed={collapsed.rates} onToggle={() => toggleSection('rates')}>
+            <div className="settings-rate-groups">
+              {settingsRateGroups.map((group) => (
+                <div key={group.phase} className="settings-rate-group">
+                  <h3>{group.phase}</h3>
+                  {group.items.map((item) => (
+                    <label key={item}>
+                      {item}
+                      <input type="number" min="0" value={settings.default_rates[item] ?? 0} onChange={(event) => updateRate(item, event.target.value)} />
+                    </label>
+                  ))}
+                </div>
+              ))}
+            </div>
+          </SettingsSubsection>
+
+          <SettingsSubsection title="簽署設定" collapsed={collapsed.signature} onToggle={() => toggleSection('signature')}>
+            <label>
+              授權人姓名
+              <input value={settings.authorized_name} onChange={(event) => update('authorized_name', event.target.value)} />
+            </label>
+            <div className="signature-mode-toggle">
+              <button className={signatureMode === 'draw' ? 'active' : ''} type="button" onClick={() => setSignatureMode('draw')}>
+                手寫
+              </button>
+              <button className={signatureMode === 'upload' ? 'active' : ''} type="button" onClick={() => setSignatureMode('upload')}>
+                上傳圖片
+              </button>
+            </div>
+            {signatureMode === 'draw' ? (
+              <div className="signature-canvas-wrap">
+                <canvas
+                  ref={canvasRef}
+                  width={400}
+                  height={120}
+                  onPointerDown={startSignatureDraw}
+                  onPointerMove={drawSignature}
+                  onPointerUp={finishSignatureDraw}
+                  onPointerLeave={finishSignatureDraw}
+                />
+                <button className="ghost-button inline-ghost-button" type="button" onClick={clearSignature}>
+                  清除
+                </button>
+              </div>
+            ) : (
+              <label>
+                上傳簽名圖片
+                <div className="signature-upload-row">
+                  {settings.signature_base64 && <img src={settings.signature_base64} alt="" />}
+                  <input type="file" accept="image/*" onChange={uploadSignature} />
+                </div>
+              </label>
+            )}
+            <div className="signature-save-row">
+              <button className="signature-save-button" type="button" onClick={() => void saveSignature()}>
+                儲存簽名
+              </button>
+              {signatureSaved && <span>已儲存</span>}
+            </div>
+          </SettingsSubsection>
+        </SettingsGroup>
+
+        <SettingsGroup icon="🔗" title="整合" subtitle="API 連接設定">
+          <SettingsSubsection title="API 連接設定" collapsed={collapsed.api} onToggle={() => toggleSection('api')}>
+            <div className="api-status-row">
+              <span className={settings.youtube_client_id && settings.youtube_client_secret ? 'api-status connected' : 'api-status'}>
+                YouTube {settings.youtube_client_id && settings.youtube_client_secret ? '✓ 已連接' : '未連接'}
+              </span>
+              <span className={settings.meta_app_id || settings.meta_app_secret ? 'api-status connected' : 'api-status'}>
+                Meta {settings.meta_app_id || settings.meta_app_secret ? '✓ 已連接' : '未連接'}
+              </span>
+            </div>
+            <label>
+              YouTube Data API Key / Client ID
+              <input value={settings.youtube_client_id} onChange={(event) => update('youtube_client_id', event.target.value)} />
+            </label>
+            <label>
+              YouTube Client Secret
+              <input type="password" value={settings.youtube_client_secret} onChange={(event) => update('youtube_client_secret', event.target.value)} />
+            </label>
+            <label>
+              Meta Access Token / App ID
+              <input value={settings.meta_app_id} onChange={(event) => update('meta_app_id', event.target.value)} />
+            </label>
+            <label>
+              Meta App Secret
+              <input type="password" value={settings.meta_app_secret} onChange={(event) => update('meta_app_secret', event.target.value)} />
+            </label>
+          </SettingsSubsection>
+        </SettingsGroup>
+
+        <SettingsGroup icon="💬" title="回覆中心" subtitle="虛擬助理設定">
+          <SettingsSubsection title="回覆設定" collapsed={collapsed.reply} onToggle={() => toggleSection('reply')}>
+            <div className="reply-settings-grid">
+              {replyInboxOptions.map((inbox) => {
+                const item = replySettings[inbox.value]
+                return (
+                  <section className="reply-settings-card" key={inbox.value}>
+                    <h3>{inbox.label}</h3>
+                    <label>
+                      助理名稱
+                      <input value={item.assistant_name} onChange={(event) => updateReplySetting(inbox.value, 'assistant_name', event.target.value)} />
+                    </label>
+                    <div className="settings-mini-toggle">
+                      {[
+                        { value: 'professional', label: '專業' },
+                        { value: 'friendly', label: '親切' },
+                        { value: 'casual', label: '活潑' },
+                      ].map((option) => (
+                        <button key={option.value} className={item.tone === option.value ? 'active' : ''} type="button" onClick={() => updateReplySetting(inbox.value, 'tone', option.value as ReplySettingDraft['tone'])}>
+                          {option.label}
+                        </button>
+                      ))}
+                    </div>
+                    <div className="settings-mini-toggle">
+                      {[
+                        { value: 'brief', label: '簡短' },
+                        { value: 'standard', label: '標準' },
+                        { value: 'detailed', label: '詳細' },
+                      ].map((option) => (
+                        <button key={option.value} className={item.reply_length === option.value ? 'active' : ''} type="button" onClick={() => updateReplySetting(inbox.value, 'reply_length', option.value as ReplySettingDraft['reply_length'])}>
+                          {option.label}
+                        </button>
+                      ))}
+                    </div>
+                    <label>
+                      Creator 背景資料
+                      <textarea value={item.creator_context} placeholder="介紹你係邊個、做咩類型內容、目標觀眾..." rows={4} onChange={(event) => updateReplySetting(inbox.value, 'creator_context', event.target.value)} />
+                    </label>
+                    <label>
+                      唔回覆話題
+                      <textarea value={item.avoid_topics} placeholder="例如：唔報價、唔透露個人資料..." rows={3} onChange={(event) => updateReplySetting(inbox.value, 'avoid_topics', event.target.value)} />
+                    </label>
+                  </section>
+                )
+              })}
+            </div>
+          </SettingsSubsection>
+        </SettingsGroup>
       </section>
     </DashboardShell>
   )
 }
 
-function SettingsCard({
+function SettingsGroup({
+  icon,
+  title,
+  subtitle,
+  children,
+}: {
+  icon: string
+  title: string
+  subtitle: string
+  children: ReactNode
+}) {
+  return (
+    <section className="settings-group-card">
+      <header className="settings-group-head">
+        <span>{icon}</span>
+        <div>
+          <h2>{title}</h2>
+          <p>{subtitle}</p>
+        </div>
+      </header>
+      <div className="settings-group-body">{children}</div>
+    </section>
+  )
+}
+
+function SettingsSubsection({
   title,
   collapsed,
   onToggle,
@@ -518,12 +589,12 @@ function SettingsCard({
   children: ReactNode
 }) {
   return (
-    <section className={`settings-card ${collapsed ? 'collapsed' : 'expanded'}`}>
-      <button className="settings-card-header" type="button" onClick={onToggle} aria-expanded={!collapsed}>
-        <h2>{title}</h2>
-        <span>{collapsed ? '▶' : '▼'}</span>
+    <section className={`settings-subsection ${collapsed ? 'collapsed' : 'expanded'}`}>
+      <button className="settings-subsection-header" type="button" onClick={onToggle} aria-expanded={!collapsed}>
+        <span>{title}</span>
+        <strong>{collapsed ? '▶' : '▼'}</strong>
       </button>
-      <div className="settings-card-body">{children}</div>
+      <div className="settings-subsection-body">{children}</div>
     </section>
   )
 }
