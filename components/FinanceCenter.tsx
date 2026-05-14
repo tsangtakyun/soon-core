@@ -145,6 +145,30 @@ function currencyCodeFromSetting(value: string) {
   return 'HKD'
 }
 
+async function convertExpenseAmount(originalCurrency: string, originalAmount: number | null, defaultCurrency: string, fallbackConverted?: number | null, fallbackRate?: number | null) {
+  const fromCode = currencyCodeFromSetting(originalCurrency)
+  const toCode = currencyCodeFromSetting(defaultCurrency)
+  const amount = originalAmount ?? 0
+  if (!amount || fromCode === toCode) {
+    return { convertedAmount: amount, convertedCurrency: toCode, exchangeRate: 1, conversionError: false }
+  }
+  try {
+    const response = await fetch(`https://api.frankfurter.app/latest?from=${fromCode}&to=${toCode}`)
+    if (!response.ok) throw new Error('Exchange rate request failed')
+    const data = await response.json() as { rates?: Record<string, number> }
+    const rate = Number(data.rates?.[toCode])
+    if (!Number.isFinite(rate) || rate <= 0) throw new Error('Exchange rate missing')
+    return { convertedAmount: amount * rate, convertedCurrency: toCode, exchangeRate: rate, conversionError: false }
+  } catch {
+    const fallbackAmount = Number(fallbackConverted)
+    const fallbackExchangeRate = Number(fallbackRate)
+    if (Number.isFinite(fallbackAmount) && fallbackAmount > 0 && Number.isFinite(fallbackExchangeRate) && fallbackExchangeRate > 0 && fallbackExchangeRate !== 1) {
+      return { convertedAmount: fallbackAmount, convertedCurrency: toCode, exchangeRate: fallbackExchangeRate, conversionError: false }
+    }
+    return { convertedAmount: amount, convertedCurrency: toCode, exchangeRate: null, conversionError: true }
+  }
+}
+
 function fileToDataUrl(file: File) {
   return new Promise<string>((resolve, reject) => {
     const reader = new FileReader()
@@ -358,27 +382,38 @@ export function FinanceCenter() {
         if (!response.ok || data.error) throw new Error(data.error || 'Receipt analysis failed')
         const receipts = Array.isArray(data.receipts) ? data.receipts as ReceiptOcrResult[] : [data as ReceiptOcrResult]
         if (!receipts.length) return [draft]
-        return receipts.map((receipt, index) => ({
-          ...draft,
-          id: crypto.randomUUID(),
-          merchant: receipt.merchant ? String(receipt.merchant) : draft.merchant,
-          date: receipt.date ? String(receipt.date) : draft.date,
-          description: Array.isArray(receipt.items) ? receipt.items.join(', ') : draft.description,
-          originalAmount: receipt.original_amount == null ? null : toNumber(receipt.original_amount),
-          originalCurrency: currencyCodeFromSetting(String(receipt.original_currency ?? draft.originalCurrency)),
-          convertedAmount: toNumber(receipt.converted_amount ?? receipt.original_amount ?? draft.convertedAmount),
-          convertedCurrency: currencyCodeFromSetting(String(receipt.converted_currency ?? defaultCurrency)),
-          exchangeRate: receipt.exchange_rate == null ? null : toNumber(receipt.exchange_rate),
-          category: receipt.category ? String(receipt.category) : draft.category,
-          notes: String(receipt.notes ?? draft.notes),
-          aiMissingFields: [
-            !receipt.merchant ? 'merchant' : '',
-            !receipt.date ? 'date' : '',
-            receipt.original_amount == null ? 'amount' : '',
-            !receipt.category ? 'category' : '',
-          ].filter(Boolean),
-          conversionError: false,
-          sourceNames: receipts.length > 1 ? draft.sourceNames.map((name) => `${name} #${index + 1}`) : draft.sourceNames,
+        return Promise.all(receipts.map(async (receipt, index) => {
+          const originalAmount = receipt.original_amount == null ? null : toNumber(receipt.original_amount)
+          const originalCurrency = currencyCodeFromSetting(String(receipt.original_currency ?? draft.originalCurrency))
+          const conversion = await convertExpenseAmount(
+            originalCurrency,
+            originalAmount,
+            defaultCurrency,
+            receipt.converted_amount == null ? null : toNumber(receipt.converted_amount),
+            receipt.exchange_rate == null ? null : toNumber(receipt.exchange_rate),
+          )
+          return {
+            ...draft,
+            id: crypto.randomUUID(),
+            merchant: receipt.merchant ? String(receipt.merchant) : draft.merchant,
+            date: receipt.date ? String(receipt.date) : draft.date,
+            description: Array.isArray(receipt.items) ? receipt.items.join(', ') : draft.description,
+            originalAmount,
+            originalCurrency,
+            convertedAmount: conversion.convertedAmount,
+            convertedCurrency: conversion.convertedCurrency,
+            exchangeRate: conversion.exchangeRate,
+            category: receipt.category ? String(receipt.category) : draft.category,
+            notes: String(receipt.notes ?? draft.notes),
+            aiMissingFields: [
+              !receipt.merchant ? 'merchant' : '',
+              !receipt.date ? 'date' : '',
+              receipt.original_amount == null ? 'amount' : '',
+              !receipt.category ? 'category' : '',
+            ].filter(Boolean),
+            conversionError: conversion.conversionError,
+            sourceNames: receipts.length > 1 ? draft.sourceNames.map((name) => `${name} #${index + 1}`) : draft.sourceNames,
+          }
         }))
       }))
       setReceiptDrafts(analysedGroups.flat())
@@ -396,34 +431,16 @@ export function FinanceCenter() {
   }
 
   async function updateExpenseDraftAmount(id: string, originalCurrency: string, originalAmount: number | null) {
-    const defaultCode = currencyCodeFromSetting(defaultCurrency)
-    let convertedAmount = originalAmount ?? 0
-    let exchangeRate: number | null = 1
-    let conversionError = false
-    if (originalAmount && originalCurrency !== defaultCode) {
-      try {
-        const response = await fetch(`https://api.frankfurter.app/latest?from=${originalCurrency}&to=${defaultCode}`)
-        if (!response.ok) throw new Error('Exchange rate request failed')
-        const data = await response.json() as { rates?: Record<string, number> }
-        const rate = Number(data.rates?.[defaultCode])
-        if (!Number.isFinite(rate) || rate <= 0) throw new Error('Exchange rate missing')
-        exchangeRate = rate
-        convertedAmount = originalAmount * exchangeRate
-      } catch {
-        convertedAmount = originalAmount
-        exchangeRate = null
-        conversionError = true
-      }
-    }
+    const conversion = await convertExpenseAmount(originalCurrency, originalAmount, defaultCurrency)
     setReceiptDrafts((current) => current.map((draft) => draft.id === id
       ? {
         ...draft,
-        originalCurrency,
+        originalCurrency: currencyCodeFromSetting(originalCurrency),
         originalAmount,
-        convertedAmount,
-        convertedCurrency: defaultCode,
-        exchangeRate,
-        conversionError,
+        convertedAmount: conversion.convertedAmount,
+        convertedCurrency: conversion.convertedCurrency,
+        exchangeRate: conversion.exchangeRate,
+        conversionError: conversion.conversionError,
         aiMissingFields: originalAmount ? draft.aiMissingFields.filter((field) => field !== 'amount') : [...new Set([...draft.aiMissingFields, 'amount'])],
       }
       : draft))
@@ -860,7 +877,11 @@ function ExpenseDraftCard({ draft, index, defaultCurrency, onChange, onAmountCha
         <select value={draft.category} onChange={(event) => onChange({ ...draft, category: event.target.value, aiMissingFields: event.target.value ? draft.aiMissingFields.filter((field) => field !== 'category') : [...new Set([...draft.aiMissingFields, 'category'])] })}>{categories.map((category) => <option key={category}>{category}</option>)}</select>
         {missing.has('category') && <FieldWarning />}
       </div>
-      <strong>{draft.originalAmount ? money(draft.originalCurrency, draft.originalAmount) : '未輸入金額'}</strong>
+      <strong>
+        {draft.originalAmount
+          ? (draft.originalCurrency !== defaultCode ? `${money(draft.originalCurrency, draft.originalAmount)} → ${money(defaultCode, draft.convertedAmount)}` : money(defaultCode, draft.convertedAmount))
+          : '未輸入金額'}
+      </strong>
       <button className="finance-primary-button" type="button" disabled={!draft.originalAmount} onClick={onSave}>確認並儲存</button>
     </article>
   )

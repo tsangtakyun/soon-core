@@ -20,14 +20,16 @@ function splitDataUrl(dataUrl: string) {
 async function convertCurrency(amount: number, from: string, to: string) {
   const fromCode = normaliseCurrencyCode(from)
   const toCode = normaliseCurrencyCode(to)
-  if (!amount || fromCode === toCode) return { converted_amount: amount, exchange_rate: 1, converted_currency: to }
+  if (!amount || fromCode === toCode) return { converted_amount: amount, exchange_rate: 1, converted_currency: toCode }
   try {
     const response = await fetch(`https://api.frankfurter.app/latest?from=${fromCode}&to=${toCode}`)
+    if (!response.ok) throw new Error('Exchange rate request failed')
     const data = await response.json() as { rates?: Record<string, number> }
-    const rate = Number(data.rates?.[toCode] ?? 1)
-    return { converted_amount: amount * rate, exchange_rate: rate, converted_currency: to }
+    const rate = Number(data.rates?.[toCode])
+    if (!Number.isFinite(rate) || rate <= 0) throw new Error('Exchange rate missing')
+    return { converted_amount: amount * rate, exchange_rate: rate, converted_currency: toCode }
   } catch {
-    return { converted_amount: amount, exchange_rate: 1, converted_currency: to }
+    return { converted_amount: amount, exchange_rate: null, converted_currency: toCode }
   }
 }
 
@@ -35,11 +37,12 @@ function normaliseCurrencyCode(value: string) {
   const upper = value.toUpperCase()
   if (upper.includes('HK')) return 'HKD'
   if (upper.includes('USD')) return 'USD'
-  if (upper.includes('GBP')) return 'GBP'
-  if (upper.includes('EUR')) return 'EUR'
+  if (upper.includes('GBP') || upper.includes('£')) return 'GBP'
+  if (upper.includes('EUR') || upper.includes('€')) return 'EUR'
   if (upper.includes('SGD')) return 'SGD'
   if (upper.includes('TWD')) return 'TWD'
-  if (upper.includes('CNY') || upper.includes('RMB')) return 'CNY'
+  if (upper.includes('CNY') || upper.includes('RMB') || upper.includes('¥')) return 'CNY'
+  if (upper.includes('JPY')) return 'JPY'
   return upper.replace(/[^A-Z]/g, '').slice(0, 3) || 'HKD'
 }
 
