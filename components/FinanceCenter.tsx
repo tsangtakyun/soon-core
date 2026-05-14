@@ -154,6 +154,10 @@ export function FinanceCenter() {
   const [customEnd, setCustomEnd] = useState(today())
   const [receiptDrafts, setReceiptDrafts] = useState<ExpenseDraft[]>([])
   const [analysingReceipts, setAnalysingReceipts] = useState(false)
+  const [showEmptyExpenseCategories, setShowEmptyExpenseCategories] = useState(false)
+  const [expandedExpenseCategories, setExpandedExpenseCategories] = useState<Set<string>>(() => new Set(categories))
+  const [showAllExpenseCategories, setShowAllExpenseCategories] = useState<Set<string>>(() => new Set())
+  const [expandedExpenseDescriptions, setExpandedExpenseDescriptions] = useState<Set<string>>(() => new Set())
   const [reportYear, setReportYear] = useState(new Date().getFullYear())
   const [reportMonth, setReportMonth] = useState(new Date().getMonth() + 1)
 
@@ -214,6 +218,16 @@ export function FinanceCenter() {
     }, {})
     return { total, byCategory }
   }, [filteredExpenses])
+
+  const groupedExpenses = useMemo(() => {
+    return categories.map((category) => {
+      const records = filteredExpenses
+        .filter((expense) => (expense.category || '雜項') === category)
+        .sort((a, b) => String(b.date).localeCompare(String(a.date)))
+      const total = records.reduce((sum, item) => sum + toNumber(item.converted_amount ?? item.amount), 0)
+      return { category, records, total }
+    }).filter((group) => showEmptyExpenseCategories || group.records.length > 0)
+  }, [filteredExpenses, showEmptyExpenseCategories])
 
   const monthlyData = useMemo(() => {
     const monthPrefix = `${reportYear}-${String(reportMonth).padStart(2, '0')}`
@@ -360,6 +374,61 @@ export function FinanceCenter() {
     setExpenses((current) => current.filter((item) => item.id !== id))
   }
 
+  async function editExpense(expense: Expense) {
+    const merchant = window.prompt('商店', expense.merchant ?? '') ?? expense.merchant ?? ''
+    const description = window.prompt('描述', expense.description ?? '') ?? expense.description ?? ''
+    const amountText = window.prompt('換算金額', String(expense.converted_amount ?? expense.amount ?? 0))
+    const category = window.prompt('類別', expense.category ?? '雜項') ?? expense.category ?? '雜項'
+    const amount = toNumber(amountText)
+    const { data, error } = await supabase
+      .from('expenses')
+      .update({
+        merchant,
+        description,
+        amount,
+        converted_amount: amount,
+        category,
+      })
+      .eq('id', expense.id)
+      .select()
+      .single()
+    if (error) {
+      window.alert(error.message)
+      return
+    }
+    setExpenses((current) => current.map((item) => (item.id === expense.id ? data as Expense : item)))
+  }
+
+  function toggleExpenseCategory(category: string) {
+    setExpandedExpenseCategories((current) => {
+      const next = new Set(current)
+      if (next.has(category)) next.delete(category)
+      else next.add(category)
+      return next
+    })
+  }
+
+  function toggleExpenseDescription(id: string) {
+    setExpandedExpenseDescriptions((current) => {
+      const next = new Set(current)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
+
+  function showAllInCategory(category: string) {
+    setShowAllExpenseCategories((current) => new Set(current).add(category))
+  }
+
+  function expandAllExpenseCategories() {
+    setExpandedExpenseCategories(new Set(categories))
+  }
+
+  function collapseAllExpenseCategories() {
+    setExpandedExpenseCategories(new Set())
+  }
+
   function exportExcel() {
     const incomeSheet = monthlyData.incomeInvoices.map((invoice) => ({
       日期: invoice.invoice_date,
@@ -476,21 +545,69 @@ export function FinanceCenter() {
               </div>
             </div>
           )}
-          <div className="finance-table-wrap">
-            <table className="finance-table">
-              <thead><tr><th>日期</th><th>商店</th><th>描述</th><th>原始金額</th><th>換算金額</th><th>類別</th><th>操作</th></tr></thead>
-              <tbody>
-                {filteredExpenses.map((expense) => (
-                  <tr key={expense.id}>
-                    <td>{expense.date}</td><td>{expense.merchant}</td><td>{expense.description}</td>
-                    <td>{expense.original_currency || ''}{money('', toNumber(expense.original_amount))}</td>
-                    <td>{money(expense.converted_currency || defaultCurrency, toNumber(expense.converted_amount ?? expense.amount))}</td>
-                    <td><CategoryBadge category={expense.category || '雜項'} /></td>
-                    <td><button className="danger-text-button" type="button" onClick={() => void deleteExpense(expense.id)}>刪除</button></td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="expense-list-tools">
+            <button type="button" onClick={() => setShowEmptyExpenseCategories((current) => !current)}>{showEmptyExpenseCategories ? '隱藏空類別' : '顯示空類別'}</button>
+            <button type="button" onClick={expandAllExpenseCategories}>全部展開</button>
+            <button type="button" onClick={collapseAllExpenseCategories}>全部收合</button>
+          </div>
+          <div className="expense-category-list">
+            {groupedExpenses.map((group) => {
+              const expanded = expandedExpenseCategories.has(group.category)
+              const showAll = showAllExpenseCategories.has(group.category)
+              const visibleRecords = showAll ? group.records : group.records.slice(0, 3)
+              const hiddenCount = Math.max(0, group.records.length - visibleRecords.length)
+              return (
+                <section className="expense-category-section" key={group.category}>
+                  <button className="expense-category-header" type="button" onClick={() => toggleExpenseCategory(group.category)}>
+                    <span className="expense-category-title">
+                      <CategoryBadge category={group.category} />
+                      <strong>{group.category}</strong>
+                      <small>({group.records.length})</small>
+                    </span>
+                    <span className="expense-category-total">
+                      {money(defaultCurrency, group.total)}
+                      <i>{expanded ? '▼' : '▶'}</i>
+                    </span>
+                  </button>
+                  {expanded && (
+                    <div className="expense-category-body">
+                      {visibleRecords.length === 0 && <div className="expense-empty-row">未有記錄</div>}
+                      {visibleRecords.map((expense) => {
+                        const description = expense.description || '-'
+                        const isDescriptionExpanded = expandedExpenseDescriptions.has(expense.id)
+                        const shouldTruncate = description.length > 60
+                        const visibleDescription = !isDescriptionExpanded && shouldTruncate ? `${description.slice(0, 60)}...` : description
+                        const convertedAmount = toNumber(expense.converted_amount ?? expense.amount)
+                        const originalAmount = toNumber(expense.original_amount)
+                        const originalCurrency = expense.original_currency || ''
+                        const convertedCurrency = expense.converted_currency || defaultCurrency
+                        const showConverted = Boolean(originalCurrency) && originalCurrency !== convertedCurrency
+                        return (
+                          <article className="expense-row-card" key={expense.id}>
+                            <div className="expense-row-meta">
+                              <span>{expense.date}</span>
+                              <strong>{expense.merchant || '-'}</strong>
+                            </div>
+                            <button className="expense-row-description" type="button" onClick={() => toggleExpenseDescription(expense.id)}>
+                              {visibleDescription}
+                            </button>
+                            <div className="expense-row-amount">
+                              <span>{originalCurrency}{money('', originalAmount)}</span>
+                              {showConverted && <strong>{money(convertedCurrency, convertedAmount)}</strong>}
+                            </div>
+                            <div className="expense-row-actions">
+                              <button type="button" onClick={() => void editExpense(expense)}>編輯</button>
+                              <button type="button" onClick={() => void deleteExpense(expense.id)}>刪除</button>
+                            </div>
+                          </article>
+                        )
+                      })}
+                      {hiddenCount > 0 && <button className="expense-show-more" type="button" onClick={() => showAllInCategory(group.category)}>+ {hiddenCount} 條記錄</button>}
+                    </div>
+                  )}
+                </section>
+              )
+            })}
           </div>
         </section>
 
