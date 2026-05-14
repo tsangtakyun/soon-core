@@ -374,6 +374,45 @@ iframe {
   background: var(--soon-surface2);
 }
 
+.schedule-frame-page {
+  min-height: 100vh;
+  background: var(--soon-bg);
+  color: var(--soon-text);
+}
+
+.schedule-frame-topbar {
+  display: flex;
+  height: 48px;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 0.5px solid var(--soon-border);
+  background: #0f0f0f;
+  padding: 0 16px;
+}
+
+.schedule-frame-topbar h1 {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.schedule-frame-topbar span {
+  border: 0.5px solid rgba(124,58,237,0.3);
+  border-radius: 4px;
+  background: var(--soon-purple-dim);
+  color: var(--soon-purple-light);
+  font-size: 10px;
+  font-weight: 600;
+  padding: 3px 8px;
+}
+
+.schedule-frame-page iframe {
+  width: 100%;
+  height: calc(100vh - 48px);
+  border: 0;
+  background: var(--soon-surface2);
+}
+
 .pipeline-badge {
   border-radius: 4px;
   font-size: 10px;

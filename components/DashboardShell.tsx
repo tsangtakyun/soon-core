@@ -9,7 +9,7 @@ import { supabase } from '@/lib/supabase'
 import type { Project, Workspace, WorkspaceType } from '@/lib/types'
 import { workspaceTypeOptions } from '@/lib/types'
 
-type Section = 'home' | 'work' | 'docs' | 'finance' | 'reply' | 'settings' | 'pipeline'
+type Section = 'home' | 'work' | 'docs' | 'schedule' | 'finance' | 'reply' | 'settings' | 'pipeline'
 
 interface DashboardShellProps {
   activeSection: Section
@@ -35,6 +35,7 @@ const primaryNav = [
   { href: '/', label: '首頁', icon: '🏠', section: 'home' },
   { href: '/work', label: '我的工作', icon: '📅', section: 'work' },
   { href: '/docs', label: '文件中心', icon: '📄', section: 'docs' },
+  { href: '/schedule', label: '行程中心', icon: '📅', section: 'schedule' },
   { href: '/finance', label: '財務中心', icon: '💰', section: 'finance' },
   { href: '/reply', label: '回覆中心', icon: '💬', section: 'reply' },
 ] as const
