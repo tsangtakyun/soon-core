@@ -222,6 +222,16 @@ a {
   padding: 20px 16px;
 }
 
+.core-logo img {
+  display: block;
+}
+
+.login-logo span,
+.core-logo span {
+  color: var(--soon-purple-light);
+  font-weight: 600;
+}
+
 .core-nav,
 .tool-nav,
 .workspace-list {

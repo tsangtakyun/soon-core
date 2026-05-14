@@ -70,6 +70,7 @@ export function DashboardShell({ activeSection, pipeline, tool, children }: Dash
     logoBase64: '',
   })
   const [authProfile, setAuthProfile] = useState<AuthProfile | null>(null)
+  const [coreLogoFailed, setCoreLogoFailed] = useState(false)
 
   useEffect(() => {
     if (pipeline?.id) setActivePipelineId(pipeline.id)
@@ -253,7 +254,18 @@ export function DashboardShell({ activeSection, pipeline, tool, children }: Dash
   return (
     <div className="core-shell">
       <aside className="core-sidebar soon-no-print">
-        <div className="core-logo">⚡ SOON CORE</div>
+        <div className="core-logo">
+          {coreLogoFailed ? (
+            <span>SOON CORE</span>
+          ) : (
+            <img
+              src="/soon_core_logo.png"
+              alt="SOON CORE"
+              style={{ height: '28px', objectFit: 'contain' }}
+              onError={() => setCoreLogoFailed(true)}
+            />
+          )}
+        </div>
 
         <nav className="core-nav" aria-label="Main navigation">
           {primaryNav.map((item) => (

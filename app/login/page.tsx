@@ -19,6 +19,7 @@ function GoogleIcon() {
 
 export default function LoginPage() {
   const router = useRouter()
+  const [logoFailed, setLogoFailed] = useState(false)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
@@ -58,7 +59,18 @@ export default function LoginPage() {
   return (
     <main className="login-page">
       <section className="login-card">
-        <div className="login-logo">⚡ SOON CORE</div>
+        <div className="login-logo">
+          {logoFailed ? (
+            <span>SOON CORE</span>
+          ) : (
+            <img
+              src="/soon_core_logo.png"
+              alt="SOON CORE"
+              style={{ height: '48px', objectFit: 'contain', margin: '0 auto', display: 'block' }}
+              onError={() => setLogoFailed(true)}
+            />
+          )}
+        </div>
         <h1>歡迎回來</h1>
         <p>登入你的 SOON CORE 帳戶</p>
 
