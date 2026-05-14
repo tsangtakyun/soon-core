@@ -261,15 +261,19 @@ export function ReplyCentre() {
 
   async function deleteThread() {
     if (!selectedThread) return
+    await deleteThreadById(selectedThread.id)
+  }
+
+  async function deleteThreadById(id: string) {
     const confirmed = window.confirm('確定刪除此訊息？此動作不可撤回。')
     if (!confirmed) return
-    const { error } = await supabase.from('reply_threads').delete().eq('id', selectedThread.id)
+    const { error } = await supabase.from('reply_threads').delete().eq('id', id)
     if (error) {
       window.alert(error.message)
       return
     }
-    setThreads((current) => current.filter((thread) => thread.id !== selectedThread.id))
-    setSelectedId(null)
+    setThreads((current) => current.filter((thread) => thread.id !== id))
+    if (selectedId === id) setSelectedId(null)
     setCreating(false)
   }
 
@@ -313,16 +317,19 @@ export function ReplyCentre() {
 
           <div className="reply-thread-list">
             {filteredThreads.map((thread) => (
-              <button key={thread.id} className={`reply-thread-card ${thread.id === selectedId ? 'active' : ''} ${thread.status === 'pending' ? 'unread' : ''}`} type="button" onClick={() => { setSelectedId(thread.id); setCreating(false) }}>
-                <span className="reply-dot" />
-                <strong>{thread.sender_name || '未命名'}</strong>
-                <p>{thread.original_message.slice(0, 60)}{thread.original_message.length > 60 ? '...' : ''}</p>
-                <div>
-                  <small>{formatTimeAgo(thread.updated_at || thread.created_at)}</small>
-                  <StatusPill status={thread.status} />
-                </div>
-                {(thread.tags ?? []).length > 0 && <div className="reply-tag-row">{(thread.tags ?? []).map((tag) => <TagPill key={tag} tag={tag} />)}</div>}
-              </button>
+              <article key={thread.id} className={`reply-thread-card ${thread.id === selectedId ? 'active' : ''} ${thread.status === 'pending' ? 'unread' : ''}`}>
+                <button className="reply-thread-main" type="button" onClick={() => { setSelectedId(thread.id); setCreating(false) }}>
+                  <span className="reply-dot" />
+                  <strong>{thread.sender_name || '未命名'}</strong>
+                  <p>{thread.original_message.slice(0, 60)}{thread.original_message.length > 60 ? '...' : ''}</p>
+                  <div>
+                    <small>{formatTimeAgo(thread.updated_at || thread.created_at)}</small>
+                    <StatusPill status={thread.status} />
+                  </div>
+                  {(thread.tags ?? []).length > 0 && <div className="reply-tag-row">{(thread.tags ?? []).map((tag) => <TagPill key={tag} tag={tag} />)}</div>}
+                </button>
+                <button className="reply-thread-delete" type="button" onClick={() => void deleteThreadById(thread.id)}>刪除</button>
+              </article>
             ))}
             {filteredThreads.length === 0 && <div className="reply-empty-list">未有訊息</div>}
           </div>

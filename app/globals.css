@@ -4455,16 +4455,22 @@ textarea:disabled {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   border-bottom: 0.5px solid var(--soon-border);
-  padding: 0 10px;
+  gap: 2px;
+  padding: 0 8px;
 }
 
 .reply-inbox-tabs button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
   border: 0;
   border-bottom: 2px solid transparent;
   background: transparent;
   color: var(--soon-text-secondary);
-  font-size: 12px;
+  font-size: 11px;
   padding: 10px 4px;
+  white-space: nowrap;
 }
 
 .reply-inbox-tabs button.active {
@@ -4474,13 +4480,13 @@ textarea:disabled {
 
 .reply-inbox-tabs span {
   display: inline-grid;
-  min-width: 18px;
-  min-height: 18px;
+  min-width: 16px;
+  height: 16px;
   place-items: center;
-  margin-left: 4px;
   border-radius: 999px;
   background: var(--soon-purple-dim);
-  font-size: 10px;
+  font-size: 9px;
+  line-height: 1;
 }
 
 .reply-filter-bar {
@@ -4535,12 +4541,10 @@ textarea:disabled {
   display: grid;
   width: 100%;
   gap: 5px;
-  border: 0;
   border-bottom: 0.5px solid var(--soon-border);
   border-left: 3px solid transparent;
   background: transparent;
   color: var(--soon-text);
-  padding: 12px 16px;
   text-align: left;
 }
 
@@ -4551,6 +4555,39 @@ textarea:disabled {
 .reply-thread-card.active {
   border-left-color: var(--soon-purple);
   background: var(--soon-purple-dim);
+}
+
+.reply-thread-main {
+  display: grid;
+  gap: 5px;
+  width: 100%;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  padding: 12px 54px 12px 16px;
+  text-align: left;
+}
+
+.reply-thread-delete {
+  position: absolute;
+  right: 10px;
+  top: 12px;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: #ef4444;
+  font-size: 11px;
+  padding: 4px 6px;
+  opacity: 0;
+}
+
+.reply-thread-card:hover .reply-thread-delete,
+.reply-thread-card.active .reply-thread-delete {
+  opacity: 1;
+}
+
+.reply-thread-delete:hover {
+  background: rgba(239,68,68,0.12);
 }
 
 .reply-thread-card strong {
