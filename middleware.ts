@@ -6,6 +6,11 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
 export async function middleware(req: NextRequest) {
   let res = NextResponse.next({ request: req })
+  const pathname = req.nextUrl.pathname
+
+  if (/\.(?:png|jpg|jpeg|gif|webp|svg|ico|json|txt|xml|webmanifest)$/i.test(pathname)) {
+    return res
+  }
 
   if (!supabaseUrl || !supabaseAnonKey) return res
 
@@ -28,7 +33,6 @@ export async function middleware(req: NextRequest) {
     data: { session },
   } = await supabase.auth.getSession()
 
-  const pathname = req.nextUrl.pathname
   const isPublicPath =
     pathname === '/login' ||
     pathname === '/register' ||
