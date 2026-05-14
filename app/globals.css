@@ -1796,6 +1796,30 @@ textarea:disabled {
   width: auto;
 }
 
+.payment-method-item {
+  display: flex !important;
+  width: fit-content;
+  align-items: center;
+  gap: 10px !important;
+  padding: 8px 0;
+  cursor: pointer;
+}
+
+.payment-method-item input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  accent-color: var(--soon-purple);
+  cursor: pointer;
+}
+
+.payment-method-item span {
+  color: var(--soon-text);
+  font-size: 13px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
 .signature-mode-toggle {
   display: flex;
   gap: 6px;

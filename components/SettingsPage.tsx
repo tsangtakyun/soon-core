@@ -311,11 +311,11 @@ export function SettingsPage() {
               <input value={settings.bank_name} onChange={(event) => update('bank_name', event.target.value)} />
             </label>
             <label>
-              Account Name
+              戶口名稱
               <input value={settings.account_name} onChange={(event) => update('account_name', event.target.value)} />
             </label>
             <label>
-              Account Number
+              戶口號碼
               <input value={settings.account_number} onChange={(event) => update('account_number', event.target.value)} />
             </label>
             <label>
@@ -326,21 +326,21 @@ export function SettingsPage() {
               PayPal Email
               <input value={settings.paypal_email} onChange={(event) => update('paypal_email', event.target.value)} />
             </label>
-            <label className="settings-toggle-row">
+            <label className="payment-method-item">
               <input type="checkbox" checked={settings.bank_transfer_enabled} onChange={(event) => update('bank_transfer_enabled', event.target.checked)} />
-              Bank Transfer
+              <span>Bank Transfer</span>
             </label>
-            <label className="settings-toggle-row">
+            <label className="payment-method-item">
               <input type="checkbox" checked={settings.cheque_enabled} onChange={(event) => update('cheque_enabled', event.target.checked)} />
-              Cheque
+              <span>Cheque</span>
             </label>
-            <label className="settings-toggle-row">
+            <label className="payment-method-item">
               <input type="checkbox" checked={settings.fps_enabled} onChange={(event) => update('fps_enabled', event.target.checked)} />
-              FPS / PayMe
+              <span>FPS / PayMe</span>
             </label>
-            <label className="settings-toggle-row">
+            <label className="payment-method-item">
               <input type="checkbox" checked={settings.paypal_enabled} onChange={(event) => update('paypal_enabled', event.target.checked)} />
-              PayPal
+              <span>PayPal</span>
             </label>
             <label>
               支票抬頭
