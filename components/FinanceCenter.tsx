@@ -153,10 +153,10 @@ async function convertExpenseAmount(originalCurrency: string, originalAmount: nu
     return { convertedAmount: amount, convertedCurrency: toCode, exchangeRate: 1, conversionError: false }
   }
   try {
-    const response = await fetch(`https://api.frankfurter.app/latest?from=${fromCode}&to=${toCode}`)
+    const response = await fetch(`/api/exchange-rate?from=${fromCode}&to=${toCode}`)
     if (!response.ok) throw new Error('Exchange rate request failed')
-    const data = await response.json() as { rates?: Record<string, number> }
-    const rate = Number(data.rates?.[toCode])
+    const data = await response.json() as { rate?: number }
+    const rate = Number(data.rate)
     if (!Number.isFinite(rate) || rate <= 0) throw new Error('Exchange rate missing')
     return { convertedAmount: amount * rate, convertedCurrency: toCode, exchangeRate: rate, conversionError: false }
   } catch {

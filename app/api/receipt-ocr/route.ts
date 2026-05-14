@@ -22,14 +22,28 @@ async function convertCurrency(amount: number, from: string, to: string) {
   const toCode = normaliseCurrencyCode(to)
   if (!amount || fromCode === toCode) return { converted_amount: amount, exchange_rate: 1, converted_currency: toCode }
   try {
-    const response = await fetch(`https://api.frankfurter.app/latest?from=${fromCode}&to=${toCode}`)
-    if (!response.ok) throw new Error('Exchange rate request failed')
-    const data = await response.json() as { rates?: Record<string, number> }
-    const rate = Number(data.rates?.[toCode])
-    if (!Number.isFinite(rate) || rate <= 0) throw new Error('Exchange rate missing')
+    const rate = await fetchExchangeRate(fromCode, toCode)
     return { converted_amount: amount * rate, exchange_rate: rate, converted_currency: toCode }
   } catch {
     return { converted_amount: amount, exchange_rate: null, converted_currency: toCode }
+  }
+}
+
+async function fetchExchangeRate(from: string, to: string) {
+  try {
+    const response = await fetch(`https://api.frankfurter.app/latest?from=${from}&to=${to}`, { cache: 'no-store' })
+    if (!response.ok) throw new Error('Frankfurter request failed')
+    const data = await response.json() as { rates?: Record<string, number> }
+    const rate = Number(data.rates?.[to])
+    if (!Number.isFinite(rate) || rate <= 0) throw new Error('Frankfurter rate missing')
+    return rate
+  } catch {
+    const response = await fetch(`https://open.er-api.com/v6/latest/${from}`, { cache: 'no-store' })
+    if (!response.ok) throw new Error('Fallback rate request failed')
+    const data = await response.json() as { rates?: Record<string, number>; result?: string }
+    const rate = Number(data.rates?.[to])
+    if (data.result === 'error' || !Number.isFinite(rate) || rate <= 0) throw new Error('Fallback rate missing')
+    return rate
   }
 }
 
