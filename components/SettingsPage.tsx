@@ -18,11 +18,14 @@ type PanelKey =
   | 'rates'
   | 'signature'
   | 'api'
+  | 'teamMembers'
+  | 'teamInvite'
+  | 'teamPending'
   | 'replyEmail'
   | 'replyMessage'
   | 'replyFans'
 type ReplyInboxType = 'email' | 'message' | 'fans'
-type NavGroupKey = 'account' | 'finance' | 'integration' | 'reply'
+type NavGroupKey = 'account' | 'finance' | 'integration' | 'team' | 'reply'
 type ReplySettingDraft = {
   user_id: string
   inbox_type: ReplyInboxType
@@ -31,6 +34,27 @@ type ReplySettingDraft = {
   reply_length: 'brief' | 'standard' | 'detailed'
   creator_context: string
   avoid_topics: string
+}
+
+type TeamMember = {
+  id: string
+  workspace_id: string
+  user_id: string
+  email: string
+  display_name: string | null
+  role: 'owner' | 'admin' | 'member'
+  status: string
+  created_at: string
+}
+
+type TeamInvitation = {
+  id: string
+  workspace_id: string
+  email: string
+  role: 'admin' | 'member'
+  status: string
+  expires_at: string
+  created_at: string
 }
 
 const navGroups: Array<{
@@ -63,6 +87,16 @@ const navGroups: Array<{
   },
   { key: 'integration', icon: '🔗', title: '整合', items: [{ key: 'api', label: 'API 連接' }] },
   {
+    key: 'team',
+    icon: '👥',
+    title: '團隊',
+    items: [
+      { key: 'teamMembers', label: '成員管理' },
+      { key: 'teamInvite', label: '邀請成員' },
+      { key: 'teamPending', label: '待接受邀請' },
+    ],
+  },
+  {
     key: 'reply',
     icon: '💬',
     title: '回覆中心',
@@ -84,6 +118,9 @@ const panelMeta: Record<PanelKey, { title: string; subtitle: string }> = {
   rates: { title: '預設費率', subtitle: '設定 Invoice 預設 service rate。' },
   signature: { title: '簽署設定', subtitle: '設定授權人姓名同簽名圖。' },
   api: { title: 'API 連接', subtitle: '管理 YouTube / Meta 等外部 API 設定。' },
+  teamMembers: { title: '成員管理', subtitle: '查看同管理目前工作區成員。' },
+  teamInvite: { title: '邀請成員', subtitle: '用電郵邀請團隊成員加入 SOON CORE。' },
+  teamPending: { title: '待接受邀請', subtitle: '追蹤、重新發送或撤銷未接受嘅邀請。' },
   replyEmail: { title: 'Email 助理', subtitle: 'Email inbox 嘅回覆語氣同背景資料。' },
   replyMessage: { title: 'Message 助理', subtitle: 'Message inbox 嘅回覆語氣同背景資料。' },
   replyFans: { title: 'Fans 助理', subtitle: 'Fans inbox 嘅回覆語氣同背景資料。' },
@@ -109,6 +146,7 @@ const defaultNavCollapsed: Record<NavGroupKey, boolean> = {
   account: false,
   finance: false,
   integration: false,
+  team: false,
   reply: false,
 }
 
@@ -125,6 +163,13 @@ export function SettingsPage() {
     message: createReplySetting('message'),
     fans: createReplySetting('fans'),
   })
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([])
+  const [teamInvitations, setTeamInvitations] = useState<TeamInvitation[]>([])
+  const [teamWorkspaceId, setTeamWorkspaceId] = useState('')
+  const [teamRole, setTeamRole] = useState('member')
+  const [inviteEmail, setInviteEmail] = useState('')
+  const [inviteRole, setInviteRole] = useState<'admin' | 'member'>('member')
+  const [teamStatus, setTeamStatus] = useState('')
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
 
   useEffect(() => {
@@ -136,6 +181,12 @@ export function SettingsPage() {
       setNavCollapsed(defaultNavCollapsed)
     }
   }, [])
+
+  useEffect(() => {
+    if (activePanel === 'teamMembers' || activePanel === 'teamInvite' || activePanel === 'teamPending') {
+      void loadTeam()
+    }
+  }, [activePanel])
 
   async function load() {
     const [{ data }, { data: replyData }] = await Promise.all([
@@ -153,6 +204,89 @@ export function SettingsPage() {
       nextReplySettings[item.inbox_type] = { ...createReplySetting(item.inbox_type), ...item }
     })
     setReplySettings(nextReplySettings)
+  }
+
+  async function loadTeam() {
+    const response = await fetch('/api/team')
+    const payload = await response.json().catch(() => ({}))
+    if (!response.ok) {
+      setTeamStatus(payload.error || '載入團隊資料失敗')
+      return
+    }
+    setTeamMembers((payload.members ?? []) as TeamMember[])
+    setTeamInvitations((payload.invitations ?? []) as TeamInvitation[])
+    setTeamWorkspaceId(payload.activeWorkspaceId ?? '')
+    setTeamRole(payload.currentRole ?? 'member')
+    setTeamStatus('')
+  }
+
+  async function sendInvitation() {
+    if (!inviteEmail.trim() || !teamWorkspaceId) return
+    const response = await fetch('/api/team/invitations', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ workspaceId: teamWorkspaceId, email: inviteEmail.trim(), role: inviteRole }),
+    })
+    const payload = await response.json().catch(() => ({}))
+    if (!response.ok) {
+      window.alert(payload.error || '發送邀請失敗')
+      return
+    }
+    setInviteEmail('')
+    setTeamStatus(
+      payload.emailWarning
+        ? `邀請已建立；Email 發送提示：${payload.emailWarning}。邀請連結：${payload.inviteLink}`
+        : `邀請已發送至 ${payload.invitation.email}`
+    )
+    await loadTeam()
+  }
+
+  async function updateMemberRole(memberId: string, role: string) {
+    const response = await fetch(`/api/team/members/${memberId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ role }),
+    })
+    const payload = await response.json().catch(() => ({}))
+    if (!response.ok) {
+      window.alert(payload.error || '更新角色失敗')
+      return
+    }
+    await loadTeam()
+  }
+
+  async function removeMember(memberId: string) {
+    if (!window.confirm('確定移除此成員？')) return
+    const response = await fetch(`/api/team/members/${memberId}`, { method: 'DELETE' })
+    if (!response.ok) {
+      const payload = await response.json().catch(() => ({}))
+      window.alert(payload.error || '移除成員失敗')
+      return
+    }
+    await loadTeam()
+  }
+
+  async function revokeInvitation(invitationId: string) {
+    if (!window.confirm('確定撤銷此邀請？')) return
+    const response = await fetch(`/api/team/invitations/${invitationId}`, { method: 'DELETE' })
+    if (!response.ok) {
+      const payload = await response.json().catch(() => ({}))
+      window.alert(payload.error || '撤銷邀請失敗')
+      return
+    }
+    await loadTeam()
+  }
+
+  async function resendInvitation(invitationId: string) {
+    const response = await fetch(`/api/team/invitations/${invitationId}`, { method: 'PATCH' })
+    if (!response.ok) {
+      const payload = await response.json().catch(() => ({}))
+      window.alert(payload.error || '重新發送失敗')
+      return
+    }
+    const payload = await response.json().catch(() => ({}))
+    setTeamStatus(payload.emailWarning ? `邀請已重新啟用。邀請連結：${payload.inviteLink}` : '邀請已重新發送')
+    await loadTeam()
   }
 
   function update<K extends keyof QuotationSettings>(key: K, value: QuotationSettings[K]) {
@@ -291,7 +425,7 @@ export function SettingsPage() {
             <button type="button" onClick={() => updateNavCollapsed(defaultNavCollapsed)}>
               全部展開
             </button>
-            <button type="button" onClick={() => updateNavCollapsed({ account: true, finance: true, integration: true, reply: true })}>
+            <button type="button" onClick={() => updateNavCollapsed({ account: true, finance: true, integration: true, team: true, reply: true })}>
               全部收埋
             </button>
           </div>
@@ -590,6 +724,90 @@ export function SettingsPage() {
               <input type="password" value={settings.meta_app_secret} onChange={(event) => update('meta_app_secret', event.target.value)} />
             </label>
           </>
+        )
+      case 'teamMembers':
+        return (
+          <div className="team-panel">
+            {teamStatus && <div className="team-status">{teamStatus}</div>}
+            {teamMembers.length === 0 ? (
+              <p className="settings-empty">未有成員資料</p>
+            ) : (
+              <div className="team-list">
+                {teamMembers.map((member) => (
+                  <div className="team-row" key={member.id}>
+                    <div className="team-avatar">{(member.display_name || member.email).slice(0, 2).toUpperCase()}</div>
+                    <div className="team-main">
+                      <strong>{member.display_name || member.email}</strong>
+                      <span>{member.email}</span>
+                    </div>
+                    <span className={`team-role ${member.role}`}>{member.role}</span>
+                    <span>{new Date(member.created_at).toLocaleDateString('zh-HK')}</span>
+                    {teamRole === 'owner' && member.role !== 'owner' && (
+                      <>
+                        <select value={member.role} onChange={(event) => void updateMemberRole(member.id, event.target.value)}>
+                          <option value="admin">Admin</option>
+                          <option value="member">Member</option>
+                        </select>
+                        <button className="danger-text-button" type="button" onClick={() => void removeMember(member.id)}>
+                          移除
+                        </button>
+                      </>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )
+      case 'teamInvite':
+        return (
+          <div className="team-panel">
+            {teamStatus && <div className="team-status">{teamStatus}</div>}
+            <label>
+              電郵地址
+              <input value={inviteEmail} placeholder="name@example.com" onChange={(event) => setInviteEmail(event.target.value)} />
+            </label>
+            <label>
+              角色
+              <select value={inviteRole} onChange={(event) => setInviteRole(event.target.value as 'admin' | 'member')}>
+                <option value="admin">Admin</option>
+                <option value="member">Member</option>
+              </select>
+            </label>
+            <button className="primary-button" type="button" disabled={!inviteEmail.trim()} onClick={() => void sendInvitation()}>
+              發送邀請
+            </button>
+          </div>
+        )
+      case 'teamPending':
+        return (
+          <div className="team-panel">
+            {teamStatus && <div className="team-status">{teamStatus}</div>}
+            {teamInvitations.filter((item) => item.status === 'pending').length === 0 ? (
+              <p className="settings-empty">未有待接受邀請</p>
+            ) : (
+              <div className="team-list">
+                {teamInvitations
+                  .filter((item) => item.status === 'pending')
+                  .map((invitation) => (
+                    <div className="team-row" key={invitation.id}>
+                      <div className="team-main">
+                        <strong>{invitation.email}</strong>
+                        <span>到期：{new Date(invitation.expires_at).toLocaleDateString('zh-HK')}</span>
+                      </div>
+                      <span className={`team-role ${invitation.role}`}>{invitation.role}</span>
+                      <span className="team-pending-badge">待接受</span>
+                      <button className="ghost-button inline-ghost-button" type="button" onClick={() => void resendInvitation(invitation.id)}>
+                        重新發送
+                      </button>
+                      <button className="danger-text-button" type="button" onClick={() => void revokeInvitation(invitation.id)}>
+                        撤銷
+                      </button>
+                    </div>
+                  ))}
+              </div>
+            )}
+          </div>
         )
     }
   }

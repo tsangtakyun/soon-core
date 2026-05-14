@@ -31,6 +31,13 @@ type SettingsProfile = {
   logoBase64: string
 }
 
+type AuthProfile = {
+  id: string
+  email: string
+  name: string
+  avatarUrl: string
+}
+
 const primaryNav = [
   { href: '/', label: '首頁', icon: '🏠', section: 'home' },
   { href: '/work', label: '我的工作', icon: '📅', section: 'work' },
@@ -62,6 +69,7 @@ export function DashboardShell({ activeSection, pipeline, tool, children }: Dash
     displayName: 'Tommy',
     logoBase64: '',
   })
+  const [authProfile, setAuthProfile] = useState<AuthProfile | null>(null)
 
   useEffect(() => {
     if (pipeline?.id) setActivePipelineId(pipeline.id)
@@ -87,6 +95,20 @@ export function DashboardShell({ activeSection, pipeline, tool, children }: Dash
   }, [projects])
 
   async function loadSidebarData() {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+
+    if (user) {
+      setAuthProfile({
+        id: user.id,
+        email: user.email ?? '',
+        name: user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0] || 'User',
+        avatarUrl: user.user_metadata?.avatar_url || user.user_metadata?.picture || '',
+      })
+      await fetch('/api/auth/bootstrap', { method: 'POST' }).catch(() => null)
+    }
+
     const [{ data: workspaceData }, { data: projectData }, { data: settingsData }] = await Promise.all([
       supabase.from('workspaces').select('*').order('created_at', { ascending: false }),
       supabase.from('projects').select('*').order('created_at', { ascending: false }),
@@ -109,16 +131,34 @@ export function DashboardShell({ activeSection, pipeline, tool, children }: Dash
   async function createWorkspace() {
     const name = window.prompt('新增工作區名稱')
     if (!name?.trim()) return
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
 
     const { data, error } = await supabase
       .from('workspaces')
-      .insert({ name: name.trim(), type: pipeline?.id ?? activePipelineId })
+      .insert({ name: name.trim(), type: pipeline?.id ?? activePipelineId, owner_id: user?.id ?? null })
       .select()
       .single()
 
     if (error) {
       window.alert(error.message)
       return
+    }
+
+    if (user) {
+      await supabase.from('workspace_members').upsert(
+        {
+          workspace_id: data.id,
+          user_id: user.id,
+          email: user.email ?? '',
+          display_name: user.user_metadata?.full_name || user.user_metadata?.name || settingsProfile.displayName,
+          role: 'owner',
+          status: 'active',
+          invited_by: user.id,
+        },
+        { onConflict: 'workspace_id,user_id' }
+      )
     }
 
     await loadSidebarData()
@@ -200,6 +240,15 @@ export function DashboardShell({ activeSection, pipeline, tool, children }: Dash
 
   const iframeTitle = pipeline && tool ? `${pipeline.label} ${tool.label}` : ''
   const selectedWorkspaceCount = workspacePanel ? projectCounts[workspacePanel.id] ?? 0 : 0
+  const sidebarName = authProfile?.name || settingsProfile.displayName
+  const sidebarEmail = authProfile?.email || settingsProfile.companyName
+  const sidebarAvatar = authProfile?.avatarUrl || settingsProfile.logoBase64
+
+  async function signOut() {
+    await supabase.auth.signOut()
+    router.push('/login')
+    router.refresh()
+  }
 
   return (
     <div className="core-shell">
@@ -260,15 +309,18 @@ export function DashboardShell({ activeSection, pipeline, tool, children }: Dash
         </Link>
 
         <div className="sidebar-user">
-          {settingsProfile.logoBase64 ? (
-            <img className="sidebar-logo-avatar" src={settingsProfile.logoBase64} alt="" />
+          {sidebarAvatar ? (
+            <img className="sidebar-logo-avatar" src={sidebarAvatar} alt="" />
           ) : (
-            <div className="avatar">{settingsProfile.companyName.slice(0, 1).toUpperCase()}</div>
+            <div className="avatar">{sidebarName.slice(0, 1).toUpperCase()}</div>
           )}
           <div>
-            <strong>{settingsProfile.companyName}</strong>
-            <span>{settingsProfile.displayName}</span>
+            <strong>{sidebarName}</strong>
+            <span>{sidebarEmail}</span>
           </div>
+          <button className="sidebar-signout" type="button" onClick={() => void signOut()}>
+            登出
+          </button>
         </div>
       </aside>
 
