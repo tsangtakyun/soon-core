@@ -65,9 +65,12 @@ export default function LoginPage() {
           ) : (
             <img
               src="/soon_core_logo.png"
-              alt="SOON CORE"
+              alt=""
               style={{ height: '48px', objectFit: 'contain', margin: '0 auto', display: 'block' }}
-              onError={() => setLogoFailed(true)}
+              onError={(event) => {
+                event.currentTarget.style.display = 'none'
+                setLogoFailed(true)
+              }}
             />
           )}
         </div>

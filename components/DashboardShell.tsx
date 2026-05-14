@@ -260,9 +260,12 @@ export function DashboardShell({ activeSection, pipeline, tool, children }: Dash
           ) : (
             <img
               src="/soon_core_logo.png"
-              alt="SOON CORE"
+              alt=""
               style={{ height: '28px', objectFit: 'contain' }}
-              onError={() => setCoreLogoFailed(true)}
+              onError={(event) => {
+                event.currentTarget.style.display = 'none'
+                setCoreLogoFailed(true)
+              }}
             />
           )}
         </div>
