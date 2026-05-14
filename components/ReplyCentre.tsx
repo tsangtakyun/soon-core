@@ -259,6 +259,20 @@ export function ReplyCentre() {
     setStatus(nextStatus)
   }
 
+  async function deleteThread() {
+    if (!selectedThread) return
+    const confirmed = window.confirm('確定刪除此訊息？此動作不可撤回。')
+    if (!confirmed) return
+    const { error } = await supabase.from('reply_threads').delete().eq('id', selectedThread.id)
+    if (error) {
+      window.alert(error.message)
+      return
+    }
+    setThreads((current) => current.filter((thread) => thread.id !== selectedThread.id))
+    setSelectedId(null)
+    setCreating(false)
+  }
+
   async function copyReply() {
     await navigator.clipboard.writeText(editedReply)
     setCopied(true)
@@ -329,6 +343,7 @@ export function ReplyCentre() {
                   <select value={status} onChange={(event) => setStatus(event.target.value as ReplyStatus)}>
                     {Object.entries(statusMeta).map(([value, meta]) => <option key={value} value={value}>{meta.label}</option>)}
                   </select>
+                  <button className="reply-delete-button" type="button" onClick={() => void deleteThread()}>刪除訊息</button>
                 </div>
               </header>
 

@@ -4505,6 +4505,26 @@ textarea:disabled {
   padding: 9px 10px;
 }
 
+.reply-detail-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.reply-delete-button {
+  border: 0.5px solid rgba(239,68,68,0.35);
+  border-radius: 8px;
+  background: rgba(239,68,68,0.08);
+  color: #ef4444;
+  font-size: 12px;
+  padding: 9px 12px;
+  white-space: nowrap;
+}
+
+.reply-delete-button:hover {
+  background: rgba(239,68,68,0.16);
+}
+
 .reply-thread-list {
   min-height: 0;
   overflow: auto;
