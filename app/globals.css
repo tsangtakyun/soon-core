@@ -1060,8 +1060,62 @@ textarea:focus {
   transition: background 0.15s ease;
 }
 
+.work-table tbody tr.work-row-selected {
+  background: var(--soon-purple-dim);
+}
+
 .work-table tbody tr:focus-visible {
   box-shadow: inset 0 0 0 1px var(--soon-purple);
+}
+
+.work-select-cell {
+  width: 38px;
+  min-width: 38px;
+  text-align: center !important;
+}
+
+.work-select-cell input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--soon-purple);
+  cursor: pointer;
+}
+
+.work-bulk-action-bar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 16px;
+  border: 0.5px solid var(--soon-border);
+  border-radius: 8px;
+  background: var(--soon-surface2);
+}
+
+.work-bulk-action-bar span:first-child {
+  color: var(--soon-text);
+  font-size: 13px;
+}
+
+.work-bulk-spacer {
+  flex: 1;
+}
+
+.work-ghost-button {
+  border: 0;
+  background: transparent;
+  color: var(--soon-text-secondary);
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.work-bulk-delete-button {
+  border: 0;
+  border-radius: 6px;
+  background: var(--soon-error);
+  color: #fff;
+  cursor: pointer;
+  font-size: 13px;
+  padding: 6px 14px;
 }
 
 .row-title-button {

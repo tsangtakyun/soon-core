@@ -87,6 +87,7 @@ export function WorkBoard() {
   const [panelMode, setPanelMode] = useState<'create' | 'edit' | null>(null)
   const [selectedProject, setSelectedProject] = useState<Project | null>(null)
   const [draft, setDraft] = useState<ProjectDraft>(emptyProject)
+  const [selectedProjectIds, setSelectedProjectIds] = useState<Set<string>>(new Set())
 
   useEffect(() => {
     const saved = window.localStorage.getItem(sortStorageKey)
@@ -132,6 +133,7 @@ export function WorkBoard() {
 
     setProjects((result.projects ?? []) as Project[])
     setWorkspaces((result.workspaces ?? []) as Workspace[])
+    setSelectedProjectIds(new Set())
   }
 
   function setAndPersistSort(nextSort: SortState) {
@@ -165,6 +167,10 @@ export function WorkBoard() {
   }, [categoryFilter, ownerFilter, projects, query, sort, statusFilter, workspaceFilter])
 
   const owners = Array.from(new Set(projects.map((project) => project.owner).filter(Boolean))) as string[]
+  const visibleProjectIds = visibleProjects.map((project) => project.id)
+  const selectedCount = selectedProjectIds.size
+  const allVisibleSelected =
+    visibleProjectIds.length > 0 && visibleProjectIds.every((projectId) => selectedProjectIds.has(projectId))
 
   function openCreatePanel() {
     setSelectedProject(null)
@@ -193,6 +199,52 @@ export function WorkBoard() {
   function closePanel() {
     setPanelMode(null)
     setSelectedProject(null)
+  }
+
+  function toggleProjectSelection(projectId: string) {
+    setSelectedProjectIds((current) => {
+      const next = new Set(current)
+      if (next.has(projectId)) {
+        next.delete(projectId)
+      } else {
+        next.add(projectId)
+      }
+      return next
+    })
+  }
+
+  function toggleAllVisibleProjects() {
+    setSelectedProjectIds((current) => {
+      if (allVisibleSelected) {
+        return new Set([...current].filter((projectId) => !visibleProjectIds.includes(projectId)))
+      }
+
+      return new Set([...current, ...visibleProjectIds])
+    })
+  }
+
+  async function deleteSelectedProjects() {
+    const ids = Array.from(selectedProjectIds)
+    if (ids.length === 0) return
+
+    if (!window.confirm(`確定刪除 ${ids.length} 個項目？此動作不可復原。`)) {
+      return
+    }
+
+    const response = await fetch('/api/projects', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ids }),
+    })
+
+    const result = await response.json().catch(() => ({}))
+    if (!response.ok) {
+      window.alert(result.error || '刪除項目失敗')
+      return
+    }
+
+    await load()
+    window.dispatchEvent(new Event('soon-data-updated'))
   }
 
   async function saveProject() {
@@ -311,10 +363,31 @@ export function WorkBoard() {
           </select>
         </div>
 
+        {selectedCount > 0 && (
+          <div className="work-bulk-action-bar">
+            <span>已選取 {selectedCount} 個項目</span>
+            <span className="work-bulk-spacer" />
+            <button className="work-ghost-button" type="button" onClick={() => setSelectedProjectIds(new Set())}>
+              取消選取
+            </button>
+            <button className="work-bulk-delete-button" type="button" onClick={() => void deleteSelectedProjects()}>
+              刪除所選
+            </button>
+          </div>
+        )}
+
         <div className="work-table-wrap">
           <table className="work-table">
             <thead>
               <tr>
+                <th className="work-select-cell">
+                  <input
+                    aria-label="選取全部項目"
+                    checked={allVisibleSelected}
+                    type="checkbox"
+                    onChange={toggleAllVisibleProjects}
+                  />
+                </th>
                 <SortableHeader label="題目" sortKey="title" activeSort={sort} onSort={toggleColumnSort} />
                 <th>類別</th>
                 <SortableHeader label="Status" sortKey="status" activeSort={sort} onSort={toggleColumnSort} />
@@ -331,10 +404,20 @@ export function WorkBoard() {
               {visibleProjects.map((project) => (
                 <tr
                   key={project.id}
+                  className={selectedProjectIds.has(project.id) ? 'work-row-selected' : undefined}
                   tabIndex={0}
                   onClick={() => openEditPanel(project)}
                   onKeyDown={(event) => handleRowKey(event, project)}
                 >
+                  <td className="work-select-cell">
+                    <input
+                      aria-label={`選取 ${project.title}`}
+                      checked={selectedProjectIds.has(project.id)}
+                      type="checkbox"
+                      onChange={() => toggleProjectSelection(project.id)}
+                      onClick={(event) => event.stopPropagation()}
+                    />
+                  </td>
                   <td>
                     <button
                       className="row-title-button"

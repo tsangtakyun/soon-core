@@ -117,6 +117,36 @@ export async function POST(request: Request) {
   return NextResponse.json({ project: data })
 }
 
+export async function DELETE(request: Request) {
+  const userId = await getUserId()
+
+  if (!userId) {
+    return NextResponse.json({ error: '未登入，請重新登入。' }, { status: 401 })
+  }
+
+  const body = (await request.json()) as { ids?: string[] }
+  const ids = Array.isArray(body.ids) ? body.ids.filter((id) => typeof id === 'string' && id.length > 0) : []
+
+  if (ids.length === 0) {
+    return NextResponse.json({ error: '請先選取要刪除的項目。' }, { status: 400 })
+  }
+
+  const admin = createSupabaseAdmin()
+  const workspaceIds = await getWorkspaceIds(admin, userId)
+
+  if (workspaceIds.length === 0) {
+    return NextResponse.json({ error: '找不到可用工作區。' }, { status: 400 })
+  }
+
+  const { error } = await admin.from('projects').delete().in('id', ids).in('workspace_id', workspaceIds)
+
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 })
+  }
+
+  return NextResponse.json({ ok: true })
+}
+
 export async function PATCH(request: Request) {
   const userId = await getUserId()
 
