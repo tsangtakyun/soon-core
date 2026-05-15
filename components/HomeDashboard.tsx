@@ -13,6 +13,7 @@ export function HomeDashboard() {
   const router = useRouter()
   const [projects, setProjects] = useState<Project[]>([])
   const [workspaces, setWorkspaces] = useState<Workspace[]>([])
+  const [displayName, setDisplayName] = useState('User')
   const today = new Date().toISOString().slice(0, 10)
 
   useEffect(() => {
@@ -20,13 +21,23 @@ export function HomeDashboard() {
   }, [])
 
   async function load() {
-    const [{ data: projectData }, { data: workspaceData }] = await Promise.all([
+    const [{ data: projectData }, { data: workspaceData }, { data: authData }] = await Promise.all([
       supabase.from('projects').select('*').order('created_at', { ascending: false }),
       supabase.from('workspaces').select('*').order('created_at', { ascending: false }),
+      supabase.auth.getUser(),
     ])
 
     setProjects((projectData ?? []) as Project[])
     setWorkspaces((workspaceData ?? []) as Workspace[])
+
+    const user = authData?.user
+    const name =
+      user?.user_metadata?.display_name ||
+      user?.user_metadata?.full_name ||
+      user?.user_metadata?.name ||
+      user?.email?.split('@')[0] ||
+      'User'
+    setDisplayName(name)
   }
 
   async function openProject(project: Project) {
@@ -56,13 +67,14 @@ export function HomeDashboard() {
   }, [projects, workspaces])
 
   const todayTodos = projects.filter((project) => project.shoot_date === today)
+  const greeting = getGreeting()
 
   return (
     <DashboardShell activeSection="home">
       <div className="home-grid">
         <section className="home-main">
           <div className="hero-block">
-            <h1>早安，Tommy！</h1>
+            <h1>{greeting}，{displayName}！</h1>
             <p>快速存取你最近嘅項目同工作區域</p>
           </div>
 
@@ -126,4 +138,11 @@ export function HomeDashboard() {
       </div>
     </DashboardShell>
   )
+}
+
+function getGreeting() {
+  const hour = new Date().getHours()
+  if (hour < 12) return '早安'
+  if (hour < 18) return '午安'
+  return '晚上好'
 }
