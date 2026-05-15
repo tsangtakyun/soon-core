@@ -189,11 +189,12 @@ export function SettingsPage() {
   }, [activePanel])
 
   async function load() {
-    const [{ data }, { data: replyData }] = await Promise.all([
-      supabase.from('settings').select('*').eq('user_id', 'tommy').maybeSingle(),
+    const [settingsResponse, { data: replyData }] = await Promise.all([
+      fetch('/api/settings'),
       supabase.from('reply_settings').select('*').eq('user_id', 'tommy'),
     ])
-    if (data) setSettings(mergeQuotationSettings(data))
+    const settingsPayload = await settingsResponse.json().catch(() => ({}))
+    if (settingsResponse.ok && settingsPayload.settings) setSettings(mergeQuotationSettings(settingsPayload.settings))
 
     const nextReplySettings = {
       email: createReplySetting('email'),
@@ -369,14 +370,17 @@ export function SettingsPage() {
   }
 
   async function saveSettingsOnly() {
-    const { error } = await supabase.from('settings').upsert(
-      { user_id: 'tommy', ...settings, updated_at: new Date().toISOString() },
-      { onConflict: 'user_id' }
-    )
-    if (error) {
-      window.alert(error.message)
+    const response = await fetch('/api/settings', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(settings),
+    })
+    const payload = await response.json().catch(() => ({}))
+    if (!response.ok) {
+      window.alert(payload.error || '儲存設定失敗')
       return false
     }
+    if (payload.settings) setSettings(mergeQuotationSettings(payload.settings))
     window.dispatchEvent(new Event('soon-data-updated'))
     return true
   }
