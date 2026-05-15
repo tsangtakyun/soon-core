@@ -148,7 +148,7 @@ export function ReplyCentre() {
 
     const missing = inboxTabs
       .map((tab) => tab.value)
-      .filter((inbox) => !(settingsData ?? []).some((setting) => setting.inbox_type === inbox))
+      .filter((inbox) => !((settingsData ?? []) as ReplySetting[]).some((setting) => setting.inbox_type === inbox))
       .map((inbox) => defaultSettings(inbox))
     if (missing.length > 0) {
       await supabase.from('reply_settings').upsert(missing, { onConflict: 'user_id,inbox_type' })
