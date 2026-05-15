@@ -120,12 +120,18 @@ export function WorkBoard() {
   }, [])
 
   async function load() {
-    const [{ data: projectData }, { data: workspaceData }] = await Promise.all([
-      supabase.from('projects').select('*').order('created_at', { ascending: false }),
-      supabase.from('workspaces').select('*').order('created_at', { ascending: false }),
-    ])
-    setProjects((projectData ?? []) as Project[])
-    setWorkspaces((workspaceData ?? []) as Workspace[])
+    const response = await fetch('/api/projects', { cache: 'no-store' })
+    const result = await response.json().catch(() => ({}))
+
+    if (!response.ok) {
+      window.alert(result.error || '載入項目失敗')
+      setProjects([])
+      setWorkspaces([])
+      return
+    }
+
+    setProjects((result.projects ?? []) as Project[])
+    setWorkspaces((result.workspaces ?? []) as Workspace[])
   }
 
   function setAndPersistSort(nextSort: SortState) {
@@ -229,6 +235,7 @@ export function WorkBoard() {
 
     closePanel()
     await load()
+    window.dispatchEvent(new Event('soon-data-updated'))
   }
 
   async function openPipeline(project: Project) {
