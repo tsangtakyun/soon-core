@@ -211,14 +211,19 @@ export function WorkBoard() {
       output_url: draft.output_url.trim() || null,
     }
 
-    const request =
-      panelMode === 'edit' && selectedProject
-        ? supabase.from('projects').update(payload).eq('id', selectedProject.id)
-        : supabase.from('projects').insert({ ...payload, languages: 3 })
+    const response = await fetch('/api/projects', {
+      method: panelMode === 'edit' && selectedProject ? 'PATCH' : 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(
+        panelMode === 'edit' && selectedProject
+          ? { id: selectedProject.id, ...payload }
+          : { ...payload, languages: 3 }
+      ),
+    })
 
-    const { error } = await request
-    if (error) {
-      window.alert(error.message)
+    const result = await response.json().catch(() => ({}))
+    if (!response.ok) {
+      window.alert(result.error || '儲存項目失敗')
       return
     }
 
