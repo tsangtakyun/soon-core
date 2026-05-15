@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react'
 
 import { DashboardShell } from '@/components/DashboardShell'
+import PageHeader from '@/components/PageHeader'
 import { supabase } from '@/lib/supabase'
 
 type InboxType = 'email' | 'message' | 'fans'
@@ -289,13 +290,18 @@ export function ReplyCentre() {
 
   return (
     <DashboardShell activeSection="reply">
+      <PageHeader
+        icon="💬"
+        title="回覆中心"
+        subtitle="管理電郵、訊息同粉絲回覆"
+        actions={(
+          <button className="primary-button" type="button" onClick={() => { setCreating(true); setSelectedId(null) }}>
+            + 新增訊息
+          </button>
+        )}
+      />
       <section className="reply-page">
         <aside className="reply-list-panel">
-          <div className="reply-list-top">
-            <h1>回覆中心</h1>
-            <button type="button" onClick={() => { setCreating(true); setSelectedId(null) }}>+ 新增訊息</button>
-          </div>
-
           <div className="reply-inbox-tabs">
             {inboxTabs.map((tab) => (
               <button key={tab.value} className={activeInbox === tab.value ? 'active' : ''} type="button" onClick={() => setActiveInbox(tab.value)}>

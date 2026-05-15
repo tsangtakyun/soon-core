@@ -8,6 +8,7 @@ import { BlankDocumentEditor } from '@/components/BlankDocumentEditor'
 import { CampaignReportEditor, createEmptyCampaignReport } from '@/components/CampaignReportEditor'
 import { DashboardShell } from '@/components/DashboardShell'
 import { ConceptBoardEditor } from '@/components/ConceptBoardEditor'
+import PageHeader from '@/components/PageHeader'
 import { IGScriptEditor } from '@/components/IGScriptEditor'
 import { InvoiceEditor } from '@/components/InvoiceEditor'
 import { createEmptyMeetingNotes, MeetingNotesEditor } from '@/components/MeetingNotesEditor'
@@ -1054,12 +1055,12 @@ export function DocsCenter() {
   return (
     <DashboardShell activeSection="docs">
       <section className="docs-page">
-        <header className="docs-header">
-          <div>
-            <h1>文件中心</h1>
-            <p>建立常用 production 文件同模板</p>
-          </div>
-          <div className="docs-header-actions">
+        <PageHeader
+          icon="📄"
+          title="文件中心"
+          subtitle="建立常用製作文件同模板"
+          actions={(
+            <>
             <select value={workspaceId} onChange={(event) => setWorkspaceId(event.target.value)}>
               <option value="">全部工作區</option>
               {workspaces.map((workspace) => (
@@ -1071,8 +1072,9 @@ export function DocsCenter() {
             <button className="blank-doc-button" type="button" onClick={() => void createDoc(blankTemplate)}>
               空白文件
             </button>
-          </div>
-        </header>
+            </>
+          )}
+        />
 
         <div className="template-grid docs-template-grid">
           {docTemplates.map((template) => (

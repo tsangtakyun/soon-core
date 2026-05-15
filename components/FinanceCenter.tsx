@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState, type ChangeEvent } from 'react'
 import * as XLSX from 'xlsx'
 
 import { DashboardShell } from '@/components/DashboardShell'
+import PageHeader from '@/components/PageHeader'
 import { parseInvoice } from '@/lib/invoice'
 import { supabase } from '@/lib/supabase'
 import type { CoreDoc } from '@/lib/types'
@@ -584,10 +585,7 @@ export function FinanceCenter() {
   return (
     <DashboardShell activeSection="finance">
       <section className="finance-page">
-        <header className="finance-header">
-          <h1>財務概覽</h1>
-          <p>Financial Overview</p>
-        </header>
+        <PageHeader icon="💰" title="財務中心" subtitle="收入、支出同財務報告" />
 
         <div className="finance-metric-grid">
           <FinanceMetric label="Paid / 已收款" amount={dashboard.paid} color="#22c55e" currency={defaultCurrency} />

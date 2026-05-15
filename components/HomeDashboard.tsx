@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useMemo, useState } from 'react'
 
 import { DashboardShell } from '@/components/DashboardShell'
+import PageHeader from '@/components/PageHeader'
 import { CategoryTag, PipelineProgress, StatusBadge } from '@/components/StatusBadge'
 import { getPipelinePath, getProjectPipeline } from '@/lib/pipelines'
 import { supabase } from '@/lib/supabase'
@@ -71,11 +72,12 @@ export function HomeDashboard() {
 
   return (
     <DashboardShell activeSection="home">
+      <PageHeader icon="🏠" title="首頁" subtitle="快速存取你最近嘅項目同工作區域" />
       <div className="home-grid">
         <section className="home-main">
           <div className="hero-block">
             <h1>{greeting}，{displayName}！</h1>
-            <p>快速存取你最近嘅項目同工作區域</p>
+            <p>今日可以由最近項目開始，或者直接進入工作區。</p>
           </div>
 
           <section className="dashboard-section">

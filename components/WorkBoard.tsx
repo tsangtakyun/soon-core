@@ -4,6 +4,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { KeyboardEvent, useEffect, useMemo, useState } from 'react'
 
 import { DashboardShell } from '@/components/DashboardShell'
+import PageHeader from '@/components/PageHeader'
 import { AvatarChip, CategoryTag, PipelineProgress, StageBadge, StatusBadge } from '@/components/StatusBadge'
 import { getPipelinePath, getProjectPipeline } from '@/lib/pipelines'
 import { supabase } from '@/lib/supabase'
@@ -244,16 +245,17 @@ export function WorkBoard() {
   return (
     <DashboardShell activeSection="work">
       <section className="board-page">
-        <header className="board-toolbar">
-          <div>
-            <h1>我的工作</h1>
-            <p>內容製作 pipeline board</p>
-            <p className="active-workspace-line">工作區：{activeWorkspaceName}</p>
-          </div>
+        <PageHeader
+          icon="📋"
+          title="我的工作"
+          subtitle="內容製作追蹤板"
+          actions={(
           <button className="primary-button" type="button" onClick={openCreatePanel}>
             + 新項目
           </button>
-        </header>
+          )}
+        />
+        <p className="active-workspace-line">工作區：{activeWorkspaceName}</p>
 
         <div className="filters work-filters">
           <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="搜尋題目" />
