@@ -110,11 +110,13 @@ export function DashboardShell({ activeSection, pipeline, tool, children }: Dash
       await fetch('/api/auth/bootstrap', { method: 'POST' }).catch(() => null)
     }
 
-    const [{ data: workspaceData }, { data: projectData }, { data: settingsData }] = await Promise.all([
+    const [{ data: workspaceData }, { data: projectData }, settingsResponse] = await Promise.all([
       supabase.from('workspaces').select('*').order('created_at', { ascending: false }),
       supabase.from('projects').select('*').order('created_at', { ascending: false }),
-      supabase.from('settings').select('*').eq('user_id', 'tommy').maybeSingle(),
+      fetch('/api/settings', { cache: 'no-store' }),
     ])
+
+    const settingsData = settingsResponse.ok ? await settingsResponse.json() : null
 
     setWorkspaces((workspaceData ?? []) as Workspace[])
     setProjects((projectData ?? []) as Project[])
@@ -243,7 +245,7 @@ export function DashboardShell({ activeSection, pipeline, tool, children }: Dash
   const selectedWorkspaceCount = workspacePanel ? projectCounts[workspacePanel.id] ?? 0 : 0
   const sidebarName = authProfile?.name || settingsProfile.displayName
   const sidebarEmail = authProfile?.email || settingsProfile.companyName
-  const sidebarAvatar = authProfile?.avatarUrl || settingsProfile.logoBase64
+  const sidebarAvatar = settingsProfile.logoBase64 || authProfile?.avatarUrl
 
   async function signOut() {
     await supabase.auth.signOut()
