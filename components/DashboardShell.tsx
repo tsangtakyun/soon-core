@@ -297,24 +297,25 @@ export function DashboardShell({ activeSection, pipeline, tool, children }: Dash
       return
     }
 
-    const { data, error } = await supabase
-      .from('workspaces')
-      .update({
+    const response = await fetch('/api/workspaces', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        id: workspacePanel.id,
         name: workspaceDraft.name.trim(),
         type: workspaceDraft.type,
         owner: workspaceDraft.owner.trim() || null,
         description: workspaceDraft.description.trim() || null,
-      })
-      .eq('id', workspacePanel.id)
-      .select()
-      .single()
+      }),
+    })
+    const data = await response.json().catch(() => ({}))
 
-    if (error) {
-      window.alert(error.message)
+    if (!response.ok || !data?.workspace) {
+      window.alert(data?.error || '儲存工作區失敗，請重試。')
       return
     }
 
-    setWorkspacePanel(data as Workspace)
+    setWorkspacePanel(data.workspace as Workspace)
     setWorkspaceEditMode(false)
     await loadSidebarData()
     notifyWorkspaceChange()
@@ -325,15 +326,15 @@ export function DashboardShell({ activeSection, pipeline, tool, children }: Dash
     const confirmed = window.confirm(`確認刪除工作區「${workspacePanel.name}」？相關項目都會一併刪除。`)
     if (!confirmed) return
 
-    const { error: projectError } = await supabase.from('projects').delete().eq('workspace_id', workspacePanel.id)
-    if (projectError) {
-      window.alert(projectError.message)
-      return
-    }
+    const response = await fetch('/api/workspaces', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: workspacePanel.id }),
+    })
+    const data = await response.json().catch(() => ({}))
 
-    const { error } = await supabase.from('workspaces').delete().eq('id', workspacePanel.id)
-    if (error) {
-      window.alert(error.message)
+    if (!response.ok) {
+      window.alert(data?.error || '刪除工作區失敗，請重試。')
       return
     }
 
