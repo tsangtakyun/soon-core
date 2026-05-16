@@ -249,6 +249,23 @@ export function DashboardShell({ activeSection, pipeline, tool, children }: Dash
   const sidebarEmail = authProfile?.email || settingsProfile.companyName
   const sidebarAvatar = settingsProfile.logoBase64 || authProfile?.avatarUrl
   const activeWorkspaceId = activeWorkspace || workspaces[0]?.id || ''
+  const toolTopic = searchParams.get('topic') || ''
+  const toolBackground = searchParams.get('background') || ''
+
+  function safeDecodeParam(value: string) {
+    try {
+      return decodeURIComponent(value)
+    } catch {
+      return value
+    }
+  }
+
+  function buildToolUrlWithPrefill(baseUrl: string) {
+    const url = new URL(baseUrl)
+    if (toolTopic) url.searchParams.set('topic', safeDecodeParam(toolTopic))
+    if (toolBackground) url.searchParams.set('background', safeDecodeParam(toolBackground))
+    return url.toString()
+  }
 
   async function sendAuthToToolIframe() {
     if (!tool || !toolIframeRef.current?.contentWindow) return
@@ -275,12 +292,13 @@ export function DashboardShell({ activeSection, pipeline, tool, children }: Dash
 
   async function buildAuthenticatedToolUrl() {
     if (!tool) return ''
+    const toolUrl = buildToolUrlWithPrefill(tool.url)
 
     const {
       data: { session },
     } = await supabase.auth.getSession()
 
-    if (!session?.access_token || !session.refresh_token) return tool.url
+    if (!session?.access_token || !session.refresh_token) return toolUrl
 
     const authPayload = {
       accessToken: session.access_token,
@@ -289,7 +307,7 @@ export function DashboardShell({ activeSection, pipeline, tool, children }: Dash
       workspaceId: activeWorkspaceId,
     }
     const encoded = encodeURIComponent(window.btoa(JSON.stringify(authPayload)))
-    return `${tool.url}#soon_auth=${encoded}`
+    return `${toolUrl}#soon_auth=${encoded}`
   }
 
   useEffect(() => {
@@ -299,18 +317,34 @@ export function DashboardShell({ activeSection, pipeline, tool, children }: Dash
       void sendAuthToToolIframe()
     }, delay))
     return () => timers.forEach((timer) => window.clearTimeout(timer))
-  }, [tool?.url, activeWorkspaceId])
+  }, [tool?.url, activeWorkspaceId, toolTopic, toolBackground])
 
   useEffect(() => {
+    const handleNavigateTool = (event: MessageEvent) => {
+      if (event.data?.type !== 'SOON_NAVIGATE_TOOL') return
+      const { pipeline: nextPipeline, tool: nextTool, topic, background } = event.data
+      if (!nextPipeline || !nextTool) return
+
+      const params = new URLSearchParams()
+      if (topic) params.set('topic', encodeURIComponent(String(topic)))
+      if (background) params.set('background', encodeURIComponent(String(background)))
+      const query = params.toString()
+      router.push(`/${nextPipeline}/${nextTool}${query ? `?${query}` : ''}`)
+    }
+
     const handleToolReady = (event: MessageEvent) => {
       if (event.data?.type !== 'SOON_TOOL_READY') return
       if (event.source !== toolIframeRef.current?.contentWindow) return
       void sendAuthToToolIframe()
     }
 
+    window.addEventListener('message', handleNavigateTool)
     window.addEventListener('message', handleToolReady)
-    return () => window.removeEventListener('message', handleToolReady)
-  }, [tool?.url, activeWorkspaceId])
+    return () => {
+      window.removeEventListener('message', handleNavigateTool)
+      window.removeEventListener('message', handleToolReady)
+    }
+  }, [tool?.url, activeWorkspaceId, router])
 
   async function signOut() {
     await supabase.auth.signOut()
