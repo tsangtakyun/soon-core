@@ -394,11 +394,23 @@ export function IGScriptEditor({ doc, onBack, onSaved }: Props) {
   }
 
   function exportPdf() {
-    window.print()
+    const printWindow = window.open('', '_blank')
+    if (!printWindow) {
+      window.print()
+      return
+    }
+    printWindow.document.open()
+    printWindow.document.write(buildTextOnlyHtml(script))
+    printWindow.document.close()
+    printWindow.focus()
+    window.setTimeout(() => {
+      printWindow.print()
+      printWindow.close()
+    }, 250)
   }
 
   function exportWord() {
-    const html = buildWordHtml(script, t)
+    const html = buildTextOnlyHtml(script)
     const blob = new Blob(['\ufeff', html], { type: 'application/msword' })
     const url = URL.createObjectURL(blob)
     const anchor = document.createElement('a')
@@ -457,14 +469,6 @@ export function IGScriptEditor({ doc, onBack, onSaved }: Props) {
             </tr>
           </tbody>
         </table>
-
-        <section className="script-field-section">
-          <h2>{t.cover}</h2>
-          <button className="script-upload-zone soon-no-print" type="button" onClick={() => void uploadCover()}>
-            {script.coverImage ? <img src={script.coverImage} alt="" /> : <span>{t.uploadCover}</span>}
-          </button>
-          {script.coverImage && <img className="script-print-cover" src={script.coverImage} alt="" />}
-        </section>
 
         <label className="script-title-field">
           <span>{t.scriptTitle}</span>
@@ -723,6 +727,42 @@ function sanitizeFilename(value: string) {
 
 function escapeHtml(value: string) {
   return value.replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' })[char] ?? char)
+}
+
+function blockToTextLine(block: IGScriptBlock) {
+  const content = escapeHtml(block.content).replaceAll('\n', '<br>')
+  if (!content.trim()) return ''
+
+  if (block.type === 'voiceover') {
+    return `<p class="line">🎙 VO：<br>「${content}」</p>`
+  }
+
+  if (block.type === 'scene' || block.type === 'action' || block.type === 'location' || block.type === 'transition' || block.type === 'insert_ad' || block.type === 'caption') {
+    return `<p class="line">📷 ${content}</p>`
+  }
+
+  const speaker = block.speaker?.trim() ? escapeHtml(block.speaker.trim()) : '主持'
+  return `<p class="line">🎙 ${speaker}：<br>「${content}」</p>`
+}
+
+function buildTextOnlyHtml(script: IGScriptContent) {
+  const segments = script.segments
+    .map((segment, segmentIndex) => {
+      const duration = segment.suggestedTime ? `（${escapeHtml(segment.suggestedTime)}）` : ''
+      const blocks = segment.blocks.map(blockToTextLine).filter(Boolean).join('')
+      return `<section class="segment"><h2>${segmentIndex + 1} ${escapeHtml(segment.title || '段落')} ${duration}</h2>${blocks}</section>`
+    })
+    .join('')
+
+  return `<html><head><meta charset="utf-8"><style>
+body{font-family:Arial,"Noto Sans TC",sans-serif;margin:40px;color:#1a1a1a;background:#fff}
+h1{font-size:16px;font-weight:700;margin:0 0 20px}
+h2{font-size:14px;font-weight:700;margin:0 0 8px}
+.meta{font-size:12px;line-height:1.6;margin:0 0 20px;color:#555}
+.segment{margin:0 0 18px;page-break-inside:avoid}
+.line{font-size:12px;line-height:1.8;margin:6px 0;white-space:pre-wrap}
+@media print{body{margin:24px}}
+</style></head><body><h1>${escapeHtml(script.scriptTitle || script.title || 'IG Script')}</h1><p class="meta">創作者：${escapeHtml(script.creator || '')}<br>欄目：${escapeHtml(script.series || '')}<br>形式：${escapeHtml(script.format || 'IG Reel')}</p>${segments}</body></html>`
 }
 
 function buildWordHtml(script: IGScriptContent, t: (typeof scriptCopy)[IGScriptLanguage]) {

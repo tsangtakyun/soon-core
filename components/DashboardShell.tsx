@@ -79,7 +79,7 @@ export function DashboardShell({ activeSection, pipeline, tool, children }: Dash
     return Math.random().toString(36).slice(2)
   }
 
-  function parseQCToIGScript(text: string, topic: string, brand: string) {
+  function parseQCToIGScript(text: string, topic: string, brand: string, industry = '') {
     const now = new Date().toISOString()
     const lines = text.split('\n').map((line) => line.trim()).filter(Boolean)
     const segments: any[] = []
@@ -139,13 +139,13 @@ export function DashboardShell({ activeSection, pipeline, tool, children }: Dash
     }
 
     return {
-      language: 'zh',
+      language: 'zh-HK',
       title: topic || 'IG Script',
       releaseDate: '',
       creator: brand || '',
       guest: '',
       location: '',
-      series: '',
+      series: industry || '',
       format: 'IG Reel',
       coverImage: '',
       scriptTitle: topic || '',
@@ -416,10 +416,10 @@ export function DashboardShell({ activeSection, pipeline, tool, children }: Dash
     const handleCreateDoc = async (event: MessageEvent) => {
       if (event.data?.type !== 'SOON_CREATE_DOC') return
 
-      const { qc_final: qcFinal, topic, brand } = event.data
+      const { qc_final: qcFinal, topic, brand, industry } = event.data
       if (!qcFinal) return
 
-      const igScriptContent = parseQCToIGScript(String(qcFinal), String(topic || ''), String(brand || ''))
+      const igScriptContent = parseQCToIGScript(String(qcFinal), String(topic || ''), String(brand || ''), String(industry || ''))
 
       try {
         const response = await fetch('/api/docs', {
@@ -428,6 +428,7 @@ export function DashboardShell({ activeSection, pipeline, tool, children }: Dash
           body: JSON.stringify({
             title: topic || 'IG Script',
             template_type: 'ig_script',
+            workspace_id: activeWorkspaceId || null,
             content: JSON.stringify(igScriptContent),
           }),
         })
