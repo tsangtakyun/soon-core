@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 
 import { getPipelinePath, pipelines, type PipelineConfig, type PipelineTool } from '@/lib/pipelines'
 import { supabase } from '@/lib/supabase'
@@ -71,6 +71,7 @@ export function DashboardShell({ activeSection, pipeline, tool, children }: Dash
   })
   const [authProfile, setAuthProfile] = useState<AuthProfile | null>(null)
   const [coreLogoFailed, setCoreLogoFailed] = useState(false)
+  const toolIframeRef = useRef<HTMLIFrameElement | null>(null)
 
   useEffect(() => {
     if (pipeline?.id) setActivePipelineId(pipeline.id)
@@ -246,6 +247,38 @@ export function DashboardShell({ activeSection, pipeline, tool, children }: Dash
   const sidebarName = authProfile?.name || settingsProfile.displayName
   const sidebarEmail = authProfile?.email || settingsProfile.companyName
   const sidebarAvatar = settingsProfile.logoBase64 || authProfile?.avatarUrl
+  const activeWorkspaceId = activeWorkspace || workspaces[0]?.id || ''
+
+  async function sendAuthToToolIframe() {
+    if (!tool || !toolIframeRef.current?.contentWindow) return
+
+    const {
+      data: { session },
+    } = await supabase.auth.getSession()
+
+    if (!session?.access_token || !session.refresh_token) return
+
+    const targetOrigin = new URL(tool.url).origin
+    toolIframeRef.current.contentWindow.postMessage(
+      {
+        type: 'SOON_AUTH',
+        accessToken: session.access_token,
+        refreshToken: session.refresh_token,
+        token: session.access_token,
+        userId: session.user.id,
+        workspaceId: activeWorkspaceId,
+      },
+      targetOrigin
+    )
+  }
+
+  useEffect(() => {
+    if (!tool) return
+    const timer = window.setTimeout(() => {
+      void sendAuthToToolIframe()
+    }, 800)
+    return () => window.clearTimeout(timer)
+  }, [tool?.url, activeWorkspaceId])
 
   async function signOut() {
     await supabase.auth.signOut()
@@ -357,10 +390,12 @@ export function DashboardShell({ activeSection, pipeline, tool, children }: Dash
             </header>
             <iframe
               key={tool.url}
+              ref={toolIframeRef}
               src={tool.url}
               title={iframeTitle}
               referrerPolicy="no-referrer-when-downgrade"
               allow="camera; microphone; clipboard-read; clipboard-write; fullscreen"
+              onLoad={() => void sendAuthToToolIframe()}
             />
           </>
         ) : (
