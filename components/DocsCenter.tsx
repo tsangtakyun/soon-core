@@ -322,19 +322,23 @@ export function DocsCenter() {
   }, [selectedDoc, projectBrief])
 
   async function load() {
-    const [{ data: docData }, { data: workspaceData }, { data: folderData, error: folderError }, { data: settingsData }] = await Promise.all([
-      supabase.from('docs').select('*').order('created_at', { ascending: false }),
-      supabase.from('workspaces').select('*').order('created_at', { ascending: false }),
-      supabase.from('doc_folders').select('*').order('created_at', { ascending: false }),
-      supabase.from('settings').select('document_header_base64').eq('user_id', 'tommy').maybeSingle(),
-    ])
+    const response = await fetch('/api/docs', { cache: 'no-store' })
+    const result = await response.json().catch(() => ({}))
 
-    setDocs((docData ?? []) as CoreDoc[])
-    setWorkspaces((workspaceData ?? []) as Workspace[])
-    if (!folderError) setFolders((folderData ?? []) as DocFolder[])
-    setDocumentHeaderBase64(String(settingsData?.document_header_base64 ?? ''))
+    if (!response.ok) {
+      window.alert(result.error || '載入文件失敗')
+      setDocs([])
+      setWorkspaces([])
+      setFolders([])
+      return
+    }
+
+    setDocs((result.docs ?? []) as CoreDoc[])
+    setWorkspaces((result.workspaces ?? []) as Workspace[])
+    setFolders((result.folders ?? []) as DocFolder[])
+    setDocumentHeaderBase64(String(result.settings?.document_header_base64 ?? ''))
     const openDocId = searchParams.get('open')
-    const nextDocs = (docData ?? []) as CoreDoc[]
+    const nextDocs = (result.docs ?? []) as CoreDoc[]
     const docToOpen = openDocId ? nextDocs.find((doc) => doc.id === openDocId) : null
     if (docToOpen) openDoc(docToOpen, nextDocs)
   }
@@ -409,24 +413,26 @@ export function DocsCenter() {
           ? JSON.stringify(createEmptyQuotation(quoteSettings ?? defaultQuotationSettings))
         : ''
 
-    const { data, error } = await supabase
-      .from('docs')
-      .insert({
+    const response = await fetch('/api/docs', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
         title: template.title,
         template_type: template.type,
         workspace_id: workspaceId || null,
         content: initialContent,
-      })
-      .select()
-      .single()
+      }),
+    })
 
-    if (error) {
-      window.alert(error.message)
+    const result = await response.json().catch(() => ({}))
+    if (!response.ok) {
+      window.alert(result.error || '建立文件失敗')
       return
     }
 
+    const data = result.doc as CoreDoc
     notifyDocsChanged()
-    openDoc(data as CoreDoc, [data as CoreDoc, ...docs])
+    openDoc(data, [data, ...docs])
   }
 
   async function reserveNextInvoiceSettings(): Promise<InvoiceSettings> {
@@ -495,9 +501,15 @@ export function DocsCenter() {
     const confirmed = window.confirm('確定刪除此文件？此動作不可撤回')
     if (!confirmed) return
 
-    const { error } = await supabase.from('docs').delete().eq('id', doc.id)
-    if (error) {
-      window.alert(error.message)
+    const response = await fetch('/api/docs', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ids: [doc.id] }),
+    })
+
+    const result = await response.json().catch(() => ({}))
+    if (!response.ok) {
+      window.alert(result.error || '刪除文件失敗')
       return
     }
 
@@ -563,9 +575,15 @@ export function DocsCenter() {
   }
 
   async function moveDocToFolder(docId: string, folderId: string) {
-    const { error } = await supabase.from('docs').update({ folder_id: folderId || null }).eq('id', docId)
-    if (error) {
-      window.alert(error.message)
+    const response = await fetch('/api/docs', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: docId, folder_id: folderId || null }),
+    })
+
+    const result = await response.json().catch(() => ({}))
+    if (!response.ok) {
+      window.alert(result.error || '移動文件失敗')
       return
     }
     setDocs((current) => current.map((doc) => (doc.id === docId ? { ...doc, folder_id: folderId || null } : doc)))
@@ -579,9 +597,15 @@ export function DocsCenter() {
     const confirmed = window.confirm(`確定刪除 ${count} 份文件？此動作不可撤回`)
     if (!confirmed) return
 
-    const { error } = await supabase.from('docs').delete().in('id', selectedDocIds)
-    if (error) {
-      window.alert(error.message)
+    const response = await fetch('/api/docs', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ids: selectedDocIds }),
+    })
+
+    const result = await response.json().catch(() => ({}))
+    if (!response.ok) {
+      window.alert(result.error || '刪除文件失敗')
       return
     }
 
@@ -600,9 +624,15 @@ export function DocsCenter() {
 
   async function saveDoc() {
     if (!selectedDoc) return
-    const { error } = await supabase.from('docs').update({ content }).eq('id', selectedDoc.id)
-    if (error) {
-      window.alert(error.message)
+    const response = await fetch('/api/docs', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: selectedDoc.id, content }),
+    })
+
+    const result = await response.json().catch(() => ({}))
+    if (!response.ok) {
+      window.alert(result.error || '儲存文件失敗')
       return
     }
     setSaveState('saved')
@@ -614,25 +644,27 @@ export function DocsCenter() {
 
     const nextContent = { ...projectBrief, updatedAt: new Date().toISOString() }
     setSaveState('saving')
-    const { data, error } = await supabase
-      .from('docs')
-      .update({
+    const response = await fetch('/api/docs', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        id: selectedDoc.id,
         title: nextContent.title || 'Project Brief',
         content: JSON.stringify(nextContent),
-      })
-      .eq('id', selectedDoc.id)
-      .select()
-      .single()
+      }),
+    })
 
-    if (error) {
-      if (showAlert) window.alert(error.message)
+    const result = await response.json().catch(() => ({}))
+    if (!response.ok) {
+      if (showAlert) window.alert(result.error || '儲存文件失敗')
       setSaveState('idle')
       return
     }
 
+    const data = result.doc as CoreDoc
     setProjectBrief(nextContent)
-    setSelectedDoc(data as CoreDoc)
-    setDocs((current) => current.map((doc) => (doc.id === selectedDoc.id ? (data as CoreDoc) : doc)))
+    setSelectedDoc(data)
+    setDocs((current) => current.map((doc) => (doc.id === selectedDoc.id ? data : doc)))
     setSaveState('saved')
   }
 
