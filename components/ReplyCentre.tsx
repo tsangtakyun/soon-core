@@ -4,7 +4,6 @@ import { useEffect, useMemo, useState } from 'react'
 
 import { DashboardShell } from '@/components/DashboardShell'
 import PageHeader from '@/components/PageHeader'
-import { supabase } from '@/lib/supabase'
 
 type InboxType = 'email' | 'message' | 'fans'
 type ReplyStatus = 'pending' | 'replied' | 'follow_up' | 'important' | 'done'
@@ -47,33 +46,33 @@ type NewMessageDraft = {
 }
 
 const inboxTabs: Array<{ value: InboxType; label: string; icon: string }> = [
-  { value: 'email', label: 'Email', icon: '📧' },
-  { value: 'message', label: 'Message', icon: '💬' },
-  { value: 'fans', label: 'Fans', icon: '👥' },
+  { value: 'email', label: 'Email', icon: 'Email' },
+  { value: 'message', label: 'Message', icon: 'Message' },
+  { value: 'fans', label: 'Fans', icon: 'Fans' },
 ]
 
 const statusMeta: Record<ReplyStatus, { label: string; color: string }> = {
-  pending: { label: '待跟進', color: '#f59e0b' },
-  follow_up: { label: '待跟進', color: '#f59e0b' },
-  replied: { label: '已回覆', color: '#22c55e' },
-  important: { label: '重要', color: '#ef4444' },
-  done: { label: '已完成', color: '#6b7280' },
+  pending: { label: 'Pending', color: '#f59e0b' },
+  follow_up: { label: 'Follow up', color: '#f59e0b' },
+  replied: { label: 'Replied', color: '#22c55e' },
+  important: { label: 'Important', color: '#ef4444' },
+  done: { label: 'Done', color: '#6b7280' },
 }
 
 const statusOptions: Array<{ value: ReplyStatus | 'all'; label: string }> = [
-  { value: 'all', label: '全部' },
-  { value: 'pending', label: '待跟進' },
-  { value: 'replied', label: '已回覆' },
-  { value: 'important', label: '重要' },
-  { value: 'done', label: '已完成' },
+  { value: 'all', label: 'All' },
+  { value: 'pending', label: 'Pending' },
+  { value: 'replied', label: 'Replied' },
+  { value: 'important', label: 'Important' },
+  { value: 'done', label: 'Done' },
 ]
 
-const tagOptions = ['合作查詢', '粉絲問題', '媒體查詢', '其他']
+const tagOptions = ['Collaboration', 'Fans', 'Media', 'Other']
 const tagColors: Record<string, string> = {
-  合作查詢: '#7c3aed',
-  粉絲問題: '#ec4899',
-  媒體查詢: '#0ea5e9',
-  其他: '#6b7280',
+  Collaboration: '#7c3aed',
+  Fans: '#ec4899',
+  Media: '#0ea5e9',
+  Other: '#6b7280',
 }
 
 const defaultSettings = (inboxType: InboxType): ReplySetting => ({
@@ -131,29 +130,25 @@ export function ReplyCentre() {
   }, [selectedThread])
 
   async function loadReplyData() {
-    const [{ data: threadData }, { data: settingsData }] = await Promise.all([
-      supabase.from('reply_threads').select('*').order('updated_at', { ascending: false }),
-      supabase.from('reply_settings').select('*').eq('user_id', 'tommy'),
-    ])
+    const response = await fetch('/api/replies', { cache: 'no-store' })
+    const result = await response.json().catch(() => ({}))
+    if (!response.ok) {
+      window.alert(result.error || '???桀???????????????')
+      return
+    }
 
+    const threadData = (result.threads ?? []) as ReplyThread[]
+    const settingsData = (result.settings ?? []) as ReplySetting[]
     const nextSettings = {
       email: defaultSettings('email'),
       message: defaultSettings('message'),
       fans: defaultSettings('fans'),
     }
-    ;((settingsData ?? []) as ReplySetting[]).forEach((setting) => {
+    settingsData.forEach((setting) => {
       nextSettings[setting.inbox_type] = { ...defaultSettings(setting.inbox_type), ...setting }
     })
     setSettings(nextSettings)
-    setThreads((threadData ?? []) as ReplyThread[])
-
-    const missing = inboxTabs
-      .map((tab) => tab.value)
-      .filter((inbox) => !((settingsData ?? []) as ReplySetting[]).some((setting) => setting.inbox_type === inbox))
-      .map((inbox) => defaultSettings(inbox))
-    if (missing.length > 0) {
-      await supabase.from('reply_settings').upsert(missing, { onConflict: 'user_id,inbox_type' })
-    }
+    setThreads(threadData)
   }
 
   const filteredThreads = useMemo(() => {
@@ -198,31 +193,32 @@ export function ReplyCentre() {
 
   async function createThreadWithReply() {
     if (!draft.original_message.trim()) {
-      window.alert('請貼入原始訊息')
+      window.alert('Please enter the original message.')
       return
     }
     const aiReply = await generateReplyForMessage(draft.original_message, draft.inbox_type)
-    const { data, error } = await supabase
-      .from('reply_threads')
-      .insert({
+    const response = await fetch('/api/replies', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
         inbox_type: draft.inbox_type,
-        sender_name: draft.sender_name.trim() || '未命名',
+        sender_name: draft.sender_name.trim() || 'Untitled',
         sender_handle: draft.sender_handle.trim() || null,
         original_message: draft.original_message.trim(),
         ai_reply: aiReply,
         user_edited_reply: aiReply,
         status: 'pending',
         tags: [],
-        updated_at: new Date().toISOString(),
-      })
-      .select()
-      .single()
-    if (error) {
-      window.alert(error.message)
+      }),
+    })
+    const result = await response.json().catch(() => ({}))
+    if (!response.ok) {
+      window.alert(result.error || 'Failed to create message')
       return
     }
-    setThreads((current) => [data as ReplyThread, ...current])
-    setSelectedId((data as ReplyThread).id)
+    const data = result.thread as ReplyThread
+    setThreads((current) => [data, ...current])
+    setSelectedId(data.id)
     setActiveInbox(draft.inbox_type)
     setCreating(false)
     setDraft(emptyDraft)
@@ -232,13 +228,15 @@ export function ReplyCentre() {
     if (!selectedThread) return
     const reply = await generateReplyForMessage(selectedThread.original_message, selectedThread.inbox_type)
     setEditedReply(reply)
-    const { data, error } = await supabase
-      .from('reply_threads')
-      .update({ ai_reply: reply, user_edited_reply: reply, updated_at: new Date().toISOString() })
-      .eq('id', selectedThread.id)
-      .select()
-      .single()
-    if (!error && data) setThreads((current) => current.map((thread) => thread.id === selectedThread.id ? data as ReplyThread : thread))
+    const response = await fetch('/api/replies', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: selectedThread.id, ai_reply: reply, user_edited_reply: reply }),
+    })
+    const result = await response.json().catch(() => ({}))
+    if (response.ok && result.thread) {
+      setThreads((current) => current.map((thread) => thread.id === selectedThread.id ? result.thread as ReplyThread : thread))
+    }
   }
 
   async function saveThread(nextStatus = status) {
@@ -249,14 +247,18 @@ export function ReplyCentre() {
       notes: notes.trim() || null,
       follow_up_date: nextStatus === 'follow_up' ? followUpDate || null : null,
       user_edited_reply: editedReply,
-      updated_at: new Date().toISOString(),
     }
-    const { data, error } = await supabase.from('reply_threads').update(payload).eq('id', selectedThread.id).select().single()
-    if (error) {
-      window.alert(error.message)
+    const response = await fetch('/api/replies', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: selectedThread.id, ...payload }),
+    })
+    const result = await response.json().catch(() => ({}))
+    if (!response.ok) {
+      window.alert(result.error || 'Failed to save message')
       return
     }
-    setThreads((current) => current.map((thread) => thread.id === selectedThread.id ? data as ReplyThread : thread))
+    setThreads((current) => current.map((thread) => thread.id === selectedThread.id ? result.thread as ReplyThread : thread))
     setStatus(nextStatus)
   }
 
@@ -266,11 +268,16 @@ export function ReplyCentre() {
   }
 
   async function deleteThreadById(id: string) {
-    const confirmed = window.confirm('確定刪除此訊息？此動作不可撤回。')
+    const confirmed = window.confirm('Delete this message? This cannot be undone.')
     if (!confirmed) return
-    const { error } = await supabase.from('reply_threads').delete().eq('id', id)
-    if (error) {
-      window.alert(error.message)
+    const response = await fetch('/api/replies', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id }),
+    })
+    const result = await response.json().catch(() => ({}))
+    if (!response.ok) {
+      window.alert(result.error || 'Failed to delete message')
       return
     }
     setThreads((current) => current.filter((thread) => thread.id !== id))
@@ -291,12 +298,12 @@ export function ReplyCentre() {
   return (
     <DashboardShell activeSection="reply">
       <PageHeader
-        icon="💬"
-        title="回覆中心"
-        subtitle="管理電郵、訊息同粉絲回覆"
+        icon="Reply"
+        title="Reply Centre"
+        subtitle="Manage email, message and fan replies"
         actions={(
           <button className="primary-button" type="button" onClick={() => { setCreating(true); setSelectedId(null) }}>
-            + 新增訊息
+            + New message
           </button>
         )}
       />
@@ -315,10 +322,10 @@ export function ReplyCentre() {
               {statusOptions.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}
             </select>
             <select value={tagFilter} onChange={(event) => setTagFilter(event.target.value)}>
-              <option value="all">全部標籤</option>
+              <option value="all">All tags</option>
               {tagOptions.map((tag) => <option key={tag}>{tag}</option>)}
             </select>
-            <input value={search} placeholder="搜尋訊息..." onChange={(event) => setSearch(event.target.value)} />
+            <input value={search} placeholder="Search messages..." onChange={(event) => setSearch(event.target.value)} />
           </div>
 
           <div className="reply-thread-list">
@@ -326,7 +333,7 @@ export function ReplyCentre() {
               <article key={thread.id} className={`reply-thread-card ${thread.id === selectedId ? 'active' : ''} ${thread.status === 'pending' ? 'unread' : ''}`}>
                 <button className="reply-thread-main" type="button" onClick={() => { setSelectedId(thread.id); setCreating(false) }}>
                   <span className="reply-dot" />
-                  <strong>{thread.sender_name || '未命名'}</strong>
+                  <strong>{thread.sender_name || 'Untitled'}</strong>
                   <p>{thread.original_message.slice(0, 60)}{thread.original_message.length > 60 ? '...' : ''}</p>
                   <div>
                     <small>{formatTimeAgo(thread.updated_at || thread.created_at)}</small>
@@ -334,10 +341,10 @@ export function ReplyCentre() {
                   </div>
                   {(thread.tags ?? []).length > 0 && <div className="reply-tag-row">{(thread.tags ?? []).map((tag) => <TagPill key={tag} tag={tag} />)}</div>}
                 </button>
-                <button className="reply-thread-delete" type="button" onClick={() => void deleteThreadById(thread.id)}>刪除</button>
+                <button className="reply-thread-delete" type="button" onClick={() => void deleteThreadById(thread.id)}>Delete</button>
               </article>
             ))}
-            {filteredThreads.length === 0 && <div className="reply-empty-list">未有訊息</div>}
+            {filteredThreads.length === 0 && <div className="reply-empty-list">No messages</div>}
           </div>
         </aside>
 
@@ -348,31 +355,31 @@ export function ReplyCentre() {
             <article className="reply-detail-card">
               <header className="reply-detail-head">
                 <div>
-                  <h2>{selectedThread.sender_name || '未命名'}</h2>
-                  <p>{selectedThread.sender_handle || '未有 handle'} · {formatTimeAgo(selectedThread.created_at)}</p>
+                  <h2>{selectedThread.sender_name || 'Untitled'}</h2>
+                  <p>{selectedThread.sender_handle || 'No handle'} - {formatTimeAgo(selectedThread.created_at)}</p>
                   <span className="reply-inbox-badge">{inboxTabs.find((tab) => tab.value === selectedThread.inbox_type)?.icon} {selectedThread.inbox_type}</span>
                 </div>
                 <div className="reply-detail-actions">
                   <select value={status} onChange={(event) => setStatus(event.target.value as ReplyStatus)}>
                     {Object.entries(statusMeta).map(([value, meta]) => <option key={value} value={value}>{meta.label}</option>)}
                   </select>
-                  <button className="reply-delete-button" type="button" onClick={() => void deleteThread()}>刪除訊息</button>
+                  <button className="reply-delete-button" type="button" onClick={() => void deleteThread()}>Delete</button>
                 </div>
               </header>
 
               <section>
-                <label className="reply-section-label">原始訊息 / Original Message</label>
+                <label className="reply-section-label">Original Message</label>
                 <div className="reply-original-message">{selectedThread.original_message}</div>
               </section>
 
               <section>
-                <label className="reply-section-label">AI 回覆建議（{settings[selectedThread.inbox_type].assistant_name || 'Mayan'}）</label>
+                <label className="reply-section-label">AI Reply ({settings[selectedThread.inbox_type].assistant_name || 'Mayan'})</label>
                 <textarea className="reply-ai-textarea" value={editedReply} onChange={(event) => setEditedReply(event.target.value)} />
                 <div className="reply-button-row">
-                  <button type="button" onClick={() => void copyReply()}>📋 複製回覆</button>
-                  <button type="button" disabled={generating} onClick={() => void regenerateReply()}>{generating ? '生成中...' : '🔄 重新生成'}</button>
-                  <button type="button" onClick={() => void saveThread('replied')}>✅ 標記已回覆</button>
-                  {copied && <span>已複製！</span>}
+                  <button type="button" onClick={() => void copyReply()}>Copy reply</button>
+                  <button type="button" disabled={generating} onClick={() => void regenerateReply()}>{generating ? 'Generating...' : 'Regenerate'}</button>
+                  <button type="button" onClick={() => void saveThread('replied')}>Mark replied</button>
+                  {copied && <span>Copied</span>}
                 </div>
               </section>
 
@@ -386,16 +393,16 @@ export function ReplyCentre() {
               <section className="reply-follow-up">
                 <label className="reply-checkbox-row">
                   <input checked={status === 'follow_up'} type="checkbox" onChange={(event) => setStatus(event.target.checked ? 'follow_up' : 'pending')} />
-                  📌 需要跟進
+                  Needs follow-up
                 </label>
-                {status === 'follow_up' && <label>跟進日期<input type="date" value={followUpDate} onChange={(event) => setFollowUpDate(event.target.value)} /></label>}
-                <label>備注<textarea value={notes} placeholder="備注" onChange={(event) => setNotes(event.target.value)} /></label>
+                {status === 'follow_up' && <label>Follow-up date<input type="date" value={followUpDate} onChange={(event) => setFollowUpDate(event.target.value)} /></label>}
+                <label>Notes<textarea value={notes} placeholder="Notes" onChange={(event) => setNotes(event.target.value)} /></label>
               </section>
 
-              <button className="reply-save-button" type="button" onClick={() => void saveThread()}>儲存</button>
+              <button className="reply-save-button" type="button" onClick={() => void saveThread()}>Save</button>
             </article>
           ) : (
-            <div className="reply-empty-state">選擇一條訊息開始</div>
+            <div className="reply-empty-state">Select a message to start</div>
           )}
         </main>
       </section>
@@ -406,14 +413,14 @@ export function ReplyCentre() {
 function NewMessagePanel({ draft, generating, onChange, onGenerate }: { draft: NewMessageDraft; generating: boolean; onChange: (draft: NewMessageDraft) => void; onGenerate: () => void }) {
   return (
     <article className="reply-new-panel">
-      <h2>新增訊息</h2>
+      <h2>New message</h2>
       <div className="reply-type-toggle">
         {inboxTabs.map((tab) => <button key={tab.value} className={draft.inbox_type === tab.value ? 'active' : ''} type="button" onClick={() => onChange({ ...draft, inbox_type: tab.value })}>{tab.icon} {tab.label}</button>)}
       </div>
-      <label>Sender name<input value={draft.sender_name} placeholder="發送者名稱" onChange={(event) => onChange({ ...draft, sender_name: event.target.value })} /></label>
-      <label>Sender handle<input value={draft.sender_handle} placeholder="@handle 或 email" onChange={(event) => onChange({ ...draft, sender_handle: event.target.value })} /></label>
-      <label>Original message<textarea value={draft.original_message} placeholder="將收到嘅訊息貼入呢度..." rows={8} onChange={(event) => onChange({ ...draft, original_message: event.target.value })} /></label>
-      <button className="reply-save-button" type="button" disabled={generating} onClick={onGenerate}>{generating ? '生成中...' : '✨ AI 生成回覆'}</button>
+      <label>Sender name<input value={draft.sender_name} placeholder="Sender name" onChange={(event) => onChange({ ...draft, sender_name: event.target.value })} /></label>
+      <label>Sender handle<input value={draft.sender_handle} placeholder="@handle or email" onChange={(event) => onChange({ ...draft, sender_handle: event.target.value })} /></label>
+      <label>Original message<textarea value={draft.original_message} placeholder="Paste the received message here..." rows={8} onChange={(event) => onChange({ ...draft, original_message: event.target.value })} /></label>
+      <button className="reply-save-button" type="button" disabled={generating} onClick={onGenerate}>{generating ? 'Generating...' : 'AI generate reply'}</button>
     </article>
   )
 }
@@ -430,8 +437,8 @@ function TagPill({ tag }: { tag: string }) {
 function formatTimeAgo(value: string) {
   const diff = Date.now() - new Date(value).getTime()
   const minutes = Math.max(1, Math.floor(diff / 60000))
-  if (minutes < 60) return `${minutes} 分鐘前`
+  if (minutes < 60) return `${minutes}m ago`
   const hours = Math.floor(minutes / 60)
-  if (hours < 24) return `${hours} 小時前`
-  return `${Math.floor(hours / 24)} 日前`
+  if (hours < 24) return `${hours}h ago`
+  return `${Math.floor(hours / 24)}d ago`
 }
