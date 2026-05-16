@@ -186,7 +186,7 @@ async function readJsonResponse(response: Response) {
   } catch {
     const lower = text.toLowerCase()
     if (lower.includes('request entity too large') || response.status === 413) {
-      throw new Error('PDF 檔案太大，Vercel 拒絕接收。請改用較細 PDF，或者截圖後用圖片上傳。')
+      throw new Error('PDF 檔案太大，請改用較細 PDF 或圖片收據。')
     }
     throw new Error(text || `Request failed (${response.status})`)
   }
@@ -239,13 +239,14 @@ export function FinanceCenter() {
   }, [])
 
   async function loadFinanceData() {
-    const [{ data: docsData }, { data: expenseData }, { data: settingsData }] = await Promise.all([
+    const [expensesResponse, { data: docsData }, { data: settingsData }] = await Promise.all([
+      fetch('/api/expenses', { cache: 'no-store' }),
       supabase.from('docs').select('*').eq('template_type', 'invoice').order('created_at', { ascending: false }),
-      supabase.from('expenses').select('*').order('date', { ascending: false }),
       supabase.from('settings').select('default_currency').eq('user_id', 'tommy').maybeSingle(),
     ])
+    const expensesResult = await expensesResponse.json().catch(() => ({}))
     setInvoices((docsData ?? []) as FinanceDoc[])
-    setExpenses((expenseData ?? []) as Expense[])
+    setExpenses((expensesResult.expenses ?? []) as Expense[])
     setDefaultCurrency(currencyCodeFromSetting(String(settingsData?.default_currency ?? 'HK$')))
   }
 
@@ -357,7 +358,7 @@ export function FinanceCenter() {
     const maxBytes = 3 * 1024 * 1024
     const oversized = files.find((file) => file.type === 'application/pdf' && file.size > maxBytes)
     if (oversized) {
-      window.alert(`${oversized.name} 太大，暫時支援 3MB 以下 PDF。請壓縮 PDF，或者截圖後用圖片上傳。`)
+      window.alert(`${oversized.name} 檔案太大，請使用 3MB 以下 PDF，或改用圖片收據。`)
       event.target.value = ''
       return
     }
@@ -448,9 +449,10 @@ export function FinanceCenter() {
   }
 
   async function saveExpenseDraft(draft: ExpenseDraft) {
-    const { data, error } = await supabase
-      .from('expenses')
-      .insert({
+    const response = await fetch('/api/expenses', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
         date: draft.date,
         merchant: draft.merchant,
         description: draft.description,
@@ -464,24 +466,27 @@ export function FinanceCenter() {
         receipt_images: draft.receiptImages,
         ai_extracted: true,
         notes: draft.notes,
-      })
-      .select()
-      .single()
-    if (error) {
-      window.alert(error.message)
+      }),
+    })
+    const result = await response.json().catch(() => ({}))
+    if (!response.ok) {
+      window.alert(result.error || '儲存支出失敗')
       return
     }
-    const savedExpense = data as Expense
-    setExpenses((current) => [savedExpense, ...current])
+    setExpenses((current) => [result.expense as Expense, ...current])
     setTimeFilter('全部')
     setReceiptDrafts((current) => current.filter((item) => item.id !== draft.id))
   }
-
   async function deleteExpense(id: string) {
     if (!window.confirm('確定刪除此支出？')) return
-    const { error } = await supabase.from('expenses').delete().eq('id', id)
-    if (error) {
-      window.alert(error.message)
+    const response = await fetch('/api/expenses', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id }),
+    })
+    const result = await response.json().catch(() => ({}))
+    if (!response.ok) {
+      window.alert(result.error || '刪除支出失敗')
       return
     }
     setExpenses((current) => current.filter((item) => item.id !== id))
@@ -493,23 +498,24 @@ export function FinanceCenter() {
     const amountText = window.prompt('換算金額', String(expense.converted_amount ?? expense.amount ?? 0))
     const category = window.prompt('類別', expense.category ?? '雜項') ?? expense.category ?? '雜項'
     const amount = toNumber(amountText)
-    const { data, error } = await supabase
-      .from('expenses')
-      .update({
+    const response = await fetch('/api/expenses', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        id: expense.id,
         merchant,
         description,
         amount,
         converted_amount: amount,
         category,
-      })
-      .eq('id', expense.id)
-      .select()
-      .single()
-    if (error) {
-      window.alert(error.message)
+      }),
+    })
+    const result = await response.json().catch(() => ({}))
+    if (!response.ok) {
+      window.alert(result.error || '更新支出失敗')
       return
     }
-    setExpenses((current) => current.map((item) => (item.id === expense.id ? data as Expense : item)))
+    setExpenses((current) => current.map((item) => (item.id === expense.id ? result.expense as Expense : item)))
   }
 
   function toggleExpenseCategory(category: string) {
@@ -659,7 +665,7 @@ export function FinanceCenter() {
                             <div className="receivable-row-client">
                               <strong>{client}</strong>
                               <span>到期日：{dueDate}</span>
-                              {overdueDays > 0 && <em>逾期 {overdueDays} 天</em>}
+                              {overdueDays > 0 && <em>逾期 {overdueDays} 日</em>}
                             </div>
                             <div className="receivable-row-amount">{money(currency, amount)}</div>
                             <div className="receivable-row-actions">
@@ -861,7 +867,7 @@ function ExpenseDraftCard({ draft, index, defaultCurrency, onChange, onAmountCha
         {missing.has('amount') && <div className="expense-field-warning">⚠️ AI 未能讀取金額，請手動輸入</div>}
         {hasConversion && (
           <div className="expense-conversion-note">
-            ≈ {money(defaultCode, draft.convertedAmount)}（匯率: 1 {draft.originalCurrency} = {Number(draft.exchangeRate).toFixed(4)} {defaultCode}）
+            ≈ {money(defaultCode, draft.convertedAmount)}（匯率：1 {draft.originalCurrency} = {Number(draft.exchangeRate).toFixed(4)} {defaultCode}）
           </div>
         )}
         {draft.conversionError && (
