@@ -42,6 +42,14 @@ function isMissingRelationError(error: unknown) {
   return code === '42P01' || code === '42703'
 }
 
+function getErrorMessage(error: unknown) {
+  if (error instanceof Error) return error.message
+  if (typeof error === 'object' && error && 'message' in error) {
+    return String((error as { message?: unknown }).message)
+  }
+  return '刪除工作區失敗。'
+}
+
 async function deleteWorkspaceRelatedRows(admin: ReturnType<typeof createSupabaseAdmin>, workspaceId: string) {
   const tables = ['projects', 'docs', 'expenses', 'reply_threads', 'financial_reports', 'doc_folders', 'invitations', 'workspace_members']
 
@@ -214,7 +222,7 @@ export async function PATCH(request: Request) {
 }
 
 export async function DELETE(request: Request) {
-  const { user } = await getSessionUser()
+  const { supabase, user } = await getSessionUser()
 
   if (!user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -225,6 +233,18 @@ export async function DELETE(request: Request) {
 
   if (!workspaceId) {
     return NextResponse.json({ error: 'Workspace id is required' }, { status: 400 })
+  }
+
+  const { error: rpcError } = await supabase.rpc('soon_delete_workspace', {
+    target_workspace_id: workspaceId,
+  })
+
+  if (!rpcError) {
+    return NextResponse.json({ ok: true })
+  }
+
+  if (!isMissingRelationError(rpcError)) {
+    return NextResponse.json({ error: getErrorMessage(rpcError) }, { status: 500 })
   }
 
   const admin = createSupabaseAdmin()
@@ -238,8 +258,7 @@ export async function DELETE(request: Request) {
     const { error } = await admin.from('workspaces').delete().eq('id', workspaceId)
     if (error) throw error
   } catch (error) {
-    const message = error instanceof Error ? error.message : '刪除工作區失敗。'
-    return NextResponse.json({ error: message }, { status: 500 })
+    return NextResponse.json({ error: getErrorMessage(error) }, { status: 500 })
   }
 
   return NextResponse.json({ ok: true })
