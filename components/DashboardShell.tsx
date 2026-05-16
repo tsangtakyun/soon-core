@@ -71,6 +71,7 @@ export function DashboardShell({ activeSection, pipeline, tool, children }: Dash
   })
   const [authProfile, setAuthProfile] = useState<AuthProfile | null>(null)
   const [coreLogoFailed, setCoreLogoFailed] = useState(false)
+  const [toolIframeSrc, setToolIframeSrc] = useState(tool?.url ?? '')
   const toolIframeRef = useRef<HTMLIFrameElement | null>(null)
 
   useEffect(() => {
@@ -272,8 +273,28 @@ export function DashboardShell({ activeSection, pipeline, tool, children }: Dash
     )
   }
 
+  async function buildAuthenticatedToolUrl() {
+    if (!tool) return ''
+
+    const {
+      data: { session },
+    } = await supabase.auth.getSession()
+
+    if (!session?.access_token || !session.refresh_token) return tool.url
+
+    const authPayload = {
+      accessToken: session.access_token,
+      refreshToken: session.refresh_token,
+      userId: session.user.id,
+      workspaceId: activeWorkspaceId,
+    }
+    const encoded = encodeURIComponent(window.btoa(JSON.stringify(authPayload)))
+    return `${tool.url}#soon_auth=${encoded}`
+  }
+
   useEffect(() => {
     if (!tool) return
+    void buildAuthenticatedToolUrl().then(setToolIframeSrc)
     const timers = [800, 1800, 3200].map((delay) => window.setTimeout(() => {
       void sendAuthToToolIframe()
     }, delay))
@@ -400,9 +421,9 @@ export function DashboardShell({ activeSection, pipeline, tool, children }: Dash
               <span className={`pipeline-badge ${pipeline.id}`}>{pipeline.badge}</span>
             </header>
             <iframe
-              key={tool.url}
+              key={toolIframeSrc || tool.url}
               ref={toolIframeRef}
-              src={tool.url}
+              src={toolIframeSrc || tool.url}
               title={iframeTitle}
               referrerPolicy="no-referrer-when-downgrade"
               allow="camera; microphone; clipboard-read; clipboard-write; fullscreen"
