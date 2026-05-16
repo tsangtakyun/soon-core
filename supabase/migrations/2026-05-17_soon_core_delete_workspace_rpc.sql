@@ -9,6 +9,7 @@ set search_path = public
 as $$
 declare
   current_user_id uuid := auth.uid();
+  related_table text;
 begin
   if current_user_id is null then
     raise exception 'Unauthorized';
@@ -31,14 +32,23 @@ begin
     raise exception 'Forbidden';
   end if;
 
-  delete from public.projects where workspace_id = target_workspace_id;
-  delete from public.docs where workspace_id = target_workspace_id;
-  delete from public.expenses where workspace_id = target_workspace_id;
-  delete from public.reply_threads where workspace_id = target_workspace_id;
-  delete from public.financial_reports where workspace_id = target_workspace_id;
-  delete from public.doc_folders where workspace_id = target_workspace_id;
-  delete from public.invitations where workspace_id = target_workspace_id;
-  delete from public.workspace_members where workspace_id = target_workspace_id;
+  foreach related_table in array array[
+    'projects',
+    'docs',
+    'expenses',
+    'reply_threads',
+    'financial_reports',
+    'doc_folders',
+    'invitations',
+    'workspace_members'
+  ]
+  loop
+    if to_regclass('public.' || related_table) is not null then
+      execute format('delete from public.%I where workspace_id = $1', related_table)
+      using target_workspace_id;
+    end if;
+  end loop;
+
   delete from public.workspaces where id = target_workspace_id;
 end;
 $$;
