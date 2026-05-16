@@ -74,6 +74,87 @@ export function DashboardShell({ activeSection, pipeline, tool, children }: Dash
   const [toolIframeSrc, setToolIframeSrc] = useState(tool?.url ?? '')
   const toolIframeRef = useRef<HTMLIFrameElement | null>(null)
 
+  function makeClientId() {
+    if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) return crypto.randomUUID()
+    return Math.random().toString(36).slice(2)
+  }
+
+  function parseQCToIGScript(text: string, topic: string, brand: string) {
+    const now = new Date().toISOString()
+    const lines = text.split('\n').map((line) => line.trim()).filter(Boolean)
+    const segments: any[] = []
+    let currentSegment: any = null
+    let currentBlocks: any[] = []
+
+    const pushSegment = () => {
+      if (currentSegment && currentBlocks.length > 0) {
+        segments.push({ ...currentSegment, blocks: currentBlocks })
+      }
+      currentBlocks = []
+    }
+
+    const startSegment = (type: string, title: string, suggestedTime: string) => {
+      pushSegment()
+      currentSegment = { id: makeClientId(), type, title, suggestedTime }
+    }
+
+    for (const line of lines) {
+      const trimmed = line.trim()
+
+      if (trimmed.includes('Opening Hook') || trimmed.includes('開場')) {
+        startSegment('hook', '開場鉤子', '5秒')
+      } else if (trimmed.includes('背景 VO') || trimmed.includes('背景VO') || trimmed.includes('背景')) {
+        startSegment('background', '背景 VO', '15秒')
+      } else if (trimmed.includes('轉場')) {
+        startSegment('turning_point', '轉場', '5秒')
+      } else if (trimmed.includes('實測內容') || trimmed.includes('實測')) {
+        startSegment('real_test', '實測內容', '30秒')
+      } else if (trimmed.includes('Ending') || trimmed.includes('結尾')) {
+        startSegment('ending', 'Ending', '10秒')
+      } else if (trimmed && currentSegment && !trimmed.startsWith('【') && !trimmed.startsWith('[')) {
+        currentBlocks.push({
+          id: makeClientId(),
+          type: 'dialogue',
+          speaker: brand || '',
+          content: trimmed,
+        })
+      }
+    }
+
+    pushSegment()
+
+    if (segments.length === 0 && text.trim()) {
+      segments.push({
+        id: makeClientId(),
+        type: 'other',
+        title: '完整 QC 稿',
+        suggestedTime: '',
+        blocks: [{
+          id: makeClientId(),
+          type: 'dialogue',
+          speaker: brand || '',
+          content: text.trim(),
+        }],
+      })
+    }
+
+    return {
+      language: 'zh',
+      title: topic || 'IG Script',
+      releaseDate: '',
+      creator: brand || '',
+      guest: '',
+      location: '',
+      series: '',
+      format: 'IG Reel',
+      coverImage: '',
+      scriptTitle: topic || '',
+      segments,
+      createdAt: now,
+      updatedAt: now,
+    }
+  }
+
   useEffect(() => {
     if (pipeline?.id) setActivePipelineId(pipeline.id)
   }, [pipeline?.id])
@@ -332,6 +413,36 @@ export function DashboardShell({ activeSection, pipeline, tool, children }: Dash
       router.push(`/${nextPipeline}/${nextTool}${query ? `?${query}` : ''}`)
     }
 
+    const handleCreateDoc = async (event: MessageEvent) => {
+      if (event.data?.type !== 'SOON_CREATE_DOC') return
+
+      const { qc_final: qcFinal, topic, brand } = event.data
+      if (!qcFinal) return
+
+      const igScriptContent = parseQCToIGScript(String(qcFinal), String(topic || ''), String(brand || ''))
+
+      try {
+        const response = await fetch('/api/docs', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            title: topic || 'IG Script',
+            template_type: 'ig_script',
+            content: JSON.stringify(igScriptContent),
+          }),
+        })
+        const data = await response.json().catch(() => ({}))
+
+        if (data?.doc?.id) {
+          router.push(`/docs?open=${encodeURIComponent(data.doc.id)}`)
+        } else {
+          router.push('/docs')
+        }
+      } catch {
+        router.push('/docs')
+      }
+    }
+
     const handleToolReady = (event: MessageEvent) => {
       if (event.data?.type !== 'SOON_TOOL_READY') return
       if (event.source !== toolIframeRef.current?.contentWindow) return
@@ -339,9 +450,11 @@ export function DashboardShell({ activeSection, pipeline, tool, children }: Dash
     }
 
     window.addEventListener('message', handleNavigateTool)
+    window.addEventListener('message', handleCreateDoc)
     window.addEventListener('message', handleToolReady)
     return () => {
       window.removeEventListener('message', handleNavigateTool)
+      window.removeEventListener('message', handleCreateDoc)
       window.removeEventListener('message', handleToolReady)
     }
   }, [tool?.url, activeWorkspaceId, router])
