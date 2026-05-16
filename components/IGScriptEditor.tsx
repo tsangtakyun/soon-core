@@ -312,19 +312,23 @@ export function IGScriptEditor({ doc, onBack, onSaved }: Props) {
 
   async function saveScript() {
     const nextScript = { ...script, updatedAt: new Date().toISOString() }
-    const { data, error } = await supabase
-      .from('docs')
-      .update({ title: nextScript.title || 'IG Script', content: JSON.stringify(nextScript) })
-      .eq('id', doc.id)
-      .select()
-      .single()
-    if (error) {
-      window.alert(error.message)
+    const response = await fetch('/api/docs', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        id: doc.id,
+        title: nextScript.title || 'IG Script',
+        content: JSON.stringify(nextScript),
+      }),
+    })
+    const result = await response.json().catch(() => ({}))
+    if (!response.ok) {
+      window.alert(result.error || '儲存文件失敗')
       return
     }
     setScript(nextScript)
     setSaved(true)
-    onSaved(data as CoreDoc)
+    onSaved(result.doc as CoreDoc)
   }
 
   async function reviewSegment(segment: IGScriptSegment) {

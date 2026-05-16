@@ -130,9 +130,10 @@ export async function PATCH(request: Request) {
     .eq('id', docId)
     .in('workspace_id', workspaceIds)
     .select('*')
-    .single()
+    .maybeSingle()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (!data) return NextResponse.json({ error: '找不到文件或沒有權限更新' }, { status: 404 })
 
   return NextResponse.json({ doc: data })
 }
