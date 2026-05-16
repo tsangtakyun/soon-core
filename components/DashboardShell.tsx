@@ -274,10 +274,21 @@ export function DashboardShell({ activeSection, pipeline, tool, children }: Dash
 
   useEffect(() => {
     if (!tool) return
-    const timer = window.setTimeout(() => {
+    const timers = [800, 1800, 3200].map((delay) => window.setTimeout(() => {
       void sendAuthToToolIframe()
-    }, 800)
-    return () => window.clearTimeout(timer)
+    }, delay))
+    return () => timers.forEach((timer) => window.clearTimeout(timer))
+  }, [tool?.url, activeWorkspaceId])
+
+  useEffect(() => {
+    const handleToolReady = (event: MessageEvent) => {
+      if (event.data?.type !== 'SOON_TOOL_READY') return
+      if (event.source !== toolIframeRef.current?.contentWindow) return
+      void sendAuthToToolIframe()
+    }
+
+    window.addEventListener('message', handleToolReady)
+    return () => window.removeEventListener('message', handleToolReady)
   }, [tool?.url, activeWorkspaceId])
 
   async function signOut() {
