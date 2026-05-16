@@ -99,7 +99,6 @@ export async function POST(request: Request) {
       ...insertBody,
       title,
       workspace_id: workspaceId,
-      created_by: userId,
     })
     .select('*')
     .single()
