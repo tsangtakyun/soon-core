@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server'
 
-import { createSupabaseAdmin } from '@/lib/supabase-admin'
 import { createSupabaseRouteClient } from '@/lib/supabase-route'
 
 export async function POST(request: Request) {
@@ -34,9 +33,7 @@ export async function POST(request: Request) {
     email.split('@')[0] ||
     'User'
 
-  const admin = createSupabaseAdmin()
-
-  const { data: workspace, error: workspaceError } = await admin
+  const { data: workspace, error: workspaceError } = await supabase
     .from('workspaces')
     .insert({
       name,
@@ -52,7 +49,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: workspaceError.message }, { status: 500 })
   }
 
-  const { error: memberError } = await admin.from('workspace_members').upsert(
+  const { error: memberError } = await supabase.from('workspace_members').upsert(
     {
       workspace_id: workspace.id,
       user_id: user.id,
@@ -66,7 +63,6 @@ export async function POST(request: Request) {
   )
 
   if (memberError) {
-    await admin.from('workspaces').delete().eq('id', workspace.id)
     return NextResponse.json({ error: memberError.message }, { status: 500 })
   }
 
