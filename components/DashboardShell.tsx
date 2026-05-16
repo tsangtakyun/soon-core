@@ -79,12 +79,21 @@ export function DashboardShell({ activeSection, pipeline, tool, children }: Dash
     return Math.random().toString(36).slice(2)
   }
 
-  function parseQCToIGScript(text: string, topic: string, brand: string, industry = '') {
+  function parseQCToIGScript(text: string, topic: string, brand: string, industry = '', location = '') {
     const now = new Date().toISOString()
     const lines = text.split('\n').map((line) => line.trim()).filter(Boolean)
     const segments: any[] = []
     let currentSegment: any = null
     let currentBlocks: any[] = []
+
+    const inferSegment = (title: string) => {
+      if (title.includes('Hook') || title.includes('開場')) return { type: 'hook', suggestedTime: '5秒' }
+      if (title.includes('背景') || title.includes('VO') || title.includes('旁白')) return { type: 'background', suggestedTime: '15秒' }
+      if (title.includes('轉場')) return { type: 'turning_point', suggestedTime: '5秒' }
+      if (title.includes('實測')) return { type: 'real_test', suggestedTime: '30秒' }
+      if (title.includes('Ending') || title.includes('結尾')) return { type: 'ending', suggestedTime: '10秒' }
+      return { type: 'other', suggestedTime: '' }
+    }
 
     const pushSegment = () => {
       if (currentSegment && currentBlocks.length > 0) {
@@ -98,24 +107,56 @@ export function DashboardShell({ activeSection, pipeline, tool, children }: Dash
       currentSegment = { id: makeClientId(), type, title, suggestedTime }
     }
 
+    const stripPrefix = (value: string, prefixes: string[]) => {
+      for (const prefix of prefixes) {
+        if (value.startsWith(prefix)) return value.slice(prefix.length).trim()
+      }
+      return value
+    }
+
     for (const line of lines) {
       const trimmed = line.trim()
+      if (!trimmed) continue
 
-      if (trimmed.includes('Opening Hook') || trimmed.includes('開場')) {
-        startSegment('hook', '開場鉤子', '5秒')
-      } else if (trimmed.includes('背景 VO') || trimmed.includes('背景VO') || trimmed.includes('背景')) {
-        startSegment('background', '背景 VO', '15秒')
-      } else if (trimmed.includes('轉場')) {
-        startSegment('turning_point', '轉場', '5秒')
-      } else if (trimmed.includes('實測內容') || trimmed.includes('實測')) {
-        startSegment('real_test', '實測內容', '30秒')
-      } else if (trimmed.includes('Ending') || trimmed.includes('結尾')) {
-        startSegment('ending', 'Ending', '10秒')
-      } else if (trimmed && currentSegment && !trimmed.startsWith('【') && !trimmed.startsWith('[')) {
+      const bracketTitle = trimmed.match(/^【(.+)】$/) || trimmed.match(/^\[(.+)\]$/)
+      const numberedTitle = trimmed.match(/^(\d+)[.、]\s*(.+)$/)
+
+      if (bracketTitle || numberedTitle) {
+        const title = bracketTitle?.[1] || numberedTitle?.[2] || trimmed
+        const { type, suggestedTime } = inferSegment(title)
+        startSegment(type, title, suggestedTime)
+        continue
+      }
+
+      if (!currentSegment) startSegment('other', '完整 QC 稿', '')
+
+      if (trimmed.startsWith('拍攝：') || trimmed.startsWith('拍摄：')) {
+        currentBlocks.push({
+          id: makeClientId(),
+          type: 'scene',
+          speaker: '',
+          content: stripPrefix(trimmed, ['拍攝：', '拍摄：']),
+        })
+      } else if (trimmed.startsWith('旁白：') || trimmed.startsWith('VO：')) {
+        currentBlocks.push({
+          id: makeClientId(),
+          type: 'voiceover',
+          speaker: 'VO',
+          content: stripPrefix(trimmed, ['旁白：', 'VO：']),
+        })
+      } else if (trimmed.startsWith('主持：')) {
         currentBlocks.push({
           id: makeClientId(),
           type: 'dialogue',
-          speaker: brand || '',
+          speaker: brand || '主持',
+          content: stripPrefix(trimmed, ['主持：']),
+        })
+      } else {
+        const numberedLine = /^\d+\./.test(trimmed)
+        currentBlocks.push({
+          id: makeClientId(),
+          type: numberedLine ? 'scene' : 'dialogue',
+          speaker: numberedLine ? '' : brand || '主持',
           content: trimmed,
         })
       }
@@ -132,7 +173,7 @@ export function DashboardShell({ activeSection, pipeline, tool, children }: Dash
         blocks: [{
           id: makeClientId(),
           type: 'dialogue',
-          speaker: brand || '',
+          speaker: brand || '主持',
           content: text.trim(),
         }],
       })
@@ -144,7 +185,7 @@ export function DashboardShell({ activeSection, pipeline, tool, children }: Dash
       releaseDate: '',
       creator: brand || '',
       guest: '',
-      location: '',
+      location: location || '',
       series: industry || '',
       format: 'IG Reel',
       coverImage: '',
@@ -332,6 +373,7 @@ export function DashboardShell({ activeSection, pipeline, tool, children }: Dash
   const activeWorkspaceId = activeWorkspace || workspaces[0]?.id || ''
   const toolTopic = searchParams.get('topic') || ''
   const toolBackground = searchParams.get('background') || ''
+  const toolLocation = searchParams.get('location') || ''
 
   function safeDecodeParam(value: string) {
     try {
@@ -345,6 +387,7 @@ export function DashboardShell({ activeSection, pipeline, tool, children }: Dash
     const url = new URL(baseUrl)
     if (toolTopic) url.searchParams.set('topic', safeDecodeParam(toolTopic))
     if (toolBackground) url.searchParams.set('background', safeDecodeParam(toolBackground))
+    if (toolLocation) url.searchParams.set('location', safeDecodeParam(toolLocation))
     return url.toString()
   }
 
@@ -398,17 +441,18 @@ export function DashboardShell({ activeSection, pipeline, tool, children }: Dash
       void sendAuthToToolIframe()
     }, delay))
     return () => timers.forEach((timer) => window.clearTimeout(timer))
-  }, [tool?.url, activeWorkspaceId, toolTopic, toolBackground])
+  }, [tool?.url, activeWorkspaceId, toolTopic, toolBackground, toolLocation])
 
   useEffect(() => {
     const handleNavigateTool = (event: MessageEvent) => {
       if (event.data?.type !== 'SOON_NAVIGATE_TOOL') return
-      const { pipeline: nextPipeline, tool: nextTool, topic, background } = event.data
+      const { pipeline: nextPipeline, tool: nextTool, topic, background, location } = event.data
       if (!nextPipeline || !nextTool) return
 
       const params = new URLSearchParams()
       if (topic) params.set('topic', encodeURIComponent(String(topic)))
       if (background) params.set('background', encodeURIComponent(String(background)))
+      if (location) params.set('location', encodeURIComponent(String(location)))
       const query = params.toString()
       router.push(`/${nextPipeline}/${nextTool}${query ? `?${query}` : ''}`)
     }
@@ -416,10 +460,10 @@ export function DashboardShell({ activeSection, pipeline, tool, children }: Dash
     const handleCreateDoc = async (event: MessageEvent) => {
       if (event.data?.type !== 'SOON_CREATE_DOC') return
 
-      const { qc_final: qcFinal, topic, brand, industry } = event.data
+      const { qc_final: qcFinal, topic, brand, industry, location } = event.data
       if (!qcFinal) return
 
-      const igScriptContent = parseQCToIGScript(String(qcFinal), String(topic || ''), String(brand || ''), String(industry || ''))
+      const igScriptContent = parseQCToIGScript(String(qcFinal), String(topic || ''), String(brand || ''), String(industry || ''), String(location || ''))
 
       try {
         const response = await fetch('/api/docs', {
