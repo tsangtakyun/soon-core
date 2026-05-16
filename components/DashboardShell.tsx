@@ -234,16 +234,16 @@ export function DashboardShell({ activeSection, pipeline, tool, children }: Dash
       await fetch('/api/auth/bootstrap', { method: 'POST' }).catch(() => null)
     }
 
-    const [{ data: workspaceData }, { data: projectData }, settingsResponse] = await Promise.all([
-      supabase.from('workspaces').select('*').order('created_at', { ascending: false }),
-      supabase.from('projects').select('*').order('created_at', { ascending: false }),
+    const [projectsResponse, settingsResponse] = await Promise.all([
+      fetch('/api/projects', { cache: 'no-store' }),
       fetch('/api/settings', { cache: 'no-store' }),
     ])
 
+    const projectsData = projectsResponse.ok ? await projectsResponse.json() : null
     const settingsData = settingsResponse.ok ? await settingsResponse.json() : null
 
-    setWorkspaces((workspaceData ?? []) as Workspace[])
-    setProjects((projectData ?? []) as Project[])
+    setWorkspaces((projectsData?.workspaces ?? []) as Workspace[])
+    setProjects((projectsData?.projects ?? []) as Project[])
     setSettingsProfile({
       companyName: settingsData?.company_name || 'SOON Studio',
       displayName: settingsData?.display_name || 'Tommy',
