@@ -258,39 +258,25 @@ export function DashboardShell({ activeSection, pipeline, tool, children }: Dash
   async function createWorkspace() {
     const name = window.prompt('新增工作區名稱')
     if (!name?.trim()) return
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
 
-    const { data, error } = await supabase
-      .from('workspaces')
-      .insert({ name: name.trim(), type: pipeline?.id ?? activePipelineId, owner_id: user?.id ?? null })
-      .select()
-      .single()
+    const response = await fetch('/api/workspaces', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: name.trim(),
+        type: pipeline?.id ?? activePipelineId,
+      }),
+    })
+    const data = await response.json().catch(() => ({}))
 
-    if (error) {
-      window.alert(error.message)
+    if (!response.ok || !data?.workspace?.id) {
+      window.alert(data?.error || '新增工作區失敗，請重試。')
       return
-    }
-
-    if (user) {
-      await supabase.from('workspace_members').upsert(
-        {
-          workspace_id: data.id,
-          user_id: user.id,
-          email: user.email ?? '',
-          display_name: user.user_metadata?.full_name || user.user_metadata?.name || settingsProfile.displayName,
-          role: 'owner',
-          status: 'active',
-          invited_by: user.id,
-        },
-        { onConflict: 'workspace_id,user_id' }
-      )
     }
 
     await loadSidebarData()
     notifyWorkspaceChange()
-    router.push(`/work?workspace=${data.id}`)
+    router.push(`/work?workspace=${data.workspace.id}`)
   }
 
   function openWorkspacePanel(workspace: Workspace) {
