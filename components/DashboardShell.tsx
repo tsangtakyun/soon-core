@@ -39,6 +39,15 @@ type AuthProfile = {
   avatarUrl: string
 }
 
+type ScriptPickerDoc = {
+  id: string
+  title: string
+  template_type: string
+  content: string
+  created_at?: string
+  updated_at?: string
+}
+
 const primaryNav = [
   { href: '/', label: '首頁', icon: '🏠', section: 'home' },
   { href: '/work', label: '我的工作', icon: '📅', section: 'work' },
@@ -88,6 +97,10 @@ export function DashboardShell({ activeSection, pipeline, tool, children }: Dash
   const [authProfile, setAuthProfile] = useState<AuthProfile | null>(null)
   const [coreLogoFailed, setCoreLogoFailed] = useState(false)
   const [toolIframeSrc, setToolIframeSrc] = useState(tool?.url ?? '')
+  const [scriptPickerOpen, setScriptPickerOpen] = useState(false)
+  const [scriptPickerDocs, setScriptPickerDocs] = useState<ScriptPickerDoc[]>([])
+  const [scriptPickerLoading, setScriptPickerLoading] = useState(false)
+  const [scriptPickerError, setScriptPickerError] = useState('')
   const toolIframeRef = useRef<HTMLIFrameElement | null>(null)
 
   function makeClientId() {
@@ -441,6 +454,91 @@ export function DashboardShell({ activeSection, pipeline, tool, children }: Dash
     )
   }
 
+  function extractScriptForStoryboard(doc: ScriptPickerDoc) {
+    const rawContent = doc.content ?? ''
+    let parsed: any = rawContent
+
+    if (typeof rawContent === 'string') {
+      try {
+        parsed = JSON.parse(rawContent)
+      } catch {
+        return rawContent
+      }
+    }
+
+    if (typeof parsed === 'string') return parsed
+    if (!parsed || typeof parsed !== 'object') return rawContent
+
+    if (typeof parsed.qc_final === 'string') return parsed.qc_final
+    if (typeof parsed.ai_draft === 'string') return parsed.ai_draft
+    if (typeof parsed.script === 'string') return parsed.script
+    if (typeof parsed.content === 'string') return parsed.content
+
+    if (Array.isArray(parsed.segments)) {
+      return parsed.segments
+        .map((segment: any, index: number) => {
+          const title = segment?.title || segment?.type || `Segment ${index + 1}`
+          const time = segment?.suggestedTime ? ` (${segment.suggestedTime})` : ''
+          const blocks = Array.isArray(segment?.blocks) ? segment.blocks : []
+          const blockText = blocks
+            .map((block: any) => {
+              const type = String(block?.type || '').toLowerCase()
+              const content = String(block?.content || '').trim()
+              if (!content) return ''
+              if (type.includes('scene') || type.includes('shot')) return `Scene: ${content}`
+              if (type.includes('voice') || type.includes('vo')) return `VO: ${content}`
+              const speaker = block?.speaker || parsed.creator || 'Host'
+              return `${speaker}: ${content}`
+            })
+            .filter(Boolean)
+            .join('\n')
+
+          return `${index + 1}. ${title}${time}${blockText ? `\n${blockText}` : ''}`
+        })
+        .join('\n\n')
+    }
+
+    return rawContent
+  }
+
+  async function openScriptPicker() {
+    setScriptPickerOpen(true)
+    setScriptPickerLoading(true)
+    setScriptPickerError('')
+
+    try {
+      const query = activeWorkspaceId ? `?workspace_id=${encodeURIComponent(activeWorkspaceId)}` : ''
+      const response = await fetch(`/api/docs${query}`, { cache: 'no-store' })
+      const data = await response.json().catch(() => ({}))
+
+      if (!response.ok) {
+        throw new Error(data?.error || 'Failed to load documents')
+      }
+
+      const docs = Array.isArray(data?.docs) ? data.docs : []
+      setScriptPickerDocs(docs.filter((doc: ScriptPickerDoc) => doc.template_type === 'ig_script'))
+    } catch {
+      setScriptPickerDocs([])
+      setScriptPickerError('未能載入文件，請重試。')
+    } finally {
+      setScriptPickerLoading(false)
+    }
+  }
+
+  function selectScriptForStoryboard(doc: ScriptPickerDoc) {
+    if (!toolIframeRef.current?.contentWindow) return
+
+    const message = {
+      type: 'SOON_SCRIPT_SELECTED',
+      script: extractScriptForStoryboard(doc),
+      topic: doc.title,
+    }
+
+    const targetOrigin = tool ? new URL(tool.url).origin : '*'
+    toolIframeRef.current.contentWindow.postMessage(message, targetOrigin)
+    setScriptPickerOpen(false)
+  }
+
   useEffect(() => {
     if (activeWorkspaceId) void sendAuthToToolIframe()
   }, [activeWorkspaceId])
@@ -491,7 +589,7 @@ export function DashboardShell({ activeSection, pipeline, tool, children }: Dash
 
     const handleRequestScript = (event: MessageEvent) => {
       if (event.data?.type !== 'SOON_REQUEST_SCRIPT') return
-      router.push('/docs?select_for_storyboard=true')
+      void openScriptPicker()
     }
 
     const handleCreateDoc = async (event: MessageEvent) => {
@@ -742,6 +840,120 @@ export function DashboardShell({ activeSection, pipeline, tool, children }: Dash
             刪除工作區
           </button>
         </aside>
+      )}
+
+      {scriptPickerOpen && (
+        <div
+          role="presentation"
+          onClick={() => setScriptPickerOpen(false)}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 1000,
+            background: 'rgba(0,0,0,0.62)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: 24,
+          }}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-label="選擇劇本文件"
+            onClick={(event) => event.stopPropagation()}
+            style={{
+              width: 'min(560px, 100%)',
+              maxHeight: '72vh',
+              overflow: 'hidden',
+              background: 'var(--soon-surface)',
+              border: '0.5px solid var(--soon-border)',
+              borderRadius: 'var(--soon-radius-lg)',
+              boxShadow: '0 24px 80px rgba(0,0,0,0.45)',
+              color: 'var(--soon-text)',
+            }}
+          >
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: 16,
+                padding: '18px 20px',
+                borderBottom: '0.5px solid var(--soon-border)',
+              }}
+            >
+              <div>
+                <h2 style={{ margin: 0, fontSize: 18, fontWeight: 600 }}>選擇劇本文件</h2>
+                <p style={{ margin: '4px 0 0', fontSize: 12, color: 'var(--soon-text-secondary)' }}>
+                  從文件中心揀一份 IG Script，會自動填入分鏡工作台。
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setScriptPickerOpen(false)}
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  color: 'var(--soon-text-secondary)',
+                  cursor: 'pointer',
+                  fontSize: 22,
+                  lineHeight: 1,
+                  padding: 4,
+                }}
+              >
+                ×
+              </button>
+            </div>
+
+            <div style={{ padding: 20, maxHeight: 'calc(72vh - 92px)', overflowY: 'auto' }}>
+              {scriptPickerLoading && (
+                <p style={{ margin: 0, fontSize: 13, color: 'var(--soon-text-secondary)' }}>載入文件中...</p>
+              )}
+
+              {!scriptPickerLoading && scriptPickerError && (
+                <p style={{ margin: 0, fontSize: 13, color: 'var(--soon-warning)' }}>{scriptPickerError}</p>
+              )}
+
+              {!scriptPickerLoading && !scriptPickerError && scriptPickerDocs.length === 0 && (
+                <p style={{ margin: 0, fontSize: 13, color: 'var(--soon-text-secondary)' }}>
+                  暫時未有 IG Script 文件。
+                </p>
+              )}
+
+              {!scriptPickerLoading && !scriptPickerError && scriptPickerDocs.map((doc) => (
+                <button
+                  key={doc.id}
+                  type="button"
+                  onClick={() => selectScriptForStoryboard(doc)}
+                  style={{
+                    width: '100%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: 14,
+                    padding: '12px 14px',
+                    marginBottom: 10,
+                    background: 'var(--soon-surface2)',
+                    border: '0.5px solid var(--soon-border)',
+                    borderRadius: 'var(--soon-radius)',
+                    color: 'var(--soon-text)',
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                  }}
+                >
+                  <span>
+                    <strong style={{ display: 'block', fontSize: 13, fontWeight: 600 }}>{doc.title || '未命名劇本'}</strong>
+                    <small style={{ display: 'block', marginTop: 4, color: 'var(--soon-text-secondary)', fontSize: 11 }}>
+                      {doc.updated_at ? `最近更新 ${new Date(doc.updated_at).toLocaleDateString('zh-HK')}` : 'IG Script'}
+                    </small>
+                  </span>
+                  <span style={{ color: 'var(--soon-purple-light)', fontSize: 12, flexShrink: 0 }}>選取</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
       )}
     </div>
   )
