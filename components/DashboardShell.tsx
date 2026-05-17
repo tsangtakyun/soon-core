@@ -420,6 +420,10 @@ export function DashboardShell({ activeSection, pipeline, tool, children }: Dash
     )
   }
 
+  useEffect(() => {
+    if (activeWorkspaceId) void sendAuthToToolIframe()
+  }, [activeWorkspaceId])
+
   async function buildAuthenticatedToolUrl() {
     if (!tool) return ''
     const toolUrl = buildToolUrlWithPrefill(tool.url)
@@ -466,7 +470,7 @@ export function DashboardShell({ activeSection, pipeline, tool, children }: Dash
     const handleCreateDoc = async (event: MessageEvent) => {
       if (event.data?.type !== 'SOON_CREATE_DOC') return
 
-      const { qc_final: qcFinal, topic, brand, industry, location } = event.data
+      const { qc_final: qcFinal, topic, brand, industry, location, workspace_id: messageWorkspaceId } = event.data
       if (!qcFinal) return
 
       const igScriptContent = parseQCToIGScript(String(qcFinal), String(topic || ''), String(brand || ''), String(industry || ''), String(location || ''))
@@ -478,7 +482,7 @@ export function DashboardShell({ activeSection, pipeline, tool, children }: Dash
           body: JSON.stringify({
             title: topic || 'IG Script',
             template_type: 'ig_script',
-            workspace_id: activeWorkspaceId || null,
+            workspace_id: messageWorkspaceId || activeWorkspaceId || null,
             content: JSON.stringify(igScriptContent),
           }),
         })
