@@ -1,8 +1,9 @@
 'use client'
 
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import { KeyboardEvent, useEffect, useMemo, useState } from 'react'
 
+import { useWorkspace } from '@/app/context/workspace-context'
 import { DashboardShell } from '@/components/DashboardShell'
 import PageHeader from '@/components/PageHeader'
 import { AvatarChip, CategoryTag, PipelineProgress, StageBadge, StatusBadge } from '@/components/StatusBadge'
@@ -75,8 +76,7 @@ const emptyProject: ProjectDraft = {
 
 export function WorkBoard() {
   const router = useRouter()
-  const searchParams = useSearchParams()
-  const workspaceFilter = searchParams.get('workspace')
+  const { activeWorkspaceId } = useWorkspace()
   const [projects, setProjects] = useState<Project[]>([])
   const [workspaces, setWorkspaces] = useState<Workspace[]>([])
   const [query, setQuery] = useState('')
@@ -112,7 +112,7 @@ export function WorkBoard() {
     setSort(defaultSort)
     window.localStorage.setItem(sortStorageKey, JSON.stringify(defaultSort))
     void load()
-  }, [workspaceFilter])
+  }, [activeWorkspaceId])
 
   useEffect(() => {
     const refresh = () => void load()
@@ -151,11 +151,11 @@ export function WorkBoard() {
   }
 
   const activeWorkspaceName =
-    workspaces.find((workspace) => workspace.id === workspaceFilter)?.name ?? (workspaceFilter ? '未找到' : '全部')
+    workspaces.find((workspace) => workspace.id === activeWorkspaceId)?.name ?? (activeWorkspaceId ? '未找到' : '全部')
 
   const visibleProjects = useMemo(() => {
     const filtered = projects.filter((project) => {
-      if (workspaceFilter && project.workspace_id !== workspaceFilter) return false
+      if (activeWorkspaceId && project.workspace_id !== activeWorkspaceId) return false
       if (statusFilter && project.status !== statusFilter) return false
       if (categoryFilter && project.category !== categoryFilter) return false
       if (ownerFilter && (project.owner ?? '') !== ownerFilter) return false
@@ -164,7 +164,7 @@ export function WorkBoard() {
     })
 
     return [...filtered].sort((a, b) => compareProjects(a, b, sort))
-  }, [categoryFilter, ownerFilter, projects, query, sort, statusFilter, workspaceFilter])
+  }, [activeWorkspaceId, categoryFilter, ownerFilter, projects, query, sort, statusFilter])
 
   const owners = Array.from(new Set(projects.map((project) => project.owner).filter(Boolean))) as string[]
   const visibleProjectIds = visibleProjects.map((project) => project.id)
@@ -174,7 +174,7 @@ export function WorkBoard() {
 
   function openCreatePanel() {
     setSelectedProject(null)
-    setDraft({ ...emptyProject, workspace_id: workspaceFilter ?? '' })
+    setDraft({ ...emptyProject, workspace_id: activeWorkspaceId })
     setPanelMode('create')
   }
 

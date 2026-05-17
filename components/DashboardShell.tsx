@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useMemo, useRef, useState } from 'react'
 
+import { useWorkspace } from '@/app/context/workspace-context'
 import { getPipelinePath, pipelines, type PipelineConfig, type PipelineTool } from '@/lib/pipelines'
 import { supabase } from '@/lib/supabase'
 import type { Project, Workspace, WorkspaceType } from '@/lib/types'
@@ -51,7 +52,8 @@ export function DashboardShell({ activeSection, pipeline, tool, children }: Dash
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const router = useRouter()
-  const activeWorkspace = searchParams.get('workspace')
+  const urlWorkspace = searchParams.get('workspace')
+  const { activeWorkspaceId, setActiveWorkspace } = useWorkspace()
   const [activePipelineId, setActivePipelineId] = useState<PipelineConfig['id']>(pipeline?.id ?? 'youtube')
   const [workspaces, setWorkspaces] = useState<Workspace[]>([])
   const [projects, setProjects] = useState<Project[]>([])
@@ -205,6 +207,22 @@ export function DashboardShell({ activeSection, pipeline, tool, children }: Dash
   }, [])
 
   useEffect(() => {
+    if (workspaces.length === 0) return
+
+    const urlSelectedWorkspace = urlWorkspace ? workspaces.find((workspace) => workspace.id === urlWorkspace) : null
+    if (urlSelectedWorkspace && activeWorkspaceId !== urlSelectedWorkspace.id) {
+      setActiveWorkspace(urlSelectedWorkspace.id, urlSelectedWorkspace.name)
+      return
+    }
+
+    const activeStillExists = workspaces.some((workspace) => workspace.id === activeWorkspaceId)
+    if (!activeWorkspaceId || !activeStillExists) {
+      const firstWorkspace = workspaces[0]
+      setActiveWorkspace(firstWorkspace.id, firstWorkspace.name)
+    }
+  }, [activeWorkspaceId, setActiveWorkspace, urlWorkspace, workspaces])
+
+  useEffect(() => {
     const refreshSidebar = () => void loadSidebarData()
     window.addEventListener('soon-data-updated', refreshSidebar)
     return () => window.removeEventListener('soon-data-updated', refreshSidebar)
@@ -275,6 +293,7 @@ export function DashboardShell({ activeSection, pipeline, tool, children }: Dash
     }
 
     await loadSidebarData()
+    setActiveWorkspace(data.workspace.id, data.workspace.name)
     notifyWorkspaceChange()
     router.push(`/work?workspace=${data.workspace.id}`)
   }
@@ -338,7 +357,7 @@ export function DashboardShell({ activeSection, pipeline, tool, children }: Dash
       return
     }
 
-    const deletedActiveWorkspace = workspacePanel.id === activeWorkspace
+    const deletedActiveWorkspace = workspacePanel.id === activeWorkspaceId
     setWorkspacePanel(null)
     await loadSidebarData()
     notifyWorkspaceChange()
@@ -357,7 +376,6 @@ export function DashboardShell({ activeSection, pipeline, tool, children }: Dash
   const sidebarName = authProfile?.name || settingsProfile.displayName
   const sidebarEmail = authProfile?.email || settingsProfile.companyName
   const sidebarAvatar = settingsProfile.logoBase64 || authProfile?.avatarUrl
-  const activeWorkspaceId = activeWorkspace || workspaces[0]?.id || ''
   const toolTopic = searchParams.get('topic') || ''
   const toolBackground = searchParams.get('background') || ''
   const toolLocation = searchParams.get('location') || ''
@@ -541,8 +559,12 @@ export function DashboardShell({ activeSection, pipeline, tool, children }: Dash
           <div className="sidebar-section-title">工作區</div>
           <div className="workspace-list">
             {workspaces.map((workspace) => (
-              <div key={workspace.id} className={`workspace-item ${workspace.id === activeWorkspace ? 'active' : ''}`}>
-                <Link href={`/work?workspace=${workspace.id}`} className="workspace-link">
+              <div key={workspace.id} className={`workspace-item ${workspace.id === activeWorkspaceId ? 'active' : ''}`}>
+                <Link
+                  href={`/work?workspace=${workspace.id}`}
+                  className="workspace-link"
+                  onClick={() => setActiveWorkspace(workspace.id, workspace.name)}
+                >
                   <span>{workspace.type === 'ig' ? 'IG' : workspace.type === 'mixed' ? 'MX' : 'YT'}</span>
                   <strong>{workspace.name}</strong>
                   <em>{projectCounts[workspace.id] ?? 0}</em>

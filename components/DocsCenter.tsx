@@ -3,6 +3,7 @@
 import { useSearchParams } from 'next/navigation'
 import { type ChangeEvent, type ReactNode, useEffect, useMemo, useState } from 'react'
 
+import { useWorkspace } from '@/app/context/workspace-context'
 import { AcceptanceOfEngagementEditor, createEmptyAcceptance } from '@/components/AcceptanceOfEngagementEditor'
 import { BlankDocumentEditor } from '@/components/BlankDocumentEditor'
 import { CampaignReportEditor, createEmptyCampaignReport } from '@/components/CampaignReportEditor'
@@ -295,23 +296,41 @@ export function DocsCenter() {
   const [content, setContent] = useState('')
   const [projectBrief, setProjectBrief] = useState<ProjectBriefContent>(defaultProjectBrief)
   const [documentHeaderBase64, setDocumentHeaderBase64] = useState('')
-  const [workspaceId, setWorkspaceId] = useState('')
+  const { activeWorkspaceId: workspaceId, setActiveWorkspace } = useWorkspace()
   const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved'>('idle')
   const [selectedDocIds, setSelectedDocIds] = useState<string[]>([])
   const [toastMessage, setToastMessage] = useState('')
 
   const copy = useMemo(() => briefCopy[projectBrief.language], [projectBrief.language])
-  const allDocsSelected = docs.length > 0 && selectedDocIds.length === docs.length
   const hasDocSelection = selectedDocIds.length > 0
+  const workspaceDocs = useMemo(
+    () => docs.filter((doc) => !workspaceId || doc.workspace_id === workspaceId),
+    [docs, workspaceId]
+  )
+  const visibleFolders = useMemo(
+    () => folders.filter((folder) => !workspaceId || folder.workspace_id === workspaceId),
+    [folders, workspaceId]
+  )
   const visibleDocs = useMemo(
-    () => docs.filter((doc) => !activeFolderId || doc.folder_id === activeFolderId),
-    [activeFolderId, docs]
+    () =>
+      workspaceDocs.filter((doc) => {
+        if (activeFolderId && doc.folder_id !== activeFolderId) return false
+        return true
+      }),
+    [activeFolderId, workspaceDocs]
   )
   const allVisibleDocsSelected = visibleDocs.length > 0 && visibleDocs.every((doc) => selectedDocIds.includes(doc.id))
 
   useEffect(() => {
     void load()
   }, [])
+
+  useEffect(() => {
+    setSelectedDocIds([])
+    if (activeFolderId && !visibleFolders.some((folder) => folder.id === activeFolderId)) {
+      setActiveFolderId('')
+    }
+  }, [activeFolderId, visibleFolders, workspaceId])
 
   useEffect(() => {
     if (!selectedDoc || selectedDoc.template_type !== 'project_brief') return
@@ -1093,7 +1112,15 @@ export function DocsCenter() {
           subtitle="建立常用製作文件同模板"
           actions={(
             <>
-            <select value={workspaceId} onChange={(event) => setWorkspaceId(event.target.value)}>
+            <select
+              value={workspaceId}
+              onChange={(event) => {
+                const selected = workspaces.find((workspace) => workspace.id === event.target.value)
+                setActiveWorkspace(selected?.id ?? '', selected?.name ?? '')
+                setActiveFolderId('')
+                setSelectedDocIds([])
+              }}
+            >
               <option value="">全部工作區</option>
               {workspaces.map((workspace) => (
                 <option key={workspace.id} value={workspace.id}>
@@ -1139,10 +1166,10 @@ export function DocsCenter() {
                 onClick={() => setActiveFolderId('')}
               >
                 <span>全部</span>
-                <small>{docs.length}</small>
+                <small>{workspaceDocs.length}</small>
               </button>
-              {folders.map((folder) => {
-                const count = docs.filter((doc) => doc.folder_id === folder.id).length
+              {visibleFolders.map((folder) => {
+                const count = workspaceDocs.filter((doc) => doc.folder_id === folder.id).length
                 return (
                   <div key={folder.id} className={activeFolderId === folder.id ? 'doc-folder-row active' : 'doc-folder-row'}>
                     <button type="button" onClick={() => setActiveFolderId(folder.id)}>
@@ -1241,7 +1268,7 @@ export function DocsCenter() {
                     onChange={(event) => void moveDocToFolder(doc.id, event.target.value)}
                   >
                     <option value="">移至：無文件夾</option>
-                    {folders.map((folder) => (
+                    {visibleFolders.map((folder) => (
                       <option key={folder.id} value={folder.id}>
                         移至：{folder.name}
                       </option>
