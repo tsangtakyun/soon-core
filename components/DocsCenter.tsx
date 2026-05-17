@@ -1,6 +1,6 @@
 'use client'
 
-import { useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { type ChangeEvent, type ReactNode, useEffect, useMemo, useState } from 'react'
 
 import { useWorkspace } from '@/app/context/workspace-context'
@@ -285,7 +285,9 @@ const defaultProjectBrief: ProjectBriefContent = {
 }
 
 export function DocsCenter() {
+  const router = useRouter()
   const searchParams = useSearchParams()
+  const selectForStoryboard = searchParams.get('select_for_storyboard') === 'true'
   const [docs, setDocs] = useState<CoreDoc[]>([])
   const [workspaces, setWorkspaces] = useState<Workspace[]>([])
   const [folders, setFolders] = useState<DocFolder[]>([])
@@ -365,6 +367,66 @@ export function DocsCenter() {
 
   function notifyDocsChanged() {
     window.dispatchEvent(new Event('soon-data-updated'))
+  }
+
+  function extractStoryboardScript(doc: CoreDoc) {
+    const rawContent = doc.content ?? ''
+    let parsed: any = rawContent
+
+    if (typeof rawContent === 'string') {
+      try {
+        parsed = JSON.parse(rawContent)
+      } catch {
+        return rawContent
+      }
+    }
+
+    if (typeof parsed === 'string') return parsed
+    if (!parsed || typeof parsed !== 'object') return rawContent
+
+    if (typeof parsed.qc_final === 'string') return parsed.qc_final
+    if (typeof parsed.ai_draft === 'string') return parsed.ai_draft
+    if (typeof parsed.script === 'string') return parsed.script
+    if (typeof parsed.content === 'string') return parsed.content
+
+    if (Array.isArray(parsed.segments)) {
+      return parsed.segments
+        .map((segment: any, index: number) => {
+          const title = segment?.title || segment?.type || `段落 ${index + 1}`
+          const time = segment?.suggestedTime ? `（${segment.suggestedTime}）` : ''
+          const blocks = Array.isArray(segment?.blocks) ? segment.blocks : []
+          const blockText = blocks
+            .map((block: any) => {
+              const type = String(block?.type || '').toLowerCase()
+              const content = String(block?.content || '').trim()
+              if (!content) return ''
+              if (type.includes('scene') || type.includes('畫面') || type.includes('shot')) return `拍攝：${content}`
+              if (type.includes('voice') || type.includes('vo') || type.includes('旁白')) return `VO：${content}`
+              const speaker = block?.speaker || parsed.creator || '主持'
+              return `${speaker}：${content}`
+            })
+            .filter(Boolean)
+            .join('\n')
+
+          return `${index + 1}. ${title}${time}${blockText ? `\n${blockText}` : ''}`
+        })
+        .join('\n\n')
+    }
+
+    return rawContent
+  }
+
+  function selectDocForStoryboard(doc: CoreDoc) {
+    const script = extractStoryboardScript(doc)
+    const message = {
+      type: 'SOON_SCRIPT_SELECTED',
+      script,
+      topic: doc.title,
+    }
+
+    window.parent.postMessage(message, '*')
+    const params = new URLSearchParams({ topic: doc.title, script })
+    router.push(`/ig/storyboard?${params.toString()}`)
   }
 
   function getStoredBriefLanguage(): BriefLang {
@@ -1263,6 +1325,11 @@ export function DocsCenter() {
                 </span>
                 <time>{new Date(doc.created_at).toLocaleDateString('zh-HK')}</time>
                 <div className="doc-row-actions">
+                  {selectForStoryboard && doc.template_type === 'ig_script' && (
+                    <button type="button" onClick={() => selectDocForStoryboard(doc)}>
+                      選取
+                    </button>
+                  )}
                   <select
                     className="doc-move-select"
                     value={doc.folder_id ?? ''}

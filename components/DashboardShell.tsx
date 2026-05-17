@@ -399,6 +399,7 @@ export function DashboardShell({ activeSection, pipeline, tool, children }: Dash
   const toolTopic = searchParams.get('topic') || ''
   const toolBackground = searchParams.get('background') || ''
   const toolLocation = searchParams.get('location') || ''
+  const toolScript = searchParams.get('script') || ''
 
   function safeDecodeParam(value: string) {
     try {
@@ -413,6 +414,7 @@ export function DashboardShell({ activeSection, pipeline, tool, children }: Dash
     if (toolTopic) url.searchParams.set('topic', safeDecodeParam(toolTopic))
     if (toolBackground) url.searchParams.set('background', safeDecodeParam(toolBackground))
     if (toolLocation) url.searchParams.set('location', safeDecodeParam(toolLocation))
+    if (toolScript) url.searchParams.set('script', safeDecodeParam(toolScript))
     return url.toString()
   }
 
@@ -470,20 +472,26 @@ export function DashboardShell({ activeSection, pipeline, tool, children }: Dash
       void sendAuthToToolIframe()
     }, delay))
     return () => timers.forEach((timer) => window.clearTimeout(timer))
-  }, [tool?.url, activeWorkspaceId, toolTopic, toolBackground, toolLocation])
+  }, [tool?.url, activeWorkspaceId, toolTopic, toolBackground, toolLocation, toolScript])
 
   useEffect(() => {
     const handleNavigateTool = (event: MessageEvent) => {
       if (event.data?.type !== 'SOON_NAVIGATE_TOOL') return
-      const { pipeline: nextPipeline, tool: nextTool, topic, background, location } = event.data
+      const { pipeline: nextPipeline, tool: nextTool, topic, background, location, script } = event.data
       if (!nextPipeline || !nextTool) return
 
       const params = new URLSearchParams()
       if (topic) params.set('topic', encodeURIComponent(String(topic)))
       if (background) params.set('background', encodeURIComponent(String(background)))
       if (location) params.set('location', encodeURIComponent(String(location)))
+      if (script) params.set('script', encodeURIComponent(String(script)))
       const query = params.toString()
       router.push(`/${nextPipeline}/${nextTool}${query ? `?${query}` : ''}`)
+    }
+
+    const handleRequestScript = (event: MessageEvent) => {
+      if (event.data?.type !== 'SOON_REQUEST_SCRIPT') return
+      router.push('/docs?select_for_storyboard=true')
     }
 
     const handleCreateDoc = async (event: MessageEvent) => {
@@ -524,10 +532,12 @@ export function DashboardShell({ activeSection, pipeline, tool, children }: Dash
     }
 
     window.addEventListener('message', handleNavigateTool)
+    window.addEventListener('message', handleRequestScript)
     window.addEventListener('message', handleCreateDoc)
     window.addEventListener('message', handleToolReady)
     return () => {
       window.removeEventListener('message', handleNavigateTool)
+      window.removeEventListener('message', handleRequestScript)
       window.removeEventListener('message', handleCreateDoc)
       window.removeEventListener('message', handleToolReady)
     }
