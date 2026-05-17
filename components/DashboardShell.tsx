@@ -48,6 +48,19 @@ const primaryNav = [
   { href: '/reply', label: '回覆中心', icon: '💬', section: 'reply' },
 ] as const
 
+const SIDEBAR_WORKSPACES_CACHE_KEY = 'soon_sidebar_workspaces'
+
+function readCachedWorkspaces(): Workspace[] {
+  if (typeof window === 'undefined') return []
+  try {
+    const cached = window.localStorage.getItem(SIDEBAR_WORKSPACES_CACHE_KEY)
+    const parsed = cached ? JSON.parse(cached) : []
+    return Array.isArray(parsed) ? parsed : []
+  } catch {
+    return []
+  }
+}
+
 export function DashboardShell({ activeSection, pipeline, tool, children }: DashboardShellProps) {
   const pathname = usePathname()
   const searchParams = useSearchParams()
@@ -55,7 +68,8 @@ export function DashboardShell({ activeSection, pipeline, tool, children }: Dash
   const urlWorkspace = searchParams.get('workspace')
   const { activeWorkspaceId, setActiveWorkspace } = useWorkspace()
   const [activePipelineId, setActivePipelineId] = useState<PipelineConfig['id']>(pipeline?.id ?? 'youtube')
-  const [workspaces, setWorkspaces] = useState<Workspace[]>([])
+  const [workspaces, setWorkspaces] = useState<Workspace[]>(readCachedWorkspaces)
+  const [sidebarDataLoaded, setSidebarDataLoaded] = useState(() => readCachedWorkspaces().length > 0)
   const [projects, setProjects] = useState<Project[]>([])
   const [activeProject, setActiveProject] = useState<Project | null>(null)
   const [workspacePanel, setWorkspacePanel] = useState<Workspace | null>(null)
@@ -261,7 +275,12 @@ export function DashboardShell({ activeSection, pipeline, tool, children }: Dash
     const projectsData = projectsResponse.ok ? await projectsResponse.json() : null
     const settingsData = settingsResponse.ok ? await settingsResponse.json() : null
 
-    setWorkspaces((projectsData?.workspaces ?? []) as Workspace[])
+    const nextWorkspaces = Array.isArray(projectsData?.workspaces) ? (projectsData.workspaces as Workspace[]) : null
+    if (nextWorkspaces) {
+      setWorkspaces(nextWorkspaces)
+      window.localStorage.setItem(SIDEBAR_WORKSPACES_CACHE_KEY, JSON.stringify(nextWorkspaces))
+    }
+    setSidebarDataLoaded(true)
     setProjects((projectsData?.projects ?? []) as Project[])
     setSettingsProfile({
       companyName: settingsData?.company_name || 'SOON Studio',
@@ -584,7 +603,7 @@ export function DashboardShell({ activeSection, pipeline, tool, children }: Dash
                 </button>
               </div>
             ))}
-            {workspaces.length === 0 && <p className="empty-mini">未有工作區</p>}
+            {sidebarDataLoaded && workspaces.length === 0 && <p className="empty-mini">未有工作區</p>}
           </div>
           <button className="ghost-button" type="button" onClick={() => void createWorkspace()}>
             + 新增工作區
