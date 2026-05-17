@@ -323,7 +323,7 @@ export function DocsCenter() {
 
   useEffect(() => {
     void load()
-  }, [])
+  }, [workspaceId])
 
   useEffect(() => {
     setSelectedDocIds([])
@@ -341,7 +341,8 @@ export function DocsCenter() {
   }, [selectedDoc, projectBrief])
 
   async function load() {
-    const response = await fetch('/api/docs', { cache: 'no-store' })
+    const docsUrl = workspaceId ? `/api/docs?workspace_id=${encodeURIComponent(workspaceId)}` : '/api/docs'
+    const response = await fetch(docsUrl, { cache: 'no-store' })
     const result = await response.json().catch(() => ({}))
 
     if (!response.ok) {

@@ -77,7 +77,7 @@ function schemaMissingResponse(error: { code?: string; message?: string }) {
   return NextResponse.json({ error: error.message ?? '回覆中心操作失敗' }, { status: 500 })
 }
 
-export async function GET() {
+export async function GET(request: Request) {
   const userId = await getUserId()
   if (!userId) {
     return NextResponse.json({ error: '未登入，請重新登入。' }, { status: 401 })
@@ -85,13 +85,15 @@ export async function GET() {
 
   const admin = createSupabaseAdmin()
   const workspaceIds = await getWorkspaceIds(admin, userId)
+  const { searchParams } = new URL(request.url)
+  const workspaceId = resolveWorkspaceId(searchParams.get('workspace_id'), workspaceIds)
   const threadsQuery = admin.from('reply_threads').select('*').order('updated_at', { ascending: false })
   const settingsQuery = admin.from('reply_settings').select('*').eq('user_id', userId)
 
-  if (workspaceIds.length > 0) {
-    threadsQuery.in('workspace_id', workspaceIds)
+  if (workspaceId) {
+    threadsQuery.eq('workspace_id', workspaceId)
   } else {
-    threadsQuery.is('workspace_id', null)
+    threadsQuery.eq('workspace_id', '00000000-0000-0000-0000-000000000000')
   }
 
   const [{ data: threads, error: threadsError }, { data: settings, error: settingsError }] = await Promise.all([

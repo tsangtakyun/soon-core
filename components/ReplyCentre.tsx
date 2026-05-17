@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 
+import { useWorkspace } from '@/app/context/workspace-context'
 import { DashboardShell } from '@/components/DashboardShell'
 import PageHeader from '@/components/PageHeader'
 
@@ -93,6 +94,7 @@ const emptyDraft: NewMessageDraft = {
 }
 
 export function ReplyCentre() {
+  const { activeWorkspaceId } = useWorkspace()
   const [threads, setThreads] = useState<ReplyThread[]>([])
   const [settings, setSettings] = useState<Record<InboxType, ReplySetting>>({
     email: defaultSettings('email'),
@@ -116,7 +118,7 @@ export function ReplyCentre() {
 
   useEffect(() => {
     void loadReplyData()
-  }, [])
+  }, [activeWorkspaceId])
 
   const selectedThread = useMemo(() => threads.find((thread) => thread.id === selectedId) ?? null, [selectedId, threads])
 
@@ -130,7 +132,8 @@ export function ReplyCentre() {
   }, [selectedThread])
 
   async function loadReplyData() {
-    const response = await fetch('/api/replies', { cache: 'no-store' })
+    const repliesUrl = activeWorkspaceId ? `/api/replies?workspace_id=${encodeURIComponent(activeWorkspaceId)}` : '/api/replies'
+    const response = await fetch(repliesUrl, { cache: 'no-store' })
     const result = await response.json().catch(() => ({}))
     if (!response.ok) {
       window.alert(result.error || '載入回覆中心失敗')
@@ -201,6 +204,7 @@ export function ReplyCentre() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
+        workspace_id: activeWorkspaceId || null,
         inbox_type: draft.inbox_type,
         sender_name: draft.sender_name.trim() || '未命名',
         sender_handle: draft.sender_handle.trim() || null,

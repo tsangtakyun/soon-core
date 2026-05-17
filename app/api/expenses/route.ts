@@ -40,7 +40,7 @@ function resolveWorkspaceId(requestedWorkspaceId: string | null | undefined, wor
   return workspaceIds[0] ?? null
 }
 
-export async function GET() {
+export async function GET(request: Request) {
   const userId = await getUserId()
   if (!userId) {
     return NextResponse.json({ error: '未登入，請重新登入。' }, { status: 401 })
@@ -48,15 +48,17 @@ export async function GET() {
 
   const admin = createSupabaseAdmin()
   const workspaceIds = await getWorkspaceIds(admin, userId)
+  const { searchParams } = new URL(request.url)
+  const workspaceId = resolveWorkspaceId(searchParams.get('workspace_id'), workspaceIds)
 
-  if (workspaceIds.length === 0) {
+  if (workspaceIds.length === 0 || !workspaceId) {
     return NextResponse.json({ expenses: [] })
   }
 
   const { data, error } = await admin
     .from('expenses')
     .select('*')
-    .in('workspace_id', workspaceIds)
+    .eq('workspace_id', workspaceId)
     .order('date', { ascending: false })
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })

@@ -204,7 +204,7 @@ export function DashboardShell({ activeSection, pipeline, tool, children }: Dash
 
   useEffect(() => {
     void loadSidebarData()
-  }, [])
+  }, [activeWorkspaceId])
 
   useEffect(() => {
     if (workspaces.length === 0) return
@@ -252,8 +252,9 @@ export function DashboardShell({ activeSection, pipeline, tool, children }: Dash
       await fetch('/api/auth/bootstrap', { method: 'POST' }).catch(() => null)
     }
 
+    const projectsUrl = activeWorkspaceId ? `/api/projects?workspace_id=${encodeURIComponent(activeWorkspaceId)}` : '/api/projects'
     const [projectsResponse, settingsResponse] = await Promise.all([
-      fetch('/api/projects', { cache: 'no-store' }),
+      fetch(projectsUrl, { cache: 'no-store' }),
       fetch('/api/settings', { cache: 'no-store' }),
     ])
 

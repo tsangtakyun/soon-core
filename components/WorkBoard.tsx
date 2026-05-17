@@ -121,7 +121,8 @@ export function WorkBoard() {
   }, [])
 
   async function load() {
-    const response = await fetch('/api/projects', { cache: 'no-store' })
+    const projectsUrl = activeWorkspaceId ? `/api/projects?workspace_id=${encodeURIComponent(activeWorkspaceId)}` : '/api/projects'
+    const response = await fetch(projectsUrl, { cache: 'no-store' })
     const result = await response.json().catch(() => ({}))
 
     if (!response.ok) {

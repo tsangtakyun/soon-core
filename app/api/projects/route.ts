@@ -42,7 +42,7 @@ function resolveWorkspaceId(requestedWorkspaceId: string | null | undefined, wor
   return workspaceIds[0] ?? null
 }
 
-export async function GET() {
+export async function GET(request: Request) {
   const userId = await getUserId()
 
   if (!userId) {
@@ -51,13 +51,15 @@ export async function GET() {
 
   const admin = createSupabaseAdmin()
   const workspaceIds = await getWorkspaceIds(admin, userId)
+  const { searchParams } = new URL(request.url)
+  const workspaceId = resolveWorkspaceId(searchParams.get('workspace_id'), workspaceIds)
 
-  if (workspaceIds.length === 0) {
+  if (workspaceIds.length === 0 || !workspaceId) {
     return NextResponse.json({ projects: [], workspaces: [] })
   }
 
   const [projectsResult, workspacesResult] = await Promise.all([
-    admin.from('projects').select('*').in('workspace_id', workspaceIds).order('created_at', { ascending: false }),
+    admin.from('projects').select('*').eq('workspace_id', workspaceId).order('created_at', { ascending: false }),
     admin.from('workspaces').select('*').in('id', workspaceIds).order('created_at', { ascending: false }),
   ])
 

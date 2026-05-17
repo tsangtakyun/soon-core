@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState, type ChangeEvent } from 'react'
 import * as XLSX from 'xlsx'
 
+import { useWorkspace } from '@/app/context/workspace-context'
 import { DashboardShell } from '@/components/DashboardShell'
 import PageHeader from '@/components/PageHeader'
 import { parseInvoice } from '@/lib/invoice'
@@ -216,6 +217,7 @@ function invoiceContentTotal(invoice: ReturnType<typeof parseInvoice>) {
 }
 
 export function FinanceCenter() {
+  const { activeWorkspaceId } = useWorkspace()
   const [invoices, setInvoices] = useState<FinanceDoc[]>([])
   const [expenses, setExpenses] = useState<Expense[]>([])
   const [defaultCurrency, setDefaultCurrency] = useState('HK$')
@@ -236,12 +238,15 @@ export function FinanceCenter() {
 
   useEffect(() => {
     void loadFinanceData()
-  }, [])
+  }, [activeWorkspaceId])
 
   async function loadFinanceData() {
+    let invoiceQuery = supabase.from('docs').select('*').eq('template_type', 'invoice')
+    if (activeWorkspaceId) invoiceQuery = invoiceQuery.eq('workspace_id', activeWorkspaceId)
+    const expensesUrl = activeWorkspaceId ? `/api/expenses?workspace_id=${encodeURIComponent(activeWorkspaceId)}` : '/api/expenses'
     const [expensesResponse, { data: docsData }, { data: settingsData }] = await Promise.all([
-      fetch('/api/expenses', { cache: 'no-store' }),
-      supabase.from('docs').select('*').eq('template_type', 'invoice').order('created_at', { ascending: false }),
+      fetch(expensesUrl, { cache: 'no-store' }),
+      invoiceQuery.order('created_at', { ascending: false }),
       supabase.from('settings').select('default_currency').eq('user_id', 'tommy').maybeSingle(),
     ])
     const expensesResult = await expensesResponse.json().catch(() => ({}))
@@ -318,7 +323,9 @@ export function FinanceCenter() {
   }, [expenses, invoices, reportMonth, reportYear])
 
   async function updateInvoiceStatus(id: string, status: InvoiceStatus) {
-    const { error } = await supabase.from('docs').update({ invoice_status: status }).eq('id', id)
+    let query = supabase.from('docs').update({ invoice_status: status }).eq('id', id)
+    if (activeWorkspaceId) query = query.eq('workspace_id', activeWorkspaceId)
+    const { error } = await query
     if (error) {
       window.alert(error.message)
       return
@@ -332,7 +339,7 @@ export function FinanceCenter() {
     const discount = invoice.discount ? (invoice.discount.type === 'percentage' ? amount * (invoice.discount.value / 100) : invoice.discount.value) : 0
     const taxable = Math.max(0, amount - discount)
     const total = taxable + taxable * (toNumber(invoice.taxRate) / 100)
-    const { data, error } = await supabase
+    let query = supabase
       .from('docs')
       .update({
         invoice_amount: total,
@@ -343,6 +350,10 @@ export function FinanceCenter() {
         invoice_status: doc.invoice_status ?? 'draft',
       })
       .eq('id', doc.id)
+
+    if (activeWorkspaceId) query = query.eq('workspace_id', activeWorkspaceId)
+
+    const { data, error } = await query
       .select()
       .single()
     if (error) {
@@ -453,6 +464,7 @@ export function FinanceCenter() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
+        workspace_id: activeWorkspaceId || null,
         date: draft.date,
         merchant: draft.merchant,
         description: draft.description,
