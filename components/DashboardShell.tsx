@@ -425,6 +425,9 @@ export function DashboardShell({ activeSection, pipeline, tool, children }: Dash
 
   function buildToolUrlWithPrefill(baseUrl: string) {
     const url = new URL(baseUrl)
+    if (pipeline?.id === 'youtube' && tool?.id === 'storyboard') {
+      url.pathname = '/'
+    }
     if (toolTopic) url.searchParams.set('topic', safeDecodeParam(toolTopic))
     if (toolBackground) url.searchParams.set('background', safeDecodeParam(toolBackground))
     if (toolLocation) url.searchParams.set('location', safeDecodeParam(toolLocation))
