@@ -413,6 +413,7 @@ export function DashboardShell({ activeSection, pipeline, tool, children }: Dash
   const toolBackground = searchParams.get('background') || ''
   const toolLocation = searchParams.get('location') || ''
   const toolScript = searchParams.get('script') || ''
+  const toolScriptId = searchParams.get('scriptId') || ''
 
   function safeDecodeParam(value: string) {
     try {
@@ -428,6 +429,7 @@ export function DashboardShell({ activeSection, pipeline, tool, children }: Dash
     if (toolBackground) url.searchParams.set('background', safeDecodeParam(toolBackground))
     if (toolLocation) url.searchParams.set('location', safeDecodeParam(toolLocation))
     if (toolScript) url.searchParams.set('script', safeDecodeParam(toolScript))
+    if (toolScriptId) url.searchParams.set('scriptId', toolScriptId)
     return url.toString()
   }
 
@@ -570,12 +572,12 @@ export function DashboardShell({ activeSection, pipeline, tool, children }: Dash
       void sendAuthToToolIframe()
     }, delay))
     return () => timers.forEach((timer) => window.clearTimeout(timer))
-  }, [tool?.url, activeWorkspaceId, toolTopic, toolBackground, toolLocation, toolScript])
+  }, [tool?.url, activeWorkspaceId, toolTopic, toolBackground, toolLocation, toolScript, toolScriptId])
 
   useEffect(() => {
     const handleNavigateTool = (event: MessageEvent) => {
       if (event.data?.type !== 'SOON_NAVIGATE_TOOL') return
-      const { pipeline: nextPipeline, tool: nextTool, topic, background, location, script } = event.data
+      const { pipeline: nextPipeline, tool: nextTool, topic, background, location, script, scriptId } = event.data
       if (!nextPipeline || !nextTool) return
 
       const params = new URLSearchParams()
@@ -583,6 +585,7 @@ export function DashboardShell({ activeSection, pipeline, tool, children }: Dash
       if (background) params.set('background', encodeURIComponent(String(background)))
       if (location) params.set('location', encodeURIComponent(String(location)))
       if (script) params.set('script', encodeURIComponent(String(script)))
+      if (scriptId) params.set('scriptId', String(scriptId))
       const query = params.toString()
       router.push(`/${nextPipeline}/${nextTool}${query ? `?${query}` : ''}`)
     }
