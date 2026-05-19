@@ -15,7 +15,7 @@ export async function POST(request: Request) {
 
   const body = (await request.json()) as { workspaceId?: string; email?: string; role?: string }
   const email = body.email?.trim().toLowerCase()
-  const role = body.role === 'admin' ? 'admin' : 'member'
+  const role = body.role === 'admin' || body.role === 'viewer' ? body.role : 'member'
 
   if (!body.workspaceId || !email) {
     return NextResponse.json({ error: 'Missing workspace or email' }, { status: 400 })
@@ -35,6 +35,7 @@ export async function POST(request: Request) {
   }
 
   const token = crypto.randomUUID()
+  const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
   const { data: invitation, error } = await admin
     .from('invitations')
     .insert({
@@ -44,12 +45,43 @@ export async function POST(request: Request) {
       token,
       invited_by: session.user.id,
       status: 'pending',
+      expires_at: expiresAt,
     })
     .select()
     .single()
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 })
+  }
+
+  const { data: existingMember } = await admin
+    .from('workspace_members')
+    .select('id')
+    .eq('workspace_id', body.workspaceId)
+    .eq('email', email)
+    .maybeSingle()
+
+  if (existingMember) {
+    const { error: memberUpdateError } = await admin
+      .from('workspace_members')
+      .update({
+        role,
+        status: 'pending',
+        invited_by: session.user.id,
+      })
+      .eq('id', existingMember.id)
+    if (memberUpdateError) return NextResponse.json({ error: memberUpdateError.message }, { status: 500 })
+  } else {
+    const { error: memberInsertError } = await admin.from('workspace_members').insert({
+      workspace_id: body.workspaceId,
+      user_id: null,
+      email,
+      display_name: null,
+      role,
+      status: 'pending',
+      invited_by: session.user.id,
+    })
+    if (memberInsertError) return NextResponse.json({ error: memberInsertError.message }, { status: 500 })
   }
 
   const inviteLink = `${new URL(request.url).origin}/invite?token=${token}`

@@ -36,7 +36,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   if (result.error) return result.error
 
   const body = (await request.json()) as { role?: string }
-  const role = body.role === 'admin' || body.role === 'owner' ? body.role : 'member'
+  const role = body.role === 'admin' || body.role === 'owner' || body.role === 'viewer' ? body.role : 'member'
 
   const { data, error } = await result.admin.from('workspace_members').update({ role }).eq('id', id).select().single()
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })

@@ -35,6 +35,14 @@ export async function DELETE(_request: Request, { params }: { params: Promise<{ 
   const result = await requireTeamAdmin(id)
   if (result.error) return result.error
 
+  const { error: memberError } = await result.admin
+    .from('workspace_members')
+    .delete()
+    .eq('workspace_id', result.invitation.workspace_id)
+    .eq('email', result.invitation.email)
+    .eq('status', 'pending')
+  if (memberError) return NextResponse.json({ error: memberError.message }, { status: 500 })
+
   const { error } = await result.admin.from('invitations').delete().eq('id', id)
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return new NextResponse(null, { status: 204 })

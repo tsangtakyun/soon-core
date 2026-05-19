@@ -544,7 +544,7 @@ a {
 
 .team-row {
   display: grid;
-  grid-template-columns: 34px minmax(0, 1fr) auto auto auto auto;
+  grid-template-columns: 34px minmax(0, 1fr) auto auto auto auto auto;
   align-items: center;
   gap: 12px;
   border: 0.5px solid var(--soon-border);
@@ -590,7 +590,8 @@ a {
 }
 
 .team-role,
-.team-pending-badge {
+.team-pending-badge,
+.team-status-badge {
   border-radius: 999px;
   font-size: 11px !important;
   padding: 4px 8px;
@@ -598,18 +599,33 @@ a {
 }
 
 .team-role.owner {
-  background: var(--soon-purple-dim);
-  color: var(--soon-purple-light) !important;
+  background: #f59e0b;
+  color: white !important;
 }
 
 .team-role.admin {
-  background: rgba(59, 130, 246, 0.15);
-  color: #93c5fd !important;
+  background: #8b5cf6;
+  color: white !important;
 }
 
 .team-role.member {
-  background: rgba(107, 114, 128, 0.2);
-  color: #d1d5db !important;
+  background: #3b82f6;
+  color: white !important;
+}
+
+.team-role.viewer {
+  background: #6b7280;
+  color: white !important;
+}
+
+.team-status-badge.active {
+  background: rgba(16, 185, 129, 0.18);
+  color: #34d399 !important;
+}
+
+.team-status-badge.pending {
+  background: rgba(245, 158, 11, 0.15);
+  color: #fbbf24 !important;
 }
 
 .team-pending-badge {

@@ -3,6 +3,11 @@ import { NextResponse } from 'next/server'
 import { createSupabaseAdmin } from '@/lib/supabase-admin'
 import { createSupabaseRouteClient } from '@/lib/supabase-route'
 
+const defaultOwnerId = 'bb3e47cc-90c8-4eac-a5ff-cabfcefb89ae'
+const defaultWorkspaceId = 'e8a76d7f-898f-4993-866c-5cda066eb24f'
+const defaultOwnerEmail = 'tsangtakyun@gmail.com'
+const defaultOwnerName = 'Tom T'
+
 export async function GET() {
   const supabase = await createSupabaseRouteClient()
   const {
@@ -16,6 +21,24 @@ export async function GET() {
   const admin = createSupabaseAdmin()
   const userId = session.user.id
 
+  const { data: existingOwner } = await admin
+    .from('workspace_members')
+    .select('id')
+    .eq('workspace_id', defaultWorkspaceId)
+    .eq('user_id', defaultOwnerId)
+    .maybeSingle()
+
+  if (!existingOwner) {
+    await admin.from('workspace_members').insert({
+      workspace_id: defaultWorkspaceId,
+      user_id: defaultOwnerId,
+      email: defaultOwnerEmail,
+      display_name: defaultOwnerName,
+      role: 'owner',
+      status: 'active',
+    })
+  }
+
   const { data: memberships, error: membershipError } = await admin
     .from('workspace_members')
     .select('*, workspaces(*)')
@@ -27,7 +50,7 @@ export async function GET() {
     return NextResponse.json({ error: membershipError.message }, { status: 500 })
   }
 
-  const workspaceId = memberships?.[0]?.workspace_id ?? null
+  const workspaceId = memberships?.[0]?.workspace_id ?? (userId === defaultOwnerId ? defaultWorkspaceId : null)
   if (!workspaceId) {
     return NextResponse.json({ user: session.user, workspaces: [], members: [], invitations: [] })
   }

@@ -39,10 +39,10 @@ type ReplySettingDraft = {
 type TeamMember = {
   id: string
   workspace_id: string
-  user_id: string
+  user_id: string | null
   email: string
   display_name: string | null
-  role: 'owner' | 'admin' | 'member'
+  role: 'owner' | 'admin' | 'member' | 'viewer'
   status: string
   created_at: string
 }
@@ -51,7 +51,7 @@ type TeamInvitation = {
   id: string
   workspace_id: string
   email: string
-  role: 'admin' | 'member'
+  role: 'admin' | 'member' | 'viewer'
   status: string
   expires_at: string
   created_at: string
@@ -200,7 +200,7 @@ export function SettingsPage() {
   const [teamWorkspaceId, setTeamWorkspaceId] = useState('')
   const [teamRole, setTeamRole] = useState('member')
   const [inviteEmail, setInviteEmail] = useState('')
-  const [inviteRole, setInviteRole] = useState<'admin' | 'member'>('member')
+  const [inviteRole, setInviteRole] = useState<'admin' | 'member' | 'viewer'>('member')
   const [teamStatus, setTeamStatus] = useState('')
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
 
@@ -272,11 +272,7 @@ export function SettingsPage() {
       return
     }
     setInviteEmail('')
-    setTeamStatus(
-      payload.emailWarning
-        ? `邀請已建立，但 Email 發送失敗：${payload.emailWarning}。邀請連結：${payload.inviteLink}`
-        : `邀請已發送至 ${payload.invitation.email}`
-    )
+    setTeamStatus(`✅ 邀請已發送至 ${payload.invitation.email}`)
     await loadTeam()
   }
 
@@ -788,12 +784,14 @@ export function SettingsPage() {
                       <span>{member.email}</span>
                     </div>
                     <span className={`team-role ${member.role}`}>{member.role}</span>
+                    <span className={`team-status-badge ${member.status}`}>{member.status}</span>
                     <span>{new Date(member.created_at).toLocaleDateString('zh-HK')}</span>
                     {teamRole === 'owner' && member.role !== 'owner' && (
                       <>
                         <select value={member.role} onChange={(event) => void updateMemberRole(member.id, event.target.value)}>
                           <option value="admin">Admin</option>
                           <option value="member">Member</option>
+                          <option value="viewer">Viewer</option>
                         </select>
                         <button className="danger-text-button" type="button" onClick={() => void removeMember(member.id)}>
                           移除
@@ -816,9 +814,10 @@ export function SettingsPage() {
             </label>
             <label>
               角色
-              <select value={inviteRole} onChange={(event) => setInviteRole(event.target.value as 'admin' | 'member')}>
+              <select value={inviteRole} onChange={(event) => setInviteRole(event.target.value as 'admin' | 'member' | 'viewer')}>
                 <option value="admin">Admin</option>
                 <option value="member">Member</option>
+                <option value="viewer">Viewer</option>
               </select>
             </label>
             <button className="primary-button" type="button" disabled={!inviteEmail.trim()} onClick={() => void sendInvitation()}>
@@ -838,15 +837,14 @@ export function SettingsPage() {
                   .filter((item) => item.status === 'pending')
                   .map((invitation) => (
                     <div className="team-row" key={invitation.id}>
+                      <div className="team-avatar">{invitation.email.slice(0, 2).toUpperCase()}</div>
                       <div className="team-main">
                         <strong>{invitation.email}</strong>
-                        <span>到期日：{new Date(invitation.expires_at).toLocaleDateString('zh-HK')}</span>
+                        <span>發送時間：{new Date(invitation.created_at).toLocaleString('zh-HK')}</span>
+                        <span>到期時間：{new Date(invitation.expires_at).toLocaleString('zh-HK')}</span>
                       </div>
                       <span className={`team-role ${invitation.role}`}>{invitation.role}</span>
                       <span className="team-pending-badge">待接受</span>
-                      <button className="ghost-button inline-ghost-button" type="button" onClick={() => void resendInvitation(invitation.id)}>
-                        重新發送
-                      </button>
                       <button className="danger-text-button" type="button" onClick={() => void revokeInvitation(invitation.id)}>
                         撤銷
                       </button>
