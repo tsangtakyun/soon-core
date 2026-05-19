@@ -33,7 +33,7 @@ export default function SchedulePage() {
             >
               <p style={{ margin: 0, fontSize: '15px', fontWeight: 600 }}>行程中心載入失敗</p>
               <p style={{ margin: 0, fontSize: '13px', color: 'var(--soon-text-secondary)' }}>
-                你可以先直接訪問 prod-mgt.vercel.app，或者重新整理頁面再試。
+                請直接打開 prod-mgt.vercel.app，或重新整理頁面再試。
               </p>
               <a
                 href="https://prod-mgt.vercel.app"
@@ -49,7 +49,7 @@ export default function SchedulePage() {
                   textDecoration: 'none',
                 }}
               >
-                直接開啟行程中心
+                打開行程中心
               </a>
             </div>
           ) : (
