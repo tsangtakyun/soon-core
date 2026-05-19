@@ -83,11 +83,15 @@ export function HomeDashboard() {
     setDisplayName(name)
 
     if (user?.id) {
-      const { data: settings } = await supabase
+      const { data: settings, error: settingsError } = await supabase
         .from('settings')
-        .select('logo_base64, company_name')
+        .select('logo_base64, company_name, user_id')
         .eq('user_id', user.id)
-        .maybeSingle()
+        .single()
+
+      console.log('[Logo Debug] session.user.id:', user.id)
+      console.log('[Logo Debug] data:', settings)
+      console.log('[Logo Debug] error:', settingsError)
 
       if (settings?.logo_base64) {
         setUserLogo(settings.logo_base64)
