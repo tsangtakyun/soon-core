@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
 import { DashboardShell } from '@/components/DashboardShell'
+import { useWorkspace } from '@/app/context/workspace-context'
 import { getPipelinePath, getProjectPipeline } from '@/lib/pipelines'
 import { supabase } from '@/lib/supabase'
 import type { Project } from '@/lib/types'
@@ -53,6 +54,7 @@ function YouTubeIcon() {
 
 export function HomeDashboard() {
   const router = useRouter()
+  const { activeWorkspaceId } = useWorkspace()
   const [projects, setProjects] = useState<Project[]>([])
   const [displayName, setDisplayName] = useState('User')
   const [userId, setUserId] = useState('')
@@ -61,15 +63,20 @@ export function HomeDashboard() {
 
   useEffect(() => {
     void load()
-  }, [])
+  }, [activeWorkspaceId])
 
   async function load() {
-    const [{ data: projectData }, { data: authData }] = await Promise.all([
-      supabase.from('projects').select('*').order('created_at', { ascending: false }),
+    const projectsUrl = activeWorkspaceId ? `/api/projects?workspace_id=${encodeURIComponent(activeWorkspaceId)}` : '/api/projects'
+    const [{ data: authData }, projectsResponse] = await Promise.all([
       supabase.auth.getUser(),
+      fetch(projectsUrl),
     ])
+    const projectsPayload = await projectsResponse.json().catch(() => ({}))
+    const projectData = Array.isArray(projectsPayload.projects) ? projectsPayload.projects : []
 
-    setProjects((projectData ?? []) as Project[])
+    console.log('[Recent Projects]', projectData, projectsPayload.error)
+
+    setProjects(projectData as Project[])
 
     const user = authData?.user
     setUserId(user?.id ?? '')
