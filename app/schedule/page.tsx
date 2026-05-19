@@ -10,11 +10,43 @@ const iframeHeight = 'calc(100vh - 48px - 73px - 184px)'
 export default function SchedulePage() {
   const [iframeError, setIframeError] = useState(false)
 
+  function openRundownPrint() {
+    const params = new URLSearchParams()
+    const tripId = new URLSearchParams(window.location.search).get('tripId')
+
+    if (tripId) params.set('tripId', tripId)
+    params.set('print', 'true')
+
+    window.open(`https://prod-mgt.vercel.app?${params.toString()}`, '_blank', 'noopener,noreferrer')
+  }
+
   return (
     <Suspense>
       <DashboardShell activeSection="schedule">
         <section className="schedule-frame-page">
-          <PageHeader icon="✈️" title="行程中心" subtitle="管理拍攝行程同場景安排" />
+          <PageHeader
+            icon="✈️"
+            title="行程中心"
+            subtitle="管理拍攝行程同場景安排"
+            actions={(
+              <button
+                type="button"
+                onClick={openRundownPrint}
+                style={{
+                  background: 'var(--soon-purple)',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: 'var(--soon-radius)',
+                  fontSize: '13px',
+                  padding: '8px 16px',
+                  cursor: 'pointer',
+                  fontFamily: 'system-ui',
+                }}
+              >
+                匯出 Rundown
+              </button>
+            )}
+          />
 
           <div style={{ padding: '0 28px', marginBottom: '24px' }}>
             <img
