@@ -6,6 +6,8 @@ import { Suspense, useState, type MouseEvent } from 'react'
 import { DashboardShell } from '@/components/DashboardShell'
 import PageHeader from '@/components/PageHeader'
 
+console.log('[schedule page] loaded, version 8fc25d3')
+
 const iframeHeight = 'calc(100vh - 48px - 73px - 184px)'
 const tommyUserId = 'bb3e47cc-90c8-4eac-a5ff-cabfcefb89ae'
 
