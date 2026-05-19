@@ -10,6 +10,7 @@ import { CampaignReportEditor, createEmptyCampaignReport } from '@/components/Ca
 import { DashboardShell } from '@/components/DashboardShell'
 import { ConceptBoardEditor } from '@/components/ConceptBoardEditor'
 import PageHeader from '@/components/PageHeader'
+import { DocumentBrandMark } from '@/components/DocumentBrandMark'
 import { IGScriptEditor } from '@/components/IGScriptEditor'
 import { InvoiceEditor } from '@/components/InvoiceEditor'
 import { createEmptyMeetingNotes, MeetingNotesEditor } from '@/components/MeetingNotesEditor'
@@ -298,6 +299,8 @@ export function DocsCenter() {
   const [content, setContent] = useState('')
   const [projectBrief, setProjectBrief] = useState<ProjectBriefContent>(defaultProjectBrief)
   const [documentHeaderBase64, setDocumentHeaderBase64] = useState('')
+  const [documentLogoBase64, setDocumentLogoBase64] = useState('')
+  const [documentCompanyName, setDocumentCompanyName] = useState('SOON Studio')
   const { activeWorkspaceId: workspaceId, setActiveWorkspace } = useWorkspace()
   const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved'>('idle')
   const [selectedDocIds, setSelectedDocIds] = useState<string[]>([])
@@ -359,6 +362,8 @@ export function DocsCenter() {
     setWorkspaces((result.workspaces ?? []) as Workspace[])
     setFolders((result.folders ?? []) as DocFolder[])
     setDocumentHeaderBase64(String(result.settings?.document_header_base64 ?? ''))
+    setDocumentLogoBase64(String(result.settings?.logo_base64 ?? ''))
+    setDocumentCompanyName(String(result.settings?.company_name ?? 'SOON Studio'))
     const openDocId = searchParams.get('open')
     const nextDocs = (result.docs ?? []) as CoreDoc[]
     const docToOpen = openDocId ? nextDocs.find((doc) => doc.id === openDocId) : null
@@ -518,7 +523,12 @@ export function DocsCenter() {
   }
 
   async function reserveNextInvoiceSettings(): Promise<InvoiceSettings> {
-    const { data } = await supabase.from('settings').select('*').eq('user_id', 'tommy').maybeSingle()
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+    if (!user) return defaultSettings
+
+    const { data } = await supabase.from('settings').select('*').eq('user_id', user.id).limit(1).maybeSingle()
     const settings: InvoiceSettings = data
       ? {
           display_name: data.display_name ?? 'Tommy',
@@ -543,7 +553,7 @@ export function DocsCenter() {
     const nextNumber = settings.invoice_current_number > 0 ? settings.invoice_current_number + 1 : settings.invoice_start_number
     const { error } = await supabase.from('settings').upsert(
       {
-        user_id: 'tommy',
+        user_id: user.id,
         invoice_prefix: settings.invoice_prefix,
         invoice_start_number: settings.invoice_start_number,
         invoice_current_number: nextNumber,
@@ -559,13 +569,18 @@ export function DocsCenter() {
   }
 
   async function reserveNextQuoteSettings(): Promise<QuotationSettings> {
-    const { data } = await supabase.from('settings').select('*').eq('user_id', 'tommy').maybeSingle()
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+    if (!user) return defaultQuotationSettings
+
+    const { data } = await supabase.from('settings').select('*').eq('user_id', user.id).limit(1).maybeSingle()
     const settings = mergeQuotationSettings(data)
     const nextNumber = Number(settings.quote_current_number ?? 0) + 1 || 1
 
     const { error } = await supabase.from('settings').upsert(
       {
-        user_id: 'tommy',
+        user_id: user.id,
         quote_prefix: settings.quote_prefix,
         quote_current_number: nextNumber,
         updated_at: new Date().toISOString(),
@@ -861,6 +876,9 @@ export function DocsCenter() {
 
           <article className="brief-document soon-print-doc">
             {documentHeaderBase64 && <img className="document-header-banner" src={documentHeaderBase64} alt="" />}
+            <div className="doc-logo-area">
+              <DocumentBrandMark logoBase64={documentLogoBase64} companyName={documentCompanyName} />
+            </div>
             <input
               className="brief-title-input"
               value={projectBrief.title}

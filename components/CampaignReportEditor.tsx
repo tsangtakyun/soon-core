@@ -365,7 +365,12 @@ export function CampaignReportEditor({ doc, onBack, onSaved }: Props) {
   })
 
   async function loadSettings() {
-    const { data } = await supabase.from('settings').select('*').eq('user_id', 'tommy').maybeSingle()
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+    if (!user) return
+
+    const { data } = await supabase.from('settings').select('*').eq('user_id', user.id).limit(1).maybeSingle()
     if (!data) return
     setSettings({
       logo_base64: String(data.logo_base64 ?? ''),

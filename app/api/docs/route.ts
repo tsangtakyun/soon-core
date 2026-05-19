@@ -60,7 +60,12 @@ export async function GET(request: Request) {
     admin.from('docs').select('*').eq('workspace_id', workspaceId).order('created_at', { ascending: false }),
     admin.from('workspaces').select('*').in('id', workspaceIds).order('created_at', { ascending: false }),
     admin.from('doc_folders').select('*').eq('workspace_id', workspaceId).order('created_at', { ascending: false }),
-    admin.from('settings').select('document_header_base64').eq('user_id', 'tommy').maybeSingle(),
+    admin
+      .from('settings')
+      .select('document_header_base64, logo_base64, company_name')
+      .eq('user_id', userId)
+      .limit(1)
+      .maybeSingle(),
   ])
 
   if (docsResult.error) return NextResponse.json({ error: docsResult.error.message }, { status: 500 })

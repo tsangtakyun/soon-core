@@ -2,6 +2,7 @@
 
 import { type ChangeEvent, type ReactNode, useEffect, useMemo, useState } from 'react'
 
+import { DocumentBrandMark } from '@/components/DocumentBrandMark'
 import {
   currencyOptions,
   invoicePhases,
@@ -119,7 +120,12 @@ export function QuotationEditor({ doc, onBack, onSaved }: Props) {
 
   async function loadSettings() {
     setLoading(true)
-    const { data } = await supabase.from('settings').select('*').eq('user_id', 'tommy').maybeSingle()
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+    const { data } = user
+      ? await supabase.from('settings').select('*').eq('user_id', user.id).limit(1).maybeSingle()
+      : { data: null }
     const loaded = mergeQuotationSettings(data)
     setSettings(loaded)
     setQuote(parseQuotation(doc.content, loaded))
@@ -252,7 +258,7 @@ export function QuotationEditor({ doc, onBack, onSaved }: Props) {
         <section className="invoice-header">
           <div className="invoice-company">
             <label className="invoice-logo">
-              {quote.logoDataUrl ? <img src={quote.logoDataUrl} alt="" /> : <span>Logo</span>}
+              <DocumentBrandMark logoBase64={quote.logoDataUrl} companyName={quote.companyName} />
               <input type="file" accept="image/*" onChange={(event) => uploadLogo(event)} />
             </label>
             <input className="invoice-company-name" value={quote.companyName} onChange={(event) => update('companyName', event.target.value)} />

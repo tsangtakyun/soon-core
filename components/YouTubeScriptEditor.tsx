@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 
+import { DocumentBrandMark } from '@/components/DocumentBrandMark'
 import {
   blockTypeColors,
   blockTypeOptions,
@@ -202,10 +203,16 @@ export function YouTubeScriptEditor({ doc, onBack, onSaved }: Props) {
   }, [])
 
   async function loadSettings() {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+    if (!user) return
+
     const { data } = await supabase
       .from('settings')
       .select('logo_base64, company_name')
-      .eq('user_id', 'tommy')
+      .eq('user_id', user.id)
+      .limit(1)
       .maybeSingle()
     setLogoBase64(String(data?.logo_base64 ?? ''))
     setCompanyName(String(data?.company_name ?? 'SOON Studio'))
@@ -412,7 +419,7 @@ export function YouTubeScriptEditor({ doc, onBack, onSaved }: Props) {
 
       <article className="script-document soon-print-doc">
         <div className="doc-logo-area">
-          {logoBase64 ? <img src={logoBase64} alt="" /> : <span>{companyName}</span>}
+          <DocumentBrandMark logoBase64={logoBase64} companyName={companyName} />
         </div>
         <input className="script-doc-title" value={script.title} onChange={(event) => updateScript({ title: event.target.value })} />
         <p className="script-meta">{t.meta(formatDate(script.updatedAt))}</p>

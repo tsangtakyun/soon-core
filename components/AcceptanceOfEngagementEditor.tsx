@@ -202,7 +202,12 @@ export function AcceptanceOfEngagementEditor({ doc, onBack, onSaved }: Props) {
   })
 
   async function loadSettings() {
-    const { data } = await supabase.from('settings').select('*').eq('user_id', 'tommy').maybeSingle()
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+    if (!user) return
+
+    const { data } = await supabase.from('settings').select('*').eq('user_id', user.id).limit(1).maybeSingle()
     if (!data) return
     const companyName = String(data.company_name ?? 'SOON Studio')
     const defaultCurrency = String(data.default_currency ?? 'HK$')
