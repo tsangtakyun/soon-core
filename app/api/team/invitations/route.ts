@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { Resend } from 'resend'
 
 import { createSupabaseAdmin } from '@/lib/supabase-admin'
 import { createSupabaseRouteClient } from '@/lib/supabase-route'
@@ -84,14 +85,39 @@ export async function POST(request: Request) {
     if (memberInsertError) return NextResponse.json({ error: memberInsertError.message }, { status: 500 })
   }
 
-  const inviteLink = `${new URL(request.url).origin}/invite?token=${token}`
+  const inviteLink = `https://soon-core.vercel.app/invite?token=${token}`
   let emailWarning = ''
 
-  const { error: inviteError } = await admin.auth.admin.inviteUserByEmail(email, {
-    redirectTo: inviteLink,
-  })
-  if (inviteError) {
-    emailWarning = inviteError.message
+  try {
+    const resendApiKey = process.env.RESEND_API_KEY
+    if (!resendApiKey) {
+      throw new Error('Missing RESEND_API_KEY')
+    }
+
+    const resend = new Resend(resendApiKey)
+    const { error: emailError } = await resend.emails.send({
+      from: 'SOON Core <onboarding@resend.dev>',
+      to: [email],
+      subject: '你收到 SOON Core 工作區邀請',
+      html: `
+        <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:32px;background:#0a0a0a;color:#fff;border-radius:12px">
+          <h2 style="color:#7c3aed;margin-bottom:8px">⚡ SOON Core</h2>
+          <p style="color:#ccc">你好！</p>
+          <p style="color:#fff"><strong>Tom T</strong> 邀請你以 <strong style="color:#a78bfa">${role}</strong> 身份加入 SOON Core 工作區。</p>
+          <a href="${inviteLink}" style="display:inline-block;margin:24px 0;padding:12px 28px;background:#7c3aed;color:white;border-radius:8px;text-decoration:none;font-weight:600;font-size:15px">
+            ✅ 接受邀請
+          </a>
+          <p style="color:#666;font-size:12px;margin-top:16px">連結 7 日內有效。如非你申請，請忽略此郵件。</p>
+          <p style="color:#444;font-size:11px">soon-core.vercel.app</p>
+        </div>
+      `,
+    })
+
+    if (emailError) {
+      emailWarning = emailError.message
+    }
+  } catch (error) {
+    emailWarning = error instanceof Error ? error.message : 'Failed to send invitation email'
   }
 
   return NextResponse.json({ invitation, inviteLink, emailWarning })
