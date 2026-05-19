@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
@@ -320,11 +321,27 @@ export function HomeDashboard() {
           </div>
 
           <p style={{ fontSize: '11px', color: '#5a5a72', margin: '0 0 8px', fontWeight: 500 }}>IG REEL 熱門題材</p>
+          <div className="relative w-full rounded-lg overflow-hidden mb-3" style={{ height: '100px' }}>
+            <Image
+              src="/ig%20trend%20banner.jpg"
+              alt="IG REEL 熱門題材"
+              fill
+              className="object-cover"
+            />
+          </div>
           <IgTrendPreview userId={userId} />
 
           <div style={{ height: '1px', background: '#2a2a3a', margin: '16px 0' }} />
 
           <p style={{ fontSize: '11px', color: '#5a5a72', margin: '0 0 8px', fontWeight: 500 }}>YOUTUBE 話題信號</p>
+          <div className="relative w-full rounded-lg overflow-hidden mb-3" style={{ height: '100px' }}>
+            <Image
+              src="/youtube%20trend%20banner.jpg"
+              alt="YOUTUBE 話題信號"
+              fill
+              className="object-cover"
+            />
+          </div>
           <YoutubeTrendPreview />
         </section>
 
