@@ -137,23 +137,15 @@ export default function SchedulePage() {
 
       if (shotsError) throw shotsError
 
-      const content = buildRundownContent(trip, (shotsData || []) as ShotRow[])
-      const response = await fetch('/api/docs', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          user_id: tommyUserId,
-          workspace_id: activeWorkspaceId || null,
-          title: `${trip.name || 'Untitled Trip'} - Rundown`,
-          type: 'rundown',
-          template_type: 'rundown',
-          content: JSON.stringify(content),
-          created_at: new Date().toISOString(),
-        }),
+      const rundownContent = buildRundownContent(trip, (shotsData || []) as ShotRow[])
+      const { error } = await supabase.from('docs').insert({
+        workspace_id: activeWorkspaceId || null,
+        title: `${trip.name || 'Untitled Trip'} - Rundown`,
+        template_type: 'rundown',
+        content: JSON.stringify(rundownContent),
       })
 
-      const result = await response.json().catch(() => ({}))
-      if (!response.ok) throw new Error(result.error || 'Rundown 儲存失敗')
+      if (error) throw error
 
       window.dispatchEvent(new Event('soon-data-updated'))
       window.alert('✅ Rundown 已儲存至文件中心')

@@ -142,7 +142,7 @@ type TripRow = {
   id: string
   name: string | null
   start_date: string
-  end_date: string
+  end_date?: string | null
 }
 
 type ShotRow = {
@@ -210,7 +210,7 @@ const projectBriefStatusOptions: BriefStatus[] = ['Planning', 'In Progress', 'On
 const tommyUserId = 'bb3e47cc-90c8-4eac-a5ff-cabfcefb89ae'
 
 function getDocKind(doc: CoreDoc | null | undefined) {
-  return doc?.template_type || doc?.type || ''
+  return doc?.template_type || ''
 }
 
 const durationMinutes: Record<string, number> = {
@@ -486,8 +486,7 @@ export function DocsCenter() {
     setRundownLoading(true)
     const { data, error } = await supabase
       .from('trips')
-      .select('id, name, start_date, end_date')
-      .eq('user_id', tommyUserId)
+      .select('id, name, start_date')
       .order('created_at', { ascending: false })
 
     if (error) {
@@ -536,7 +535,6 @@ export function DocsCenter() {
         user_id: tommyUserId,
         workspace_id: workspaceId || null,
         title: `${trip.name || 'Untitled Trip'} - Rundown`,
-        type: 'rundown',
         template_type: 'rundown',
         content: JSON.stringify(content),
         created_at: new Date().toISOString(),
