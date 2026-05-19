@@ -488,7 +488,7 @@ export function DocsCenter() {
       .from('trips')
       .select('id, name, start_date, end_date')
       .eq('user_id', tommyUserId)
-      .order('start_date', { ascending: false })
+      .order('created_at', { ascending: false })
 
     if (error) {
       console.error('[Rundown] load trips failed:', error)
