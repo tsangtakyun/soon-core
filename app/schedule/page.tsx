@@ -1,10 +1,10 @@
 'use client'
 
 import { Suspense, useState, type MouseEvent } from 'react'
+import { createClient } from '@supabase/supabase-js'
 
 import { DashboardShell } from '@/components/DashboardShell'
 import PageHeader from '@/components/PageHeader'
-import { supabase } from '@/lib/supabase'
 
 console.log('[schedule page] loaded, version 8fc25d3')
 
@@ -103,6 +103,11 @@ export default function SchedulePage() {
 
     setSavingRundown(true)
     try {
+      const supabase = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      )
+
       const { data: trips, error: tripErr } = await supabase
         .from('trips')
         .select('*')
