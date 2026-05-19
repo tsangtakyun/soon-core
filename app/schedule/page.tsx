@@ -2,7 +2,6 @@
 
 import { Suspense, useState } from 'react'
 
-import { useWorkspace } from '@/app/context/workspace-context'
 import { DashboardShell } from '@/components/DashboardShell'
 import PageHeader from '@/components/PageHeader'
 import { supabase } from '@/lib/supabase'
@@ -78,7 +77,6 @@ function buildRundownContent(trip: TripRow, shots: ShotRow[]) {
 }
 
 export default function SchedulePage() {
-  const { activeWorkspaceId } = useWorkspace()
   const [iframeError, setIframeError] = useState(false)
   const [savingRundown, setSavingRundown] = useState(false)
 
@@ -139,19 +137,23 @@ export default function SchedulePage() {
 
       const rundownContent = buildRundownContent(trip, (shotsData || []) as ShotRow[])
       const { error } = await supabase.from('docs').insert({
-        workspace_id: activeWorkspaceId || null,
+        workspace_id: null,
         title: `${trip.name || 'Untitled Trip'} - Rundown`,
         template_type: 'rundown',
         content: JSON.stringify(rundownContent),
       })
 
-      if (error) throw error
+      if (error) {
+        console.error('[saveRundown]', error)
+        window.alert(`儲存失敗：${error.message}`)
+        return
+      }
 
       window.dispatchEvent(new Event('soon-data-updated'))
       window.alert('✅ Rundown 已儲存至文件中心')
     } catch (error) {
-      console.error('[Rundown] save failed:', error)
-      window.alert(error instanceof Error ? error.message : 'Rundown 儲存失敗，請重試。')
+      console.error('[saveRundown]', error)
+      window.alert(error instanceof Error ? `儲存失敗：${error.message}` : '儲存失敗：請重試。')
     } finally {
       setSavingRundown(false)
     }
