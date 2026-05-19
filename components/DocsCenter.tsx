@@ -638,9 +638,18 @@ export function DocsCenter() {
   async function createFolder() {
     const name = newFolderName.trim()
     if (!name) return
-    const { error } = await supabase.from('doc_folders').insert({ name, workspace_id: workspaceId || null })
-    if (error) {
-      window.alert(error.message)
+
+    console.log('[Folder] Creating:', name, 'workspace:', workspaceId)
+    const response = await fetch('/api/docs/folders', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, workspace_id: workspaceId }),
+    })
+    const result = await response.json().catch(() => ({}))
+    console.log('[Folder] Result:', result)
+
+    if (!response.ok) {
+      window.alert(result.error || '新增文件夾失敗')
       return
     }
     setNewFolderName('')
@@ -651,9 +660,16 @@ export function DocsCenter() {
   async function renameFolder(folder: DocFolder) {
     const name = window.prompt('新文件夾名稱', folder.name)?.trim()
     if (!name) return
-    const { error } = await supabase.from('doc_folders').update({ name }).eq('id', folder.id)
-    if (error) {
-      window.alert(error.message)
+
+    const response = await fetch('/api/docs/folders', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: folder.id, name }),
+    })
+    const result = await response.json().catch(() => ({}))
+
+    if (!response.ok) {
+      window.alert(result.error || '重命名文件夾失敗')
       return
     }
     await load()
@@ -661,10 +677,16 @@ export function DocsCenter() {
 
   async function deleteFolder(folder: DocFolder) {
     if (!window.confirm(`確定刪除文件夾「${folder.name}」？文件會保留並移出文件夾。`)) return
-    await supabase.from('docs').update({ folder_id: null }).eq('folder_id', folder.id)
-    const { error } = await supabase.from('doc_folders').delete().eq('id', folder.id)
-    if (error) {
-      window.alert(error.message)
+
+    const response = await fetch('/api/docs/folders', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: folder.id }),
+    })
+    const result = await response.json().catch(() => ({}))
+
+    if (!response.ok) {
+      window.alert(result.error || '刪除文件夾失敗')
       return
     }
     if (activeFolderId === folder.id) setActiveFolderId('')

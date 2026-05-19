@@ -1299,7 +1299,7 @@ textarea:disabled {
 
 .docs-header p {
   margin: 8px 0 0;
-  color: var(--soon-text-muted);
+  color: #f0f0f5;
   font-size: 13px;
   white-space: nowrap;
 }
@@ -1388,7 +1388,7 @@ textarea:disabled {
 
 .template-title-row p {
   margin: 4px 0 0;
-  color: var(--soon-text-muted);
+  color: #f0f0f5;
   font-size: 12px;
 }
 
@@ -1396,7 +1396,7 @@ textarea:disabled {
   display: grid;
   gap: 0;
   margin-top: 12px;
-  color: var(--soon-text-muted);
+  color: #f0f0f5;
   font-size: 11px;
   line-height: 1.8;
 }
@@ -1426,7 +1426,7 @@ textarea:disabled {
 
 .existing-docs-section h2 {
   margin: 0;
-  color: var(--soon-text-muted);
+  color: #aaaabc;
   font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.06em;
@@ -1451,7 +1451,7 @@ textarea:disabled {
   gap: 8px;
   border: 0;
   background: transparent;
-  color: var(--soon-text-secondary);
+  color: #f0f0f5;
   font-size: 12px;
   padding: 5px 8px;
 }
@@ -1474,7 +1474,7 @@ textarea:disabled {
 }
 
 .doc-folder-row small {
-  color: var(--soon-text-muted);
+  color: #f0f0f5;
   font-size: 11px;
 }
 
@@ -1538,7 +1538,7 @@ textarea:disabled {
 .docs-ghost-button {
   border: 0;
   background: transparent;
-  color: var(--soon-text-secondary);
+  color: #f0f0f5;
   cursor: pointer;
   font-size: 13px;
 }
@@ -1571,7 +1571,7 @@ textarea:disabled {
   min-height: 38px;
   border-bottom: 0.5px solid rgba(255,255,255,0.08);
   padding: 0 16px;
-  color: var(--soon-text-muted);
+  color: #f0f0f5;
   font-size: 11px;
   font-weight: 500;
   letter-spacing: 0.06em;
@@ -1593,7 +1593,7 @@ textarea:disabled {
   gap: 12px;
   min-height: 44px;
   border-bottom: 0.5px solid rgba(255,255,255,0.06);
-  color: var(--soon-text-secondary);
+  color: #f0f0f5;
   font-size: 13px;
   padding: 0 12px;
 }
@@ -1661,7 +1661,7 @@ textarea:disabled {
 }
 
 .doc-row time {
-  color: var(--soon-text-muted);
+  color: #f0f0f5;
   font-size: 12px;
 }
 
@@ -1676,7 +1676,7 @@ textarea:disabled {
   border: 0.5px solid var(--soon-border);
   border-radius: 6px;
   background: var(--soon-surface2);
-  color: var(--soon-text-secondary);
+  color: #f0f0f5;
   font-size: 11px;
   padding: 4px 6px;
 }
@@ -1696,7 +1696,7 @@ textarea:disabled {
 
 .docs-empty {
   margin: 0;
-  color: var(--soon-text-muted);
+  color: #f0f0f5;
   font-size: 13px;
   padding: 28px;
   text-align: center;
