@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import { useEffect, useMemo, useState, type ChangeEvent } from 'react'
 import * as XLSX from 'xlsx'
 
@@ -604,6 +605,16 @@ export function FinanceCenter() {
     <DashboardShell activeSection="finance">
       <section className="finance-page">
         <PageHeader icon="💰" title="財務中心" subtitle="收入、支出同財務報告" />
+
+        <div className="relative w-full rounded-xl overflow-hidden mb-6" style={{ height: '180px' }}>
+          <Image
+            src="/finance.jpg"
+            alt="財務中心"
+            fill
+            className="object-cover"
+            priority
+          />
+        </div>
 
         <div className="finance-metric-grid">
           <FinanceMetric label="Paid / 已收款" amount={dashboard.paid} color="#22c55e" currency={defaultCurrency} />

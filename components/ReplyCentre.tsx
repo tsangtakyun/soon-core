@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import { useEffect, useMemo, useState } from 'react'
 
 import { useWorkspace } from '@/app/context/workspace-context'
@@ -311,6 +312,15 @@ export function ReplyCentre() {
           </button>
         )}
       />
+      <div className="relative w-full rounded-xl overflow-hidden mb-6" style={{ height: '180px' }}>
+        <Image
+          src="/reply.jpg"
+          alt="回覆中心"
+          fill
+          className="object-cover"
+          priority
+        />
+      </div>
       <section className="reply-page">
         <aside className="reply-list-panel">
           <div className="reply-inbox-tabs">
