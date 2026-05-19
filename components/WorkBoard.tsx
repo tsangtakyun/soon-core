@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { KeyboardEvent, useEffect, useMemo, useState } from 'react'
 
@@ -320,6 +321,9 @@ export function WorkBoard() {
           </button>
           )}
         />
+        <div className="relative w-full rounded-xl overflow-hidden mb-6" style={{ height: '180px' }}>
+          <Image src="/mywork-banner.jpg" alt="我的工作" fill className="object-cover" priority />
+        </div>
         <p className="active-workspace-line">工作區：{activeWorkspaceName}</p>
 
         <div className="filters work-filters">
