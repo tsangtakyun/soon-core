@@ -85,7 +85,12 @@ const navGroups: Array<{
       { key: 'signature', label: '簽署設定' },
     ],
   },
-  { key: 'integration', icon: '🔗', title: '整合', items: [{ key: 'api', label: 'API 連接' }] },
+  {
+    key: 'integration',
+    icon: '🔗',
+    title: '整合',
+    items: [{ key: 'api', label: 'API 連接' }],
+  },
   {
     key: 'team',
     icon: '👥',
@@ -109,23 +114,22 @@ const navGroups: Array<{
 ]
 
 const panelMeta: Record<PanelKey, { title: string; subtitle: string }> = {
-  user: { title: '基本資料', subtitle: '設定你喺 SOON CORE 入面顯示嘅名稱同頭像。' },
-  company: { title: '公司資料', subtitle: '公司名稱、聯絡資料同文件用 Logo。' },
-  brand: { title: '品牌', subtitle: '上傳文件標頭，供文件模板輸出使用。' },
-  payment: { title: '付款資料', subtitle: '銀行、FPS、PayPal 同支票付款設定。' },
-  paymentTerms: { title: '付款條款', subtitle: '設定付款期限同逾期利息。' },
-  invoice: { title: '發票設定', subtitle: '管理發票 / 報價單號碼、貨幣同稅率。' },
-  rates: { title: '預設費率', subtitle: '設定 Invoice 預設 service rate。' },
-  signature: { title: '簽署設定', subtitle: '設定授權人姓名同簽名圖。' },
-  api: { title: 'API 連接', subtitle: '管理 YouTube / Meta 等外部 API 設定。' },
-  teamMembers: { title: '成員管理', subtitle: '查看同管理目前工作區成員。' },
-  teamInvite: { title: '邀請成員', subtitle: '用電郵邀請團隊成員加入 SOON CORE。' },
-  teamPending: { title: '待接受邀請', subtitle: '追蹤、重新發送或撤銷未接受嘅邀請。' },
-  replyEmail: { title: 'Email 助理', subtitle: 'Email inbox 嘅回覆語氣同背景資料。' },
-  replyMessage: { title: 'Message 助理', subtitle: 'Message inbox 嘅回覆語氣同背景資料。' },
-  replyFans: { title: 'Fans 助理', subtitle: 'Fans inbox 嘅回覆語氣同背景資料。' },
+  user: { title: '基本資料', subtitle: '管理你在 SOON CORE 入面顯示的名稱與頭像。' },
+  company: { title: '公司資料', subtitle: '設定公司名稱、聯絡方式、地址與公司 logo。' },
+  brand: { title: '品牌', subtitle: '上載文件標頭，套用到報價、發票與製作文件。' },
+  payment: { title: '付款資料', subtitle: '設定銀行、FPS、PayPal、支票與付款顯示方式。' },
+  paymentTerms: { title: '付款條款', subtitle: '設定付款期限、逾期利率與預設條款。' },
+  invoice: { title: '發票設定', subtitle: '設定發票、報價單編號、貨幣與稅率。' },
+  rates: { title: '預設費率', subtitle: '設定文件與報價會使用的預設 service rate。' },
+  signature: { title: '簽署設定', subtitle: '設定授權人姓名與簽名圖像。' },
+  api: { title: 'API 連接', subtitle: '管理 YouTube、Meta 與其他外部服務連接。' },
+  teamMembers: { title: '成員管理', subtitle: '查看工作區成員、角色與權限。' },
+  teamInvite: { title: '邀請成員', subtitle: '發送邀請，讓團隊成員加入 SOON CORE。' },
+  teamPending: { title: '待接受邀請', subtitle: '查看、重新發送或撤銷尚未接受的邀請。' },
+  replyEmail: { title: 'Email 助理', subtitle: '設定 Email inbox 的回覆語氣與背景資料。' },
+  replyMessage: { title: 'Message 助理', subtitle: '設定 Message inbox 的回覆語氣與背景資料。' },
+  replyFans: { title: 'Fans 助理', subtitle: '設定 Fans inbox 的回覆語氣與背景資料。' },
 }
-
 const replyPanelMap: Partial<Record<PanelKey, ReplyInboxType>> = {
   replyEmail: 'email',
   replyMessage: 'message',
@@ -148,6 +152,32 @@ const defaultNavCollapsed: Record<NavGroupKey, boolean> = {
   integration: false,
   team: false,
   reply: false,
+}
+
+const navGroupDisplay: Record<NavGroupKey, { title: string; icon: string }> = {
+  account: { title: '帳戶', icon: '👤' },
+  finance: { title: '財務', icon: '💳' },
+  integration: { title: '整合', icon: '🔗' },
+  team: { title: '團隊', icon: '👥' },
+  reply: { title: '回覆中心', icon: '💬' },
+}
+
+const panelDisplay: Record<PanelKey, { title: string; subtitle: string; label: string }> = {
+  user: { title: '基本資料', label: '基本資料', subtitle: '管理你在 SOON CORE 入面顯示的名稱與頭像。' },
+  company: { title: '公司資料', label: '公司資料', subtitle: '設定公司名稱、聯絡方式、地址與公司 logo。' },
+  brand: { title: '品牌', label: '品牌', subtitle: '上載文件標頭，套用到報價、發票與製作文件。' },
+  payment: { title: '付款資料', label: '付款資料', subtitle: '設定銀行、FPS、PayPal、支票與付款顯示方式。' },
+  paymentTerms: { title: '付款條款', label: '付款條款', subtitle: '設定付款期限、逾期利率與預設條款。' },
+  invoice: { title: '發票設定', label: '發票設定', subtitle: '設定發票、報價單編號、貨幣與稅率。' },
+  rates: { title: '預設費率', label: '預設費率', subtitle: '設定文件與報價會使用的預設 service rate。' },
+  signature: { title: '簽署設定', label: '簽署設定', subtitle: '設定授權人姓名與簽名圖像。' },
+  api: { title: 'API 連接', label: 'API 連接', subtitle: '管理 YouTube、Meta 與其他外部服務連接。' },
+  teamMembers: { title: '成員管理', label: '成員管理', subtitle: '查看工作區成員、角色與權限。' },
+  teamInvite: { title: '邀請成員', label: '邀請成員', subtitle: '發送邀請，讓團隊成員加入 SOON CORE。' },
+  teamPending: { title: '待接受邀請', label: '待接受邀請', subtitle: '查看、重新發送或撤銷尚未接受的邀請。' },
+  replyEmail: { title: 'Email 助理', label: 'Email 助理', subtitle: '設定 Email inbox 的回覆語氣與背景資料。' },
+  replyMessage: { title: 'Message 助理', label: 'Message 助理', subtitle: '設定 Message inbox 的回覆語氣與背景資料。' },
+  replyFans: { title: 'Fans 助理', label: 'Fans 助理', subtitle: '設定 Fans inbox 的回覆語氣與背景資料。' },
 }
 
 export function SettingsPage() {
@@ -236,7 +266,7 @@ export function SettingsPage() {
     setInviteEmail('')
     setTeamStatus(
       payload.emailWarning
-        ? `邀請已建立；Email 發送提示：${payload.emailWarning}。邀請連結：${payload.inviteLink}`
+        ? `邀請已建立，但 Email 發送失敗：${payload.emailWarning}。邀請連結：${payload.inviteLink}`
         : `邀請已發送至 ${payload.invitation.email}`
     )
     await loadTeam()
@@ -286,7 +316,7 @@ export function SettingsPage() {
       return
     }
     const payload = await response.json().catch(() => ({}))
-    setTeamStatus(payload.emailWarning ? `邀請已重新啟用。邀請連結：${payload.inviteLink}` : '邀請已重新發送')
+    setTeamStatus(payload.emailWarning ? `邀請已重新啟用，邀請連結：${payload.inviteLink}` : '邀請已重新發送')
     await loadTeam()
   }
 
@@ -418,39 +448,29 @@ export function SettingsPage() {
     updateNavCollapsed({ ...navCollapsed, [key]: !navCollapsed[key] })
   }
 
-  const meta = panelMeta[activePanel]
+  const meta = panelDisplay[activePanel] ?? panelMeta[activePanel]
 
   return (
     <DashboardShell activeSection="settings">
       <section className="settings-board">
         <aside className="settings-local-sidebar">
           <div className="settings-local-title">設定</div>
-          <div className="settings-nav-controls">
-            <button type="button" onClick={() => updateNavCollapsed(defaultNavCollapsed)}>
-              全部展開
-            </button>
-            <button type="button" onClick={() => updateNavCollapsed({ account: true, finance: true, integration: true, team: true, reply: true })}>
-              全部收埋
-            </button>
-          </div>
           {navGroups.map((group) => (
-            <nav key={group.title} className={`settings-local-group ${navCollapsed[group.key] ? 'collapsed' : ''}`} aria-label={group.title}>
-              <button className="settings-local-group-title" type="button" onClick={() => toggleNavGroup(group.key)}>
-                <span>{group.icon}</span>
-                <span>{group.title}</span>
-                <strong>{navCollapsed[group.key] ? '▶' : '▼'}</strong>
-              </button>
-              {!navCollapsed[group.key] &&
-                group.items.map((item) => (
-                  <button
-                    key={item.key}
-                    className={activePanel === item.key ? 'active' : ''}
-                    type="button"
-                    onClick={() => setActivePanel(item.key)}
-                  >
-                    {item.label}
-                  </button>
-                ))}
+            <nav key={group.key} className="settings-local-group" aria-label={navGroupDisplay[group.key].title}>
+              <div className="settings-local-group-title">
+                <span>{navGroupDisplay[group.key].icon}</span>
+                <span>{navGroupDisplay[group.key].title}</span>
+              </div>
+              {group.items.map((item) => (
+                <button
+                  key={item.key}
+                  className={activePanel === item.key ? 'active' : ''}
+                  type="button"
+                  onClick={() => setActivePanel(item.key)}
+                >
+                  {panelDisplay[item.key]?.label ?? item.label}
+                </button>
+              ))}
             </nav>
           ))}
         </aside>
@@ -459,7 +479,7 @@ export function SettingsPage() {
           <select className="settings-mobile-select" value={activePanel} onChange={(event) => setActivePanel(event.target.value as PanelKey)}>
             {navGroups.flatMap((group) => group.items).map((item) => (
               <option key={item.key} value={item.key}>
-                {item.label}
+                {panelDisplay[item.key]?.label ?? item.label}
               </option>
             ))}
           </select>
@@ -472,7 +492,10 @@ export function SettingsPage() {
           </header>
 
           <div className="settings-detail-divider" />
-          <div className="settings-detail-form">{renderPanel()}</div>
+          <div className="settings-detail-card">
+            <h3>{meta.title}</h3>
+            <div className="settings-detail-form">{renderPanel()}</div>
+          </div>
 
           <div className="settings-section-save">
             {saved && <span>已儲存</span>}
@@ -538,12 +561,12 @@ export function SettingsPage() {
         return (
           <label>
             文件標頭
-            <span className="settings-field-help">建議解析度：580x80px，PNG 透明背景</span>
+            <span className="settings-field-help">建議尺寸 580x80px，支援 PNG 或透明背景圖片。</span>
             <div className="document-header-upload">
               {settings.document_header_base64 ? (
                 <img src={settings.document_header_base64} alt="Document header preview" />
               ) : (
-                <span>點擊上傳文件標頭</span>
+                <span>尚未上載文件標頭</span>
               )}
               <input type="file" accept="image/*" onChange={(event) => readImage(event, (value) => update('document_header_base64', value))} />
             </div>
@@ -592,7 +615,7 @@ export function SettingsPage() {
               <input value={settings.cheque_payable_to} onChange={(event) => update('cheque_payable_to', event.target.value)} />
             </label>
             <label>
-              郵寄地址
+              支票地址
               <textarea value={settings.cheque_address} onChange={(event) => update('cheque_address', event.target.value)} rows={3} />
             </label>
           </>
@@ -601,11 +624,11 @@ export function SettingsPage() {
         return (
           <>
             <label>
-              付款期限
+              付款期限（日）
               <input type="number" min="0" value={settings.payment_days} onChange={(event) => update('payment_days', Number(event.target.value || 0))} />
             </label>
             <label>
-              逾期利息
+              逾期利率（%）
               <input type="number" min="0" value={settings.interest_rate} onChange={(event) => update('interest_rate', Number(event.target.value || 0))} />
             </label>
           </>
@@ -614,28 +637,28 @@ export function SettingsPage() {
         return (
           <>
             <label>
-              發票號碼前綴
+              發票編號前綴
               <input value={settings.invoice_prefix} onChange={(event) => update('invoice_prefix', event.target.value)} />
             </label>
             <div className="settings-readonly-row">
-              <span>發票號碼格式</span>
-              <strong>預覽：{buildInvoiceNumber(settings.invoice_prefix, new Date().getFullYear(), settings.invoice_start_number)}</strong>
+              <span>發票編號預覽</span>
+              <strong>{buildInvoiceNumber(settings.invoice_prefix, new Date().getFullYear(), settings.invoice_start_number)}</strong>
             </div>
             <label>
-              起始號碼
+              起始編號
               <input type="number" min="1" value={settings.invoice_start_number} onChange={(event) => update('invoice_start_number', Number(event.target.value || 1))} />
             </label>
             <div className="settings-readonly-row">
-              <span>目前號碼</span>
+              <span>目前編號</span>
               <strong>{settings.invoice_current_number}</strong>
             </div>
             <label>
-              報價單號碼前綴
+              報價單編號前綴
               <input value={settings.quote_prefix} onChange={(event) => update('quote_prefix', event.target.value)} />
             </label>
             <div className="settings-readonly-row">
-              <span>報價單號碼格式</span>
-              <strong>預覽：{buildQuoteNumber(settings, 1)}</strong>
+              <span>報價單編號預覽</span>
+              <strong>{buildQuoteNumber(settings, 1)}</strong>
             </div>
             <label>
               預設貨幣
@@ -678,7 +701,7 @@ export function SettingsPage() {
             </label>
             <div className="signature-mode-toggle">
               <button className={signatureMode === 'draw' ? 'active' : ''} type="button" onClick={() => setSignatureMode('draw')}>手寫</button>
-              <button className={signatureMode === 'upload' ? 'active' : ''} type="button" onClick={() => setSignatureMode('upload')}>上傳圖片</button>
+              <button className={signatureMode === 'upload' ? 'active' : ''} type="button" onClick={() => setSignatureMode('upload')}>上載簽名</button>
             </div>
             {signatureMode === 'draw' ? (
               <div className="signature-canvas-wrap">
@@ -687,7 +710,7 @@ export function SettingsPage() {
               </div>
             ) : (
               <label>
-                上傳簽名圖片
+                上載簽名圖
                 <div className="signature-upload-row">
                   {settings.signature_base64 && <img src={settings.signature_base64} alt="" />}
                   <input type="file" accept="image/*" onChange={uploadSignature} />
@@ -705,10 +728,10 @@ export function SettingsPage() {
           <>
             <div className="api-status-row">
               <span className={settings.youtube_client_id && settings.youtube_client_secret ? 'api-status connected' : 'api-status'}>
-                YouTube {settings.youtube_client_id && settings.youtube_client_secret ? '✓ 已連接' : '未連接'}
+                YouTube {settings.youtube_client_id && settings.youtube_client_secret ? '已連接' : '未連接'}
               </span>
               <span className={settings.meta_app_id || settings.meta_app_secret ? 'api-status connected' : 'api-status'}>
-                Meta {settings.meta_app_id || settings.meta_app_secret ? '✓ 已連接' : '未連接'}
+                Meta {settings.meta_app_id || settings.meta_app_secret ? '已連接' : '未連接'}
               </span>
             </div>
             <label>
@@ -797,7 +820,7 @@ export function SettingsPage() {
                     <div className="team-row" key={invitation.id}>
                       <div className="team-main">
                         <strong>{invitation.email}</strong>
-                        <span>到期：{new Date(invitation.expires_at).toLocaleDateString('zh-HK')}</span>
+                        <span>到期日：{new Date(invitation.expires_at).toLocaleDateString('zh-HK')}</span>
                       </div>
                       <span className={`team-role ${invitation.role}`}>{invitation.role}</span>
                       <span className="team-pending-badge">待接受</span>
@@ -835,8 +858,8 @@ function ReplyPanel({
       <div className="settings-mini-toggle">
         {[
           { value: 'professional', label: '專業' },
-          { value: 'friendly', label: '親切' },
-          { value: 'casual', label: '活潑' },
+          { value: 'friendly', label: '友善' },
+          { value: 'casual', label: '輕鬆' },
         ].map((option) => (
           <button key={option.value} className={item.tone === option.value ? 'active' : ''} type="button" onClick={() => onChange(inboxType, 'tone', option.value as ReplySettingDraft['tone'])}>
             {option.label}
@@ -856,11 +879,11 @@ function ReplyPanel({
       </div>
       <label>
         Creator 背景資料
-        <textarea value={item.creator_context} placeholder="介紹你係邊個、做咩類型內容、目標觀眾..." rows={5} onChange={(event) => onChange(inboxType, 'creator_context', event.target.value)} />
+        <textarea value={item.creator_context} placeholder="例如品牌語氣、內容方向、常用稱呼、客戶背景..." rows={5} onChange={(event) => onChange(inboxType, 'creator_context', event.target.value)} />
       </label>
       <label>
-        唔回覆話題
-        <textarea value={item.avoid_topics} placeholder="例如：唔報價、唔透露個人資料..." rows={4} onChange={(event) => onChange(inboxType, 'avoid_topics', event.target.value)} />
+        避免提及
+        <textarea value={item.avoid_topics} placeholder="例如敏感話題、競爭品牌、不能承諾的內容..." rows={4} onChange={(event) => onChange(inboxType, 'avoid_topics', event.target.value)} />
       </label>
     </>
   )
