@@ -78,49 +78,165 @@ export function HomeDashboard() {
 
   return (
     <DashboardShell activeSection="home">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <img src="/soon_core_logo.png" alt="SOON CORE" style={{ height: '36px', objectFit: 'contain' }} />
-          <div>
-            <p style={{ fontSize: '11px', color: '#5a5a72', margin: 0 }}>SOON CORE</p>
-            <p style={{ fontSize: '15px', fontWeight: 600, color: '#f0f0f5', margin: 0 }}>
-              {displayName}
-            </p>
-          </div>
-        </div>
-        <button
-          type="button"
-          onClick={() => router.push('/settings')}
+      <section
+        style={{
+          position: 'relative',
+          width: '100%',
+          height: '220px',
+          borderRadius: '16px',
+          overflow: 'hidden',
+          marginBottom: '24px',
+        }}
+      >
+        <img
+          src="/home-hero.png"
+          alt=""
           style={{
-            background: 'transparent',
-            border: '1px solid #2a2a3a',
-            color: '#9090a8',
-            borderRadius: '8px',
-            padding: '8px 14px',
-            fontSize: '12px',
-            cursor: 'pointer',
+            position: 'absolute',
+            inset: 0,
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            objectPosition: 'center 60%',
+          }}
+        />
+        <div
+          style={{
+            position: 'absolute',
+            inset: 0,
+            background:
+              'linear-gradient(to right, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.3) 60%, rgba(0,0,0,0.1) 100%)',
+          }}
+        />
+        <div
+          style={{
+            position: 'relative',
+            height: '100%',
+            display: 'flex',
+            alignItems: 'center',
+            padding: '0 32px',
+            justifyContent: 'space-between',
+            gap: '24px',
           }}
         >
-          ⚙️ 設定
-        </button>
-      </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+            <img src="/soon_core_logo.png" alt="SOON CORE" style={{ height: '40px', objectFit: 'contain' }} />
+            <div>
+              <p
+                style={{
+                  fontSize: '11px',
+                  color: 'rgba(255,255,255,0.6)',
+                  margin: '0 0 2px',
+                  letterSpacing: '0.05em',
+                }}
+              >
+                SOON CORE
+              </p>
+              <p style={{ fontSize: '20px', fontWeight: 700, color: 'white', margin: 0 }}>{displayName}</p>
+              <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.5)', margin: '2px 0 0' }}>
+                {new Date().toLocaleDateString('zh-HK', { weekday: 'long', month: 'long', day: 'numeric' })}
+              </p>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', gap: '10px', flexShrink: 0 }}>
+            <button
+              type="button"
+              onClick={() => router.push('/ig/idea')}
+              style={{
+                background: 'rgba(124,92,252,0.8)',
+                backdropFilter: 'blur(8px)',
+                color: 'white',
+                border: 'none',
+                borderRadius: '10px',
+                padding: '12px 20px',
+                fontSize: '13px',
+                fontWeight: 600,
+                cursor: 'pointer',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '4px',
+              }}
+            >
+              <span style={{ fontSize: '18px' }}>IG</span>
+              <span>IG Reel</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => router.push('/youtube/idea')}
+              style={{
+                background: 'rgba(14,165,233,0.8)',
+                backdropFilter: 'blur(8px)',
+                color: 'white',
+                border: 'none',
+                borderRadius: '10px',
+                padding: '12px 20px',
+                fontSize: '13px',
+                fontWeight: 600,
+                cursor: 'pointer',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '4px',
+              }}
+            >
+              <span style={{ fontSize: '18px' }}>YT</span>
+              <span>YouTube</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => router.push('/settings')}
+              aria-label="設定"
+              style={{
+                background: 'rgba(255,255,255,0.15)',
+                backdropFilter: 'blur(8px)',
+                color: 'white',
+                border: '1px solid rgba(255,255,255,0.2)',
+                borderRadius: '10px',
+                padding: '12px 16px',
+                fontSize: '13px',
+                cursor: 'pointer',
+              }}
+            >
+              設定
+            </button>
+          </div>
+        </div>
+      </section>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
         <section style={{ background: '#16161f', border: '1px solid #2a2a3a', borderRadius: '12px', padding: '20px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-            <p style={{ fontSize: '14px', fontWeight: 600, color: '#f0f0f5', margin: 0 }}>📊 發掘趨勢</p>
+            <p style={{ fontSize: '14px', fontWeight: 600, color: '#f0f0f5', margin: 0 }}>發掘趨勢</p>
             <div style={{ display: 'flex', gap: '8px' }}>
               <button
                 type="button"
                 onClick={() => router.push('/ig/idea')}
-                style={{ fontSize: '11px', padding: '4px 10px', borderRadius: '6px', border: '1px solid #7c5cfc', color: '#7c5cfc', background: 'transparent', cursor: 'pointer' }}
+                style={{
+                  fontSize: '11px',
+                  padding: '4px 10px',
+                  borderRadius: '6px',
+                  border: '1px solid #7c5cfc',
+                  color: '#7c5cfc',
+                  background: 'transparent',
+                  cursor: 'pointer',
+                }}
               >
                 IG
               </button>
               <button
                 type="button"
                 onClick={() => router.push('/youtube/idea')}
-                style={{ fontSize: '11px', padding: '4px 10px', borderRadius: '6px', border: '1px solid #0ea5e9', color: '#0ea5e9', background: 'transparent', cursor: 'pointer' }}
+                style={{
+                  fontSize: '11px',
+                  padding: '4px 10px',
+                  borderRadius: '6px',
+                  border: '1px solid #0ea5e9',
+                  color: '#0ea5e9',
+                  background: 'transparent',
+                  cursor: 'pointer',
+                }}
               >
                 YouTube
               </button>
@@ -139,18 +255,20 @@ export function HomeDashboard() {
         <section style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <div style={{ background: '#16161f', border: '1px solid #2a2a3a', borderRadius: '12px', padding: '20px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-              <p style={{ fontSize: '14px', fontWeight: 600, color: '#f0f0f5', margin: 0 }}>📋 最近工作</p>
+              <p style={{ fontSize: '14px', fontWeight: 600, color: '#f0f0f5', margin: 0 }}>最近工作</p>
               <button
                 type="button"
                 onClick={() => router.push('/work')}
                 style={{ fontSize: '11px', color: '#9090a8', background: 'transparent', border: 'none', cursor: 'pointer' }}
               >
-                查看全部 →
+                查看全部
               </button>
             </div>
 
             {recentProjects.length === 0 ? (
-              <p style={{ fontSize: '12px', color: '#5a5a72', textAlign: 'center', padding: '16px 0', margin: 0 }}>未有最近項目</p>
+              <p style={{ fontSize: '12px', color: '#5a5a72', textAlign: 'center', padding: '16px 0', margin: 0 }}>
+                未有最近項目
+              </p>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column' }}>
                 {recentProjects.map((project, index) => (
@@ -170,7 +288,18 @@ export function HomeDashboard() {
                       textAlign: 'left',
                     }}
                   >
-                    <p style={{ fontSize: '13px', color: '#f0f0f5', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{project.title}</p>
+                    <p
+                      style={{
+                        fontSize: '13px',
+                        color: '#f0f0f5',
+                        margin: 0,
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      {project.title}
+                    </p>
                     <span style={{ fontSize: '11px', color: '#5a5a72', flexShrink: 0 }}>{project.status || '進行中'}</span>
                   </button>
                 ))}
@@ -179,9 +308,11 @@ export function HomeDashboard() {
           </div>
 
           <div style={{ background: '#16161f', border: '1px solid #2a2a3a', borderRadius: '12px', padding: '20px' }}>
-            <p style={{ fontSize: '14px', fontWeight: 600, color: '#f0f0f5', margin: '0 0 12px' }}>📅 今日拍攝</p>
+            <p style={{ fontSize: '14px', fontWeight: 600, color: '#f0f0f5', margin: '0 0 12px' }}>今日拍攝</p>
             {todayProjects.length === 0 ? (
-              <p style={{ fontSize: '12px', color: '#5a5a72', textAlign: 'center', padding: '8px 0', margin: 0 }}>今日未有拍攝事項</p>
+              <p style={{ fontSize: '12px', color: '#5a5a72', textAlign: 'center', padding: '8px 0', margin: 0 }}>
+                今日未有拍攝事項
+              </p>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column' }}>
                 {todayProjects.map((project, index) => (
@@ -206,9 +337,11 @@ export function HomeDashboard() {
           </div>
 
           <div style={{ background: '#16161f', border: '1px solid #2a2a3a', borderRadius: '12px', padding: '20px' }}>
-            <p style={{ fontSize: '14px', fontWeight: 600, color: '#f0f0f5', margin: '0 0 12px' }}>⚡ 進行中</p>
+            <p style={{ fontSize: '14px', fontWeight: 600, color: '#f0f0f5', margin: '0 0 12px' }}>進行中</p>
             {inProgressProjects.length === 0 ? (
-              <p style={{ fontSize: '12px', color: '#5a5a72', textAlign: 'center', padding: '8px 0', margin: 0 }}>暫時無進行中項目</p>
+              <p style={{ fontSize: '12px', color: '#5a5a72', textAlign: 'center', padding: '8px 0', margin: 0 }}>
+                暫時無進行中項目
+              </p>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column' }}>
                 {inProgressProjects.map((project, index) => (
@@ -284,7 +417,17 @@ function IgTrendPreview({ userId }: { userId: string }) {
             textAlign: 'left',
           }}
         >
-          <p style={{ fontSize: '13px', color: '#f0f0f5', margin: 0, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          <p
+            style={{
+              fontSize: '13px',
+              color: '#f0f0f5',
+              margin: 0,
+              flex: 1,
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+            }}
+          >
             {idea.title}
           </p>
           <span style={{ fontSize: '12px', fontWeight: 600, color: '#7c5cfc', marginLeft: '8px', flexShrink: 0 }}>
@@ -336,7 +479,17 @@ function YoutubeTrendPreview() {
             textAlign: 'left',
           }}
         >
-          <p style={{ fontSize: '13px', color: '#f0f0f5', margin: 0, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          <p
+            style={{
+              fontSize: '13px',
+              color: '#f0f0f5',
+              margin: 0,
+              flex: 1,
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+            }}
+          >
             {signal.topic_zh || '未命名話題'}
           </p>
           <span style={{ fontSize: '12px', fontWeight: 600, color: '#0ea5e9', marginLeft: '8px', flexShrink: 0 }}>
