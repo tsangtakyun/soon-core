@@ -56,8 +56,8 @@ const sortOptions: SortState[] = [
   { key: 'publish_date', direction: 'asc', label: '發佈時間 近→遠' },
   { key: 'publish_date', direction: 'desc', label: '發佈時間 遠→近' },
   { key: 'title', direction: 'asc', label: '題目 A→Z' },
-  { key: 'status', direction: 'asc', label: 'Status 1→7' },
-  { key: 'status', direction: 'desc', label: 'Status 7→1' },
+  { key: 'status', direction: 'asc', label: '狀態 1→7' },
+  { key: 'status', direction: 'desc', label: '狀態 7→1' },
 ]
 
 const emptyProject: ProjectDraft = {
@@ -333,7 +333,7 @@ export function WorkBoard() {
             ))}
           </select>
           <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}>
-            <option value="">全部 Status</option>
+            <option value="">全部狀態</option>
             {statusOptions.map((item) => (
               <option key={item} value={item}>
                 {item}
@@ -391,14 +391,14 @@ export function WorkBoard() {
                 </th>
                 <SortableHeader label="題目" sortKey="title" activeSort={sort} onSort={toggleColumnSort} />
                 <th>類別</th>
-                <SortableHeader label="Status" sortKey="status" activeSort={sort} onSort={toggleColumnSort} />
+                <SortableHeader label="狀態" sortKey="status" activeSort={sort} onSort={toggleColumnSort} />
                 <SortableHeader label="當前工序" sortKey="current_stage" activeSort={sort} onSort={toggleColumnSort} />
                 <th>主持</th>
                 <th>負責人</th>
                 <SortableHeader label="拍攝日期" sortKey="shoot_date" activeSort={sort} onSort={toggleColumnSort} />
                 <SortableHeader label="發佈時間" sortKey="publish_date" activeSort={sort} onSort={toggleColumnSort} />
-                <th>Pipeline</th>
-                <th>Output</th>
+                <th>流程</th>
+                <th>輸出</th>
               </tr>
             </thead>
             <tbody>
@@ -513,7 +513,7 @@ export function WorkBoard() {
             </select>
           </label>
           <label>
-            Status
+            狀態
             <select
               value={draft.status}
               onChange={(event) => setDraft({ ...draft, status: event.target.value as ProjectStatus })}
@@ -563,7 +563,7 @@ export function WorkBoard() {
             />
           </label>
           <label>
-            Pipeline step
+            流程階段
             <select
               value={draft.pipeline_step}
               onChange={(event) => setDraft({ ...draft, pipeline_step: event.target.value as PipelineStep })}
@@ -576,7 +576,7 @@ export function WorkBoard() {
             </select>
           </label>
           <label>
-            Output URL
+            輸出連結
             <input
               value={draft.output_url}
               onChange={(event) => setDraft({ ...draft, output_url: event.target.value })}
@@ -613,7 +613,7 @@ const columnSortLabels: Record<SortKey, string> = {
   shoot_date: '拍攝日期',
   publish_date: '發佈時間',
   title: '題目',
-  status: 'Status',
+  status: '狀態',
   current_stage: '當前工序',
 }
 

@@ -73,6 +73,73 @@ export function HomeDashboard() {
   return (
     <DashboardShell activeSection="home">
       <PageHeader icon="🏠" title="首頁" subtitle="快速存取你最近嘅項目同工作區域" />
+      <div style={{
+        background: 'linear-gradient(135deg, rgba(124,92,252,0.1) 0%, rgba(14,165,233,0.05) 100%)',
+        border: '1px solid #2a2a3a',
+        borderRadius: '16px',
+        padding: '32px',
+        marginBottom: '24px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: '24px',
+      }}>
+        <div>
+          <p style={{ fontSize: '12px', color: '#7c5cfc', fontWeight: 500, margin: '0 0 8px', letterSpacing: '0.05em' }}>
+            開始創作
+          </p>
+          <h2 style={{ fontSize: '20px', fontWeight: 700, color: '#f0f0f5', margin: '0 0 8px' }}>
+            你今日想做咩？
+          </h2>
+          <p style={{ fontSize: '13px', color: '#9090a8', margin: 0 }}>
+            選擇創作類型，由題材收集到劇本生成，一站完成。
+          </p>
+        </div>
+        <div style={{ display: 'flex', gap: '12px', flexShrink: 0 }}>
+          <button
+            type="button"
+            onClick={() => router.push('/ig/idea')}
+            style={{
+              background: '#7c5cfc',
+              color: 'white',
+              border: 'none',
+              borderRadius: '10px',
+              padding: '14px 24px',
+              fontSize: '14px',
+              fontWeight: 600,
+              cursor: 'pointer',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '4px',
+            }}
+          >
+            <span style={{ fontSize: '20px' }}>📱</span>
+            <span>IG Reel</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => router.push('/youtube/idea')}
+            style={{
+              background: '#0ea5e9',
+              color: 'white',
+              border: 'none',
+              borderRadius: '10px',
+              padding: '14px 24px',
+              fontSize: '14px',
+              fontWeight: 600,
+              cursor: 'pointer',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '4px',
+            }}
+          >
+            <span style={{ fontSize: '20px' }}>▶️</span>
+            <span>YouTube</span>
+          </button>
+        </div>
+      </div>
       <div className="home-grid">
         <section className="home-main">
           <div className="hero-block">
