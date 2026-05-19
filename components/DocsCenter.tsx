@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { type ChangeEvent, type ReactNode, useEffect, useMemo, useState } from 'react'
 
@@ -117,7 +118,16 @@ const acceptanceTemplate = {
   preview: [],
 } as const
 
-const docTemplates = [...templates, conceptBoardTemplate, blankTemplate, meetingNotesTemplate, campaignReportTemplate, acceptanceTemplate] as const
+const rundownTemplate = {
+  type: 'rundown',
+  icon: '✈️',
+  title: 'Shooting Rundown',
+  altTitle: '拍攝場景表',
+  accent: '#0ea5e9',
+  preview: [],
+} as const
+
+const docTemplates = [...templates, conceptBoardTemplate, blankTemplate, meetingNotesTemplate, campaignReportTemplate, acceptanceTemplate, rundownTemplate] as const
 
 type Template = (typeof docTemplates)[number]
 
@@ -126,6 +136,45 @@ type DocFolder = {
   name: string
   workspace_id: string | null
   created_at: string
+}
+
+type TripRow = {
+  id: string
+  name: string | null
+  start_date: string
+  end_date: string
+}
+
+type ShotRow = {
+  id: string
+  trip_id: string
+  seq: number | null
+  name: string | null
+  day: number | null
+  start_time: string | null
+  time_of_day: string | null
+  duration: string | null
+  platform: string | null
+  location: string | null
+}
+
+type RundownContent = {
+  type: 'rundown'
+  trip: {
+    name: string
+    date: string
+    total_shots: number
+  }
+  shots: Array<{
+    seq: number
+    name: string
+    day: number
+    time: string
+    time_of_day: string
+    duration: string
+    platform: string
+    location: string
+  }>
 }
 
 type Stakeholder = {
@@ -158,6 +207,26 @@ type ProjectBriefContent = {
 const templateLabels = Object.fromEntries(docTemplates.map((template) => [template.type, template.title]))
 const templateIcons = Object.fromEntries(docTemplates.map((template) => [template.type, template.icon]))
 const projectBriefStatusOptions: BriefStatus[] = ['Planning', 'In Progress', 'On Hold', 'Done']
+const tommyUserId = 'bb3e47cc-90c8-4eac-a5ff-cabfcefb89ae'
+
+function getDocKind(doc: CoreDoc | null | undefined) {
+  return doc?.template_type || doc?.type || ''
+}
+
+const durationMinutes: Record<string, number> = {
+  '30': 30,
+  '60': 60,
+  '120': 120,
+  '180': 180,
+  '240': 240,
+  '360': 360,
+  '30分': 30,
+  '1小時': 60,
+  '2小時': 120,
+  '3小時': 180,
+  '4小時': 240,
+  '半日': 360,
+}
 
 const briefCopy = {
   zh: {
@@ -305,6 +374,11 @@ export function DocsCenter() {
   const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved'>('idle')
   const [selectedDocIds, setSelectedDocIds] = useState<string[]>([])
   const [toastMessage, setToastMessage] = useState('')
+  const [activeDocTypeFilter, setActiveDocTypeFilter] = useState<'all' | 'rundown'>('all')
+  const [rundownModalOpen, setRundownModalOpen] = useState(false)
+  const [rundownTrips, setRundownTrips] = useState<TripRow[]>([])
+  const [selectedRundownTripId, setSelectedRundownTripId] = useState('')
+  const [rundownLoading, setRundownLoading] = useState(false)
 
   const copy = useMemo(() => briefCopy[projectBrief.language], [projectBrief.language])
   const hasDocSelection = selectedDocIds.length > 0
@@ -320,11 +394,13 @@ export function DocsCenter() {
     () =>
       workspaceDocs.filter((doc) => {
         if (activeFolderId && doc.folder_id !== activeFolderId) return false
+        if (activeDocTypeFilter === 'rundown' && getDocKind(doc) !== 'rundown') return false
         return true
       }),
-    [activeFolderId, workspaceDocs]
+    [activeDocTypeFilter, activeFolderId, workspaceDocs]
   )
   const allVisibleDocsSelected = visibleDocs.length > 0 && visibleDocs.every((doc) => selectedDocIds.includes(doc.id))
+  const rundownDocCount = workspaceDocs.filter((doc) => getDocKind(doc) === 'rundown').length
 
   useEffect(() => {
     void load()
@@ -372,6 +448,114 @@ export function DocsCenter() {
 
   function notifyDocsChanged() {
     window.dispatchEvent(new Event('soon-data-updated'))
+  }
+
+  function calcEndTime(startTime: string, duration: string | null) {
+    const minutesToAdd = (durationMinutes[duration || ''] ?? Number(duration || 0)) || 0
+    const [hours, minutes] = startTime.split(':').map(Number)
+    if (Number.isNaN(hours) || Number.isNaN(minutes)) return startTime
+
+    const total = hours * 60 + minutes + minutesToAdd
+    const endHours = Math.floor(total / 60) % 24
+    const endMinutes = total % 60
+    return `${String(endHours).padStart(2, '0')}:${String(endMinutes).padStart(2, '0')}`
+  }
+
+  function buildRundownContent(trip: TripRow, shots: ShotRow[]): RundownContent {
+    return {
+      type: 'rundown',
+      trip: {
+        name: trip.name || 'Untitled Trip',
+        date: trip.start_date,
+        total_shots: shots.length,
+      },
+      shots: shots.map((shot, index) => ({
+        seq: shot.seq ?? index + 1,
+        name: shot.name || '',
+        day: shot.day ?? 0,
+        time: shot.start_time ? `${shot.start_time} - ${calcEndTime(shot.start_time, shot.duration)}` : '-',
+        time_of_day: shot.time_of_day || '',
+        duration: shot.duration || '',
+        platform: shot.platform || '',
+        location: shot.location || '',
+      })),
+    }
+  }
+
+  async function loadRundownTrips() {
+    setRundownLoading(true)
+    const { data, error } = await supabase
+      .from('trips')
+      .select('id, name, start_date, end_date')
+      .eq('user_id', tommyUserId)
+      .order('start_date', { ascending: false })
+
+    if (error) {
+      console.error('[Rundown] load trips failed:', error)
+      window.alert('載入行程失敗，請稍後再試。')
+      setRundownLoading(false)
+      return
+    }
+
+    const trips = (data || []) as TripRow[]
+    setRundownTrips(trips)
+    setSelectedRundownTripId((current) => current || trips[0]?.id || '')
+    setRundownLoading(false)
+  }
+
+  async function openRundownModal() {
+    setRundownModalOpen(true)
+    if (rundownTrips.length === 0) {
+      await loadRundownTrips()
+    }
+  }
+
+  async function createRundownDocFromTrip() {
+    const trip = rundownTrips.find((item) => item.id === selectedRundownTripId)
+    if (!trip) return
+
+    setRundownLoading(true)
+    const { data: shotsData, error } = await supabase
+      .from('shots')
+      .select('id, trip_id, seq, name, day, start_time, time_of_day, duration, platform, location')
+      .eq('trip_id', trip.id)
+      .order('seq', { ascending: true })
+
+    if (error) {
+      console.error('[Rundown] load shots failed:', error)
+      window.alert('載入場景失敗，請稍後再試。')
+      setRundownLoading(false)
+      return
+    }
+
+    const content = buildRundownContent(trip, (shotsData || []) as ShotRow[])
+    const response = await fetch('/api/docs', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        user_id: tommyUserId,
+        workspace_id: workspaceId || null,
+        title: `${trip.name || 'Untitled Trip'} - Rundown`,
+        type: 'rundown',
+        template_type: 'rundown',
+        content: JSON.stringify(content),
+        created_at: new Date().toISOString(),
+      }),
+    })
+
+    const result = await response.json().catch(() => ({}))
+    setRundownLoading(false)
+
+    if (!response.ok) {
+      window.alert(result.error || '建立 Rundown 文件失敗。')
+      return
+    }
+
+    const data = result.doc as CoreDoc
+    setRundownModalOpen(false)
+    notifyDocsChanged()
+    showToast('✅ Rundown 已儲存至文件中心')
+    openDoc(data, [data, ...docs])
   }
 
   function extractStoryboardScript(doc: CoreDoc) {
@@ -470,6 +654,11 @@ export function DocsCenter() {
   }
 
   async function createDoc(template: Template) {
+    if (template.type === 'rundown') {
+      await openRundownModal()
+      return
+    }
+
     const initialBrief = { ...defaultProjectBrief, language: getStoredBriefLanguage() }
     const initialConceptBoard = createEmptyConceptBoard(getStoredConceptLanguage())
     const initialYouTubeScript = createEmptyYouTubeScript(getStoredYouTubeScriptLanguage())
@@ -1206,6 +1395,19 @@ export function DocsCenter() {
     )
   }
 
+  if (selectedDoc && getDocKind(selectedDoc) === 'rundown') {
+    return (
+      <DashboardShell activeSection="docs">
+        <RundownViewer
+          doc={selectedDoc}
+          onBack={closeDoc}
+          logoBase64={documentLogoBase64}
+          companyName={documentCompanyName}
+        />
+      </DashboardShell>
+    )
+  }
+
   return (
     <DashboardShell activeSection="docs">
       <section className="docs-page">
@@ -1238,6 +1440,16 @@ export function DocsCenter() {
           )}
         />
 
+        <div style={{ position: 'relative', width: '100%', height: '12rem', borderRadius: '12px', overflow: 'hidden', margin: '0 28px 24px' }}>
+          <Image
+            src="/document-banner.jpg"
+            alt="文件中心"
+            fill
+            className="object-cover"
+            priority
+          />
+        </div>
+
         <div className="template-grid docs-template-grid">
           {docTemplates.map((template) => (
             <article key={template.type} className="template-card docs-template-card">
@@ -1261,7 +1473,39 @@ export function DocsCenter() {
         <section className="existing-docs-section">
           <h2>已有文件</h2>
           {toastMessage && <div className="docs-toast">{toastMessage}</div>}
-          <div className="doc-folder-panel">
+            <div className="doc-folder-panel">
+            <div style={{ display: 'flex', gap: '8px', marginBottom: '12px', flexWrap: 'wrap' }}>
+              <button
+                type="button"
+                onClick={() => setActiveDocTypeFilter('all')}
+                style={{
+                  background: activeDocTypeFilter === 'all' ? 'rgba(124,92,252,0.18)' : 'transparent',
+                  border: '1px solid #2a2a3a',
+                  borderRadius: '999px',
+                  color: '#f0f0f5',
+                  cursor: 'pointer',
+                  fontSize: '12px',
+                  padding: '6px 12px',
+                }}
+              >
+                全部 {workspaceDocs.length}
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveDocTypeFilter('rundown')}
+                style={{
+                  background: activeDocTypeFilter === 'rundown' ? 'rgba(14,165,233,0.18)' : 'transparent',
+                  border: '1px solid #0ea5e9',
+                  borderRadius: '999px',
+                  color: '#f0f0f5',
+                  cursor: 'pointer',
+                  fontSize: '12px',
+                  padding: '6px 12px',
+                }}
+              >
+                📋 場景表 {rundownDocCount}
+              </button>
+            </div>
             <div className="doc-folder-row-wrap">
               <button
                 className={activeFolderId === '' ? 'doc-folder-row active' : 'doc-folder-row'}
@@ -1339,6 +1583,7 @@ export function DocsCenter() {
             )}
             {visibleDocs.map((doc) => {
               const isChecked = selectedDocIds.includes(doc.id)
+              const docKind = getDocKind(doc)
               const rowClassName = [
                 'doc-row',
                 selectedDoc?.id === doc.id ? 'active' : '',
@@ -1358,10 +1603,10 @@ export function DocsCenter() {
                     onChange={(event) => toggleDocSelection(doc.id, event.target.checked)}
                   />
                 </label>
-                <span className="doc-row-icon">{templateIcons[doc.template_type ?? ''] ?? '📄'}</span>
+                <span className="doc-row-icon">{templateIcons[docKind] ?? '📄'}</span>
                 <strong>{doc.title}</strong>
                 <span className="doc-type-badge">
-                  {templateLabels[doc.template_type ?? ''] ?? doc.template_type ?? 'Document'}
+                  {templateLabels[docKind] ?? docKind ?? 'Document'}
                 </span>
                 <time>{new Date(doc.created_at).toLocaleDateString('zh-HK')}</time>
                 <div className="doc-row-actions">
@@ -1418,8 +1663,240 @@ export function DocsCenter() {
             <div className="empty-card">選擇或新建一份文件開始編輯</div>
           )}
         </section>
+
+        {rundownModalOpen && (
+          <>
+            <div
+              onClick={() => setRundownModalOpen(false)}
+              style={{
+                position: 'fixed',
+                inset: 0,
+                background: 'rgba(0,0,0,0.55)',
+                zIndex: 80,
+              }}
+            />
+            <div
+              style={{
+                position: 'fixed',
+                left: '50%',
+                top: '50%',
+                transform: 'translate(-50%, -50%)',
+                width: 'min(520px, calc(100vw - 40px))',
+                background: '#16161f',
+                border: '1px solid #2a2a3a',
+                borderRadius: '14px',
+                boxShadow: '0 24px 80px rgba(0,0,0,0.45)',
+                padding: '22px',
+                zIndex: 81,
+              }}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', gap: '16px', marginBottom: '18px' }}>
+                <div>
+                  <p style={{ margin: '0 0 4px', color: '#0ea5e9', fontSize: '12px', fontWeight: 600 }}>Shooting Rundown</p>
+                  <h2 style={{ margin: 0, color: '#f0f0f5', fontSize: '18px' }}>選擇行程建立場景表</h2>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setRundownModalOpen(false)}
+                  style={{ background: 'transparent', border: 'none', color: '#9090a8', cursor: 'pointer', fontSize: '22px' }}
+                >
+                  ×
+                </button>
+              </div>
+
+              <label style={{ display: 'block', color: '#f0f0f5', fontSize: '13px', fontWeight: 600, marginBottom: '8px' }}>
+                已有行程
+              </label>
+              <select
+                value={selectedRundownTripId}
+                onChange={(event) => setSelectedRundownTripId(event.target.value)}
+                style={{
+                  width: '100%',
+                  background: '#111118',
+                  border: '1px solid #2a2a3a',
+                  borderRadius: '8px',
+                  color: '#f0f0f5',
+                  padding: '10px 12px',
+                  fontSize: '13px',
+                  marginBottom: '16px',
+                }}
+              >
+                {rundownTrips.length === 0 && <option value="">未有行程</option>}
+                {rundownTrips.map((trip) => (
+                  <option key={trip.id} value={trip.id}>
+                    {trip.name || 'Untitled Trip'} · {new Date(trip.start_date).toLocaleDateString('zh-HK')}
+                  </option>
+                ))}
+              </select>
+
+              <button
+                type="button"
+                disabled={!selectedRundownTripId || rundownLoading}
+                onClick={() => void createRundownDocFromTrip()}
+                style={{
+                  width: '100%',
+                  background: '#0ea5e9',
+                  border: 'none',
+                  borderRadius: '8px',
+                  color: '#fff',
+                  cursor: selectedRundownTripId && !rundownLoading ? 'pointer' : 'not-allowed',
+                  fontSize: '13px',
+                  fontWeight: 600,
+                  opacity: selectedRundownTripId && !rundownLoading ? 1 : 0.55,
+                  padding: '11px 16px',
+                }}
+              >
+                {rundownLoading ? '建立中...' : '建立 Rundown 文件'}
+              </button>
+            </div>
+          </>
+        )}
       </section>
     </DashboardShell>
+  )
+}
+
+function parseRundownContent(content: string | null): RundownContent {
+  const fallback: RundownContent = {
+    type: 'rundown',
+    trip: { name: 'Shooting Rundown', date: '', total_shots: 0 },
+    shots: [],
+  }
+
+  if (!content) return fallback
+
+  try {
+    const parsed = JSON.parse(content) as Partial<RundownContent>
+    const shots = Array.isArray(parsed.shots)
+      ? parsed.shots.map((shot: any, index) => ({
+          seq: Number(shot.seq ?? index + 1),
+          name: String(shot.name ?? ''),
+          day: Number(shot.day ?? 0),
+          time: String(shot.time ?? '-'),
+          time_of_day: String(shot.time_of_day ?? ''),
+          duration: String(shot.duration ?? ''),
+          platform: String(shot.platform ?? ''),
+          location: String(shot.location ?? ''),
+        }))
+      : []
+
+    return {
+      type: 'rundown',
+      trip: {
+        name: parsed.trip?.name || 'Shooting Rundown',
+        date: parsed.trip?.date || '',
+        total_shots: Number(parsed.trip?.total_shots ?? shots.length),
+      },
+      shots,
+    }
+  } catch {
+    return fallback
+  }
+}
+
+function RundownViewer({
+  doc,
+  onBack,
+  logoBase64,
+  companyName,
+}: {
+  doc: CoreDoc
+  onBack: () => void
+  logoBase64: string
+  companyName: string
+}) {
+  const rundown = parseRundownContent(doc.content)
+
+  return (
+    <section className="brief-editor-page">
+      <div className="brief-toolbar">
+        <button type="button" onClick={onBack}>
+          ← 文件中心
+        </button>
+        <button type="button" onClick={() => window.print()}>
+          匯出 PDF
+        </button>
+      </div>
+
+      <article
+        className="soon-print-doc"
+        style={{
+          maxWidth: '980px',
+          margin: '0 auto 48px',
+          background: '#fff',
+          color: '#111',
+          borderRadius: '12px',
+          padding: '42px',
+          boxShadow: '0 24px 80px rgba(0,0,0,0.25)',
+        }}
+      >
+        <header style={{ display: 'flex', justifyContent: 'space-between', gap: '24px', marginBottom: '30px' }}>
+          <div>
+            {logoBase64 ? (
+              <img
+                src={logoBase64}
+                alt="Logo"
+                style={{ height: '72px', maxWidth: '220px', objectFit: 'contain', display: 'block' }}
+              />
+            ) : (
+              <strong style={{ display: 'block', fontSize: '18px', marginBottom: '10px' }}>
+                {companyName || 'SOON Studio'}
+              </strong>
+            )}
+            <p style={{ margin: '12px 0 0', fontSize: '12px', color: '#555' }}>Shooting Rundown</p>
+          </div>
+          <div style={{ textAlign: 'right' }}>
+            <h1 style={{ margin: 0, fontSize: '28px', lineHeight: 1.2 }}>{rundown.trip.name}</h1>
+            <p style={{ margin: '10px 0 0', fontSize: '13px', color: '#555' }}>
+              日期：{rundown.trip.date ? formatDate(rundown.trip.date) : '-'} · 場景數：{rundown.trip.total_shots}
+            </p>
+          </div>
+        </header>
+
+        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
+          <thead>
+            <tr>
+              {['#', '拍攝日', '時間', '片段名稱', '拍攝時段', '時長', '平台', '地點'].map((label) => (
+                <th
+                  key={label}
+                  style={{
+                    border: '1px solid #d4d4d8',
+                    background: '#f4f4f5',
+                    color: '#111',
+                    padding: '10px 8px',
+                    textAlign: 'left',
+                    fontWeight: 700,
+                  }}
+                >
+                  {label}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {rundown.shots.map((shot) => (
+              <tr key={`${shot.seq}-${shot.name}`}>
+                <td style={{ border: '1px solid #e4e4e7', padding: '9px 8px' }}>{shot.seq}</td>
+                <td style={{ border: '1px solid #e4e4e7', padding: '9px 8px' }}>D{(shot.day || 0) + 1}</td>
+                <td style={{ border: '1px solid #e4e4e7', padding: '9px 8px', whiteSpace: 'nowrap' }}>{shot.time}</td>
+                <td style={{ border: '1px solid #e4e4e7', padding: '9px 8px', fontWeight: 600 }}>{shot.name || '-'}</td>
+                <td style={{ border: '1px solid #e4e4e7', padding: '9px 8px' }}>{shot.time_of_day || '-'}</td>
+                <td style={{ border: '1px solid #e4e4e7', padding: '9px 8px' }}>{shot.duration || '-'}</td>
+                <td style={{ border: '1px solid #e4e4e7', padding: '9px 8px' }}>{shot.platform || '-'}</td>
+                <td style={{ border: '1px solid #e4e4e7', padding: '9px 8px' }}>{shot.location || '-'}</td>
+              </tr>
+            ))}
+            {rundown.shots.length === 0 && (
+              <tr>
+                <td colSpan={8} style={{ border: '1px solid #e4e4e7', padding: '24px', textAlign: 'center' }}>
+                  未有場景
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </article>
+    </section>
   )
 }
 

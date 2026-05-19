@@ -59,6 +59,7 @@ export interface CoreDoc {
   workspace_id: string | null
   folder_id?: string | null
   title: string
+  type?: string | null
   template_type: string | null
   content: string | null
   created_at: string

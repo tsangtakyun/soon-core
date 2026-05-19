@@ -2,13 +2,85 @@
 
 import { Suspense, useState } from 'react'
 
+import { useWorkspace } from '@/app/context/workspace-context'
 import { DashboardShell } from '@/components/DashboardShell'
 import PageHeader from '@/components/PageHeader'
+import { supabase } from '@/lib/supabase'
 
 const iframeHeight = 'calc(100vh - 48px - 73px - 184px)'
+const tommyUserId = 'bb3e47cc-90c8-4eac-a5ff-cabfcefb89ae'
+
+const durationMinutes: Record<string, number> = {
+  '30': 30,
+  '60': 60,
+  '120': 120,
+  '180': 180,
+  '240': 240,
+  '360': 360,
+  '30分': 30,
+  '1小時': 60,
+  '2小時': 120,
+  '3小時': 180,
+  '4小時': 240,
+  '半日': 360,
+}
+
+type TripRow = {
+  id: string
+  name: string | null
+  start_date: string
+  end_date: string | null
+}
+
+type ShotRow = {
+  id: string
+  trip_id: string
+  seq: number | null
+  name: string | null
+  day: number | null
+  start_time: string | null
+  time_of_day: string | null
+  duration: string | null
+  platform: string | null
+  location: string | null
+}
+
+function calcEndTime(startTime: string, duration: string | null) {
+  const minutesToAdd = (durationMinutes[duration || ''] ?? Number(duration || 0)) || 0
+  const [hours, minutes] = startTime.split(':').map(Number)
+  if (Number.isNaN(hours) || Number.isNaN(minutes)) return startTime
+
+  const total = hours * 60 + minutes + minutesToAdd
+  const endHours = Math.floor(total / 60) % 24
+  const endMinutes = total % 60
+  return `${String(endHours).padStart(2, '0')}:${String(endMinutes).padStart(2, '0')}`
+}
+
+function buildRundownContent(trip: TripRow, shots: ShotRow[]) {
+  return {
+    type: 'rundown',
+    trip: {
+      name: trip.name || 'Untitled Trip',
+      date: trip.start_date,
+      total_shots: shots.length,
+    },
+    shots: shots.map((shot, index) => ({
+      seq: shot.seq ?? index + 1,
+      name: shot.name || '',
+      day: shot.day ?? 0,
+      time: shot.start_time ? `${shot.start_time} - ${calcEndTime(shot.start_time, shot.duration)}` : '-',
+      time_of_day: shot.time_of_day || '',
+      duration: shot.duration || '',
+      platform: shot.platform || '',
+      location: shot.location || '',
+    })),
+  }
+}
 
 export default function SchedulePage() {
+  const { activeWorkspaceId } = useWorkspace()
   const [iframeError, setIframeError] = useState(false)
+  const [savingRundown, setSavingRundown] = useState(false)
 
   function openRundownPrint() {
     const params = new URLSearchParams()
@@ -20,6 +92,79 @@ export default function SchedulePage() {
     window.open(`https://prod-mgt.vercel.app?${params.toString()}`, '_blank', 'noopener,noreferrer')
   }
 
+  async function resolveTrip() {
+    const tripId = new URLSearchParams(window.location.search).get('tripId')
+
+    if (tripId) {
+      const { data, error } = await supabase
+        .from('trips')
+        .select('id, name, start_date, end_date')
+        .eq('id', tripId)
+        .maybeSingle()
+
+      if (error) throw error
+      if (data) return data as TripRow
+    }
+
+    const { data, error } = await supabase
+      .from('trips')
+      .select('id, name, start_date, end_date')
+      .eq('user_id', tommyUserId)
+      .order('start_date', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+
+    if (error) throw error
+    return (data ?? null) as TripRow | null
+  }
+
+  async function saveRundownToDocs() {
+    if (savingRundown) return
+
+    setSavingRundown(true)
+    try {
+      const trip = await resolveTrip()
+      if (!trip) {
+        window.alert('未有行程可以儲存。')
+        return
+      }
+
+      const { data: shotsData, error: shotsError } = await supabase
+        .from('shots')
+        .select('id, trip_id, seq, name, day, start_time, time_of_day, duration, platform, location')
+        .eq('trip_id', trip.id)
+        .order('seq', { ascending: true })
+
+      if (shotsError) throw shotsError
+
+      const content = buildRundownContent(trip, (shotsData || []) as ShotRow[])
+      const response = await fetch('/api/docs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user_id: tommyUserId,
+          workspace_id: activeWorkspaceId || null,
+          title: `${trip.name || 'Untitled Trip'} - Rundown`,
+          type: 'rundown',
+          template_type: 'rundown',
+          content: JSON.stringify(content),
+          created_at: new Date().toISOString(),
+        }),
+      })
+
+      const result = await response.json().catch(() => ({}))
+      if (!response.ok) throw new Error(result.error || 'Rundown 儲存失敗')
+
+      window.dispatchEvent(new Event('soon-data-updated'))
+      window.alert('✅ Rundown 已儲存至文件中心')
+    } catch (error) {
+      console.error('[Rundown] save failed:', error)
+      window.alert(error instanceof Error ? error.message : 'Rundown 儲存失敗，請重試。')
+    } finally {
+      setSavingRundown(false)
+    }
+  }
+
   return (
     <Suspense>
       <DashboardShell activeSection="schedule">
@@ -29,22 +174,42 @@ export default function SchedulePage() {
             title="行程中心"
             subtitle="管理拍攝行程同場景安排"
             actions={(
-              <button
-                type="button"
-                onClick={openRundownPrint}
-                style={{
-                  background: 'var(--soon-purple)',
-                  color: '#fff',
-                  border: 'none',
-                  borderRadius: 'var(--soon-radius)',
-                  fontSize: '13px',
-                  padding: '8px 16px',
-                  cursor: 'pointer',
-                  fontFamily: 'system-ui',
-                }}
-              >
-                匯出 Rundown
-              </button>
+              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                <button
+                  type="button"
+                  onClick={openRundownPrint}
+                  style={{
+                    background: 'transparent',
+                    color: '#0ea5e9',
+                    border: '1px solid #0ea5e9',
+                    borderRadius: 'var(--soon-radius)',
+                    fontSize: '13px',
+                    padding: '8px 16px',
+                    cursor: 'pointer',
+                    fontFamily: 'system-ui',
+                  }}
+                >
+                  🖨️ 列印 PDF
+                </button>
+                <button
+                  type="button"
+                  disabled={savingRundown}
+                  onClick={() => void saveRundownToDocs()}
+                  style={{
+                    background: 'var(--soon-purple)',
+                    color: '#fff',
+                    border: 'none',
+                    borderRadius: 'var(--soon-radius)',
+                    fontSize: '13px',
+                    padding: '8px 16px',
+                    cursor: savingRundown ? 'not-allowed' : 'pointer',
+                    fontFamily: 'system-ui',
+                    opacity: savingRundown ? 0.65 : 1,
+                  }}
+                >
+                  {savingRundown ? '儲存中...' : '💾 儲存至文件中心'}
+                </button>
+              </div>
             )}
           />
 
@@ -83,7 +248,7 @@ export default function SchedulePage() {
             >
               <p style={{ margin: 0, fontSize: '15px', fontWeight: 600 }}>行程中心載入失敗</p>
               <p style={{ margin: 0, fontSize: '13px', color: 'var(--soon-text-secondary)' }}>
-                請直接打開 prod-mgt.vercel.app，或重新整理頁面再試。
+                請直接開啟 prod-mgt.vercel.app，或者稍後再試。
               </p>
               <a
                 href="https://prod-mgt.vercel.app"
@@ -99,7 +264,7 @@ export default function SchedulePage() {
                   textDecoration: 'none',
                 }}
               >
-                打開行程中心
+                開啟行程中心
               </a>
             </div>
           ) : (
