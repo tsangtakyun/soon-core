@@ -56,8 +56,14 @@ export async function GET(request: Request) {
     return NextResponse.json({ docs: [], workspaces: [], folders: [], settings: null })
   }
 
-  const [docsResult, workspacesResult, foldersResult, settingsResult] = await Promise.all([
+  const [workspaceDocsResult, nullRundownDocsResult, workspacesResult, foldersResult, settingsResult] = await Promise.all([
     admin.from('docs').select('*').eq('workspace_id', workspaceId).order('created_at', { ascending: false }),
+    admin
+      .from('docs')
+      .select('*')
+      .is('workspace_id', null)
+      .eq('template_type', 'rundown')
+      .order('created_at', { ascending: false }),
     admin.from('workspaces').select('*').in('id', workspaceIds).order('created_at', { ascending: false }),
     admin.from('doc_folders').select('*').eq('workspace_id', workspaceId).order('created_at', { ascending: false }),
     admin
@@ -68,12 +74,23 @@ export async function GET(request: Request) {
       .maybeSingle(),
   ])
 
-  if (docsResult.error) return NextResponse.json({ error: docsResult.error.message }, { status: 500 })
+  if (workspaceDocsResult.error) return NextResponse.json({ error: workspaceDocsResult.error.message }, { status: 500 })
+  if (nullRundownDocsResult.error) return NextResponse.json({ error: nullRundownDocsResult.error.message }, { status: 500 })
   if (workspacesResult.error) return NextResponse.json({ error: workspacesResult.error.message }, { status: 500 })
   if (foldersResult.error) return NextResponse.json({ error: foldersResult.error.message }, { status: 500 })
 
+  const docsById = new Map<string, Record<string, unknown>>()
+  for (const doc of [...(workspaceDocsResult.data ?? []), ...(nullRundownDocsResult.data ?? [])]) {
+    docsById.set(String(doc.id), doc)
+  }
+  const docs = Array.from(docsById.values()).sort((a, b) => {
+    const left = typeof a.created_at === 'string' ? Date.parse(a.created_at) : 0
+    const right = typeof b.created_at === 'string' ? Date.parse(b.created_at) : 0
+    return right - left
+  })
+
   return NextResponse.json({
-    docs: docsResult.data ?? [],
+    docs,
     workspaces: workspacesResult.data ?? [],
     folders: foldersResult.data ?? [],
     settings: settingsResult.data ?? null,

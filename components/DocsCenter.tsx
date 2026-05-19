@@ -383,7 +383,13 @@ export function DocsCenter() {
   const copy = useMemo(() => briefCopy[projectBrief.language], [projectBrief.language])
   const hasDocSelection = selectedDocIds.length > 0
   const workspaceDocs = useMemo(
-    () => docs.filter((doc) => !workspaceId || doc.workspace_id === workspaceId),
+    () =>
+      docs.filter(
+        (doc) =>
+          !workspaceId ||
+          doc.workspace_id === workspaceId ||
+          (doc.workspace_id === null && doc.template_type === 'rundown')
+      ),
     [docs, workspaceId]
   )
   const visibleFolders = useMemo(
@@ -400,7 +406,7 @@ export function DocsCenter() {
     [activeDocTypeFilter, activeFolderId, workspaceDocs]
   )
   const allVisibleDocsSelected = visibleDocs.length > 0 && visibleDocs.every((doc) => selectedDocIds.includes(doc.id))
-  const rundownDocCount = workspaceDocs.filter((doc) => getDocKind(doc) === 'rundown').length
+  const rundownDocCount = workspaceDocs.filter((doc) => doc.template_type === 'rundown').length
 
   useEffect(() => {
     void load()
