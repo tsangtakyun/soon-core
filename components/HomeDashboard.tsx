@@ -164,20 +164,27 @@ export function HomeDashboard() {
             gap: '24px',
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
             {userLogo ? (
               <img
                 src={userLogo}
                 alt={displayName}
-                style={{ height: '40px', width: '40px', objectFit: 'contain', borderRadius: '8px' }}
+                style={{
+                  height: '64px',
+                  width: '64px',
+                  objectFit: 'contain',
+                  borderRadius: '12px',
+                  background: 'rgba(255,255,255,0.05)',
+                  padding: '4px',
+                }}
               />
             ) : (
-              <img src="/soon_core_logo.png" alt="SOON CORE" style={{ height: '40px', objectFit: 'contain' }} />
+              <img src="/soon_core_logo.png" alt="SOON CORE" style={{ height: '64px', objectFit: 'contain' }} />
             )}
             <div>
               <p
                 style={{
-                  fontSize: '11px',
+                  fontSize: '12px',
                   color: 'rgba(255,255,255,0.6)',
                   margin: '0 0 2px',
                   letterSpacing: '0.05em',
@@ -185,8 +192,8 @@ export function HomeDashboard() {
               >
                 SOON CORE
               </p>
-              <p style={{ fontSize: '20px', fontWeight: 700, color: 'white', margin: 0 }}>{displayName}</p>
-              <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.5)', margin: '2px 0 0' }}>
+              <p style={{ fontSize: '22px', fontWeight: 700, color: 'white', margin: 0 }}>{displayName}</p>
+              <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.5)', margin: '2px 0 0' }}>
                 {new Date().toLocaleDateString('zh-HK', { weekday: 'long', month: 'long', day: 'numeric' })}
               </p>
             </div>
