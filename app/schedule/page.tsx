@@ -117,7 +117,11 @@ export default function SchedulePage() {
   }
 
   async function saveRundownToDocs() {
-    if (savingRundown) return
+    console.log('[saveRundown] handler start')
+    if (savingRundown) {
+      console.log('[saveRundown] ignored: already saving')
+      return
+    }
 
     setSavingRundown(true)
     try {
@@ -127,15 +131,24 @@ export default function SchedulePage() {
         return
       }
 
+      console.log('[saveRundown] trip:', trip)
+
       const { data: shotsData, error: shotsError } = await supabase
         .from('shots')
         .select('id, trip_id, seq, name, day, start_time, time_of_day, duration, platform, location')
         .eq('trip_id', trip.id)
         .order('seq', { ascending: true })
 
-      if (shotsError) throw shotsError
+      if (shotsError) {
+        console.error('[saveRundown] shots error:', shotsError)
+        window.alert(`儲存失敗：${shotsError.message}`)
+        return
+      }
 
-      const rundownContent = buildRundownContent(trip, (shotsData || []) as ShotRow[])
+      const shots = (shotsData || []) as ShotRow[]
+      console.log('[saveRundown] trip:', trip, 'shots:', shots)
+
+      const rundownContent = buildRundownContent(trip, shots)
       const { error } = await supabase.from('docs').insert({
         workspace_id: null,
         title: `${trip.name || 'Untitled Trip'} - Rundown`,
@@ -188,7 +201,11 @@ export default function SchedulePage() {
                 <button
                   type="button"
                   disabled={savingRundown}
-                  onClick={() => void saveRundownToDocs()}
+                  onClick={(event) => {
+                    event.preventDefault()
+                    console.log('[saveRundown] button clicked')
+                    void saveRundownToDocs()
+                  }}
                   style={{
                     background: 'var(--soon-purple)',
                     color: '#fff',
