@@ -3,23 +3,22 @@ import { NextResponse } from 'next/server'
 import { createSupabaseAdmin } from '@/lib/supabase-admin'
 import { createSupabaseRouteClient } from '@/lib/supabase-route'
 
-const settingsUserId = 'tommy'
-
 export async function GET() {
   const supabase = await createSupabaseRouteClient()
   const {
-    data: { session },
-  } = await supabase.auth.getSession()
+    data: { user },
+  } = await supabase.auth.getUser()
 
-  if (!session?.user) {
+  if (!user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
+  const userId = user.id
   const admin = createSupabaseAdmin()
   const { data, error } = await admin
     .from('settings')
     .select('*')
-    .eq('user_id', settingsUserId)
+    .eq('user_id', userId)
     .maybeSingle()
 
   if (error) {
@@ -32,13 +31,14 @@ export async function GET() {
 export async function PATCH(request: Request) {
   const supabase = await createSupabaseRouteClient()
   const {
-    data: { session },
-  } = await supabase.auth.getSession()
+    data: { user },
+  } = await supabase.auth.getUser()
 
-  if (!session?.user) {
+  if (!user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
+  const userId = user.id
   const body = (await request.json()) as Record<string, unknown>
   const admin = createSupabaseAdmin()
   const { data, error } = await admin
@@ -46,7 +46,7 @@ export async function PATCH(request: Request) {
     .upsert(
       {
         ...body,
-        user_id: settingsUserId,
+        user_id: userId,
         updated_at: new Date().toISOString(),
       },
       { onConflict: 'user_id' }
