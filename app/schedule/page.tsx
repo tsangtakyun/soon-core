@@ -1,10 +1,10 @@
 'use client'
 
-import { createBrowserClient } from '@supabase/ssr'
 import { Suspense, useState, type MouseEvent } from 'react'
 
 import { DashboardShell } from '@/components/DashboardShell'
 import PageHeader from '@/components/PageHeader'
+import { supabase } from '@/lib/supabase'
 
 console.log('[schedule page] loaded, version 8fc25d3')
 
@@ -103,15 +103,9 @@ export default function SchedulePage() {
 
     setSavingRundown(true)
     try {
-      const scheduleSupabase = createBrowserClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-      )
-
-      const { data: trips, error: tripErr } = await scheduleSupabase
+      const { data: trips, error: tripErr } = await supabase
         .from('trips')
         .select('*')
-        .eq('status', 'active')
         .order('created_at', { ascending: false })
         .limit(1)
 
@@ -124,7 +118,7 @@ export default function SchedulePage() {
       const trip = trips[0] as TripRow
       console.log('[saveRundown] trip:', trip.name)
 
-      const { data: shots, error: shotsErr } = await scheduleSupabase
+      const { data: shots, error: shotsErr } = await supabase
         .from('shots')
         .select('*')
         .eq('trip_id', trip.id)
@@ -138,7 +132,7 @@ export default function SchedulePage() {
 
       console.log('[saveRundown] shots:', shots?.length)
 
-      const { error } = await scheduleSupabase.from('docs').insert({
+      const { error } = await supabase.from('docs').insert({
         workspace_id: null,
         title: `${trip.name || 'Untitled Trip'} - Rundown`,
         template_type: 'rundown',
