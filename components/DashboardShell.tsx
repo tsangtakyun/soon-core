@@ -80,6 +80,7 @@ export function DashboardShell({ activeSection, pipeline, tool, children }: Dash
   const [workspaces, setWorkspaces] = useState<Workspace[]>(readCachedWorkspaces)
   const [sidebarDataLoaded, setSidebarDataLoaded] = useState(() => readCachedWorkspaces().length > 0)
   const [projects, setProjects] = useState<Project[]>([])
+  const [workspaceProjectCounts, setWorkspaceProjectCounts] = useState<Record<string, number>>({})
   const [activeProject, setActiveProject] = useState<Project | null>(null)
   const [workspacePanel, setWorkspacePanel] = useState<Workspace | null>(null)
   const [workspaceEditMode, setWorkspaceEditMode] = useState(false)
@@ -293,6 +294,11 @@ export function DashboardShell({ activeSection, pipeline, tool, children }: Dash
       setWorkspaces(nextWorkspaces)
       window.localStorage.setItem(SIDEBAR_WORKSPACES_CACHE_KEY, JSON.stringify(nextWorkspaces))
     }
+    setWorkspaceProjectCounts(
+      projectsData?.workspace_counts && typeof projectsData.workspace_counts === 'object'
+        ? projectsData.workspace_counts
+        : {}
+    )
     setSidebarDataLoaded(true)
     setProjects((projectsData?.projects ?? []) as Project[])
     setSettingsProfile({
@@ -397,15 +403,8 @@ export function DashboardShell({ activeSection, pipeline, tool, children }: Dash
     if (deletedActiveWorkspace) router.push('/work')
   }
 
-  const projectCounts = useMemo(() => {
-    return projects.reduce<Record<string, number>>((counts, project) => {
-      if (project.workspace_id) counts[project.workspace_id] = (counts[project.workspace_id] ?? 0) + 1
-      return counts
-    }, {})
-  }, [projects])
-
   const iframeTitle = pipeline && tool ? `${pipeline.label} ${tool.label}` : ''
-  const selectedWorkspaceCount = workspacePanel ? projectCounts[workspacePanel.id] ?? 0 : 0
+  const selectedWorkspaceCount = workspacePanel ? workspaceProjectCounts[workspacePanel.id] ?? 0 : 0
   const sidebarName = authProfile?.name || settingsProfile.displayName
   const sidebarEmail = authProfile?.email || settingsProfile.companyName
   const sidebarAvatar = settingsProfile.logoBase64 || authProfile?.avatarUrl
@@ -711,7 +710,7 @@ export function DashboardShell({ activeSection, pipeline, tool, children }: Dash
                 >
                   <span>{workspace.type === 'ig' ? 'IG' : workspace.type === 'mixed' ? 'MX' : 'YT'}</span>
                   <strong>{workspace.name}</strong>
-                  <em>{projectCounts[workspace.id] ?? 0}</em>
+                  <em>{workspaceProjectCounts[workspace.id] ?? 0}</em>
                 </Link>
                 <button
                   className="workspace-menu-button"

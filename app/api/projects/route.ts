@@ -63,6 +63,8 @@ export async function GET(request: Request) {
     admin.from('workspaces').select('*').in('id', workspaceIds).order('created_at', { ascending: false }),
   ])
 
+  const countsResult = await admin.from('projects').select('workspace_id').in('workspace_id', workspaceIds)
+
   if (projectsResult.error) {
     return NextResponse.json({ error: projectsResult.error.message }, { status: 500 })
   }
@@ -71,9 +73,19 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: workspacesResult.error.message }, { status: 500 })
   }
 
+  if (countsResult.error) {
+    return NextResponse.json({ error: countsResult.error.message }, { status: 500 })
+  }
+
+  const workspaceCounts = (countsResult.data ?? []).reduce<Record<string, number>>((counts, project) => {
+    if (project.workspace_id) counts[project.workspace_id] = (counts[project.workspace_id] ?? 0) + 1
+    return counts
+  }, {})
+
   return NextResponse.json({
     projects: projectsResult.data ?? [],
     workspaces: workspacesResult.data ?? [],
+    workspace_counts: workspaceCounts,
   })
 }
 
