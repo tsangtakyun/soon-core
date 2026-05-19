@@ -224,7 +224,11 @@ export function SettingsPage() {
       supabase.from('reply_settings').select('*').eq('user_id', 'tommy'),
     ])
     const settingsPayload = await settingsResponse.json().catch(() => ({}))
-    if (settingsResponse.ok && settingsPayload.settings) setSettings(mergeQuotationSettings(settingsPayload.settings))
+    console.log('[Settings Page] GET settings:', settingsPayload.settings)
+    console.log('[Settings Page] has logo:', !!settingsPayload.settings?.logo_base64)
+    if (settingsResponse.ok && settingsPayload.settings) {
+      setSettings(mergeQuotationSettings(settingsPayload.settings))
+    }
 
     const nextReplySettings = {
       email: createReplySetting('email'),
@@ -523,7 +527,15 @@ export function SettingsPage() {
             <label>
               頭像 / Logo upload
               <div className="settings-logo-row">
-                {settings.logo_base64 ? <img src={settings.logo_base64} alt="" /> : <span className="settings-logo-placeholder">Logo</span>}
+                {settings.logo_base64 ? (
+                  <img
+                    src={settings.logo_base64}
+                    style={{ height: '48px', objectFit: 'contain', borderRadius: '8px' }}
+                    alt="Current logo"
+                  />
+                ) : (
+                  <span className="settings-logo-placeholder">Logo</span>
+                )}
                 <input type="file" accept="image/*" onChange={(event) => readImage(event, (value) => update('logo_base64', value))} />
               </div>
             </label>
@@ -551,7 +563,15 @@ export function SettingsPage() {
             <label>
               公司 Logo upload
               <div className="settings-logo-row">
-                {settings.logo_base64 ? <img src={settings.logo_base64} alt="" /> : <span className="settings-logo-placeholder">Logo</span>}
+                {settings.logo_base64 ? (
+                  <img
+                    src={settings.logo_base64}
+                    style={{ height: '48px', objectFit: 'contain', borderRadius: '8px' }}
+                    alt="Current logo"
+                  />
+                ) : (
+                  <span className="settings-logo-placeholder">Logo</span>
+                )}
                 <input type="file" accept="image/*" onChange={(event) => readImage(event, (value) => update('logo_base64', value))} />
               </div>
             </label>

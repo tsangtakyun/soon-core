@@ -21,6 +21,11 @@ export async function GET() {
     .eq('user_id', userId)
     .maybeSingle()
 
+  console.log('[Settings GET] user.id:', user.id)
+  console.log('[Settings GET] data keys:', data ? Object.keys(data) : null)
+  console.log('[Settings GET] has logo:', !!data?.logo_base64)
+  console.log('[Settings GET] error:', error)
+
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
