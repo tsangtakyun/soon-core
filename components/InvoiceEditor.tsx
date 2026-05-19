@@ -249,7 +249,8 @@ export function InvoiceEditor({ doc, onBack, onSaved }: Props) {
       })
       .eq('id', doc.id)
       .select()
-      .single()
+      .limit(1)
+      .maybeSingle()
     if (error) {
       window.alert(error.message)
       return

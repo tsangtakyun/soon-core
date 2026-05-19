@@ -85,7 +85,8 @@ export function BlankDocumentEditor({ doc, onBack, onSaved }: Props) {
       .update({ title, content: JSON.stringify(nextContent) })
       .eq('id', doc.id)
       .select()
-      .single()
+      .limit(1)
+      .maybeSingle()
     if (error) {
       if (showIndicator) window.alert(error.message)
       return

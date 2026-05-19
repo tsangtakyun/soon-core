@@ -182,7 +182,8 @@ export function QuotationEditor({ doc, onBack, onSaved }: Props) {
       .update({ title: quote.quoteNumber || 'Quotation', content: JSON.stringify(payload) })
       .eq('id', doc.id)
       .select()
-      .single()
+      .limit(1)
+      .maybeSingle()
     if (error) {
       window.alert(error.message)
       return
