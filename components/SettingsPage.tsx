@@ -182,6 +182,8 @@ const panelDisplay: Record<PanelKey, { title: string; subtitle: string; label: s
 
 export function SettingsPage() {
   const [settings, setSettings] = useState<QuotationSettings>(defaultQuotationSettings)
+  const [savedLogo, setSavedLogo] = useState('')
+  const [newLogoFile, setNewLogoFile] = useState('')
   const [activePanel, setActivePanel] = useState<PanelKey>('user')
   const [navCollapsed, setNavCollapsed] = useState<Record<NavGroupKey, boolean>>(defaultNavCollapsed)
   const [saved, setSaved] = useState(false)
@@ -228,6 +230,8 @@ export function SettingsPage() {
     console.log('[Settings Page] has logo:', !!settingsPayload.settings?.logo_base64)
     if (settingsResponse.ok && settingsPayload.settings) {
       setSettings(mergeQuotationSettings(settingsPayload.settings))
+      setSavedLogo(String(settingsPayload.settings.logo_base64 ?? ''))
+      setNewLogoFile('')
     }
 
     const nextReplySettings = {
@@ -361,6 +365,13 @@ export function SettingsPage() {
     })
   }
 
+  function uploadLogo(event: ChangeEvent<HTMLInputElement>) {
+    readImage(event, (value) => {
+      setNewLogoFile(value)
+      update('logo_base64', value)
+    })
+  }
+
   function pointerPosition(event: PointerEvent<HTMLCanvasElement>) {
     const rect = event.currentTarget.getBoundingClientRect()
     return { x: event.clientX - rect.left, y: event.clientY - rect.top }
@@ -414,7 +425,11 @@ export function SettingsPage() {
       window.alert(payload.error || '儲存設定失敗')
       return false
     }
-    if (payload.settings) setSettings(mergeQuotationSettings(payload.settings))
+    if (payload.settings) {
+      setSettings(mergeQuotationSettings(payload.settings))
+      setSavedLogo(String(payload.settings.logo_base64 ?? ''))
+      setNewLogoFile('')
+    }
     window.dispatchEvent(new Event('soon-data-updated'))
     return true
   }
@@ -453,6 +468,7 @@ export function SettingsPage() {
   }
 
   const meta = panelDisplay[activePanel] ?? panelMeta[activePanel]
+  const displayLogo = newLogoFile || savedLogo
 
   return (
     <DashboardShell activeSection="settings">
@@ -527,16 +543,8 @@ export function SettingsPage() {
             <label>
               頭像 / Logo upload
               <div className="settings-logo-row">
-                {settings.logo_base64 ? (
-                  <img
-                    src={settings.logo_base64}
-                    style={{ height: '48px', objectFit: 'contain', borderRadius: '8px' }}
-                    alt="Current logo"
-                  />
-                ) : (
-                  <span className="settings-logo-placeholder">Logo</span>
-                )}
-                <input type="file" accept="image/*" onChange={(event) => readImage(event, (value) => update('logo_base64', value))} />
+                {renderLogoPreview(displayLogo)}
+                <input type="file" accept="image/*" onChange={uploadLogo} />
               </div>
             </label>
           </>
@@ -563,16 +571,8 @@ export function SettingsPage() {
             <label>
               公司 Logo upload
               <div className="settings-logo-row">
-                {settings.logo_base64 ? (
-                  <img
-                    src={settings.logo_base64}
-                    style={{ height: '48px', objectFit: 'contain', borderRadius: '8px' }}
-                    alt="Current logo"
-                  />
-                ) : (
-                  <span className="settings-logo-placeholder">Logo</span>
-                )}
-                <input type="file" accept="image/*" onChange={(event) => readImage(event, (value) => update('logo_base64', value))} />
+                {renderLogoPreview(displayLogo)}
+                <input type="file" accept="image/*" onChange={uploadLogo} />
               </div>
             </label>
           </>
@@ -858,6 +858,42 @@ export function SettingsPage() {
         )
     }
   }
+}
+
+function renderLogoPreview(displayLogo: string) {
+  if (!displayLogo) {
+    return (
+      <div
+        style={{
+          width: '48px',
+          height: '48px',
+          background: '#2a2a3a',
+          borderRadius: '8px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontSize: '11px',
+          color: '#5a5a72',
+        }}
+      >
+        Logo
+      </div>
+    )
+  }
+
+  return (
+    <img
+      src={displayLogo}
+      alt="Logo preview"
+      style={{
+        height: '48px',
+        objectFit: 'contain',
+        borderRadius: '8px',
+        background: 'rgba(255,255,255,0.05)',
+        padding: '4px',
+      }}
+    />
+  )
 }
 
 function ReplyPanel({
