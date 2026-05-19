@@ -426,7 +426,7 @@ function buildWordHtml(content: AcceptanceContent, settings: SettingsSnapshot, t
   ].map(([label, value]) => `<tr><th>${escapeHtml(label)}</th><td>${escapeHtml(value)}</td></tr>`).join('')
   const signature = settings.signatureBase64 ? `<img src="${settings.signatureBase64}" style="max-width:240px;max-height:100px">` : ''
   return `<html><head><meta charset="utf-8"><style>body{font-family:Arial,sans-serif;margin:40px;color:#1a1a1a}h1{text-align:center;text-decoration:underline;font-size:20px}table{border-collapse:collapse;width:100%;margin:20px 0}th,td{border:1px solid #1a1a1a;padding:8px 12px;font-size:13px;text-align:left}th{width:200px;background:#f9f9f9}.legal{font-size:12px;color:#555;font-style:italic;white-space:pre-wrap}.sig{display:grid;grid-template-columns:1fr 1fr;gap:48px;margin-top:48px}.line{border-top:1px solid #1a1a1a;margin:28px 0 10px}</style></head><body>
-${settings.logoBase64 ? `<img src="${settings.logoBase64}" style="height:96px;max-width:200px;object-fit:contain;border-radius:4px;display:block">` : `<strong>${escapeHtml(settings.companyName)}</strong>`}
+${settings.logoBase64 ? `<img src="${settings.logoBase64}" style="height:96px;max-width:240px;object-fit:contain;display:block">` : `<strong>${escapeHtml(settings.companyName)}</strong>`}
 <h1>${escapeHtml(content.title)}</h1>
 <p><strong>${t.post}:</strong> ${escapeHtml(content.post)}<br><strong>${t.date}:</strong> ${content.date}<br><strong>${t.rate}:</strong> ${escapeHtml(ratePreview)}</p>
 <table>${rows}</table>

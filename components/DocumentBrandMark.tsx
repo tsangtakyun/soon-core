@@ -11,9 +11,8 @@ export function DocumentBrandMark({ logoBase64, companyName }: DocumentBrandMark
         alt="Logo"
         style={{
           height: '96px',
-          maxWidth: '200px',
+          maxWidth: '240px',
           objectFit: 'contain',
-          borderRadius: '4px',
           display: 'block',
         }}
       />

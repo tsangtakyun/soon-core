@@ -2915,19 +2915,20 @@ textarea:disabled {
   width: 80px;
   height: 80px;
   place-items: center;
-  border-radius: 8px;
-  background: #eeeeee;
+  border: none;
+  border-radius: 2px;
+  background: transparent;
+  padding: 0;
   color: #888;
   cursor: pointer;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .invoice-logo img {
   width: auto;
   height: 96px;
-  max-width: 200px;
+  max-width: 240px;
   object-fit: contain;
-  border-radius: 4px;
   display: block;
 }
 
@@ -3511,9 +3512,8 @@ textarea:disabled {
 .doc-logo-area img {
   display: block;
   height: 96px;
-  max-width: 200px;
+  max-width: 240px;
   object-fit: contain;
-  border-radius: 4px;
   object-position: left center;
 }
 
@@ -4592,9 +4592,8 @@ textarea:disabled {
 .campaign-company-logo {
   display: block;
   height: 96px;
-  max-width: 200px;
+  max-width: 240px;
   object-fit: contain;
-  border-radius: 4px;
   object-position: left center;
   margin-bottom: 16px;
 }
@@ -5010,9 +5009,8 @@ textarea:disabled {
 .acceptance-logo {
   display: block;
   height: 96px;
-  max-width: 200px;
+  max-width: 240px;
   object-fit: contain;
-  border-radius: 4px;
   object-position: left center;
   margin-bottom: 20px;
 }
