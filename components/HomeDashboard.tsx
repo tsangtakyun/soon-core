@@ -1,20 +1,33 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import { DashboardShell } from '@/components/DashboardShell'
-import PageHeader from '@/components/PageHeader'
-import { CategoryTag, PipelineProgress, StatusBadge } from '@/components/StatusBadge'
 import { getPipelinePath, getProjectPipeline } from '@/lib/pipelines'
 import { supabase } from '@/lib/supabase'
-import type { Project, Workspace } from '@/lib/types'
+import type { Project } from '@/lib/types'
+
+type IdeaPreview = {
+  id: string
+  title: string
+  viral_score: number | null
+  country?: string | null
+  tags?: string[] | null
+}
+
+type YoutubeSignalPreview = {
+  id: string
+  topic_zh: string | null
+  max_outlier_ratio: number | null
+  signal_count?: number | null
+}
 
 export function HomeDashboard() {
   const router = useRouter()
   const [projects, setProjects] = useState<Project[]>([])
-  const [workspaces, setWorkspaces] = useState<Workspace[]>([])
   const [displayName, setDisplayName] = useState('User')
+  const [userId, setUserId] = useState('')
   const today = new Date().toISOString().slice(0, 10)
 
   useEffect(() => {
@@ -22,16 +35,16 @@ export function HomeDashboard() {
   }, [])
 
   async function load() {
-    const [{ data: projectData }, { data: workspaceData }, { data: authData }] = await Promise.all([
+    const [{ data: projectData }, { data: authData }] = await Promise.all([
       supabase.from('projects').select('*').order('created_at', { ascending: false }),
-      supabase.from('workspaces').select('*').order('created_at', { ascending: false }),
       supabase.auth.getUser(),
     ])
 
     setProjects((projectData ?? []) as Project[])
-    setWorkspaces((workspaceData ?? []) as Workspace[])
 
     const user = authData?.user
+    setUserId(user?.id ?? '')
+
     const name =
       user?.user_metadata?.display_name ||
       user?.user_metadata?.full_name ||
@@ -52,166 +65,285 @@ export function HomeDashboard() {
     router.push(getPipelinePath(pipeline, project.pipeline_step))
   }
 
-  const recent = [...projects]
+  const recentProjects = [...projects]
     .sort((a, b) => Date.parse(b.last_visited_at ?? b.created_at) - Date.parse(a.last_visited_at ?? a.created_at))
     .slice(0, 4)
 
-  const inProgress = projects
-    .filter((project) => project.status !== '7. 已出片')
+  const inProgressProjects = projects
+    .filter((project) => !project.status?.includes('完成') && !project.status?.startsWith('7.'))
     .sort((a, b) => (a.shoot_date ?? '9999-12-31').localeCompare(b.shoot_date ?? '9999-12-31'))
+    .slice(0, 4)
 
-  const workspaceCounts = useMemo(() => {
-    return workspaces.map((workspace) => ({
-      ...workspace,
-      count: projects.filter((project) => project.workspace_id === workspace.id).length,
-    }))
-  }, [projects, workspaces])
-
-  const todayTodos = projects.filter((project) => project.shoot_date === today)
-  const greeting = getGreeting()
+  const todayProjects = projects.filter((project) => project.shoot_date === today)
 
   return (
     <DashboardShell activeSection="home">
-      <PageHeader icon="🏠" title="首頁" subtitle="快速存取你最近嘅項目同工作區域" />
-      <div style={{
-        background: 'linear-gradient(135deg, rgba(124,92,252,0.1) 0%, rgba(14,165,233,0.05) 100%)',
-        border: '1px solid #2a2a3a',
-        borderRadius: '16px',
-        padding: '32px',
-        marginBottom: '24px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        gap: '24px',
-      }}>
-        <div>
-          <p style={{ fontSize: '12px', color: '#7c5cfc', fontWeight: 500, margin: '0 0 8px', letterSpacing: '0.05em' }}>
-            開始創作
-          </p>
-          <h2 style={{ fontSize: '20px', fontWeight: 700, color: '#f0f0f5', margin: '0 0 8px' }}>
-            你今日想做咩？
-          </h2>
-          <p style={{ fontSize: '13px', color: '#9090a8', margin: 0 }}>
-            選擇創作類型，由題材收集到劇本生成，一站完成。
-          </p>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <img src="/soon_core_logo.png" alt="SOON CORE" style={{ height: '36px', objectFit: 'contain' }} />
+          <div>
+            <p style={{ fontSize: '11px', color: '#5a5a72', margin: 0 }}>SOON CORE</p>
+            <p style={{ fontSize: '15px', fontWeight: 600, color: '#f0f0f5', margin: 0 }}>
+              {displayName}
+            </p>
+          </div>
         </div>
-        <div style={{ display: 'flex', gap: '12px', flexShrink: 0 }}>
-          <button
-            type="button"
-            onClick={() => router.push('/ig/idea')}
-            style={{
-              background: '#7c5cfc',
-              color: 'white',
-              border: 'none',
-              borderRadius: '10px',
-              padding: '14px 24px',
-              fontSize: '14px',
-              fontWeight: 600,
-              cursor: 'pointer',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: '4px',
-            }}
-          >
-            <span style={{ fontSize: '20px' }}>📱</span>
-            <span>IG Reel</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => router.push('/youtube/idea')}
-            style={{
-              background: '#0ea5e9',
-              color: 'white',
-              border: 'none',
-              borderRadius: '10px',
-              padding: '14px 24px',
-              fontSize: '14px',
-              fontWeight: 600,
-              cursor: 'pointer',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: '4px',
-            }}
-          >
-            <span style={{ fontSize: '20px' }}>▶️</span>
-            <span>YouTube</span>
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={() => router.push('/settings')}
+          style={{
+            background: 'transparent',
+            border: '1px solid #2a2a3a',
+            color: '#9090a8',
+            borderRadius: '8px',
+            padding: '8px 14px',
+            fontSize: '12px',
+            cursor: 'pointer',
+          }}
+        >
+          ⚙️ 設定
+        </button>
       </div>
-      <div className="home-grid">
-        <section className="home-main">
-          <div className="hero-block">
-            <h1>{greeting}，{displayName}！</h1>
-            <p>今日可以由最近項目開始，或者直接進入工作區。</p>
+
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+        <section style={{ background: '#16161f', border: '1px solid #2a2a3a', borderRadius: '12px', padding: '20px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+            <p style={{ fontSize: '14px', fontWeight: 600, color: '#f0f0f5', margin: 0 }}>📊 發掘趨勢</p>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <button
+                type="button"
+                onClick={() => router.push('/ig/idea')}
+                style={{ fontSize: '11px', padding: '4px 10px', borderRadius: '6px', border: '1px solid #7c5cfc', color: '#7c5cfc', background: 'transparent', cursor: 'pointer' }}
+              >
+                IG
+              </button>
+              <button
+                type="button"
+                onClick={() => router.push('/youtube/idea')}
+                style={{ fontSize: '11px', padding: '4px 10px', borderRadius: '6px', border: '1px solid #0ea5e9', color: '#0ea5e9', background: 'transparent', cursor: 'pointer' }}
+              >
+                YouTube
+              </button>
+            </div>
           </div>
 
-          <section className="dashboard-section">
-            <div className="section-heading">
-              <h2>最近項目</h2>
-            </div>
-            <div className="project-card-grid">
-              {recent.map((project) => (
-                <button key={project.id} className="project-card" type="button" onClick={() => void openProject(project)}>
-                  <div className="card-title">{project.title}</div>
-                  <StatusBadge status={project.status} />
-                  <PipelineProgress step={project.pipeline_step} />
-                  <CategoryTag category={project.category} />
-                </button>
-              ))}
-              {recent.length === 0 && <div className="empty-card">未有最近項目</div>}
-            </div>
-          </section>
+          <p style={{ fontSize: '11px', color: '#5a5a72', margin: '0 0 8px', fontWeight: 500 }}>IG REEL 熱門題材</p>
+          <IgTrendPreview userId={userId} />
 
-          <section className="dashboard-section">
-            <div className="section-heading">
-              <h2>進行中</h2>
-            </div>
-            <div className="compact-list">
-              {inProgress.map((project) => (
-                <button key={project.id} type="button" onClick={() => void openProject(project)}>
-                  <span>{project.title}</span>
-                  <StatusBadge status={project.status} />
-                  <em>{project.shoot_date ?? '未定日期'}</em>
-                </button>
-              ))}
-              {inProgress.length === 0 && <div className="empty-card">暫時無進行中項目</div>}
-            </div>
-          </section>
+          <div style={{ height: '1px', background: '#2a2a3a', margin: '16px 0' }} />
+
+          <p style={{ fontSize: '11px', color: '#5a5a72', margin: '0 0 8px', fontWeight: 500 }}>YOUTUBE 話題信號</p>
+          <YoutubeTrendPreview />
         </section>
 
-        <aside className="home-side">
-          <section className="side-card">
-            <h2>工作區概覽</h2>
-            {workspaceCounts.map((workspace) => (
-              <div key={workspace.id} className="side-row">
-                <span>{workspace.name}</span>
-                <strong>{workspace.count}</strong>
-              </div>
-            ))}
-            {workspaceCounts.length === 0 && <p className="muted">未有工作區</p>}
-          </section>
+        <section style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <div style={{ background: '#16161f', border: '1px solid #2a2a3a', borderRadius: '12px', padding: '20px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+              <p style={{ fontSize: '14px', fontWeight: 600, color: '#f0f0f5', margin: 0 }}>📋 最近工作</p>
+              <button
+                type="button"
+                onClick={() => router.push('/work')}
+                style={{ fontSize: '11px', color: '#9090a8', background: 'transparent', border: 'none', cursor: 'pointer' }}
+              >
+                查看全部 →
+              </button>
+            </div>
 
-          <section className="side-card">
-            <h2>今日待辦</h2>
-            {todayTodos.map((project) => (
-              <div key={project.id} className="todo-item">
-                <span>{project.title}</span>
-                <em>{project.current_stage}</em>
+            {recentProjects.length === 0 ? (
+              <p style={{ fontSize: '12px', color: '#5a5a72', textAlign: 'center', padding: '16px 0', margin: 0 }}>未有最近項目</p>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column' }}>
+                {recentProjects.map((project, index) => (
+                  <button
+                    key={project.id}
+                    type="button"
+                    onClick={() => void openProject(project)}
+                    style={{
+                      padding: '10px 0',
+                      border: 'none',
+                      borderBottom: index === recentProjects.length - 1 ? 'none' : '1px solid #2a2a3a',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      gap: '16px',
+                      background: 'transparent',
+                      cursor: 'pointer',
+                      textAlign: 'left',
+                    }}
+                  >
+                    <p style={{ fontSize: '13px', color: '#f0f0f5', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{project.title}</p>
+                    <span style={{ fontSize: '11px', color: '#5a5a72', flexShrink: 0 }}>{project.status || '進行中'}</span>
+                  </button>
+                ))}
               </div>
-            ))}
-            {todayTodos.length === 0 && <p className="muted">今日未有拍攝事項</p>}
-          </section>
-        </aside>
+            )}
+          </div>
+
+          <div style={{ background: '#16161f', border: '1px solid #2a2a3a', borderRadius: '12px', padding: '20px' }}>
+            <p style={{ fontSize: '14px', fontWeight: 600, color: '#f0f0f5', margin: '0 0 12px' }}>📅 今日拍攝</p>
+            {todayProjects.length === 0 ? (
+              <p style={{ fontSize: '12px', color: '#5a5a72', textAlign: 'center', padding: '8px 0', margin: 0 }}>今日未有拍攝事項</p>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column' }}>
+                {todayProjects.map((project, index) => (
+                  <button
+                    key={project.id}
+                    type="button"
+                    onClick={() => void openProject(project)}
+                    style={{
+                      padding: '8px 0',
+                      border: 'none',
+                      borderBottom: index === todayProjects.length - 1 ? 'none' : '1px solid #2a2a3a',
+                      background: 'transparent',
+                      cursor: 'pointer',
+                      textAlign: 'left',
+                    }}
+                  >
+                    <p style={{ fontSize: '13px', color: '#f0f0f5', margin: 0 }}>{project.title}</p>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div style={{ background: '#16161f', border: '1px solid #2a2a3a', borderRadius: '12px', padding: '20px' }}>
+            <p style={{ fontSize: '14px', fontWeight: 600, color: '#f0f0f5', margin: '0 0 12px' }}>⚡ 進行中</p>
+            {inProgressProjects.length === 0 ? (
+              <p style={{ fontSize: '12px', color: '#5a5a72', textAlign: 'center', padding: '8px 0', margin: 0 }}>暫時無進行中項目</p>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column' }}>
+                {inProgressProjects.map((project, index) => (
+                  <button
+                    key={project.id}
+                    type="button"
+                    onClick={() => void openProject(project)}
+                    style={{
+                      padding: '8px 0',
+                      border: 'none',
+                      borderBottom: index === inProgressProjects.length - 1 ? 'none' : '1px solid #2a2a3a',
+                      background: 'transparent',
+                      cursor: 'pointer',
+                      textAlign: 'left',
+                    }}
+                  >
+                    <p style={{ fontSize: '13px', color: '#f0f0f5', margin: 0 }}>{project.title}</p>
+                    <span style={{ fontSize: '11px', color: '#5a5a72' }}>{project.shoot_date ?? '未定日期'}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </section>
       </div>
     </DashboardShell>
   )
 }
 
-function getGreeting() {
-  const hour = new Date().getHours()
-  if (hour < 12) return '早安'
-  if (hour < 18) return '午安'
-  return '晚上好'
+function IgTrendPreview({ userId }: { userId: string }) {
+  const router = useRouter()
+  const [ideas, setIdeas] = useState<IdeaPreview[]>([])
+
+  useEffect(() => {
+    if (!userId) {
+      setIdeas([])
+      return
+    }
+
+    void supabase
+      .from('ideas')
+      .select('id, title, viral_score, country, tags')
+      .eq('user_id', userId)
+      .order('viral_score', { ascending: false })
+      .limit(3)
+      .then(({ data }) => setIdeas((data ?? []) as IdeaPreview[]))
+  }, [userId])
+
+  if (ideas.length === 0) {
+    return (
+      <p style={{ fontSize: '12px', color: '#5a5a72', textAlign: 'center', padding: '12px 0', margin: 0 }}>
+        未有題材，去 IG Idea 收集
+      </p>
+    )
+  }
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+      {ideas.map((idea) => (
+        <button
+          key={idea.id}
+          type="button"
+          onClick={() => router.push('/ig/idea')}
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            padding: '10px 12px',
+            background: '#111118',
+            borderRadius: '8px',
+            border: '1px solid #2a2a3a',
+            cursor: 'pointer',
+            textAlign: 'left',
+          }}
+        >
+          <p style={{ fontSize: '13px', color: '#f0f0f5', margin: 0, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            {idea.title}
+          </p>
+          <span style={{ fontSize: '12px', fontWeight: 600, color: '#7c5cfc', marginLeft: '8px', flexShrink: 0 }}>
+            {idea.viral_score ?? 0}
+          </span>
+        </button>
+      ))}
+    </div>
+  )
+}
+
+function YoutubeTrendPreview() {
+  const router = useRouter()
+  const [signals, setSignals] = useState<YoutubeSignalPreview[]>([])
+
+  useEffect(() => {
+    void supabase
+      .from('topic_signals')
+      .select('id, topic_zh, max_outlier_ratio, signal_count')
+      .order('max_outlier_ratio', { ascending: false })
+      .limit(3)
+      .then(({ data }) => setSignals((data ?? []) as YoutubeSignalPreview[]))
+  }, [])
+
+  if (signals.length === 0) {
+    return (
+      <p style={{ fontSize: '12px', color: '#5a5a72', textAlign: 'center', padding: '12px 0', margin: 0 }}>
+        未有信號，去 YouTube Idea 搜掘
+      </p>
+    )
+  }
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+      {signals.map((signal) => (
+        <button
+          key={signal.id}
+          type="button"
+          onClick={() => router.push('/youtube/idea')}
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            padding: '10px 12px',
+            background: '#111118',
+            borderRadius: '8px',
+            border: '1px solid #2a2a3a',
+            cursor: 'pointer',
+            textAlign: 'left',
+          }}
+        >
+          <p style={{ fontSize: '13px', color: '#f0f0f5', margin: 0, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            {signal.topic_zh || '未命名話題'}
+          </p>
+          <span style={{ fontSize: '12px', fontWeight: 600, color: '#0ea5e9', marginLeft: '8px', flexShrink: 0 }}>
+            {Number(signal.max_outlier_ratio ?? 0).toFixed(1)}x
+          </span>
+        </button>
+      ))}
+    </div>
+  )
 }
