@@ -23,11 +23,40 @@ type YoutubeSignalPreview = {
   signal_count?: number | null
 }
 
+function InstagramIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" style={{ display: 'block' }}>
+      <defs>
+        <linearGradient id="soon-home-instagram" x1="4" x2="20" y1="20" y2="4" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#feda75" />
+          <stop offset="0.3" stopColor="#fa7e1e" />
+          <stop offset="0.55" stopColor="#d62976" />
+          <stop offset="0.8" stopColor="#962fbf" />
+          <stop offset="1" stopColor="#4f5bd5" />
+        </linearGradient>
+      </defs>
+      <rect x="3" y="3" width="18" height="18" rx="5" fill="url(#soon-home-instagram)" />
+      <circle cx="12" cy="12" r="4" fill="none" stroke="white" strokeWidth="1.8" />
+      <circle cx="17" cy="7" r="1.2" fill="white" />
+    </svg>
+  )
+}
+
+function YouTubeIcon() {
+  return (
+    <svg width="22" height="20" viewBox="0 0 28 20" aria-hidden="true" style={{ display: 'block' }}>
+      <rect width="28" height="20" rx="5" fill="#ff0033" />
+      <path d="M11 6.2v7.6L18 10z" fill="white" />
+    </svg>
+  )
+}
+
 export function HomeDashboard() {
   const router = useRouter()
   const [projects, setProjects] = useState<Project[]>([])
   const [displayName, setDisplayName] = useState('User')
   const [userId, setUserId] = useState('')
+  const [userLogo, setUserLogo] = useState('')
   const today = new Date().toISOString().slice(0, 10)
 
   useEffect(() => {
@@ -52,6 +81,18 @@ export function HomeDashboard() {
       user?.email?.split('@')[0] ||
       'User'
     setDisplayName(name)
+
+    if (user?.id) {
+      const { data: settings } = await supabase
+        .from('settings')
+        .select('logo_base64, company_name')
+        .eq('user_id', user.id)
+        .maybeSingle()
+
+      if (settings?.logo_base64) {
+        setUserLogo(settings.logo_base64)
+      }
+    }
   }
 
   async function openProject(project: Project) {
@@ -120,7 +161,15 @@ export function HomeDashboard() {
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-            <img src="/soon_core_logo.png" alt="SOON CORE" style={{ height: '40px', objectFit: 'contain' }} />
+            {userLogo ? (
+              <img
+                src={userLogo}
+                alt={displayName}
+                style={{ height: '40px', width: '40px', objectFit: 'contain', borderRadius: '8px' }}
+              />
+            ) : (
+              <img src="/soon_core_logo.png" alt="SOON CORE" style={{ height: '40px', objectFit: 'contain' }} />
+            )}
             <div>
               <p
                 style={{
@@ -144,7 +193,7 @@ export function HomeDashboard() {
               type="button"
               onClick={() => router.push('/ig/idea')}
               style={{
-                background: 'rgba(124,92,252,0.8)',
+                background: 'rgba(193,53,132,0.8)',
                 backdropFilter: 'blur(8px)',
                 color: 'white',
                 border: 'none',
@@ -159,14 +208,14 @@ export function HomeDashboard() {
                 gap: '4px',
               }}
             >
-              <span style={{ fontSize: '18px' }}>IG</span>
+              <InstagramIcon />
               <span>IG Reel</span>
             </button>
             <button
               type="button"
               onClick={() => router.push('/youtube/idea')}
               style={{
-                background: 'rgba(14,165,233,0.8)',
+                background: 'rgba(255,0,51,0.82)',
                 backdropFilter: 'blur(8px)',
                 color: 'white',
                 border: 'none',
@@ -181,7 +230,7 @@ export function HomeDashboard() {
                 gap: '4px',
               }}
             >
-              <span style={{ fontSize: '18px' }}>YT</span>
+              <YouTubeIcon />
               <span>YouTube</span>
             </button>
             <button
