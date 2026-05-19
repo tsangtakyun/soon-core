@@ -5,6 +5,8 @@ import { Suspense, useState } from 'react'
 import { DashboardShell } from '@/components/DashboardShell'
 import PageHeader from '@/components/PageHeader'
 
+const iframeHeight = 'calc(100vh - 48px - 73px - 184px)'
+
 export default function SchedulePage() {
   const [iframeError, setIframeError] = useState(false)
 
@@ -14,10 +16,25 @@ export default function SchedulePage() {
         <section className="schedule-frame-page">
           <PageHeader icon="✈️" title="行程中心" subtitle="管理拍攝行程同場景安排" />
 
+          <div style={{ padding: '0 28px', marginBottom: '24px' }}>
+            <img
+              src="/schedule-banner.jpg"
+              alt="行程中心"
+              style={{
+                width: '100%',
+                height: '160px',
+                objectFit: 'cover',
+                objectPosition: 'center',
+                borderRadius: '12px',
+                display: 'block',
+              }}
+            />
+          </div>
+
           {iframeError ? (
             <div
               style={{
-                height: 'calc(100vh - 48px - 73px)',
+                height: iframeHeight,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -28,6 +45,7 @@ export default function SchedulePage() {
                 background: 'var(--soon-surface)',
                 color: 'var(--soon-text)',
                 padding: '24px',
+                margin: '0 28px',
                 textAlign: 'center',
               }}
             >
@@ -60,7 +78,7 @@ export default function SchedulePage() {
               referrerPolicy="no-referrer-when-downgrade"
               allow="clipboard-read; clipboard-write; fullscreen"
               onError={() => setIframeError(true)}
-              style={{ width: '100%', height: 'calc(100vh - 48px - 73px)', border: 'none' }}
+              style={{ width: '100%', height: iframeHeight, border: 'none' }}
             />
           )}
         </section>
