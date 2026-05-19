@@ -52,7 +52,7 @@ const primaryNav = [
   { href: '/', label: '首頁', icon: '🏠', section: 'home' },
   { href: '/work', label: '我的工作', icon: '📅', section: 'work' },
   { href: '/docs', label: '文件中心', icon: '📄', section: 'docs' },
-  { href: '/schedule', label: '行程中心', icon: '📅', section: 'schedule' },
+  { href: '/schedule', label: '行程中心', icon: '✈️', section: 'schedule' },
   { href: '/finance', label: '財務中心', icon: '💰', section: 'finance' },
   { href: '/reply', label: '回覆中心', icon: '💬', section: 'reply' },
 ] as const
