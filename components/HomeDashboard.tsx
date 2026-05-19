@@ -52,6 +52,15 @@ function YouTubeIcon() {
   )
 }
 
+function getStatusColor(status: string) {
+  if (!status) return { bg: '#2a2a3a', text: '#9090a8' }
+  if (status.includes('未拍攝') || status.includes('1.')) return { bg: '#ef4444', text: 'white' }
+  if (status.includes('拍攝中') || status.includes('2.')) return { bg: '#f59e0b', text: 'white' }
+  if (status.includes('後製') || status.includes('3.')) return { bg: '#8b5cf6', text: 'white' }
+  if (status.includes('完成') || status.includes('4.')) return { bg: '#10b981', text: 'white' }
+  return { bg: '#2a2a3a', text: '#9090a8' }
+}
+
 export function HomeDashboard() {
   const router = useRouter()
   const { activeWorkspaceId } = useWorkspace()
@@ -338,38 +347,53 @@ export function HomeDashboard() {
               </p>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column' }}>
-                {recentProjects.map((project, index) => (
-                  <button
-                    key={project.id}
-                    type="button"
-                    onClick={() => void openProject(project)}
-                    style={{
-                      padding: '10px 0',
-                      border: 'none',
-                      borderBottom: index === recentProjects.length - 1 ? 'none' : '1px solid #2a2a3a',
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      gap: '16px',
-                      background: 'transparent',
-                      cursor: 'pointer',
-                      textAlign: 'left',
-                    }}
-                  >
-                    <p
+                {recentProjects.map((project, index) => {
+                  const statusColor = getStatusColor(project.status)
+                  return (
+                    <button
+                      key={project.id}
+                      type="button"
+                      onClick={() => void openProject(project)}
                       style={{
-                        fontSize: '13px',
-                        color: '#f0f0f5',
-                        margin: 0,
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        whiteSpace: 'nowrap',
+                        padding: '10px 0',
+                        border: 'none',
+                        borderBottom: index === recentProjects.length - 1 ? 'none' : '1px solid #2a2a3a',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        gap: '16px',
+                        background: 'transparent',
+                        cursor: 'pointer',
+                        textAlign: 'left',
                       }}
                     >
-                      {project.title}
-                    </p>
-                    <span style={{ fontSize: '11px', color: '#5a5a72', flexShrink: 0 }}>{project.status || '進行中'}</span>
-                  </button>
-                ))}
+                      <p
+                        style={{
+                          fontSize: '13px',
+                          color: '#f0f0f5',
+                          margin: 0,
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap',
+                        }}
+                      >
+                        {project.title}
+                      </p>
+                      <span
+                        style={{
+                          fontSize: '11px',
+                          padding: '2px 8px',
+                          borderRadius: '6px',
+                          background: statusColor.bg,
+                          color: statusColor.text,
+                          fontWeight: 500,
+                          flexShrink: 0,
+                        }}
+                      >
+                        {project.status || '未有狀態'}
+                      </span>
+                    </button>
+                  )
+                })}
               </div>
             )}
           </div>
