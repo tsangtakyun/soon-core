@@ -1010,7 +1010,7 @@ textarea:focus {
 .work-table th {
   height: 40px;
   border-bottom: 0.5px solid rgba(255,255,255,0.08);
-  color: var(--soon-text-muted);
+  color: #f0f0f5;
   font-size: 11px;
   font-weight: 500;
   letter-spacing: 0.06em;
@@ -1040,16 +1040,16 @@ textarea:focus {
 
 .sortable-header.active,
 .sortable-header.active button {
-  color: var(--soon-purple-light);
+  color: #f0f0f5;
 }
 
 .sortable-header button:hover {
-  color: var(--soon-text);
+  color: #f0f0f5;
 }
 
 .work-table td {
   height: 44px;
-  color: var(--soon-text-secondary);
+  color: #f0f0f5;
   font-size: 13px;
 }
 
@@ -1123,7 +1123,7 @@ textarea:focus {
   overflow: hidden;
   border: 0;
   background: transparent;
-  color: var(--soon-text);
+  color: #f0f0f5;
   font-size: 13px;
   font-weight: 600;
   padding: 0;
@@ -1137,19 +1137,23 @@ textarea:focus {
   gap: 6px;
   border: 0;
   background: transparent;
-  color: var(--soon-text-secondary);
+  color: #f0f0f5;
   padding: 0;
   text-align: left;
 }
 
 .pipeline-cell .step-label {
-  color: var(--soon-text-muted);
+  color: #f0f0f5;
   font-size: 10px;
 }
 
 .shoot-date {
-  color: var(--soon-text-secondary);
+  color: #f0f0f5;
   font-size: 13px;
+}
+
+.work-table .muted {
+  color: #f0f0f5;
 }
 
 .output-link {
@@ -1201,7 +1205,7 @@ textarea:focus {
 .workspace-info-panel label {
   display: grid;
   gap: 7px;
-  color: var(--soon-text-secondary);
+  color: #f0f0f5;
   font-size: 12px;
 }
 
