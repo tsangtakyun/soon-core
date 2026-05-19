@@ -17,6 +17,9 @@ export interface PipelineConfig {
 
 export const pipelineSteps = ['idea', 'script', 'storyboard', 'production', 'subtitle', 'done'] as const
 
+const subtitleToolUrl =
+  'https://soon-subtitle.vercel.app?embedded=true&user_id=bb3e47cc-90c8-4eac-a5ff-cabfcefb89ae'
+
 export const pipelines: Record<PipelineId, PipelineConfig> = {
   ig: {
     id: 'ig',
@@ -45,7 +48,7 @@ export const pipelines: Record<PipelineId, PipelineConfig> = {
         id: 'subtitle',
         label: 'Subtitle',
         icon: '🎞️',
-        url: 'https://soon-subtitle.vercel.app?embedded=true',
+        url: subtitleToolUrl,
       },
     ],
   },
@@ -82,7 +85,7 @@ export const pipelines: Record<PipelineId, PipelineConfig> = {
         id: 'subtitle',
         label: 'Subtitle',
         icon: '🎞️',
-        url: 'https://soon-subtitle.vercel.app?embedded=true',
+        url: subtitleToolUrl,
       },
     ],
   },
