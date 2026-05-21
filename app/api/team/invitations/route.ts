@@ -96,7 +96,7 @@ export async function POST(request: Request) {
 
     const resend = new Resend(resendApiKey)
     const { error: emailError } = await resend.emails.send({
-      from: 'SOON Core <onboarding@resend.dev>',
+      from: 'SOON Core <noreply@sooncreator.network>',
       to: [email],
       subject: '你收到 SOON Core 工作區邀請',
       html: `
