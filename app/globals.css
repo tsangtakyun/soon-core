@@ -286,6 +286,20 @@ a {
   color: var(--soon-purple-light);
 }
 
+.sidebar-badge {
+  margin-left: auto;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: #ef4444;
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 18px;
+  text-align: center;
+}
+
 .core-divider {
   height: 1px;
   margin: 8px 16px;

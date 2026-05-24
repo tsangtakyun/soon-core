@@ -10,7 +10,7 @@ import { supabase } from '@/lib/supabase'
 import type { Project, Workspace, WorkspaceType } from '@/lib/types'
 import { workspaceTypeOptions } from '@/lib/types'
 
-type Section = 'home' | 'work' | 'docs' | 'schedule' | 'finance' | 'reply' | 'settings' | 'pipeline'
+type Section = 'home' | 'work' | 'docs' | 'schedule' | 'finance' | 'reply' | 'deals' | 'settings' | 'pipeline'
 
 interface DashboardShellProps {
   activeSection: Section
@@ -55,6 +55,7 @@ const primaryNav = [
   { href: '/schedule', label: '行程中心', icon: '✈️', section: 'schedule' },
   { href: '/finance', label: '財務中心', icon: '💰', section: 'finance' },
   { href: '/reply', label: '回覆中心', icon: '💬', section: 'reply' },
+  { href: '/deals', label: '交易中心', icon: '💼', section: 'deals' },
 ] as const
 
 const SIDEBAR_WORKSPACES_CACHE_KEY = 'soon_sidebar_workspaces'
@@ -81,6 +82,7 @@ export function DashboardShell({ activeSection, pipeline, tool, children }: Dash
   const [sidebarDataLoaded, setSidebarDataLoaded] = useState(() => readCachedWorkspaces().length > 0)
   const [projects, setProjects] = useState<Project[]>([])
   const [workspaceProjectCounts, setWorkspaceProjectCounts] = useState<Record<string, number>>({})
+  const [dealsUnreadCount, setDealsUnreadCount] = useState(0)
   const [activeProject, setActiveProject] = useState<Project | null>(null)
   const [workspacePanel, setWorkspacePanel] = useState<Workspace | null>(null)
   const [workspaceEditMode, setWorkspaceEditMode] = useState(false)
@@ -254,6 +256,21 @@ export function DashboardShell({ activeSection, pipeline, tool, children }: Dash
     const refreshSidebar = () => void loadSidebarData()
     window.addEventListener('soon-data-updated', refreshSidebar)
     return () => window.removeEventListener('soon-data-updated', refreshSidebar)
+  }, [])
+
+  useEffect(() => {
+    void loadDealsUnreadCount()
+
+    const channel = supabase
+      .channel('sidebar_deals_activities')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'deals_activities' }, () => {
+        void loadDealsUnreadCount()
+      })
+      .subscribe()
+
+    return () => {
+      void supabase.removeChannel(channel)
+    }
   }, [])
 
   useEffect(() => {
@@ -437,6 +454,15 @@ export function DashboardShell({ activeSection, pipeline, tool, children }: Dash
     if (toolStoryboardId) url.searchParams.set('storyboardId', toolStoryboardId)
     if (toolTitle) url.searchParams.set('title', safeDecodeParam(toolTitle))
     return url.toString()
+  }
+
+  async function loadDealsUnreadCount() {
+    const { count, error } = await supabase
+      .from('deals_activities')
+      .select('*', { count: 'exact', head: true })
+      .eq('is_read', false)
+
+    if (!error) setDealsUnreadCount(count ?? 0)
   }
 
   async function sendAuthToToolIframe() {
@@ -686,6 +712,9 @@ export function DashboardShell({ activeSection, pipeline, tool, children }: Dash
             >
               <span>{item.icon}</span>
               <span>{item.label}</span>
+              {item.section === 'deals' && dealsUnreadCount > 0 && (
+                <span className="sidebar-badge">{dealsUnreadCount > 99 ? '99+' : dealsUnreadCount}</span>
+              )}
             </Link>
           ))}
         </nav>
