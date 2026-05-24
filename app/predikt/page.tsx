@@ -246,13 +246,6 @@ function PrediktClient() {
     }
   }
 
-  function updateAngle(index: number, patch: Partial<TrendAngle>) {
-    setDraft((current) => ({
-      ...current,
-      angles: current.angles.map((angle, angleIndex) => angleIndex === index ? { ...angle, ...patch } : angle),
-    }))
-  }
-
   function removeAngle(index: number) {
     setDraft((current) => ({
       ...current,
@@ -296,7 +289,7 @@ function PrediktClient() {
                 <tbody>
                   {trends.map((trend) => (
                     <tr key={trend.id} style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }}>
-                      <td style={tableCellStyle}><span style={{ fontSize: '24px' }}>{trend.icon || '💬'}</span></td>
+                      <td style={tableCellStyle}><span style={{ fontFamily: 'Apple Color Emoji, Segoe UI Emoji, Noto Color Emoji, sans-serif', fontSize: '24px' }}>{trend.icon || '💬'}</span></td>
                       <td style={tableCellStyle}><strong style={{ color: '#ffffff', display: 'block', fontSize: '16px' }}>{trend.topic}</strong></td>
                       <td style={tableCellStyle}>
                         <input
@@ -346,7 +339,16 @@ function PrediktClient() {
             </div>
 
             <div style={{ display: 'grid', gap: '14px' }}>
-              <label style={labelStyle}>話題 Icon<input value={draft.icon} placeholder="⚽" onChange={(event) => setDraft((current) => ({ ...current, icon: event.target.value }))} style={inputStyle} /></label>
+              <label style={labelStyle}>
+                話題 Icon
+                <input
+                  value={draft.icon}
+                  placeholder="輸入 emoji，例如 ⚽ 🎬 🤖"
+                  maxLength={4}
+                  onChange={(event) => setDraft((current) => ({ ...current, icon: event.target.value }))}
+                  style={{ ...inputStyle, fontFamily: 'Apple Color Emoji, Segoe UI Emoji, Noto Color Emoji, sans-serif', fontSize: '20px' }}
+                />
+              </label>
               <label style={labelStyle}>話題名稱<input value={draft.topic} placeholder="2026 世界盃" onChange={(event) => setDraft((current) => ({ ...current, topic: event.target.value }))} style={inputStyle} /></label>
               <label style={labelStyle}>Heat Score<input type="number" min={0} max={100} value={draft.heat_score} onChange={(event) => setDraft((current) => ({ ...current, heat_score: clampScore(Number(event.target.value)) }))} style={inputStyle} /></label>
               <label style={{ ...labelStyle, alignItems: 'center', display: 'flex', flexDirection: 'row', gap: '10px' }}><input type="checkbox" checked={draft.is_active} onChange={(event) => setDraft((current) => ({ ...current, is_active: event.target.checked }))} />公開顯示</label>
@@ -359,10 +361,44 @@ function PrediktClient() {
                 {angleTotal !== 100 && <p style={{ color: '#f59e0b', fontSize: '12px', margin: '0 0 8px' }}>目前百分比總和是 {angleTotal}%，儲存時會自動 normalize 到 100%。</p>}
                 <div style={{ display: 'grid', gap: '8px' }}>
                   {draft.angles.map((angle, index) => (
-                    <div key={`${index}-${angle.name}`} style={{ display: 'grid', gap: '8px', gridTemplateColumns: '58px 1fr 92px 42px' }}>
-                      <input value={angle.emoji} placeholder="🇫🇷" onChange={(event) => updateAngle(index, { emoji: event.target.value })} style={{ ...inputStyle, fontSize: '20px', textAlign: 'center' }} />
-                      <input value={angle.name} placeholder="球員花絮" onChange={(event) => updateAngle(index, { name: event.target.value })} style={inputStyle} />
-                      <input type="number" value={angle.percentage} onChange={(event) => updateAngle(index, { percentage: Number(event.target.value) })} style={inputStyle} />
+                    <div key={index} style={{ display: 'grid', gap: '8px', gridTemplateColumns: '58px 1fr 92px 42px' }}>
+                      <input
+                        value={angle.emoji}
+                        placeholder="🇫🇷"
+                        maxLength={4}
+                        onChange={(event) => {
+                          const nextValue = event.target.value
+                          setDraft((current) => ({
+                            ...current,
+                            angles: current.angles.map((item, itemIndex) => itemIndex === index ? { ...item, emoji: nextValue } : item),
+                          }))
+                        }}
+                        style={{ ...inputStyle, fontFamily: 'Apple Color Emoji, Segoe UI Emoji, Noto Color Emoji, sans-serif', fontSize: '20px', textAlign: 'center' }}
+                      />
+                      <input
+                        value={angle.name}
+                        placeholder="角度名稱"
+                        onChange={(event) => {
+                          const nextValue = event.target.value
+                          setDraft((current) => ({
+                            ...current,
+                            angles: current.angles.map((item, itemIndex) => itemIndex === index ? { ...item, name: nextValue } : item),
+                          }))
+                        }}
+                        style={inputStyle}
+                      />
+                      <input
+                        type="number"
+                        value={angle.percentage}
+                        onChange={(event) => {
+                          const nextValue = parseInt(event.target.value, 10) || 0
+                          setDraft((current) => ({
+                            ...current,
+                            angles: current.angles.map((item, itemIndex) => itemIndex === index ? { ...item, percentage: nextValue } : item),
+                          }))
+                        }}
+                        style={inputStyle}
+                      />
                       <button type="button" onClick={() => removeAngle(index)} style={dangerButtonStyle}>×</button>
                     </div>
                   ))}
