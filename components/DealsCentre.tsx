@@ -24,7 +24,7 @@ const icons: Record<string, string> = {
   kol_onboarded: '🥚',
 }
 
-const assignees = ['Tommy', 'Dingding', 'Panda', 'Renee']
+const assignees = ['Tommy', 'Renee']
 
 function startOfToday() {
   const date = new Date()
