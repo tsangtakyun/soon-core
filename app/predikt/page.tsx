@@ -38,6 +38,8 @@ type TrendDraft = {
   angles: TrendAngle[]
 }
 
+type DetailField = 'description' | 'why_trending' | 'creator_tips'
+
 const emptyDraft: TrendDraft = {
   icon: '⚽',
   topic: '',
@@ -117,6 +119,7 @@ function PrediktClient() {
   const [whyTrending, setWhyTrending] = useState('')
   const [creatorTips, setCreatorTips] = useState('')
   const [relatedLinksText, setRelatedLinksText] = useState('')
+  const [generatingField, setGeneratingField] = useState<DetailField | null>(null)
 
   useEffect(() => {
     async function checkAdmin() {
@@ -264,6 +267,58 @@ function PrediktClient() {
       window.alert('儲存失敗：' + (saveError instanceof Error ? saveError.message : '未知錯誤'))
     } finally {
       setSaving(false)
+    }
+  }
+
+  async function generateWithAI(field: DetailField) {
+    if (!draft.topic.trim()) return
+
+    setGeneratingField(field)
+
+    const prompts: Record<DetailField, string> = {
+      description: `你係一個香港內容創作顧問。
+根據以下話題，寫一段100-150字嘅背景介紹，用繁體中文廣東話書面語。
+話題：${draft.topic}
+討論角度：${draft.angles.map((angle) => angle.name).filter(Boolean).join('、')}
+
+只返回背景介紹文字，唔需要標題或其他說明。`,
+
+      why_trending: `你係一個香港社交媒體分析師。
+解釋點解「${draft.topic}」呢個話題而家咁受香港/亞洲創作者關注，
+100字左右，用繁體中文廣東話書面語。
+只返回分析文字，唔需要標題。`,
+
+      creator_tips: `你係一個香港短片創作顧問。
+針對「${draft.topic}」呢個話題，
+俾3-4個具體嘅拍攝建議俾 IG Reel / YouTube Shorts creator，
+每個建議一行，用繁體中文廣東話書面語。
+格式：
+- 建議一
+- 建議二
+- 建議三`,
+    }
+
+    try {
+      const response = await fetch('/api/ai/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt: prompts[field] }),
+      })
+      const data = await response.json().catch(() => ({}))
+
+      if (!response.ok) throw new Error(data.error || 'AI generation failed')
+
+      const text = data.content?.find?.((part: { type?: string; text?: string }) => part.type === 'text')?.text
+        || data.content?.[0]?.text
+        || ''
+
+      if (field === 'description') setDescription(text)
+      if (field === 'why_trending') setWhyTrending(text)
+      if (field === 'creator_tips') setCreatorTips(text)
+    } catch {
+      window.alert('AI 生成失敗，請重試')
+    } finally {
+      setGeneratingField(null)
     }
   }
 
@@ -465,18 +520,30 @@ function PrediktClient() {
                       value={description}
                       onChange={setDescription}
                       placeholder="介紹呢個話題嘅背景同來龍去脈..."
+                      aiField="description"
+                      generatingField={generatingField}
+                      disableGenerate={!draft.topic.trim()}
+                      onGenerate={generateWithAI}
                     />
                     <DetailTextarea
                       label="點解而家咁熱？"
                       value={whyTrending}
                       onChange={setWhyTrending}
                       placeholder="解釋點解呢個話題最近特別受關注..."
+                      aiField="why_trending"
+                      generatingField={generatingField}
+                      disableGenerate={!draft.topic.trim()}
+                      onGenerate={generateWithAI}
                     />
                     <DetailTextarea
                       label="Creator 可以點拍？"
                       value={creatorTips}
                       onChange={setCreatorTips}
                       placeholder="建議 creator 可以從咩角度入手拍攝呢個題材..."
+                      aiField="creator_tips"
+                      generatingField={generatingField}
+                      disableGenerate={!draft.topic.trim()}
+                      onGenerate={generateWithAI}
                     />
                     <DetailTextarea
                       label="相關連結（每行一個）"
@@ -510,15 +577,55 @@ function DetailTextarea({
   value,
   onChange,
   placeholder,
+  aiField,
+  generatingField,
+  disableGenerate,
+  onGenerate,
 }: {
   label: string
   value: string
   onChange: (value: string) => void
   placeholder: string
+  aiField?: DetailField
+  generatingField?: DetailField | null
+  disableGenerate?: boolean
+  onGenerate?: (field: DetailField) => void
 }) {
+  const isGenerating = generatingField === aiField
+
   return (
     <div>
-      <label style={{ color: '#aaa', fontSize: 13 }}>{label}</label>
+      <div style={{
+        alignItems: 'center',
+        display: 'flex',
+        justifyContent: 'space-between',
+        marginBottom: 4,
+      }}>
+        <label style={{ color: '#aaa', fontSize: 13 }}>{label}</label>
+        {aiField && onGenerate && (
+          <button
+            type="button"
+            onClick={() => onGenerate(aiField)}
+            disabled={isGenerating || disableGenerate}
+            title={disableGenerate ? '請先填寫話題名稱' : ''}
+            style={{
+              alignItems: 'center',
+              backgroundColor: isGenerating ? '#333' : '#2d1b69',
+              border: '1px solid #4c1d95',
+              borderRadius: 6,
+              color: isGenerating ? '#888' : '#a78bfa',
+              cursor: isGenerating || disableGenerate ? 'not-allowed' : 'pointer',
+              display: 'flex',
+              fontSize: 12,
+              gap: 4,
+              opacity: disableGenerate ? 0.55 : 1,
+              padding: '3px 10px',
+            }}
+          >
+            {isGenerating ? '⏳ 生成中...' : '✨ AI 生成'}
+          </button>
+        )}
+      </div>
       <textarea
         value={value}
         onChange={(event) => onChange(event.target.value)}
@@ -531,7 +638,6 @@ function DetailTextarea({
           color: 'white',
           fontFamily: 'inherit',
           fontSize: 14,
-          marginTop: 4,
           padding: '8px 12px',
           resize: 'vertical',
           width: '100%',
