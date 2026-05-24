@@ -8,11 +8,35 @@ import PageHeader from '@/components/PageHeader'
 
 type DealActivityType = 'kol_accepted' | 'brief_received' | 'kol_onboarded' | string
 
+type DealActivityMeta = {
+  creator_username?: string
+  creator_display_name?: string
+  creator_avatar_url?: string
+  creator_ig_handle?: string
+  creator_ig_followers?: number
+  creator_mediakit_url?: string
+  campaign_name?: string
+  brand_name?: string
+  brand_website?: string
+  budget_range?: string
+  budget?: string
+  collab_formats?: string[]
+  deliverables?: string[]
+  starts_on?: string
+  timeline?: string
+  dos?: string
+  donts?: string
+  brief_title?: string
+  cw_workspace_id?: string
+  cw_campaign_id?: string
+}
+
 type DealActivity = {
   id: string
   type: DealActivityType
   title: string
   body: string | null
+  meta: DealActivityMeta | null
   is_read: boolean
   assigned_to: string | null
   created_at: string
@@ -24,7 +48,7 @@ const icons: Record<string, string> = {
   kol_onboarded: '🥚',
 }
 
-const assignees = ['Tommy', 'Renee']
+const assignees = ['Tommy', 'Dingding', 'Panda', 'Renee']
 
 function startOfToday() {
   const date = new Date()
@@ -41,6 +65,7 @@ function startOfWeek() {
 
 export function DealsCentre() {
   const [activities, setActivities] = useState<DealActivity[]>([])
+  const [expandedId, setExpandedId] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
@@ -181,6 +206,8 @@ export function DealsCentre() {
                 <ActivityRow
                   key={activity.id}
                   activity={activity}
+                  isExpanded={expandedId === activity.id}
+                  onToggle={() => setExpandedId((current) => current === activity.id ? null : activity.id)}
                   onRead={handleRead}
                   onAssign={handleAssign}
                 />
@@ -209,72 +236,164 @@ function KpiCard({ label, value, accent }: { label: string; value: number; accen
 
 function ActivityRow({
   activity,
+  isExpanded,
+  onToggle,
   onRead,
   onAssign,
 }: {
   activity: DealActivity
+  isExpanded: boolean
+  onToggle: () => void
   onRead: (id: string) => void
   onAssign: (id: string, assignee: string) => void
 }) {
+  const meta = activity.meta ?? {}
+
   return (
     <article style={{
-      alignItems: 'flex-start',
       background: activity.is_read ? 'transparent' : 'rgba(255,255,255,0.03)',
       border: `1px solid ${activity.is_read ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.10)'}`,
       borderRadius: '14px',
-      display: 'flex',
-      gap: '14px',
-      opacity: activity.is_read ? 0.5 : 1,
-      padding: '14px',
+      opacity: activity.is_read ? 0.6 : 1,
+      overflow: 'hidden',
       transition: '0.15s ease',
     }}>
-      <span style={{ fontSize: '24px', marginTop: '2px' }}>{icons[activity.type] ?? '📌'}</span>
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <p style={{ color: '#ffffff', fontSize: '14px', fontWeight: 600, margin: 0 }}>{activity.title}</p>
-        {activity.body && (
-          <p style={{ color: '#888888', fontSize: '12px', margin: '4px 0 0' }}>{activity.body}</p>
-        )}
-        <p style={{ color: '#555555', fontSize: '11px', margin: '6px 0 0' }}>
-          {new Date(activity.created_at).toLocaleString('zh-HK')}
-        </p>
-      </div>
-      <div style={{ display: 'flex', alignItems: 'center', flexShrink: 0, gap: '8px' }}>
-        <select
-          value={activity.assigned_to ?? ''}
-          onChange={(event) => onAssign(activity.id, event.target.value)}
-          style={{
-            background: 'rgba(255,255,255,0.05)',
-            border: '1px solid rgba(255,255,255,0.10)',
-            borderRadius: '8px',
-            color: '#d1d5db',
-            fontSize: '12px',
-            padding: '7px 8px',
-          }}
-        >
-          <option value="">未分配</option>
-          {assignees.map((assignee) => (
-            <option key={assignee} value={assignee}>{assignee}</option>
-          ))}
-        </select>
-        {!activity.is_read && (
-          <button
-            type="button"
-            onClick={() => onRead(activity.id)}
+      <div
+        onClick={onToggle}
+        style={{
+          alignItems: 'flex-start',
+          cursor: 'pointer',
+          display: 'flex',
+          gap: '14px',
+          padding: '14px',
+        }}
+      >
+        <span style={{ fontSize: '24px', marginTop: '2px', flexShrink: 0 }}>{icons[activity.type] ?? '📌'}</span>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <p style={{ color: '#ffffff', fontSize: '14px', fontWeight: 600, margin: 0 }}>{activity.title}</p>
+          {activity.body && (
+            <p style={{ color: '#888888', fontSize: '12px', margin: '4px 0 0' }}>{activity.body}</p>
+          )}
+          <p style={{ color: '#555555', fontSize: '11px', margin: '6px 0 0' }}>
+            {new Date(activity.created_at).toLocaleString('zh-HK')}
+          </p>
+        </div>
+        <div onClick={(event) => event.stopPropagation()} style={{ display: 'flex', alignItems: 'center', flexShrink: 0, gap: '8px' }}>
+          <select
+            value={activity.assigned_to ?? ''}
+            onChange={(event) => onAssign(activity.id, event.target.value)}
             style={{
-              background: 'transparent',
-              border: '1px solid rgba(167,139,250,0.3)',
+              background: 'rgba(255,255,255,0.05)',
+              border: '1px solid rgba(255,255,255,0.10)',
               borderRadius: '8px',
-              color: '#a78bfa',
-              cursor: 'pointer',
+              color: '#d1d5db',
               fontSize: '12px',
-              padding: '7px 10px',
+              padding: '7px 8px',
             }}
           >
-            ✓
-          </button>
-        )}
+            <option value="">未分配</option>
+            {assignees.map((assignee) => (
+              <option key={assignee} value={assignee}>{assignee}</option>
+            ))}
+          </select>
+          {!activity.is_read && (
+            <button
+              type="button"
+              onClick={() => onRead(activity.id)}
+              style={{
+                background: 'transparent',
+                border: '1px solid rgba(167,139,250,0.3)',
+                borderRadius: '8px',
+                color: '#a78bfa',
+                cursor: 'pointer',
+                fontSize: '12px',
+                padding: '7px 10px',
+              }}
+            >
+              ✓
+            </button>
+          )}
+          <span style={{ color: '#555555', fontSize: '11px' }}>{isExpanded ? '▲' : '▼'}</span>
+        </div>
       </div>
+
+      {isExpanded && (
+        <div style={{
+          borderTop: '1px solid rgba(255,255,255,0.05)',
+          display: 'grid',
+          gap: '12px',
+          gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+          padding: '12px 14px 14px',
+        }}>
+          {meta.creator_username && (
+            <div style={{
+              alignItems: 'center',
+              background: 'rgba(255,255,255,0.05)',
+              borderRadius: '10px',
+              display: 'flex',
+              gap: '12px',
+              gridColumn: '1 / -1',
+              padding: '12px',
+            }}>
+              {meta.creator_avatar_url && <img src={meta.creator_avatar_url} alt="" style={{ width: '40px', height: '40px', borderRadius: '999px', objectFit: 'cover' }} />}
+              <div style={{ flex: 1 }}>
+                <p style={{ color: '#ffffff', fontSize: '13px', fontWeight: 600, margin: 0 }}>{meta.creator_display_name || meta.creator_username}</p>
+                <p style={{ color: '#9ca3af', fontSize: '12px', margin: '3px 0 0' }}>
+                  @{meta.creator_ig_handle || meta.creator_username}
+                  {meta.creator_ig_followers ? ` · ${meta.creator_ig_followers.toLocaleString()} followers` : ''}
+                </p>
+              </div>
+              {meta.creator_mediakit_url && (
+                <a href={meta.creator_mediakit_url} target="_blank" rel="noopener noreferrer" style={{
+                  border: '1px solid rgba(167,139,250,0.3)',
+                  borderRadius: '8px',
+                  color: '#a78bfa',
+                  fontSize: '12px',
+                  padding: '7px 10px',
+                  textDecoration: 'none',
+                }}>
+                  Media Kit ↗
+                </a>
+              )}
+            </div>
+          )}
+
+          {meta.campaign_name && <DetailCard label="Campaign" value={meta.campaign_name} />}
+          {meta.brand_name && <DetailCard label="品牌" value={meta.brand_name} link={meta.brand_website} />}
+          {meta.budget_range && <DetailCard label="預算" value={meta.budget_range} />}
+          {meta.budget && <DetailCard label="預算" value={meta.budget} />}
+          {meta.starts_on && <DetailCard label="開始日期" value={meta.starts_on} />}
+          {meta.timeline && <DetailCard label="時間表" value={meta.timeline} />}
+          {meta.collab_formats && meta.collab_formats.length > 0 && <ListCard label="合作形式" values={meta.collab_formats} />}
+          {meta.deliverables && meta.deliverables.length > 0 && <ListCard label="交付物" values={meta.deliverables} />}
+          {meta.dos && <DetailCard label="✅ 要做" value={meta.dos} />}
+          {meta.donts && <DetailCard label="❌ 唔做" value={meta.donts} />}
+        </div>
+      )}
     </article>
+  )
+}
+
+function DetailCard({ label, value, link }: { label: string; value: string; link?: string }) {
+  return (
+    <div style={{ background: 'rgba(255,255,255,0.05)', borderRadius: '10px', padding: '12px' }}>
+      <p style={{ color: '#6b7280', fontSize: '11px', margin: '0 0 5px' }}>{label}</p>
+      <p style={{ color: '#ffffff', fontSize: '12px', margin: 0 }}>{value}</p>
+      {link && <a href={link} target="_blank" rel="noopener noreferrer" style={{ color: '#a78bfa', display: 'block', fontSize: '12px', marginTop: '4px' }}>{link}</a>}
+    </div>
+  )
+}
+
+function ListCard({ label, values }: { label: string; values: string[] }) {
+  return (
+    <div style={{ background: 'rgba(255,255,255,0.05)', borderRadius: '10px', padding: '12px' }}>
+      <p style={{ color: '#6b7280', fontSize: '11px', margin: '0 0 7px' }}>{label}</p>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
+        {values.map((value) => (
+          <span key={value} style={{ background: 'rgba(255,255,255,0.10)', borderRadius: '999px', color: '#d1d5db', fontSize: '11px', padding: '3px 8px' }}>{value}</span>
+        ))}
+      </div>
+    </div>
   )
 }
 
