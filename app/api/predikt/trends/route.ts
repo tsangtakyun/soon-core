@@ -33,6 +33,10 @@ function trendPayload(body: Record<string, unknown>) {
     heat_score: clampScore(body.heat_score),
     is_active: Boolean(body.is_active),
     angles: Array.isArray(body.angles) ? body.angles : [],
+    description: typeof body.description === 'string' && body.description.trim() ? body.description.trim() : null,
+    why_trending: typeof body.why_trending === 'string' && body.why_trending.trim() ? body.why_trending.trim() : null,
+    creator_tips: typeof body.creator_tips === 'string' && body.creator_tips.trim() ? body.creator_tips.trim() : null,
+    related_links: Array.isArray(body.related_links) ? body.related_links : [],
   }
 }
 
@@ -83,6 +87,10 @@ export async function PATCH(request: NextRequest) {
   if ('heat_score' in body) allowedUpdates.heat_score = clampScore(body.heat_score)
   if ('is_active' in body) allowedUpdates.is_active = Boolean(body.is_active)
   if ('angles' in body) allowedUpdates.angles = Array.isArray(body.angles) ? body.angles : []
+  if ('description' in body) allowedUpdates.description = typeof body.description === 'string' && body.description.trim() ? body.description.trim() : null
+  if ('why_trending' in body) allowedUpdates.why_trending = typeof body.why_trending === 'string' && body.why_trending.trim() ? body.why_trending.trim() : null
+  if ('creator_tips' in body) allowedUpdates.creator_tips = typeof body.creator_tips === 'string' && body.creator_tips.trim() ? body.creator_tips.trim() : null
+  if ('related_links' in body) allowedUpdates.related_links = Array.isArray(body.related_links) ? body.related_links : []
 
   const admin = createSupabaseAdmin()
   const { data, error } = await admin

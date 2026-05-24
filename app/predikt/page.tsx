@@ -24,6 +24,10 @@ type Trend = {
   heat_score: number
   angles: TrendAngle[] | null
   is_active: boolean
+  description?: string | null
+  why_trending?: string | null
+  creator_tips?: string | null
+  related_links?: Array<{ url?: string }> | null
 }
 
 type TrendDraft = {
@@ -108,6 +112,11 @@ function PrediktClient() {
   const [editingTrend, setEditingTrend] = useState<Trend | null>(null)
   const [draft, setDraft] = useState<TrendDraft>(emptyDraft)
   const [saving, setSaving] = useState(false)
+  const [showDetail, setShowDetail] = useState(false)
+  const [description, setDescription] = useState('')
+  const [whyTrending, setWhyTrending] = useState('')
+  const [creatorTips, setCreatorTips] = useState('')
+  const [relatedLinksText, setRelatedLinksText] = useState('')
 
   useEffect(() => {
     async function checkAdmin() {
@@ -164,6 +173,7 @@ function PrediktClient() {
   function openCreateModal() {
     setEditingTrend(null)
     setDraft(emptyDraft)
+    resetDetailFields()
     setShowModal(true)
   }
 
@@ -176,6 +186,11 @@ function PrediktClient() {
       is_active: Boolean(trend.is_active),
       angles: parseAngles(trend.angles),
     })
+    setDescription(trend.description || '')
+    setWhyTrending(trend.why_trending || '')
+    setCreatorTips(trend.creator_tips || '')
+    setRelatedLinksText((trend.related_links || []).map((link) => link.url).filter(Boolean).join('\n'))
+    setShowDetail(Boolean(trend.description || trend.why_trending || trend.creator_tips || (trend.related_links || []).length > 0))
     setShowModal(true)
   }
 
@@ -229,6 +244,12 @@ function PrediktClient() {
       heat_score: clampScore(Number(draft.heat_score)),
       is_active: draft.is_active,
       angles: normaliseAngles(draft.angles),
+      description: description.trim() || null,
+      why_trending: whyTrending.trim() || null,
+      creator_tips: creatorTips.trim() || null,
+      related_links: relatedLinksText
+        ? relatedLinksText.split('\n').map((url) => url.trim()).filter(Boolean).map((url) => ({ url }))
+        : [],
     }
 
     try {
@@ -237,7 +258,7 @@ function PrediktClient() {
       } else {
         await callTrendsApi('POST', payload)
       }
-      setShowModal(false)
+      closeModal()
       await loadTrends()
     } catch (saveError) {
       window.alert('儲存失敗：' + (saveError instanceof Error ? saveError.message : '未知錯誤'))
@@ -251,6 +272,21 @@ function PrediktClient() {
       ...current,
       angles: current.angles.filter((_, angleIndex) => angleIndex !== index),
     }))
+  }
+
+  function resetDetailFields() {
+    setShowDetail(false)
+    setDescription('')
+    setWhyTrending('')
+    setCreatorTips('')
+    setRelatedLinksText('')
+  }
+
+  function closeModal() {
+    setShowModal(false)
+    setEditingTrend(null)
+    setDraft(emptyDraft)
+    resetDetailFields()
   }
 
   if (!authChecked || !isAdmin) {
@@ -328,14 +364,14 @@ function PrediktClient() {
       </main>
 
       {showModal && (
-        <div style={modalBackdropStyle} onMouseDown={() => setShowModal(false)}>
+        <div style={modalBackdropStyle} onMouseDown={closeModal}>
           <section style={modalStyle} onMouseDown={(event) => event.stopPropagation()}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '18px' }}>
               <div>
                 <h2 style={{ color: '#ffffff', fontSize: '18px', margin: 0 }}>{editingTrend ? '編輯話題' : '新增話題'}</h2>
                 <p style={{ color: '#888888', fontSize: '12px', margin: '4px 0 0' }}>設定 Predikt 熱話題目同討論角度。</p>
               </div>
-              <button type="button" onClick={() => setShowModal(false)} style={closeButtonStyle}>×</button>
+              <button type="button" onClick={closeModal} style={closeButtonStyle}>×</button>
             </div>
 
             <div style={{ display: 'grid', gap: '14px' }}>
@@ -405,6 +441,53 @@ function PrediktClient() {
                 </div>
               </div>
 
+              <div style={{ marginTop: 16 }}>
+                <button
+                  type="button"
+                  onClick={() => setShowDetail((current) => !current)}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: '#7c3aed',
+                    cursor: 'pointer',
+                    fontSize: 14,
+                    marginBottom: 8,
+                    padding: 0,
+                  }}
+                >
+                  {showDetail ? '▼ 收起詳細內容' : '▶ 加入詳細內容（選填）'}
+                </button>
+
+                {showDetail && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                    <DetailTextarea
+                      label="話題背景"
+                      value={description}
+                      onChange={setDescription}
+                      placeholder="介紹呢個話題嘅背景同來龍去脈..."
+                    />
+                    <DetailTextarea
+                      label="點解而家咁熱？"
+                      value={whyTrending}
+                      onChange={setWhyTrending}
+                      placeholder="解釋點解呢個話題最近特別受關注..."
+                    />
+                    <DetailTextarea
+                      label="Creator 可以點拍？"
+                      value={creatorTips}
+                      onChange={setCreatorTips}
+                      placeholder="建議 creator 可以從咩角度入手拍攝呢個題材..."
+                    />
+                    <DetailTextarea
+                      label="相關連結（每行一個）"
+                      value={relatedLinksText}
+                      onChange={setRelatedLinksText}
+                      placeholder="https://example.com"
+                    />
+                  </div>
+                )}
+              </div>
+
               <button type="button" onClick={() => void saveTrend()} disabled={saving} style={primaryButtonStyle}>{saving ? '儲存中...' : '儲存'}</button>
             </div>
           </section>
@@ -418,6 +501,42 @@ function EmptyState({ text }: { text: string }) {
   return (
     <div style={{ border: '1px dashed rgba(255,255,255,0.10)', borderRadius: '12px', color: '#888888', fontSize: '13px', padding: '30px', textAlign: 'center' }}>
       {text}
+    </div>
+  )
+}
+
+function DetailTextarea({
+  label,
+  value,
+  onChange,
+  placeholder,
+}: {
+  label: string
+  value: string
+  onChange: (value: string) => void
+  placeholder: string
+}) {
+  return (
+    <div>
+      <label style={{ color: '#aaa', fontSize: 13 }}>{label}</label>
+      <textarea
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        placeholder={placeholder}
+        rows={3}
+        style={{
+          backgroundColor: '#1a1a1a',
+          border: '1px solid #333',
+          borderRadius: 8,
+          color: 'white',
+          fontFamily: 'inherit',
+          fontSize: 14,
+          marginTop: 4,
+          padding: '8px 12px',
+          resize: 'vertical',
+          width: '100%',
+        }}
+      />
     </div>
   )
 }
