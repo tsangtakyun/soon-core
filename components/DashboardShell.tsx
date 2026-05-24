@@ -10,7 +10,7 @@ import { supabase } from '@/lib/supabase'
 import type { Project, Workspace, WorkspaceType } from '@/lib/types'
 import { workspaceTypeOptions } from '@/lib/types'
 
-type Section = 'home' | 'work' | 'docs' | 'schedule' | 'finance' | 'reply' | 'deals' | 'settings' | 'pipeline'
+type Section = 'home' | 'work' | 'docs' | 'schedule' | 'finance' | 'reply' | 'predikt' | 'deals' | 'settings' | 'pipeline'
 
 interface DashboardShellProps {
   activeSection: Section
@@ -48,6 +48,10 @@ type ScriptPickerDoc = {
   updated_at?: string
 }
 
+const ADMIN_EMAILS = [
+  'tsangtakyun@gmail.com',
+]
+
 const primaryNav = [
   { href: '/', label: '首頁', icon: '🏠', section: 'home' },
   { href: '/work', label: '我的工作', icon: '📅', section: 'work' },
@@ -55,6 +59,7 @@ const primaryNav = [
   { href: '/schedule', label: '行程中心', icon: '✈️', section: 'schedule' },
   { href: '/finance', label: '財務中心', icon: '💰', section: 'finance' },
   { href: '/reply', label: '回覆中心', icon: '💬', section: 'reply' },
+  { href: '/predikt', label: '討論區中心', icon: '💬', section: 'predikt', adminOnly: true },
   { href: '/deals', label: '交易中心', icon: '💼', section: 'deals' },
 ] as const
 
@@ -105,6 +110,11 @@ export function DashboardShell({ activeSection, pipeline, tool, children }: Dash
   const [scriptPickerLoading, setScriptPickerLoading] = useState(false)
   const [scriptPickerError, setScriptPickerError] = useState('')
   const toolIframeRef = useRef<HTMLIFrameElement | null>(null)
+  const isAdmin = ADMIN_EMAILS.includes(authProfile?.email ?? '')
+  const visiblePrimaryNav = useMemo(
+    () => primaryNav.filter((item) => !('adminOnly' in item) || !item.adminOnly || isAdmin),
+    [isAdmin]
+  )
 
   function makeClientId() {
     if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) return crypto.randomUUID()
@@ -704,7 +714,7 @@ export function DashboardShell({ activeSection, pipeline, tool, children }: Dash
         </div>
 
         <nav className="core-nav" aria-label="Main navigation">
-          {primaryNav.map((item) => (
+          {visiblePrimaryNav.map((item) => (
             <Link
               key={item.href}
               href={item.href}
