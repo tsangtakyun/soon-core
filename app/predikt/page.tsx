@@ -24,8 +24,6 @@ type Trend = {
   heat_score: number
   angles: TrendAngle[] | null
   is_active: boolean
-  created_at?: string
-  updated_at?: string
 }
 
 type TrendDraft = {
@@ -41,9 +39,7 @@ const emptyDraft: TrendDraft = {
   topic: '',
   heat_score: 50,
   is_active: true,
-  angles: [
-    { emoji: '💬', name: '', percentage: 100 },
-  ],
+  angles: [{ emoji: '💬', name: '', percentage: 100 }],
 }
 
 function parseAngles(value: unknown): TrendAngle[] {
@@ -86,9 +82,7 @@ function normaliseAngles(angles: TrendAngle[]) {
 
   let runningTotal = 0
   return cleanAngles.map((angle, index) => {
-    if (index === cleanAngles.length - 1) {
-      return { ...angle, percentage: 100 - runningTotal }
-    }
+    if (index === cleanAngles.length - 1) return { ...angle, percentage: 100 - runningTotal }
     const percentage = Math.round((angle.percentage / total) * 100)
     runningTotal += percentage
     return { ...angle, percentage }
@@ -138,23 +132,30 @@ function PrediktClient() {
     [draft.angles]
   )
 
+  async function callTrendsApi(method: string, body?: Record<string, unknown>, query = '') {
+    const response = await fetch(`/api/predikt/trends${query}`, {
+      method,
+      headers: body ? { 'Content-Type': 'application/json' } : undefined,
+      body: body ? JSON.stringify(body) : undefined,
+    })
+    const data = await response.json().catch(() => ({}))
+    if (!response.ok) throw new Error(data.error || 'Predikt request failed')
+    return data
+  }
+
   async function loadTrends() {
     setLoading(true)
     setError('')
 
-    const { data, error: loadError } = await supabase
-      .from('trends')
-      .select('*')
-      .order('heat_score', { ascending: false })
-
-    if (loadError) {
-      setError(loadError.message)
-      setTrends([])
-    } else {
-      setTrends((data ?? []).map((trend) => ({
-        ...(trend as Trend),
-        angles: parseAngles((trend as Trend).angles),
+    try {
+      const data = await callTrendsApi('GET')
+      setTrends((data.trends ?? []).map((trend: Trend) => ({
+        ...trend,
+        angles: parseAngles(trend.angles),
       })))
+    } catch (loadError) {
+      setError(loadError instanceof Error ? loadError.message : '載入失敗')
+      setTrends([])
     }
 
     setLoading(false)
@@ -186,25 +187,19 @@ function PrediktClient() {
     const nextActive = !trend.is_active
     patchTrendLocal(trend.id, { is_active: nextActive })
 
-    const { error: updateError } = await supabase
-      .from('trends')
-      .update({ is_active: nextActive })
-      .eq('id', trend.id)
-
-    if (updateError) {
-      window.alert('更新狀態失敗：' + updateError.message)
+    try {
+      await callTrendsApi('PATCH', { id: trend.id, is_active: nextActive })
+    } catch (updateError) {
+      window.alert('更新狀態失敗：' + (updateError instanceof Error ? updateError.message : '未知錯誤'))
       patchTrendLocal(trend.id, { is_active: trend.is_active })
     }
   }
 
   async function saveHeatScore(trend: Trend) {
-    const { error: updateError } = await supabase
-      .from('trends')
-      .update({ heat_score: clampScore(Number(trend.heat_score ?? 0)) })
-      .eq('id', trend.id)
-
-    if (updateError) {
-      window.alert('更新 Heat Score 失敗：' + updateError.message)
+    try {
+      await callTrendsApi('PATCH', { id: trend.id, heat_score: clampScore(Number(trend.heat_score ?? 0)) })
+    } catch (updateError) {
+      window.alert('更新 Heat Score 失敗：' + (updateError instanceof Error ? updateError.message : '未知錯誤'))
       void loadTrends()
     }
   }
@@ -213,13 +208,10 @@ function PrediktClient() {
     if (!window.confirm(`確定刪除「${trend.topic}」？此操作不可復原。`)) return
 
     setTrends((current) => current.filter((item) => item.id !== trend.id))
-    const { error: deleteError } = await supabase
-      .from('trends')
-      .delete()
-      .eq('id', trend.id)
-
-    if (deleteError) {
-      window.alert('刪除失敗：' + deleteError.message)
+    try {
+      await callTrendsApi('DELETE', undefined, `?id=${encodeURIComponent(trend.id)}`)
+    } catch (deleteError) {
+      window.alert('刪除失敗：' + (deleteError instanceof Error ? deleteError.message : '未知錯誤'))
       void loadTrends()
     }
   }
@@ -239,19 +231,33 @@ function PrediktClient() {
       angles: normaliseAngles(draft.angles),
     }
 
-    const { error: saveError } = editingTrend
-      ? await supabase.from('trends').update(payload).eq('id', editingTrend.id)
-      : await supabase.from('trends').insert(payload)
-
-    setSaving(false)
-
-    if (saveError) {
-      window.alert('儲存失敗：' + saveError.message)
-      return
+    try {
+      if (editingTrend) {
+        await callTrendsApi('PATCH', { id: editingTrend.id, ...payload })
+      } else {
+        await callTrendsApi('POST', payload)
+      }
+      setShowModal(false)
+      await loadTrends()
+    } catch (saveError) {
+      window.alert('儲存失敗：' + (saveError instanceof Error ? saveError.message : '未知錯誤'))
+    } finally {
+      setSaving(false)
     }
+  }
 
-    setShowModal(false)
-    await loadTrends()
+  function updateAngle(index: number, patch: Partial<TrendAngle>) {
+    setDraft((current) => ({
+      ...current,
+      angles: current.angles.map((angle, angleIndex) => angleIndex === index ? { ...angle, ...patch } : angle),
+    }))
+  }
+
+  function removeAngle(index: number) {
+    setDraft((current) => ({
+      ...current,
+      angles: current.angles.filter((_, angleIndex) => angleIndex !== index),
+    }))
   }
 
   if (!authChecked || !isAdmin) {
@@ -268,15 +274,7 @@ function PrediktClient() {
         icon="💬"
         title="討論區中心"
         subtitle="管理 Predikt 熱話題目"
-        actions={(
-          <button
-            type="button"
-            onClick={openCreateModal}
-            style={primaryButtonStyle}
-          >
-            + 新增話題
-          </button>
-        )}
+        actions={<button type="button" onClick={openCreateModal} style={primaryButtonStyle}>+ 新增話題</button>}
       />
 
       <main style={{ padding: '0 28px 32px' }}>
@@ -299,9 +297,7 @@ function PrediktClient() {
                   {trends.map((trend) => (
                     <tr key={trend.id} style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }}>
                       <td style={tableCellStyle}><span style={{ fontSize: '24px' }}>{trend.icon || '💬'}</span></td>
-                      <td style={tableCellStyle}>
-                        <strong style={{ color: '#ffffff', display: 'block', fontSize: '16px' }}>{trend.topic}</strong>
-                      </td>
+                      <td style={tableCellStyle}><strong style={{ color: '#ffffff', display: 'block', fontSize: '16px' }}>{trend.topic}</strong></td>
                       <td style={tableCellStyle}>
                         <input
                           type="number"
@@ -318,10 +314,7 @@ function PrediktClient() {
                         <button
                           type="button"
                           onClick={() => void toggleActive(trend)}
-                          style={{
-                            ...toggleButtonStyle,
-                            background: trend.is_active ? '#10b981' : '#4b5563',
-                          }}
+                          style={{ ...toggleButtonStyle, background: trend.is_active ? '#10b981' : '#4b5563' }}
                         >
                           {trend.is_active ? '公開' : '隱藏'}
                         </button>
@@ -353,245 +346,55 @@ function PrediktClient() {
             </div>
 
             <div style={{ display: 'grid', gap: '14px' }}>
-              <label style={labelStyle}>
-                話題 Icon
-                <input
-                  value={draft.icon}
-                  placeholder="⚽"
-                  onChange={(event) => setDraft((current) => ({ ...current, icon: event.target.value }))}
-                  style={inputStyle}
-                />
-              </label>
-
-              <label style={labelStyle}>
-                話題名稱
-                <input
-                  value={draft.topic}
-                  placeholder="2026 世界盃"
-                  onChange={(event) => setDraft((current) => ({ ...current, topic: event.target.value }))}
-                  style={inputStyle}
-                />
-              </label>
-
-              <label style={labelStyle}>
-                Heat Score
-                <input
-                  type="number"
-                  min={0}
-                  max={100}
-                  value={draft.heat_score}
-                  onChange={(event) => setDraft((current) => ({ ...current, heat_score: clampScore(Number(event.target.value)) }))}
-                  style={inputStyle}
-                />
-              </label>
-
-              <label style={{ ...labelStyle, alignItems: 'center', display: 'flex', flexDirection: 'row', gap: '10px' }}>
-                <input
-                  type="checkbox"
-                  checked={draft.is_active}
-                  onChange={(event) => setDraft((current) => ({ ...current, is_active: event.target.checked }))}
-                />
-                公開顯示
-              </label>
+              <label style={labelStyle}>話題 Icon<input value={draft.icon} placeholder="⚽" onChange={(event) => setDraft((current) => ({ ...current, icon: event.target.value }))} style={inputStyle} /></label>
+              <label style={labelStyle}>話題名稱<input value={draft.topic} placeholder="2026 世界盃" onChange={(event) => setDraft((current) => ({ ...current, topic: event.target.value }))} style={inputStyle} /></label>
+              <label style={labelStyle}>Heat Score<input type="number" min={0} max={100} value={draft.heat_score} onChange={(event) => setDraft((current) => ({ ...current, heat_score: clampScore(Number(event.target.value)) }))} style={inputStyle} /></label>
+              <label style={{ ...labelStyle, alignItems: 'center', display: 'flex', flexDirection: 'row', gap: '10px' }}><input type="checkbox" checked={draft.is_active} onChange={(event) => setDraft((current) => ({ ...current, is_active: event.target.checked }))} />公開顯示</label>
 
               <div>
                 <div style={{ alignItems: 'center', display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
                   <span style={{ color: '#f5f5f5', fontSize: '13px', fontWeight: 600 }}>討論角度</span>
-                  <button
-                    type="button"
-                    onClick={() => setDraft((current) => ({
-                      ...current,
-                      angles: [...current.angles, { emoji: '💬', name: '', percentage: 0 }],
-                    }))}
-                    style={ghostButtonStyle}
-                  >
-                    + 新增角度
-                  </button>
+                  <button type="button" onClick={() => setDraft((current) => ({ ...current, angles: [...current.angles, { emoji: '💬', name: '', percentage: 0 }] }))} style={ghostButtonStyle}>+ 新增角度</button>
                 </div>
-
-                {angleTotal !== 100 && (
-                  <p style={{ color: '#f59e0b', fontSize: '12px', margin: '0 0 8px' }}>
-                    目前百分比總和是 {angleTotal}%，儲存時會自動 normalize 到 100%。
-                  </p>
-                )}
-
+                {angleTotal !== 100 && <p style={{ color: '#f59e0b', fontSize: '12px', margin: '0 0 8px' }}>目前百分比總和是 {angleTotal}%，儲存時會自動 normalize 到 100%。</p>}
                 <div style={{ display: 'grid', gap: '8px' }}>
                   {draft.angles.map((angle, index) => (
                     <div key={`${index}-${angle.name}`} style={{ display: 'grid', gap: '8px', gridTemplateColumns: '58px 1fr 92px 42px' }}>
-                      <input
-                        value={angle.emoji}
-                        placeholder="🇫🇷"
-                        onChange={(event) => updateAngle(index, { emoji: event.target.value })}
-                        style={{ ...inputStyle, fontSize: '20px', textAlign: 'center' }}
-                      />
-                      <input
-                        value={angle.name}
-                        placeholder="球員花絮"
-                        onChange={(event) => updateAngle(index, { name: event.target.value })}
-                        style={inputStyle}
-                      />
-                      <input
-                        type="number"
-                        value={angle.percentage}
-                        onChange={(event) => updateAngle(index, { percentage: Number(event.target.value) })}
-                        style={inputStyle}
-                      />
+                      <input value={angle.emoji} placeholder="🇫🇷" onChange={(event) => updateAngle(index, { emoji: event.target.value })} style={{ ...inputStyle, fontSize: '20px', textAlign: 'center' }} />
+                      <input value={angle.name} placeholder="球員花絮" onChange={(event) => updateAngle(index, { name: event.target.value })} style={inputStyle} />
+                      <input type="number" value={angle.percentage} onChange={(event) => updateAngle(index, { percentage: Number(event.target.value) })} style={inputStyle} />
                       <button type="button" onClick={() => removeAngle(index)} style={dangerButtonStyle}>×</button>
                     </div>
                   ))}
                 </div>
               </div>
 
-              <button type="button" onClick={() => void saveTrend()} disabled={saving} style={primaryButtonStyle}>
-                {saving ? '儲存中...' : '儲存'}
-              </button>
+              <button type="button" onClick={() => void saveTrend()} disabled={saving} style={primaryButtonStyle}>{saving ? '儲存中...' : '儲存'}</button>
             </div>
           </section>
         </div>
       )}
     </DashboardShell>
   )
-
-  function updateAngle(index: number, patch: Partial<TrendAngle>) {
-    setDraft((current) => ({
-      ...current,
-      angles: current.angles.map((angle, angleIndex) => angleIndex === index ? { ...angle, ...patch } : angle),
-    }))
-  }
-
-  function removeAngle(index: number) {
-    setDraft((current) => ({
-      ...current,
-      angles: current.angles.filter((_, angleIndex) => angleIndex !== index),
-    }))
-  }
 }
 
 function EmptyState({ text }: { text: string }) {
   return (
-    <div style={{
-      border: '1px dashed rgba(255,255,255,0.10)',
-      borderRadius: '12px',
-      color: '#888888',
-      fontSize: '13px',
-      padding: '30px',
-      textAlign: 'center',
-    }}>
+    <div style={{ border: '1px dashed rgba(255,255,255,0.10)', borderRadius: '12px', color: '#888888', fontSize: '13px', padding: '30px', textAlign: 'center' }}>
       {text}
     </div>
   )
 }
 
-const cardStyle = {
-  background: '#141414',
-  border: '1px solid rgba(255,255,255,0.08)',
-  borderRadius: '14px',
-  padding: '18px',
-}
-
-const tableHeadStyle = {
-  color: '#888888',
-  fontSize: '12px',
-  fontWeight: 600,
-  padding: '10px 12px',
-  textAlign: 'left' as const,
-}
-
-const tableCellStyle = {
-  color: '#d1d5db',
-  fontSize: '13px',
-  padding: '12px',
-  verticalAlign: 'middle' as const,
-}
-
-const inputStyle = {
-  background: '#0f0f0f',
-  border: '1px solid rgba(255,255,255,0.12)',
-  borderRadius: '8px',
-  color: '#ffffff',
-  fontSize: '13px',
-  outline: 'none',
-  padding: '9px 10px',
-  width: '100%',
-}
-
-const labelStyle = {
-  color: '#f5f5f5',
-  display: 'grid',
-  fontSize: '13px',
-  gap: '6px',
-}
-
-const primaryButtonStyle = {
-  background: '#7c3aed',
-  border: 'none',
-  borderRadius: '9px',
-  color: '#ffffff',
-  cursor: 'pointer',
-  fontSize: '13px',
-  fontWeight: 600,
-  padding: '10px 16px',
-}
-
-const ghostButtonStyle = {
-  background: 'transparent',
-  border: '1px solid rgba(255,255,255,0.12)',
-  borderRadius: '8px',
-  color: '#a78bfa',
-  cursor: 'pointer',
-  fontSize: '12px',
-  padding: '8px 10px',
-}
-
-const dangerButtonStyle = {
-  background: 'transparent',
-  border: '1px solid rgba(239,68,68,0.35)',
-  borderRadius: '8px',
-  color: '#f87171',
-  cursor: 'pointer',
-  fontSize: '12px',
-  padding: '8px 10px',
-}
-
-const toggleButtonStyle = {
-  border: 'none',
-  borderRadius: '999px',
-  color: '#ffffff',
-  cursor: 'pointer',
-  fontSize: '12px',
-  fontWeight: 600,
-  minWidth: '58px',
-  padding: '7px 10px',
-}
-
-const modalBackdropStyle = {
-  alignItems: 'center',
-  background: 'rgba(0,0,0,0.65)',
-  display: 'flex',
-  inset: 0,
-  justifyContent: 'center',
-  padding: '24px',
-  position: 'fixed' as const,
-  zIndex: 80,
-}
-
-const modalStyle = {
-  background: '#141414',
-  border: '1px solid rgba(255,255,255,0.10)',
-  borderRadius: '16px',
-  boxShadow: '0 24px 80px rgba(0,0,0,0.45)',
-  maxHeight: '90vh',
-  maxWidth: '720px',
-  overflowY: 'auto' as const,
-  padding: '22px',
-  width: '100%',
-}
-
-const closeButtonStyle = {
-  background: 'transparent',
-  border: 'none',
-  color: '#888888',
-  cursor: 'pointer',
-  fontSize: '24px',
-  lineHeight: 1,
-}
+const cardStyle = { background: '#141414', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '14px', padding: '18px' }
+const tableHeadStyle = { color: '#888888', fontSize: '12px', fontWeight: 600, padding: '10px 12px', textAlign: 'left' as const }
+const tableCellStyle = { color: '#d1d5db', fontSize: '13px', padding: '12px', verticalAlign: 'middle' as const }
+const inputStyle = { background: '#0f0f0f', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '8px', color: '#ffffff', fontSize: '13px', outline: 'none', padding: '9px 10px', width: '100%' }
+const labelStyle = { color: '#f5f5f5', display: 'grid', fontSize: '13px', gap: '6px' }
+const primaryButtonStyle = { background: '#7c3aed', border: 'none', borderRadius: '9px', color: '#ffffff', cursor: 'pointer', fontSize: '13px', fontWeight: 600, padding: '10px 16px' }
+const ghostButtonStyle = { background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '8px', color: '#a78bfa', cursor: 'pointer', fontSize: '12px', padding: '8px 10px' }
+const dangerButtonStyle = { background: 'transparent', border: '1px solid rgba(239,68,68,0.35)', borderRadius: '8px', color: '#f87171', cursor: 'pointer', fontSize: '12px', padding: '8px 10px' }
+const toggleButtonStyle = { border: 'none', borderRadius: '999px', color: '#ffffff', cursor: 'pointer', fontSize: '12px', fontWeight: 600, minWidth: '58px', padding: '7px 10px' }
+const modalBackdropStyle = { alignItems: 'center', background: 'rgba(0,0,0,0.65)', display: 'flex', inset: 0, justifyContent: 'center', padding: '24px', position: 'fixed' as const, zIndex: 80 }
+const modalStyle = { background: '#141414', border: '1px solid rgba(255,255,255,0.10)', borderRadius: '16px', boxShadow: '0 24px 80px rgba(0,0,0,0.45)', maxHeight: '90vh', maxWidth: '720px', overflowY: 'auto' as const, padding: '22px', width: '100%' }
+const closeButtonStyle = { background: 'transparent', border: 'none', color: '#888888', cursor: 'pointer', fontSize: '24px', lineHeight: 1 }
