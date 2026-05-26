@@ -32,6 +32,10 @@ function normaliseDeadline(value: unknown) {
   return Number.isNaN(date.getTime()) ? null : date.toISOString()
 }
 
+function normaliseTimezone(value: unknown) {
+  return typeof value === 'string' && value.trim() ? value.trim() : 'Asia/Hong_Kong'
+}
+
 function trendPayload(body: Record<string, unknown>) {
   return {
     icon: typeof body.icon === 'string' && body.icon.trim() ? body.icon.trim() : '💬',
@@ -40,6 +44,7 @@ function trendPayload(body: Record<string, unknown>) {
     is_active: Boolean(body.is_active),
     angles: Array.isArray(body.angles) ? body.angles : [],
     deadline_at: normaliseDeadline(body.deadline_at),
+    deadline_timezone: normaliseTimezone(body.deadline_timezone),
     news_headlines: Array.isArray(body.news_headlines) ? body.news_headlines : [],
     description: typeof body.description === 'string' && body.description.trim() ? body.description.trim() : null,
     why_trending: typeof body.why_trending === 'string' && body.why_trending.trim() ? body.why_trending.trim() : null,
@@ -98,6 +103,7 @@ export async function PATCH(request: NextRequest) {
   if ('deadline_at' in body) {
     allowedUpdates.deadline_at = normaliseDeadline(body.deadline_at)
   }
+  if ('deadline_timezone' in body) allowedUpdates.deadline_timezone = normaliseTimezone(body.deadline_timezone)
   if ('news_headlines' in body) allowedUpdates.news_headlines = Array.isArray(body.news_headlines) ? body.news_headlines : []
   if ('description' in body) allowedUpdates.description = typeof body.description === 'string' && body.description.trim() ? body.description.trim() : null
   if ('why_trending' in body) allowedUpdates.why_trending = typeof body.why_trending === 'string' && body.why_trending.trim() ? body.why_trending.trim() : null

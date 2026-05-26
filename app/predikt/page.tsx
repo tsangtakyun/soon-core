@@ -26,6 +26,7 @@ type Trend = {
   angles: TrendAngle[] | null
   is_active: boolean
   deadline_at?: string | null
+  deadline_timezone?: string | null
   news_headlines?: Array<{ title?: string }> | null
   description?: string | null
   why_trending?: string | null
@@ -42,6 +43,16 @@ type TrendDraft = {
 }
 
 type DetailField = 'description' | 'why_trending' | 'creator_tips'
+
+const timezoneOptions = [
+  { value: 'Asia/Hong_Kong', label: '香港 HKT' },
+  { value: 'Europe/London', label: '倫敦 GMT/BST' },
+  { value: 'Europe/Paris', label: '巴黎 CET/CEST' },
+  { value: 'Asia/Tokyo', label: '東京 JST' },
+  { value: 'Asia/Taipei', label: '台北 CST' },
+  { value: 'Asia/Singapore', label: '新加坡 SGT' },
+  { value: 'America/New_York', label: '紐約 ET' },
+]
 
 const emptyDraft: TrendDraft = {
   icon: '⚽',
@@ -176,6 +187,7 @@ function PrediktClient() {
   const [creatorTips, setCreatorTips] = useState('')
   const [relatedLinksText, setRelatedLinksText] = useState('')
   const [deadlineAt, setDeadlineAt] = useState('')
+  const [deadlineTimezone, setDeadlineTimezone] = useState('Asia/Hong_Kong')
   const [newsHeadlinesText, setNewsHeadlinesText] = useState('')
   const [generatingField, setGeneratingField] = useState<DetailField | null>(null)
 
@@ -252,6 +264,7 @@ function PrediktClient() {
     setCreatorTips(trend.creator_tips || '')
     setRelatedLinksText((trend.related_links || []).map((link) => link.url).filter(Boolean).join('\n'))
     setDeadlineAt(toDatetimeLocalValue(trend.deadline_at))
+    setDeadlineTimezone(trend.deadline_timezone || 'Asia/Hong_Kong')
     setNewsHeadlinesText(parseNewsHeadlines(trend.news_headlines).join('\n'))
     setShowDetail(Boolean(trend.description || trend.why_trending || trend.creator_tips || (trend.related_links || []).length > 0 || parseNewsHeadlines(trend.news_headlines).length > 0))
     setShowModal(true)
@@ -308,6 +321,7 @@ function PrediktClient() {
       is_active: draft.is_active,
       angles: normaliseAngles(draft.angles),
       deadline_at: deadlineAt ? new Date(deadlineAt).toISOString() : null,
+      deadline_timezone: deadlineTimezone,
       news_headlines: newsHeadlinesText
         ? newsHeadlinesText.split('\n').map((title) => title.trim()).filter(Boolean).map((title) => ({ title }))
         : [],
@@ -445,6 +459,7 @@ function PrediktClient() {
     setCreatorTips('')
     setRelatedLinksText('')
     setDeadlineAt('')
+    setDeadlineTimezone('Asia/Hong_Kong')
     setNewsHeadlinesText('')
   }
 
@@ -504,7 +519,11 @@ function PrediktClient() {
                           style={{ ...inputStyle, width: '88px' }}
                         />
                       </td>
-                      <td style={tableCellStyle}>{trend.deadline_at ? new Date(trend.deadline_at).toLocaleString('zh-HK', { dateStyle: 'medium', timeStyle: 'short' }) : '未設定'}</td>
+                      <td style={tableCellStyle}>
+                        {trend.deadline_at
+                          ? `${new Date(trend.deadline_at).toLocaleString('zh-HK', { dateStyle: 'medium', timeStyle: 'short', timeZone: trend.deadline_timezone || 'Asia/Hong_Kong' })} · ${(trend.deadline_timezone || 'Asia/Hong_Kong').replace('_', ' ')}`
+                          : '未設定'}
+                      </td>
                       <td style={tableCellStyle}>{parseAngles(trend.angles).length} 個角度</td>
                       <td style={tableCellStyle}>
                         <button
@@ -567,6 +586,19 @@ function PrediktClient() {
                   style={inputStyle}
                 />
                 <small style={hintStyle}>例如 2026-05-31 23:59，會喺 SOON-LOG 討論區投票卡顯示。</small>
+              </label>
+              <label style={labelStyle}>
+                截止時區
+                <select
+                  value={deadlineTimezone}
+                  onChange={(event) => setDeadlineTimezone(event.target.value)}
+                  style={inputStyle}
+                >
+                  {timezoneOptions.map((timezone) => (
+                    <option key={timezone.value} value={timezone.value}>{timezone.label}</option>
+                  ))}
+                </select>
+                <small style={hintStyle}>歐聯、世界盃等跨地區題目請揀開波當地時區，例如巴黎用 Europe/Paris。</small>
               </label>
               <label style={{ ...labelStyle, alignItems: 'center', display: 'flex', flexDirection: 'row', gap: '10px' }}><input type="checkbox" checked={draft.is_active} onChange={(event) => setDraft((current) => ({ ...current, is_active: event.target.checked }))} />公開顯示</label>
 
