@@ -22,12 +22,14 @@ type Trend = {
   id: string
   icon: string | null
   topic: string
+  category?: string | null
+  keywords?: string | null
   heat_score: number
   angles: TrendAngle[] | null
   is_active: boolean
   deadline_at?: string | null
   deadline_timezone?: string | null
-  news_headlines?: Array<{ title?: string }> | null
+  news_headlines?: NewsHeadline[] | null
   description?: string | null
   why_trending?: string | null
   creator_tips?: string | null
@@ -37,12 +39,31 @@ type Trend = {
 type TrendDraft = {
   icon: string
   topic: string
+  category: string
+  keywords: string
   heat_score: number
   is_active: boolean
   angles: TrendAngle[]
 }
 
 type DetailField = 'description' | 'why_trending' | 'creator_tips'
+type NewsHeadline = {
+  title: string
+  source?: string
+  url?: string
+  published_at?: string | null
+}
+
+const categoryOptions = [
+  { value: 'news', label: '新聞' },
+  { value: 'finance', label: '財經' },
+  { value: 'tech', label: '科技' },
+  { value: 'life', label: '生活' },
+  { value: 'sports', label: '體育' },
+  { value: 'gaming', label: '遊戲' },
+  { value: 'anime', label: '動漫' },
+  { value: 'entertainment', label: '娛樂' },
+]
 
 const timezoneOptions = [
   { value: 'Asia/Hong_Kong', label: '香港 HKT' },
@@ -57,6 +78,8 @@ const timezoneOptions = [
 const emptyDraft: TrendDraft = {
   icon: '⚽',
   topic: '',
+  category: 'news',
+  keywords: '',
   heat_score: 50,
   is_active: true,
   angles: [{ emoji: '💬', name: '', percentage: 100 }],
@@ -113,20 +136,37 @@ function isImageIcon(value: string | null | undefined) {
   return Boolean(value && (/^(https?:|data:image\/)/.test(value)))
 }
 
-function toDatetimeLocalValue(value: string | null | undefined) {
+function toDatetimeLocalValue(value: string | null | undefined, timeZone = 'Asia/Hong_Kong') {
   if (!value) return ''
   const date = new Date(value)
   if (Number.isNaN(date.getTime())) return ''
-  const offsetDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000)
-  return offsetDate.toISOString().slice(0, 16)
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    day: '2-digit',
+    hour: '2-digit',
+    hour12: false,
+    minute: '2-digit',
+    month: '2-digit',
+    timeZone,
+    year: 'numeric',
+  }).formatToParts(date)
+  const values = Object.fromEntries(parts.map((part) => [part.type, part.value]))
+  return `${values.year}-${values.month}-${values.day}T${values.hour}:${values.minute}`
 }
 
 function parseNewsHeadlines(value: unknown) {
   if (!Array.isArray(value)) return []
   return value
-    .map((item) => typeof item === 'string' ? item : String((item as { title?: unknown }).title ?? ''))
-    .map((title) => title.trim())
-    .filter(Boolean)
+    .map((item) => {
+      if (typeof item === 'string') return { title: item.trim() }
+      const news = item as Partial<NewsHeadline>
+      return {
+        title: String(news.title ?? '').trim(),
+        source: typeof news.source === 'string' ? news.source : '',
+        url: typeof news.url === 'string' ? news.url : '',
+        published_at: typeof news.published_at === 'string' ? news.published_at : null,
+      }
+    })
+    .filter((item) => item.title)
 }
 
 function readImageAsDataUrl(file: File) {
@@ -181,6 +221,7 @@ function PrediktClient() {
   const [editingTrend, setEditingTrend] = useState<Trend | null>(null)
   const [draft, setDraft] = useState<TrendDraft>(emptyDraft)
   const [saving, setSaving] = useState(false)
+  const [fetchingNews, setFetchingNews] = useState(false)
   const [showDetail, setShowDetail] = useState(false)
   const [description, setDescription] = useState('')
   const [whyTrending, setWhyTrending] = useState('')
@@ -188,7 +229,7 @@ function PrediktClient() {
   const [relatedLinksText, setRelatedLinksText] = useState('')
   const [deadlineAt, setDeadlineAt] = useState('')
   const [deadlineTimezone, setDeadlineTimezone] = useState('Asia/Hong_Kong')
-  const [newsHeadlinesText, setNewsHeadlinesText] = useState('')
+  const [newsItems, setNewsItems] = useState<NewsHeadline[]>([])
   const [generatingField, setGeneratingField] = useState<DetailField | null>(null)
 
   useEffect(() => {
@@ -255,6 +296,8 @@ function PrediktClient() {
     setDraft({
       icon: trend.icon || '💬',
       topic: trend.topic || '',
+      category: trend.category || 'news',
+      keywords: trend.keywords || '',
       heat_score: clampScore(Number(trend.heat_score ?? 0)),
       is_active: Boolean(trend.is_active),
       angles: parseAngles(trend.angles),
@@ -263,9 +306,9 @@ function PrediktClient() {
     setWhyTrending(trend.why_trending || '')
     setCreatorTips(trend.creator_tips || '')
     setRelatedLinksText((trend.related_links || []).map((link) => link.url).filter(Boolean).join('\n'))
-    setDeadlineAt(toDatetimeLocalValue(trend.deadline_at))
     setDeadlineTimezone(trend.deadline_timezone || 'Asia/Hong_Kong')
-    setNewsHeadlinesText(parseNewsHeadlines(trend.news_headlines).join('\n'))
+    setDeadlineAt(toDatetimeLocalValue(trend.deadline_at, trend.deadline_timezone || 'Asia/Hong_Kong'))
+    setNewsItems(parseNewsHeadlines(trend.news_headlines))
     setShowDetail(Boolean(trend.description || trend.why_trending || trend.creator_tips || (trend.related_links || []).length > 0 || parseNewsHeadlines(trend.news_headlines).length > 0))
     setShowModal(true)
   }
@@ -317,14 +360,19 @@ function PrediktClient() {
     const payload = {
       icon: draft.icon.trim() || '💬',
       topic: draft.topic.trim(),
+      category: draft.category,
+      keywords: draft.keywords.trim() || null,
       heat_score: clampScore(Number(draft.heat_score)),
       is_active: draft.is_active,
       angles: normaliseAngles(draft.angles),
-      deadline_at: deadlineAt ? new Date(deadlineAt).toISOString() : null,
+      deadline_at: deadlineAt || null,
       deadline_timezone: deadlineTimezone,
-      news_headlines: newsHeadlinesText
-        ? newsHeadlinesText.split('\n').map((title) => title.trim()).filter(Boolean).map((title) => ({ title }))
-        : [],
+      news_headlines: newsItems.filter((item) => item.title.trim()).map((item) => ({
+        title: item.title.trim(),
+        source: item.source?.trim() || '',
+        url: item.url?.trim() || '',
+        published_at: item.published_at || null,
+      })),
       description: description.trim() || null,
       why_trending: whyTrending.trim() || null,
       creator_tips: creatorTips.trim() || null,
@@ -346,6 +394,33 @@ function PrediktClient() {
     } finally {
       setSaving(false)
     }
+  }
+
+  async function fetchNews() {
+    if (!draft.topic.trim() && !draft.keywords.trim()) {
+      window.alert('請先輸入話題名稱或搜尋關鍵字')
+      return
+    }
+
+    setFetchingNews(true)
+    try {
+      const response = await fetch('/api/predikt/fetch-news', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ keywords: draft.keywords, topic: draft.topic }),
+      })
+      const data = await response.json().catch(() => ({}))
+      if (!response.ok) throw new Error(data.error || '抓取新聞失敗')
+      setNewsItems(parseNewsHeadlines(data.items))
+    } catch (fetchError) {
+      window.alert('抓取新聞失敗：' + (fetchError instanceof Error ? fetchError.message : '未知錯誤'))
+    } finally {
+      setFetchingNews(false)
+    }
+  }
+
+  function patchNewsItem(index: number, patch: Partial<NewsHeadline>) {
+    setNewsItems((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, ...patch } : item))
   }
 
   async function generateWithAI(field: DetailField) {
@@ -460,7 +535,7 @@ function PrediktClient() {
     setRelatedLinksText('')
     setDeadlineAt('')
     setDeadlineTimezone('Asia/Hong_Kong')
-    setNewsHeadlinesText('')
+    setNewsItems([])
   }
 
   function closeModal() {
@@ -498,7 +573,7 @@ function PrediktClient() {
               <table style={{ borderCollapse: 'collapse', minWidth: '860px', width: '100%' }}>
                 <thead>
                   <tr>
-                    {['Icon', '話題', 'Heat Score', '截止時間', 'Angles', '狀態', '操作'].map((header) => (
+                    {['Icon', '話題', '分類', 'Heat Score', '截止時間', 'Angles', '狀態', '操作'].map((header) => (
                       <th key={header} style={tableHeadStyle}>{header}</th>
                     ))}
                   </tr>
@@ -508,6 +583,7 @@ function PrediktClient() {
                     <tr key={trend.id} style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }}>
                       <td style={tableCellStyle}><IconPreview value={trend.icon} size={28} /></td>
                       <td style={tableCellStyle}><strong style={{ color: '#ffffff', display: 'block', fontSize: '16px' }}>{trend.topic}</strong></td>
+                      <td style={tableCellStyle}>{categoryOptions.find((category) => category.value === trend.category)?.label || '新聞'}</td>
                       <td style={tableCellStyle}>
                         <input
                           type="number"
@@ -576,6 +652,27 @@ function PrediktClient() {
                 <small style={hintStyle}>建議 256×256 PNG/WebP，透明底最佳，檔案小於 300KB。會同步顯示於 SOON-LOG mobile。</small>
               </div>
               <label style={labelStyle}>話題名稱<input value={draft.topic} placeholder="2026 世界盃" onChange={(event) => setDraft((current) => ({ ...current, topic: event.target.value }))} style={inputStyle} /></label>
+              <label style={labelStyle}>
+                分類
+                <select
+                  value={draft.category}
+                  onChange={(event) => setDraft((current) => ({ ...current, category: event.target.value }))}
+                  style={inputStyle}
+                >
+                  {categoryOptions.map((category) => (
+                    <option key={category.value} value={category.value}>{category.label}</option>
+                  ))}
+                </select>
+              </label>
+              <label style={labelStyle}>
+                搜尋關鍵字
+                <input
+                  value={draft.keywords}
+                  placeholder="例：2026世界盃, FIFA, 香港球迷"
+                  onChange={(event) => setDraft((current) => ({ ...current, keywords: event.target.value }))}
+                  style={inputStyle}
+                />
+              </label>
               <label style={labelStyle}>Heat Score<input type="number" min={0} max={100} value={draft.heat_score} onChange={(event) => setDraft((current) => ({ ...current, heat_score: clampScore(Number(event.target.value)) }))} style={inputStyle} /></label>
               <label style={labelStyle}>
                 截止時間
@@ -701,12 +798,68 @@ function PrediktClient() {
                       onChange={setRelatedLinksText}
                       placeholder="https://example.com"
                     />
-                    <DetailTextarea
-                      label="新聞標題（每行一個）"
-                      value={newsHeadlinesText}
-                      onChange={setNewsHeadlinesText}
-                      placeholder="Reuters：市場預期決賽爆冷機會上升&#10;ESPN：巴黎聖日耳門陣容狀態保持穩定"
-                    />
+                    <div>
+                      <div style={{ alignItems: 'center', display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+                        <label style={{ color: '#aaa', fontSize: 13 }}>相關新聞</label>
+                        <div style={{ display: 'flex', gap: 8 }}>
+                          <button
+                            type="button"
+                            onClick={() => setNewsItems((current) => [...current, { title: '', source: '', url: '', published_at: null }])}
+                            style={ghostButtonStyle}
+                          >
+                            + 新增新聞
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => void fetchNews()}
+                            disabled={fetchingNews}
+                            style={primaryButtonStyle}
+                          >
+                            {fetchingNews ? '抓取中...' : '✨ 抓取最新新聞'}
+                          </button>
+                        </div>
+                      </div>
+                      <div style={{ display: 'grid', gap: 10 }}>
+                        {newsItems.length === 0 && <div style={newsEmptyStyle}>暫時未有新聞。可用關鍵字自動抓取，或手動新增。</div>}
+                        {newsItems.map((item, index) => (
+                          <div key={`${item.title}-${index}`} style={newsItemStyle}>
+                            <input
+                              value={item.title}
+                              placeholder="新聞標題"
+                              onChange={(event) => patchNewsItem(index, { title: event.target.value })}
+                              style={inputStyle}
+                            />
+                            <div style={{ display: 'grid', gap: 8, gridTemplateColumns: '1fr 1.6fr 170px 42px' }}>
+                              <input
+                                value={item.source || ''}
+                                placeholder="來源"
+                                onChange={(event) => patchNewsItem(index, { source: event.target.value })}
+                                style={inputStyle}
+                              />
+                              <input
+                                value={item.url || ''}
+                                placeholder="https://..."
+                                onChange={(event) => patchNewsItem(index, { url: event.target.value })}
+                                style={inputStyle}
+                              />
+                              <input
+                                value={item.published_at || ''}
+                                placeholder="published_at ISO"
+                                onChange={(event) => patchNewsItem(index, { published_at: event.target.value })}
+                                style={inputStyle}
+                              />
+                              <button
+                                type="button"
+                                onClick={() => setNewsItems((current) => current.filter((_, itemIndex) => itemIndex !== index))}
+                                style={dangerButtonStyle}
+                              >
+                                ×
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
                   </div>
                 )}
               </div>
@@ -809,6 +962,8 @@ const tableCellStyle = { color: '#d1d5db', fontSize: '13px', padding: '12px', ve
 const inputStyle = { background: '#0f0f0f', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '8px', color: '#ffffff', fontSize: '13px', outline: 'none', padding: '9px 10px', width: '100%' }
 const labelStyle = { color: '#f5f5f5', display: 'grid', fontSize: '13px', gap: '6px' }
 const hintStyle = { color: '#888888', fontSize: '12px', lineHeight: 1.5 }
+const newsEmptyStyle = { border: '1px dashed rgba(255,255,255,0.12)', borderRadius: '10px', color: '#888888', fontSize: '12px', padding: '14px', textAlign: 'center' as const }
+const newsItemStyle = { background: '#101010', border: '1px solid rgba(255,255,255,0.10)', borderRadius: '10px', display: 'grid', gap: '8px', padding: '10px' }
 const uploadRowStyle = { alignItems: 'center', display: 'flex', gap: '10px' }
 const iconPreviewBoxStyle = { alignItems: 'center', background: '#0f0f0f', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '10px', display: 'flex', height: '56px', justifyContent: 'center', width: '56px' }
 const uploadButtonStyle = { background: '#1f1538', border: '1px solid #4c1d95', borderRadius: '8px', color: '#c4b5fd', cursor: 'pointer', fontSize: '12px', fontWeight: 600, padding: '9px 12px' }

@@ -26,8 +26,43 @@ function clampScore(value: unknown) {
   return Math.max(0, Math.min(100, number))
 }
 
-function normaliseDeadline(value: unknown) {
+function zonedLocalTimeToUtc(value: string, timeZone: string) {
+  const match = value.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/)
+  if (!match) return null
+
+  const [, year, month, day, hour, minute] = match
+  const utcGuess = Date.UTC(Number(year), Number(month) - 1, Number(day), Number(hour), Number(minute))
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    calendar: 'iso8601',
+    day: '2-digit',
+    hour: '2-digit',
+    hour12: false,
+    minute: '2-digit',
+    month: '2-digit',
+    second: '2-digit',
+    timeZone,
+    year: 'numeric',
+  }).formatToParts(new Date(utcGuess))
+
+  const values = Object.fromEntries(parts.map((part) => [part.type, part.value]))
+  const zonedAsUtc = Date.UTC(
+    Number(values.year),
+    Number(values.month) - 1,
+    Number(values.day),
+    Number(values.hour),
+    Number(values.minute),
+    Number(values.second || 0)
+  )
+  return new Date(utcGuess - (zonedAsUtc - utcGuess)).toISOString()
+}
+
+function normaliseDeadline(value: unknown, timeZone: unknown) {
   if (typeof value !== 'string' || !value.trim()) return null
+  const timezone = normaliseTimezone(timeZone)
+  if (!/[zZ]|[+-]\d{2}:?\d{2}$/.test(value.trim())) {
+    const zonedValue = zonedLocalTimeToUtc(value.trim(), timezone)
+    if (zonedValue) return zonedValue
+  }
   const date = new Date(value)
   return Number.isNaN(date.getTime()) ? null : date.toISOString()
 }
@@ -40,10 +75,12 @@ function trendPayload(body: Record<string, unknown>) {
   return {
     icon: typeof body.icon === 'string' && body.icon.trim() ? body.icon.trim() : '💬',
     topic: typeof body.topic === 'string' ? body.topic.trim() : '',
+    category: typeof body.category === 'string' && body.category.trim() ? body.category.trim() : 'news',
+    keywords: typeof body.keywords === 'string' && body.keywords.trim() ? body.keywords.trim() : null,
     heat_score: clampScore(body.heat_score),
     is_active: Boolean(body.is_active),
     angles: Array.isArray(body.angles) ? body.angles : [],
-    deadline_at: normaliseDeadline(body.deadline_at),
+    deadline_at: normaliseDeadline(body.deadline_at, body.deadline_timezone),
     deadline_timezone: normaliseTimezone(body.deadline_timezone),
     news_headlines: Array.isArray(body.news_headlines) ? body.news_headlines : [],
     description: typeof body.description === 'string' && body.description.trim() ? body.description.trim() : null,
@@ -97,11 +134,13 @@ export async function PATCH(request: NextRequest) {
   const allowedUpdates: Record<string, unknown> = {}
   if ('icon' in body) allowedUpdates.icon = typeof body.icon === 'string' && body.icon.trim() ? body.icon.trim() : '💬'
   if ('topic' in body) allowedUpdates.topic = typeof body.topic === 'string' ? body.topic.trim() : ''
+  if ('category' in body) allowedUpdates.category = typeof body.category === 'string' && body.category.trim() ? body.category.trim() : 'news'
+  if ('keywords' in body) allowedUpdates.keywords = typeof body.keywords === 'string' && body.keywords.trim() ? body.keywords.trim() : null
   if ('heat_score' in body) allowedUpdates.heat_score = clampScore(body.heat_score)
   if ('is_active' in body) allowedUpdates.is_active = Boolean(body.is_active)
   if ('angles' in body) allowedUpdates.angles = Array.isArray(body.angles) ? body.angles : []
   if ('deadline_at' in body) {
-    allowedUpdates.deadline_at = normaliseDeadline(body.deadline_at)
+    allowedUpdates.deadline_at = normaliseDeadline(body.deadline_at, body.deadline_timezone)
   }
   if ('deadline_timezone' in body) allowedUpdates.deadline_timezone = normaliseTimezone(body.deadline_timezone)
   if ('news_headlines' in body) allowedUpdates.news_headlines = Array.isArray(body.news_headlines) ? body.news_headlines : []
