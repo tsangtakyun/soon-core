@@ -15,6 +15,8 @@ type RssItem = {
   source?: string | { '#text'?: string; '@_url'?: string }
 }
 
+type RawItem = NewsItem
+
 const parser = new XMLParser({
   attributeNamePrefix: '@_',
   ignoreAttributes: false,
@@ -73,11 +75,15 @@ function isSimilarTitle(a: string, b: string) {
 
 function dedupeNews(items: NewsItem[]) {
   const deduped: NewsItem[] = []
+  const seen = new Set<string>()
+
   for (const item of items) {
-    if (!deduped.some((existing) => isSimilarTitle(existing.original_title || existing.title, item.original_title || item.title))) {
-      deduped.push(item)
-    }
+    const key = normaliseTitle(item.original_title || item.title)
+    if (!key || seen.has(key)) continue
+    seen.add(key)
+    deduped.push(item)
   }
+
   return deduped
 }
 
@@ -87,7 +93,7 @@ function getFeedItems(xml: string): RssItem[] {
   return Array.isArray(items) ? items : [items]
 }
 
-function parseFeed(xml: string): NewsItem[] {
+function parseFeed(xml: string): RawItem[] {
   return getFeedItems(xml)
     .map((item) => {
       const source = sourceName(item.source)
@@ -115,6 +121,25 @@ async function fetchRss(url: string) {
   })
   if (!response.ok) throw new Error(`Google News RSS returned ${response.status}`)
   return response.text()
+}
+
+async function fetchRSSItems(query: string, lang: 'zh' | 'en'): Promise<RawItem[]> {
+  const encodedQuery = encodeURIComponent(query)
+  const rssUrl = lang === 'zh'
+    ? `https://news.google.com/rss/search?q=${encodedQuery}&hl=zh-HK&gl=HK&ceid=HK:zh-Hant`
+    : `https://news.google.com/rss/search?q=${encodedQuery}&hl=en-US&gl=US&ceid=US:en`
+
+  const xml = await fetchRss(rssUrl)
+  return parseFeed(xml)
+}
+
+function filterByAge(items: RawItem[], maxDays: number): RawItem[] {
+  const oldestAllowed = Date.now() - maxDays * 24 * 60 * 60 * 1000
+
+  return items.filter((item) => {
+    const publishedTime = new Date(item.published_at).getTime()
+    return !Number.isNaN(publishedTime) && publishedTime >= oldestAllowed
+  })
 }
 
 async function translateEnglishTitles(items: NewsItem[]) {
@@ -164,19 +189,50 @@ async function translateEnglishTitles(items: NewsItem[]) {
 }
 
 export async function fetchNewsForTrend(keywords: string, topic: string): Promise<NewsItem[]> {
-  const queryText = (keywords || topic || '').trim()
-  if (!queryText) return []
+  const keywordQuery = (keywords || topic || '').trim()
+  const topicQuery = (topic || '').trim()
+  const firstKeyword = (keywords || '')
+    .split(',')
+    .map((keyword) => keyword.trim())
+    .find(Boolean)
 
-  const query = encodeURIComponent(queryText)
-  const rssZH = `https://news.google.com/rss/search?q=${query}&hl=zh-HK&gl=HK&ceid=HK:zh-Hant`
-  const rssEN = `https://news.google.com/rss/search?q=${query}&hl=en-US&gl=US&ceid=US:en`
-  const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000
+  async function runTier(tier: number, query: string, maxDays: number, languages: Array<'zh' | 'en'>) {
+    if (!query) return []
 
-  const feeds = await Promise.allSettled([fetchRss(rssZH), fetchRss(rssEN)])
-  const items = feeds
-    .flatMap((result) => result.status === 'fulfilled' ? parseFeed(result.value) : [])
-    .filter((item) => new Date(item.published_at).getTime() >= sevenDaysAgo)
-    .sort((a, b) => new Date(b.published_at).getTime() - new Date(a.published_at).getTime())
+    const feeds = await Promise.allSettled(languages.map((lang) => fetchRSSItems(query, lang)))
+    const results = filterByAge(
+      feeds.flatMap((result) => result.status === 'fulfilled' ? result.value : []),
+      maxDays
+    )
 
-  return translateEnglishTitles(dedupeNews(items).slice(0, 10))
+    if (results.length >= 1) {
+      console.log(`[fetchNews] Tier ${tier} succeeded: ${results.length} items for "${query}"`)
+    }
+
+    return results
+  }
+
+  const tiers: Array<{
+    tier: number
+    query: string
+    maxDays: number
+    languages: Array<'zh' | 'en'>
+  }> = [
+    { tier: 1, query: keywordQuery, maxDays: 7, languages: ['zh', 'en'] },
+    { tier: 2, query: topicQuery, maxDays: 30, languages: ['zh', 'en'] },
+    { tier: 3, query: firstKeyword || '', maxDays: 60, languages: ['zh'] },
+  ]
+
+  for (const tier of tiers) {
+    const items = await runTier(tier.tier, tier.query, tier.maxDays, tier.languages)
+    if (items.length >= 1) {
+      const prepared = dedupeNews(items)
+        .sort((a, b) => new Date(b.published_at).getTime() - new Date(a.published_at).getTime())
+        .slice(0, 10)
+
+      return translateEnglishTitles(prepared)
+    }
+  }
+
+  return []
 }
