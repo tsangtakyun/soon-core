@@ -49,6 +49,7 @@ type TrendDraft = {
 type DetailField = 'description' | 'why_trending' | 'creator_tips'
 type NewsHeadline = {
   title: string
+  original_title?: string
   source?: string
   url?: string
   published_at?: string | null
@@ -161,12 +162,25 @@ function parseNewsHeadlines(value: unknown) {
       const news = item as Partial<NewsHeadline>
       return {
         title: String(news.title ?? '').trim(),
+        original_title: typeof news.original_title === 'string' ? news.original_title : '',
         source: typeof news.source === 'string' ? news.source : '',
         url: typeof news.url === 'string' ? news.url : '',
         published_at: typeof news.published_at === 'string' ? news.published_at : null,
       }
     })
     .filter((item) => item.title)
+}
+
+function relativeTime(value?: string | null) {
+  if (!value) return ''
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return ''
+  const diff = Date.now() - date.getTime()
+  const minutes = Math.max(1, Math.floor(diff / 60000))
+  if (minutes < 60) return `${minutes} 分前`
+  const hours = Math.floor(minutes / 60)
+  if (hours < 24) return `${hours} 小時前`
+  return `${Math.floor(hours / 24)} 天前`
 }
 
 function readImageAsDataUrl(file: File) {
@@ -222,6 +236,7 @@ function PrediktClient() {
   const [draft, setDraft] = useState<TrendDraft>(emptyDraft)
   const [saving, setSaving] = useState(false)
   const [fetchingNews, setFetchingNews] = useState(false)
+  const [generatingKeywords, setGeneratingKeywords] = useState(false)
   const [showDetail, setShowDetail] = useState(false)
   const [description, setDescription] = useState('')
   const [whyTrending, setWhyTrending] = useState('')
@@ -369,6 +384,7 @@ function PrediktClient() {
       deadline_timezone: deadlineTimezone,
       news_headlines: newsItems.filter((item) => item.title.trim()).map((item) => ({
         title: item.title.trim(),
+        original_title: item.original_title?.trim() || undefined,
         source: item.source?.trim() || '',
         url: item.url?.trim() || '',
         published_at: item.published_at || null,
@@ -416,6 +432,29 @@ function PrediktClient() {
       window.alert('抓取新聞失敗：' + (fetchError instanceof Error ? fetchError.message : '未知錯誤'))
     } finally {
       setFetchingNews(false)
+    }
+  }
+
+  async function generateKeywords() {
+    if (!draft.topic.trim()) {
+      window.alert('請先輸入話題名稱')
+      return
+    }
+
+    setGeneratingKeywords(true)
+    try {
+      const response = await fetch('/api/predikt/generate-keywords', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ topic: draft.topic, description }),
+      })
+      const data = await response.json().catch(() => ({}))
+      if (!response.ok) throw new Error(data.error || 'AI 生成關鍵字失敗')
+      setDraft((current) => ({ ...current, keywords: data.keywords || current.keywords }))
+    } catch (generateError) {
+      window.alert('AI 生成關鍵字失敗：' + (generateError instanceof Error ? generateError.message : '未知錯誤'))
+    } finally {
+      setGeneratingKeywords(false)
     }
   }
 
@@ -664,15 +703,30 @@ function PrediktClient() {
                   ))}
                 </select>
               </label>
-              <label style={labelStyle}>
-                搜尋關鍵字
-                <input
-                  value={draft.keywords}
-                  placeholder="例：2026世界盃, FIFA, 香港球迷"
-                  onChange={(event) => setDraft((current) => ({ ...current, keywords: event.target.value }))}
-                  style={inputStyle}
-                />
-              </label>
+              <div style={labelStyle}>
+                <span>搜尋關鍵字</span>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <input
+                    value={draft.keywords}
+                    placeholder="例：2026世界盃, FIFA World Cup, 香港球迷"
+                    onChange={(event) => setDraft((current) => ({ ...current, keywords: event.target.value }))}
+                    style={inputStyle}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => void generateKeywords()}
+                    disabled={generatingKeywords || !draft.topic.trim()}
+                    title={!draft.topic.trim() ? '請先填寫話題名稱' : ''}
+                    style={{
+                      ...ghostButtonStyle,
+                      flexShrink: 0,
+                      opacity: generatingKeywords || !draft.topic.trim() ? 0.55 : 1,
+                    }}
+                  >
+                    {generatingKeywords ? '生成中...' : '✨ AI 生成'}
+                  </button>
+                </div>
+              </div>
               <label style={labelStyle}>Heat Score<input type="number" min={0} max={100} value={draft.heat_score} onChange={(event) => setDraft((current) => ({ ...current, heat_score: clampScore(Number(event.target.value)) }))} style={inputStyle} /></label>
               <label style={labelStyle}>
                 截止時間
@@ -800,7 +854,10 @@ function PrediktClient() {
                     />
                     <div>
                       <div style={{ alignItems: 'center', display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                        <label style={{ color: '#aaa', fontSize: 13 }}>相關新聞</label>
+                        <div>
+                          <label style={{ color: '#aaa', fontSize: 13 }}>相關新聞</label>
+                          <div style={{ color: '#10b981', fontSize: 11, marginTop: 4 }}>Cron Job 每小時自動更新中 ✓</div>
+                        </div>
                         <div style={{ display: 'flex', gap: 8 }}>
                           <button
                             type="button"
@@ -821,8 +878,16 @@ function PrediktClient() {
                       </div>
                       <div style={{ display: 'grid', gap: 10 }}>
                         {newsItems.length === 0 && <div style={newsEmptyStyle}>暫時未有新聞。可用關鍵字自動抓取，或手動新增。</div>}
-                        {newsItems.map((item, index) => (
+                        {newsItems.slice(0, 10).map((item, index) => (
                           <div key={`${item.title}-${index}`} style={newsItemStyle}>
+                            {item.title && (
+                              <div style={{ color: '#ffffff', fontSize: 13, fontWeight: 700, lineHeight: 1.45 }}>
+                                {item.title}
+                                <span style={{ color: '#888888', fontSize: 12, fontWeight: 400 }}>
+                                  {' '}| {item.source || 'News'}{relativeTime(item.published_at) ? ` · ${relativeTime(item.published_at)}` : ''}
+                                </span>
+                              </div>
+                            )}
                             <input
                               value={item.title}
                               placeholder="新聞標題"
