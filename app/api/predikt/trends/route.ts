@@ -26,6 +26,12 @@ function clampScore(value: unknown) {
   return Math.max(0, Math.min(100, number))
 }
 
+function normaliseDeadline(value: unknown) {
+  if (typeof value !== 'string' || !value.trim()) return null
+  const date = new Date(value)
+  return Number.isNaN(date.getTime()) ? null : date.toISOString()
+}
+
 function trendPayload(body: Record<string, unknown>) {
   return {
     icon: typeof body.icon === 'string' && body.icon.trim() ? body.icon.trim() : '💬',
@@ -33,6 +39,8 @@ function trendPayload(body: Record<string, unknown>) {
     heat_score: clampScore(body.heat_score),
     is_active: Boolean(body.is_active),
     angles: Array.isArray(body.angles) ? body.angles : [],
+    deadline_at: normaliseDeadline(body.deadline_at),
+    news_headlines: Array.isArray(body.news_headlines) ? body.news_headlines : [],
     description: typeof body.description === 'string' && body.description.trim() ? body.description.trim() : null,
     why_trending: typeof body.why_trending === 'string' && body.why_trending.trim() ? body.why_trending.trim() : null,
     creator_tips: typeof body.creator_tips === 'string' && body.creator_tips.trim() ? body.creator_tips.trim() : null,
@@ -87,6 +95,10 @@ export async function PATCH(request: NextRequest) {
   if ('heat_score' in body) allowedUpdates.heat_score = clampScore(body.heat_score)
   if ('is_active' in body) allowedUpdates.is_active = Boolean(body.is_active)
   if ('angles' in body) allowedUpdates.angles = Array.isArray(body.angles) ? body.angles : []
+  if ('deadline_at' in body) {
+    allowedUpdates.deadline_at = normaliseDeadline(body.deadline_at)
+  }
+  if ('news_headlines' in body) allowedUpdates.news_headlines = Array.isArray(body.news_headlines) ? body.news_headlines : []
   if ('description' in body) allowedUpdates.description = typeof body.description === 'string' && body.description.trim() ? body.description.trim() : null
   if ('why_trending' in body) allowedUpdates.why_trending = typeof body.why_trending === 'string' && body.why_trending.trim() ? body.why_trending.trim() : null
   if ('creator_tips' in body) allowedUpdates.creator_tips = typeof body.creator_tips === 'string' && body.creator_tips.trim() ? body.creator_tips.trim() : null

@@ -25,6 +25,8 @@ type Trend = {
   heat_score: number
   angles: TrendAngle[] | null
   is_active: boolean
+  deadline_at?: string | null
+  news_headlines?: Array<{ title?: string }> | null
   description?: string | null
   why_trending?: string | null
   creator_tips?: string | null
@@ -100,6 +102,22 @@ function isImageIcon(value: string | null | undefined) {
   return Boolean(value && (/^(https?:|data:image\/)/.test(value)))
 }
 
+function toDatetimeLocalValue(value: string | null | undefined) {
+  if (!value) return ''
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return ''
+  const offsetDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000)
+  return offsetDate.toISOString().slice(0, 16)
+}
+
+function parseNewsHeadlines(value: unknown) {
+  if (!Array.isArray(value)) return []
+  return value
+    .map((item) => typeof item === 'string' ? item : String((item as { title?: unknown }).title ?? ''))
+    .map((title) => title.trim())
+    .filter(Boolean)
+}
+
 function readImageAsDataUrl(file: File) {
   return new Promise<string>((resolve, reject) => {
     const reader = new FileReader()
@@ -157,6 +175,8 @@ function PrediktClient() {
   const [whyTrending, setWhyTrending] = useState('')
   const [creatorTips, setCreatorTips] = useState('')
   const [relatedLinksText, setRelatedLinksText] = useState('')
+  const [deadlineAt, setDeadlineAt] = useState('')
+  const [newsHeadlinesText, setNewsHeadlinesText] = useState('')
   const [generatingField, setGeneratingField] = useState<DetailField | null>(null)
 
   useEffect(() => {
@@ -231,7 +251,9 @@ function PrediktClient() {
     setWhyTrending(trend.why_trending || '')
     setCreatorTips(trend.creator_tips || '')
     setRelatedLinksText((trend.related_links || []).map((link) => link.url).filter(Boolean).join('\n'))
-    setShowDetail(Boolean(trend.description || trend.why_trending || trend.creator_tips || (trend.related_links || []).length > 0))
+    setDeadlineAt(toDatetimeLocalValue(trend.deadline_at))
+    setNewsHeadlinesText(parseNewsHeadlines(trend.news_headlines).join('\n'))
+    setShowDetail(Boolean(trend.description || trend.why_trending || trend.creator_tips || (trend.related_links || []).length > 0 || parseNewsHeadlines(trend.news_headlines).length > 0))
     setShowModal(true)
   }
 
@@ -285,6 +307,10 @@ function PrediktClient() {
       heat_score: clampScore(Number(draft.heat_score)),
       is_active: draft.is_active,
       angles: normaliseAngles(draft.angles),
+      deadline_at: deadlineAt ? new Date(deadlineAt).toISOString() : null,
+      news_headlines: newsHeadlinesText
+        ? newsHeadlinesText.split('\n').map((title) => title.trim()).filter(Boolean).map((title) => ({ title }))
+        : [],
       description: description.trim() || null,
       why_trending: whyTrending.trim() || null,
       creator_tips: creatorTips.trim() || null,
@@ -418,6 +444,8 @@ function PrediktClient() {
     setWhyTrending('')
     setCreatorTips('')
     setRelatedLinksText('')
+    setDeadlineAt('')
+    setNewsHeadlinesText('')
   }
 
   function closeModal() {
@@ -455,7 +483,7 @@ function PrediktClient() {
               <table style={{ borderCollapse: 'collapse', minWidth: '860px', width: '100%' }}>
                 <thead>
                   <tr>
-                    {['Icon', '話題', 'Heat Score', 'Angles', '狀態', '操作'].map((header) => (
+                    {['Icon', '話題', 'Heat Score', '截止時間', 'Angles', '狀態', '操作'].map((header) => (
                       <th key={header} style={tableHeadStyle}>{header}</th>
                     ))}
                   </tr>
@@ -476,6 +504,7 @@ function PrediktClient() {
                           style={{ ...inputStyle, width: '88px' }}
                         />
                       </td>
+                      <td style={tableCellStyle}>{trend.deadline_at ? new Date(trend.deadline_at).toLocaleString('zh-HK', { dateStyle: 'medium', timeStyle: 'short' }) : '未設定'}</td>
                       <td style={tableCellStyle}>{parseAngles(trend.angles).length} 個角度</td>
                       <td style={tableCellStyle}>
                         <button
@@ -529,6 +558,16 @@ function PrediktClient() {
               </div>
               <label style={labelStyle}>話題名稱<input value={draft.topic} placeholder="2026 世界盃" onChange={(event) => setDraft((current) => ({ ...current, topic: event.target.value }))} style={inputStyle} /></label>
               <label style={labelStyle}>Heat Score<input type="number" min={0} max={100} value={draft.heat_score} onChange={(event) => setDraft((current) => ({ ...current, heat_score: clampScore(Number(event.target.value)) }))} style={inputStyle} /></label>
+              <label style={labelStyle}>
+                截止時間
+                <input
+                  type="datetime-local"
+                  value={deadlineAt}
+                  onChange={(event) => setDeadlineAt(event.target.value)}
+                  style={inputStyle}
+                />
+                <small style={hintStyle}>例如 2026-05-31 23:59，會喺 SOON-LOG 討論區投票卡顯示。</small>
+              </label>
               <label style={{ ...labelStyle, alignItems: 'center', display: 'flex', flexDirection: 'row', gap: '10px' }}><input type="checkbox" checked={draft.is_active} onChange={(event) => setDraft((current) => ({ ...current, is_active: event.target.checked }))} />公開顯示</label>
 
               <div>
@@ -629,6 +668,12 @@ function PrediktClient() {
                       value={relatedLinksText}
                       onChange={setRelatedLinksText}
                       placeholder="https://example.com"
+                    />
+                    <DetailTextarea
+                      label="新聞標題（每行一個）"
+                      value={newsHeadlinesText}
+                      onChange={setNewsHeadlinesText}
+                      placeholder="Reuters：市場預期決賽爆冷機會上升&#10;ESPN：巴黎聖日耳門陣容狀態保持穩定"
                     />
                   </div>
                 )}
