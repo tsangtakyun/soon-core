@@ -1,5 +1,6 @@
 'use client'
 
+import type { ChangeEvent } from 'react'
 import { Suspense, useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 
@@ -93,6 +94,43 @@ function normaliseAngles(angles: TrendAngle[]) {
     runningTotal += percentage
     return { ...angle, percentage }
   })
+}
+
+function isImageIcon(value: string | null | undefined) {
+  return Boolean(value && (/^(https?:|data:image\/)/.test(value)))
+}
+
+function readImageAsDataUrl(file: File) {
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => resolve(String(reader.result ?? ''))
+    reader.onerror = () => reject(new Error('讀取圖片失敗'))
+    reader.readAsDataURL(file)
+  })
+}
+
+function IconPreview({ value, size = 34 }: { value?: string | null; size?: number }) {
+  if (isImageIcon(value)) {
+    return (
+      <img
+        src={value || ''}
+        alt=""
+        style={{
+          borderRadius: Math.round(size * 0.22),
+          display: 'block',
+          height: size,
+          objectFit: 'cover',
+          width: size,
+        }}
+      />
+    )
+  }
+
+  return (
+    <span style={{ fontFamily: 'Apple Color Emoji, Segoe UI Emoji, Noto Color Emoji, sans-serif', fontSize: Math.round(size * 0.72), lineHeight: 1 }}>
+      {value || '💬'}
+    </span>
+  )
 }
 
 export default function PrediktPage() {
@@ -329,6 +367,51 @@ function PrediktClient() {
     }))
   }
 
+  async function uploadTopicIcon(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0]
+    event.target.value = ''
+    if (!file) return
+    if (!file.type.startsWith('image/')) {
+      window.alert('請上傳圖片檔案')
+      return
+    }
+    if (file.size > 300 * 1024) {
+      window.alert('Icon 圖片請壓縮至 300KB 以下，建議 256×256 PNG/WebP 透明底。')
+      return
+    }
+
+    try {
+      const dataUrl = await readImageAsDataUrl(file)
+      setDraft((current) => ({ ...current, icon: dataUrl }))
+    } catch (uploadError) {
+      window.alert(uploadError instanceof Error ? uploadError.message : '上傳失敗')
+    }
+  }
+
+  async function uploadAngleIcon(index: number, event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0]
+    event.target.value = ''
+    if (!file) return
+    if (!file.type.startsWith('image/')) {
+      window.alert('請上傳圖片檔案')
+      return
+    }
+    if (file.size > 300 * 1024) {
+      window.alert('角度 icon 圖片請壓縮至 300KB 以下，建議 128×128 PNG/WebP 透明底。')
+      return
+    }
+
+    try {
+      const dataUrl = await readImageAsDataUrl(file)
+      setDraft((current) => ({
+        ...current,
+        angles: current.angles.map((item, itemIndex) => itemIndex === index ? { ...item, emoji: dataUrl } : item),
+      }))
+    } catch (uploadError) {
+      window.alert(uploadError instanceof Error ? uploadError.message : '上傳失敗')
+    }
+  }
+
   function resetDetailFields() {
     setShowDetail(false)
     setDescription('')
@@ -380,7 +463,7 @@ function PrediktClient() {
                 <tbody>
                   {trends.map((trend) => (
                     <tr key={trend.id} style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }}>
-                      <td style={tableCellStyle}><span style={{ fontFamily: 'Apple Color Emoji, Segoe UI Emoji, Noto Color Emoji, sans-serif', fontSize: '24px' }}>{trend.icon || '💬'}</span></td>
+                      <td style={tableCellStyle}><IconPreview value={trend.icon} size={28} /></td>
                       <td style={tableCellStyle}><strong style={{ color: '#ffffff', display: 'block', fontSize: '16px' }}>{trend.topic}</strong></td>
                       <td style={tableCellStyle}>
                         <input
@@ -430,16 +513,20 @@ function PrediktClient() {
             </div>
 
             <div style={{ display: 'grid', gap: '14px' }}>
-              <label style={labelStyle}>
-                話題 Icon
-                <input
-                  value={draft.icon}
-                  placeholder="輸入 emoji，例如 ⚽ 🎬 🤖"
-                  maxLength={4}
-                  onChange={(event) => setDraft((current) => ({ ...current, icon: event.target.value }))}
-                  style={{ ...inputStyle, fontFamily: 'Apple Color Emoji, Segoe UI Emoji, Noto Color Emoji, sans-serif', fontSize: '20px' }}
-                />
-              </label>
+              <div style={labelStyle}>
+                <span>話題 Icon</span>
+                <div style={uploadRowStyle}>
+                  <div style={iconPreviewBoxStyle}>
+                    <IconPreview value={draft.icon} size={38} />
+                  </div>
+                  <label style={uploadButtonStyle}>
+                    上傳圖片
+                    <input type="file" accept="image/png,image/jpeg,image/webp,image/*" onChange={(event) => void uploadTopicIcon(event)} style={{ display: 'none' }} />
+                  </label>
+                  <button type="button" onClick={() => setDraft((current) => ({ ...current, icon: '💬' }))} style={ghostButtonStyle}>清除</button>
+                </div>
+                <small style={hintStyle}>建議 256×256 PNG/WebP，透明底最佳，檔案小於 300KB。會同步顯示於 SOON-LOG mobile。</small>
+              </div>
               <label style={labelStyle}>話題名稱<input value={draft.topic} placeholder="2026 世界盃" onChange={(event) => setDraft((current) => ({ ...current, topic: event.target.value }))} style={inputStyle} /></label>
               <label style={labelStyle}>Heat Score<input type="number" min={0} max={100} value={draft.heat_score} onChange={(event) => setDraft((current) => ({ ...current, heat_score: clampScore(Number(event.target.value)) }))} style={inputStyle} /></label>
               <label style={{ ...labelStyle, alignItems: 'center', display: 'flex', flexDirection: 'row', gap: '10px' }}><input type="checkbox" checked={draft.is_active} onChange={(event) => setDraft((current) => ({ ...current, is_active: event.target.checked }))} />公開顯示</label>
@@ -452,20 +539,12 @@ function PrediktClient() {
                 {angleTotal !== 100 && <p style={{ color: '#f59e0b', fontSize: '12px', margin: '0 0 8px' }}>目前百分比總和是 {angleTotal}%，儲存時會自動 normalize 到 100%。</p>}
                 <div style={{ display: 'grid', gap: '8px' }}>
                   {draft.angles.map((angle, index) => (
-                    <div key={index} style={{ display: 'grid', gap: '8px', gridTemplateColumns: '58px 1fr 92px 42px' }}>
-                      <input
-                        value={angle.emoji}
-                        placeholder="🇫🇷"
-                        maxLength={4}
-                        onChange={(event) => {
-                          const nextValue = event.target.value
-                          setDraft((current) => ({
-                            ...current,
-                            angles: current.angles.map((item, itemIndex) => itemIndex === index ? { ...item, emoji: nextValue } : item),
-                          }))
-                        }}
-                        style={{ ...inputStyle, fontFamily: 'Apple Color Emoji, Segoe UI Emoji, Noto Color Emoji, sans-serif', fontSize: '20px', textAlign: 'center' }}
-                      />
+                    <div key={index} style={{ display: 'grid', gap: '8px', gridTemplateColumns: '86px 1fr 92px 42px' }}>
+                      <label style={angleUploadStyle} title="建議 128×128 PNG/WebP，透明底最佳，小於 300KB">
+                        <IconPreview value={angle.emoji} size={28} />
+                        <span>上傳</span>
+                        <input type="file" accept="image/png,image/jpeg,image/webp,image/*" onChange={(event) => void uploadAngleIcon(index, event)} style={{ display: 'none' }} />
+                      </label>
                       <input
                         value={angle.name}
                         placeholder="角度名稱"
@@ -652,6 +731,11 @@ const tableHeadStyle = { color: '#888888', fontSize: '12px', fontWeight: 600, pa
 const tableCellStyle = { color: '#d1d5db', fontSize: '13px', padding: '12px', verticalAlign: 'middle' as const }
 const inputStyle = { background: '#0f0f0f', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '8px', color: '#ffffff', fontSize: '13px', outline: 'none', padding: '9px 10px', width: '100%' }
 const labelStyle = { color: '#f5f5f5', display: 'grid', fontSize: '13px', gap: '6px' }
+const hintStyle = { color: '#888888', fontSize: '12px', lineHeight: 1.5 }
+const uploadRowStyle = { alignItems: 'center', display: 'flex', gap: '10px' }
+const iconPreviewBoxStyle = { alignItems: 'center', background: '#0f0f0f', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '10px', display: 'flex', height: '56px', justifyContent: 'center', width: '56px' }
+const uploadButtonStyle = { background: '#1f1538', border: '1px solid #4c1d95', borderRadius: '8px', color: '#c4b5fd', cursor: 'pointer', fontSize: '12px', fontWeight: 600, padding: '9px 12px' }
+const angleUploadStyle = { alignItems: 'center', background: '#0f0f0f', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '8px', color: '#a78bfa', cursor: 'pointer', display: 'flex', fontSize: '11px', gap: '7px', justifyContent: 'center', minHeight: '42px', padding: '7px 8px' }
 const primaryButtonStyle = { background: '#7c3aed', border: 'none', borderRadius: '9px', color: '#ffffff', cursor: 'pointer', fontSize: '13px', fontWeight: 600, padding: '10px 16px' }
 const ghostButtonStyle = { background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '8px', color: '#a78bfa', cursor: 'pointer', fontSize: '12px', padding: '8px 10px' }
 const dangerButtonStyle = { background: 'transparent', border: '1px solid rgba(239,68,68,0.35)', borderRadius: '8px', color: '#f87171', cursor: 'pointer', fontSize: '12px', padding: '8px 10px' }
