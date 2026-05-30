@@ -34,7 +34,7 @@ export const pipelines: Record<PipelineId, PipelineConfig> = {
       },
       {
         id: 'script',
-        label: 'Script',
+        label: 'script',
         icon: '📝',
         url: 'https://script-generator-xi.vercel.app?embedded=true',
       },
@@ -67,7 +67,7 @@ export const pipelines: Record<PipelineId, PipelineConfig> = {
         id: 'script',
         label: '劇本生產線',
         icon: '📝',
-        url: 'https://soon-youtube-idea.vercel.app/workbench?embedded=true&v=20260531-dark-topic-library',
+        url: 'https://soon-youtube-idea.vercel.app/workbench?embedded=true&v=20260531-dark-script',
       },
       {
         id: 'storyboard',
