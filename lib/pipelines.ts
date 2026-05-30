@@ -65,9 +65,9 @@ export const pipelines: Record<PipelineId, PipelineConfig> = {
       },
       {
         id: 'script',
-        label: 'Script',
+        label: '劇本生產線',
         icon: '📝',
-        url: 'https://script-generator-youtube.vercel.app?embedded=true',
+        url: 'https://soon-youtube-idea.vercel.app/workbench?embedded=true',
       },
       {
         id: 'storyboard',
