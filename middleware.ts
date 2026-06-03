@@ -8,7 +8,7 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 export async function middleware(req: NextRequest) {
   let res = NextResponse.next({ request: req })
   const pathname = req.nextUrl.pathname
-  const publicApiRoutes = ['/api/invite/accept', '/api/auth']
+  const publicApiRoutes = ['/api/invite/accept', '/api/auth', '/api/ai/generate']
 
   if (publicApiRoutes.some((route) => pathname.startsWith(route))) {
     return res
