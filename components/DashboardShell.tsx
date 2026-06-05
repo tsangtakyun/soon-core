@@ -10,7 +10,7 @@ import { supabase } from '@/lib/supabase'
 import type { Project, Workspace, WorkspaceType } from '@/lib/types'
 import { workspaceTypeOptions } from '@/lib/types'
 
-type Section = 'home' | 'work' | 'docs' | 'schedule' | 'finance' | 'reply' | 'predikt' | 'deals' | 'settings' | 'pipeline'
+type Section = 'home' | 'work' | 'docs' | 'schedule' | 'finance' | 'reply' | 'predikt' | 'deals' | 'packaging' | 'judge' | 'settings' | 'pipeline'
 
 interface DashboardShellProps {
   activeSection: Section
@@ -48,20 +48,35 @@ type ScriptPickerDoc = {
   updated_at?: string
 }
 
-const ADMIN_EMAILS = [
-  'tsangtakyun@gmail.com',
-]
+type SidebarIconName =
+  | 'home'
+  | 'work'
+  | 'docs'
+  | 'schedule'
+  | 'finance'
+  | 'reply'
+  | 'predikt'
+  | 'deals'
+  | 'packaging'
+  | 'judge'
+  | 'settings'
+  | PipelineTool['id']
 
 const primaryNav = [
-  { href: '/', label: '首頁', icon: '🏠', section: 'home' },
-  { href: '/work', label: '我的工作', icon: '📅', section: 'work' },
-  { href: '/docs', label: '文件中心', icon: '📄', section: 'docs' },
-  { href: '/schedule', label: '行程中心', icon: '✈️', section: 'schedule' },
-  { href: '/finance', label: '財務中心', icon: '💰', section: 'finance' },
-  { href: '/reply', label: '回覆中心', icon: '💬', section: 'reply' },
-  { href: '/predikt', label: '討論區中心', icon: '💬', section: 'predikt', adminOnly: true },
-  { href: '/deals', label: '交易中心', icon: '💼', section: 'deals' },
-] as const
+  { href: '/', label: '首頁', icon: 'home', section: 'home' },
+  { href: '/work', label: '我的工作', icon: 'work', section: 'work' },
+  { href: '/docs', label: '文件中心', icon: 'docs', section: 'docs' },
+  { href: '/schedule', label: '行程中心', icon: 'schedule', section: 'schedule' },
+  { href: '/finance', label: '財務中心', icon: 'finance', section: 'finance' },
+  { href: '/reply', label: '回覆中心', icon: 'reply', section: 'reply' },
+  { href: '/predikt', label: '討論區中心', icon: 'predikt', section: 'predikt' },
+  { href: '/deals', label: '交易中心', icon: 'deals', section: 'deals' },
+] as const satisfies ReadonlyArray<{
+  href: string
+  label: string
+  icon: SidebarIconName
+  section: Exclude<Section, 'settings' | 'pipeline'>
+}>
 
 const SIDEBAR_WORKSPACES_CACHE_KEY = 'soon_sidebar_workspaces'
 
@@ -110,11 +125,6 @@ export function DashboardShell({ activeSection, pipeline, tool, children }: Dash
   const [scriptPickerLoading, setScriptPickerLoading] = useState(false)
   const [scriptPickerError, setScriptPickerError] = useState('')
   const toolIframeRef = useRef<HTMLIFrameElement | null>(null)
-  const isAdmin = ADMIN_EMAILS.includes(authProfile?.email ?? '')
-  const visiblePrimaryNav = useMemo(
-    () => primaryNav.filter((item) => !('adminOnly' in item) || !item.adminOnly || isAdmin),
-    [isAdmin]
-  )
 
   function makeClientId() {
     if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) return crypto.randomUUID()
@@ -442,6 +452,9 @@ export function DashboardShell({ activeSection, pipeline, tool, children }: Dash
   const toolScriptId = searchParams.get('scriptId') || ''
   const toolStoryboardId = searchParams.get('storyboardId') || ''
   const toolTitle = searchParams.get('title') || ''
+  const toolTopicId = searchParams.get('topicId') || searchParams.get('topic_id') || ''
+  const toolTarget = searchParams.get('target') || ''
+  const toolSource = searchParams.get('source') || searchParams.get('source_material') || ''
 
   function safeDecodeParam(value: string) {
     try {
@@ -463,6 +476,11 @@ export function DashboardShell({ activeSection, pipeline, tool, children }: Dash
     if (toolScriptId) url.searchParams.set('scriptId', toolScriptId)
     if (toolStoryboardId) url.searchParams.set('storyboardId', toolStoryboardId)
     if (toolTitle) url.searchParams.set('title', safeDecodeParam(toolTitle))
+    if (toolTarget) url.searchParams.set('target', toolTarget)
+    if (toolSource) url.searchParams.set('source', safeDecodeParam(toolSource))
+    if (pipeline?.id === 'youtube' && tool?.id === 'script' && toolTopicId) {
+      url.searchParams.set('topic_id', toolTopicId)
+    }
     return url.toString()
   }
 
@@ -614,12 +632,12 @@ export function DashboardShell({ activeSection, pipeline, tool, children }: Dash
       void sendAuthToToolIframe()
     }, delay))
     return () => timers.forEach((timer) => window.clearTimeout(timer))
-  }, [tool?.url, activeWorkspaceId, toolTopic, toolBackground, toolLocation, toolScript, toolScriptId, toolStoryboardId, toolTitle])
+  }, [tool?.url, activeWorkspaceId, toolTopic, toolBackground, toolLocation, toolScript, toolScriptId, toolStoryboardId, toolTitle, toolTopicId, toolTarget, toolSource])
 
   useEffect(() => {
     const handleNavigateTool = (event: MessageEvent) => {
       if (event.data?.type !== 'SOON_NAVIGATE_TOOL') return
-      const { pipeline: nextPipeline, tool: nextTool, topic, background, location, script, scriptId, storyboardId, title } = event.data
+      const { pipeline: nextPipeline, tool: nextTool, topic, topicId, topic_id, background, location, script, scriptId, storyboardId, title, target, source, source_material } = event.data
       if (!nextPipeline || !nextTool) return
 
       const params = new URLSearchParams()
@@ -630,6 +648,9 @@ export function DashboardShell({ activeSection, pipeline, tool, children }: Dash
       if (scriptId) params.set('scriptId', String(scriptId))
       if (storyboardId) params.set('storyboardId', String(storyboardId))
       if (title) params.set('title', encodeURIComponent(String(title)))
+      if (target) params.set('target', String(target))
+      if (source || source_material) params.set('source', encodeURIComponent(String(source || source_material)))
+      if (topicId || topic_id) params.set('topicId', String(topicId || topic_id))
       const query = params.toString()
       router.push(`/${nextPipeline}/${nextTool}${query ? `?${query}` : ''}`)
     }
@@ -713,63 +734,65 @@ export function DashboardShell({ activeSection, pipeline, tool, children }: Dash
           )}
         </div>
 
-        <nav className="core-nav" aria-label="Main navigation">
-          {visiblePrimaryNav.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={activeSection === item.section ? 'active' : ''}
-            >
-              <span>{item.icon}</span>
-              <span>{item.label}</span>
-              {item.section === 'deals' && dealsUnreadCount > 0 && (
-                <span className="sidebar-badge">{dealsUnreadCount > 99 ? '99+' : dealsUnreadCount}</span>
-              )}
-            </Link>
-          ))}
-        </nav>
-
-        <div className="core-divider" />
-
-        <span className="sidebar-start-label">開始創作</span>
-        <PipelineToggle activeId={activePipelineId} onChange={setActivePipelineId} />
-        <ToolNav pipeline={pipelines[activePipelineId]} activePath={pathname} />
-
-        <div className="core-divider" />
-
-        <section className="workspace-block">
-          <div className="sidebar-section-title">工作區</div>
-          <div className="workspace-list">
-            {workspaces.map((workspace) => (
-              <div key={workspace.id} className={`workspace-item ${workspace.id === activeWorkspaceId ? 'active' : ''}`}>
-                <Link
-                  href={`/work?workspace=${workspace.id}`}
-                  className="workspace-link"
-                  onClick={() => setActiveWorkspace(workspace.id, workspace.name)}
-                >
-                  <span>{workspace.type === 'ig' ? 'IG' : workspace.type === 'mixed' ? 'MX' : 'YT'}</span>
-                  <strong>{workspace.name}</strong>
-                  <em>{workspaceProjectCounts[workspace.id] ?? 0}</em>
-                </Link>
-                <button
-                  className="workspace-menu-button"
-                  type="button"
-                  aria-label={`開啟 ${workspace.name} 工作區資料`}
-                  onClick={() => openWorkspacePanel(workspace)}
-                >
-                  ⋯
-                </button>
-              </div>
+        <div className="core-sidebar-scroll">
+          <nav className="core-nav" aria-label="Main navigation">
+            {primaryNav.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={activeSection === item.section ? 'active' : ''}
+              >
+                <SidebarIcon name={item.icon} />
+                <span>{item.label}</span>
+                {item.section === 'deals' && dealsUnreadCount > 0 && (
+                  <span className="sidebar-badge">{dealsUnreadCount > 99 ? '99+' : dealsUnreadCount}</span>
+                )}
+              </Link>
             ))}
-            {sidebarDataLoaded && workspaces.length === 0 && <p className="empty-mini">未有工作區</p>}
-          </div>
-          <button className="ghost-button" type="button" onClick={() => void createWorkspace()}>
-            + 新增工作區
-          </button>
-        </section>
+          </nav>
+
+          <div className="core-divider" />
+
+          <span className="sidebar-start-label">開始創作</span>
+          <PipelineToggle activeId={activePipelineId} onChange={setActivePipelineId} />
+          <ToolNav pipeline={pipelines[activePipelineId]} activePath={pathname} />
+
+          <div className="core-divider" />
+
+          <section className="workspace-block">
+            <div className="sidebar-section-title">工作區</div>
+            <div className="workspace-list">
+              {workspaces.map((workspace) => (
+                <div key={workspace.id} className={`workspace-item ${workspace.id === activeWorkspaceId ? 'active' : ''}`}>
+                  <Link
+                    href={`/work?workspace=${workspace.id}`}
+                    className="workspace-link"
+                    onClick={() => setActiveWorkspace(workspace.id, workspace.name)}
+                  >
+                    <span>{workspace.type === 'ig' ? 'IG' : workspace.type === 'mixed' ? 'MX' : 'YT'}</span>
+                    <strong>{workspace.name}</strong>
+                    <em>{workspaceProjectCounts[workspace.id] ?? 0}</em>
+                  </Link>
+                  <button
+                    className="workspace-menu-button"
+                    type="button"
+                    aria-label={`開啟 ${workspace.name} 工作區資料`}
+                    onClick={() => openWorkspacePanel(workspace)}
+                  >
+                    ⋯
+                  </button>
+                </div>
+              ))}
+              {sidebarDataLoaded && workspaces.length === 0 && <p className="empty-mini">未有工作區</p>}
+            </div>
+            <button className="ghost-button" type="button" onClick={() => void createWorkspace()}>
+              + 新增工作區
+            </button>
+          </section>
+        </div>
 
         <Link href="/settings" className={`sidebar-settings-link ${activeSection === 'settings' ? 'active' : ''}`}>
-          <span>⚙️</span>
+          <SidebarIcon name="settings" />
           <span>設定</span>
         </Link>
 
@@ -1032,20 +1055,148 @@ function PipelineToggle({
   )
 }
 
+function SidebarIcon({ name }: { name: SidebarIconName }) {
+  const commonProps = {
+    className: 'sidebar-icon',
+    viewBox: '0 0 24 24',
+    fill: 'none',
+    stroke: 'currentColor',
+    strokeWidth: 1.8,
+    strokeLinecap: 'round' as const,
+    strokeLinejoin: 'round' as const,
+    'aria-hidden': true,
+  }
+
+  const paths: Record<SidebarIconName, React.ReactNode> = {
+    home: <path d="M4 10.5 12 4l8 6.5V20h-5v-5.5H9V20H4z" />,
+    work: (
+      <>
+        <rect x="4" y="5" width="16" height="15" rx="2" />
+        <path d="M8 3v4M16 3v4M4 10h16" />
+      </>
+    ),
+    docs: (
+      <>
+        <path d="M7 3h7l4 4v14H7z" />
+        <path d="M14 3v5h5M9 13h6M9 17h6" />
+      </>
+    ),
+    schedule: (
+      <>
+        <path d="M3.5 13.5 20 5l-5.5 15-3-6-6-3z" />
+        <path d="m11.5 14 3-3" />
+      </>
+    ),
+    finance: (
+      <>
+        <path d="M12 3v18M17 7.5c-.8-1.2-2.3-2-4.2-2-2.2 0-3.8 1-3.8 2.7 0 1.8 1.7 2.4 4.1 3 2.3.6 3.9 1.3 3.9 3.2 0 1.8-1.7 3-4.1 3-2 0-3.8-.8-4.9-2.2" />
+      </>
+    ),
+    reply: (
+      <>
+        <path d="M5 5h14v10H8l-3 3z" />
+        <path d="M8 9h8M8 12h5" />
+      </>
+    ),
+    predikt: (
+      <>
+        <path d="M4 6.5h16M4 12h12M4 17.5h9" />
+        <path d="m17 15 3 2.5-3 2.5z" />
+      </>
+    ),
+    deals: (
+      <>
+        <rect x="5" y="7" width="14" height="12" rx="2" />
+        <path d="M9 7V5h6v2M5 12h14" />
+      </>
+    ),
+    packaging: (
+      <>
+        <rect x="4" y="5" width="16" height="12" rx="2" />
+        <path d="M8 20h8M9 9h6M7 13h10" />
+      </>
+    ),
+    judge: (
+      <>
+        <path d="M12 4 4 8l8 4 8-4z" />
+        <path d="M6 10.5V15c0 2 2.7 3.5 6 3.5s6-1.5 6-3.5v-4.5" />
+        <path d="m9.5 14 1.5 1.5 3.5-4" />
+      </>
+    ),
+    settings: (
+      <>
+        <circle cx="12" cy="12" r="3" />
+        <path d="M12 3.5v2M12 18.5v2M4.6 7.8l1.7 1M17.7 15.2l1.7 1M4.6 16.2l1.7-1M17.7 8.8l1.7-1M3.5 12h2M18.5 12h2" />
+      </>
+    ),
+    idea: (
+      <>
+        <path d="M9 18h6M10 21h4" />
+        <path d="M8 13.5a5 5 0 1 1 8 0c-.9.9-1.4 1.7-1.5 2.5h-5c-.1-.8-.6-1.6-1.5-2.5z" />
+      </>
+    ),
+    script: (
+      <>
+        <path d="M7 4h10v16H7z" />
+        <path d="M9.5 8h5M9.5 12h5M9.5 16h3" />
+      </>
+    ),
+    storyboard: (
+      <>
+        <rect x="4" y="5" width="7" height="6" rx="1" />
+        <rect x="13" y="5" width="7" height="6" rx="1" />
+        <rect x="4" y="13" width="7" height="6" rx="1" />
+        <rect x="13" y="13" width="7" height="6" rx="1" />
+      </>
+    ),
+    production: (
+      <>
+        <rect x="4" y="7" width="13" height="10" rx="2" />
+        <path d="m17 10 3-2v8l-3-2zM8 5l2 2M14 5l-2 2" />
+      </>
+    ),
+    motion: (
+      <>
+        <rect x="4" y="5" width="16" height="11" rx="2" />
+        <path d="M8 20h8M12 16v4M8 9l2.5 2.5L14 8l2 3" />
+      </>
+    ),
+    subtitle: (
+      <>
+        <rect x="4" y="5" width="16" height="14" rx="2" />
+        <path d="M7 14h5M14 14h3M7 17h10" />
+      </>
+    ),
+  }
+
+  return <svg {...commonProps}>{paths[name]}</svg>
+}
+
 function ToolNav({ pipeline, activePath }: { pipeline: PipelineConfig; activePath: string }) {
+  const youtubeExperimentLinks = pipeline.id === 'youtube'
+    ? [
+        { href: '/packaging', label: 'Packaging', icon: 'packaging' as const },
+        { href: '/judge', label: 'Hook/Ending Judge', icon: 'judge' as const },
+      ]
+    : []
+
   return (
-    <nav className="tool-nav compact" aria-label={`${pipeline.label} tools`}>
+    <nav className="tool-nav compact" aria-label={`${pipeline.label} 工具`}>
       {pipeline.tools.map((item) => {
         const href = getPipelinePath(pipeline.id, item.id)
         return (
           <Link key={`${pipeline.id}-${item.id}`} href={href} className={activePath === href ? 'active' : ''}>
-            <span className="tool-icon" aria-hidden="true">
-              {item.icon}
-            </span>
+            <SidebarIcon name={item.icon} />
             <span>{item.label}</span>
           </Link>
         )
       })}
+      {youtubeExperimentLinks.map((item) => (
+        <Link key={item.href} href={item.href} className={activePath === item.href ? 'active' : ''}>
+          <SidebarIcon name={item.icon} />
+          <span>{item.label}</span>
+        </Link>
+      ))}
     </nav>
   )
 }
