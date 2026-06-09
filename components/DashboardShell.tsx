@@ -1187,7 +1187,7 @@ function ToolNav({ pipeline, activePath }: { pipeline: PipelineConfig; activePat
         const href = getPipelinePath(pipeline.id, item.id)
         return (
           <Link key={`${pipeline.id}-${item.id}`} href={href} className={activePath === href ? 'active' : ''}>
-            <SidebarIcon name={item.icon} />
+            <SidebarIcon name={item.id} />
             <span>{item.label}</span>
           </Link>
         )
