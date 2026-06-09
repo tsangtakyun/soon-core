@@ -1,6 +1,6 @@
 'use client'
 
-import { Suspense, useState, type MouseEvent } from 'react'
+import { Suspense, useCallback, useEffect, useRef, useState, type MouseEvent } from 'react'
 import { createClient } from '@supabase/supabase-js'
 
 import { DashboardShell } from '@/components/DashboardShell'
@@ -82,6 +82,7 @@ export default function SchedulePage() {
   const [iframeError, setIframeError] = useState(false)
   const [savingRundown, setSavingRundown] = useState(false)
   const [syncingSchedule, setSyncingSchedule] = useState(false)
+  const syncingScheduleRef = useRef(false)
 
   function openRundownPrint() {
     const params = new URLSearchParams()
@@ -161,12 +162,11 @@ export default function SchedulePage() {
     }
   }
 
-  async function handleSyncSchedule(event: MouseEvent<HTMLButtonElement>) {
-    event.preventDefault()
+  const syncScheduleToApp = useCallback(async ({ silent = false }: { silent?: boolean } = {}) => {
+    if (syncingScheduleRef.current) return
 
-    if (syncingSchedule) return
-
-    setSyncingSchedule(true)
+    syncingScheduleRef.current = true
+    if (!silent) setSyncingSchedule(true)
     try {
       const response = await fetch('/api/schedule/sync', { method: 'POST' })
       const payload = (await response.json().catch(() => ({}))) as {
@@ -177,20 +177,44 @@ export default function SchedulePage() {
       }
 
       if (!response.ok) {
-        window.alert(payload.error || '同步失敗，請稍後再試。')
+        if (!silent) window.alert(payload.error || '同步失敗，請稍後再試。')
         return
       }
 
       window.dispatchEvent(new Event('soon-data-updated'))
       const removedText = payload.removed ? `，並移除 ${payload.removed} 個舊日程` : ''
-      window.alert(`✅ 已同步 ${payload.synced ?? 0} 個日程到 App${removedText}`)
+      if (!silent) window.alert(`✅ 已同步 ${payload.synced ?? 0} 個日程到 App${removedText}`)
     } catch (error) {
       console.error('[syncSchedule]', error)
-      window.alert(error instanceof Error ? `同步失敗：${error.message}` : '同步失敗，請稍後再試。')
+      if (!silent) {
+        window.alert(error instanceof Error ? `同步失敗：${error.message}` : '同步失敗，請稍後再試。')
+      }
     } finally {
-      setSyncingSchedule(false)
+      syncingScheduleRef.current = false
+      if (!silent) setSyncingSchedule(false)
     }
+  }, [])
+
+  function handleSyncSchedule(event: MouseEvent<HTMLButtonElement>) {
+    event.preventDefault()
+    void syncScheduleToApp()
   }
+
+  useEffect(() => {
+    void syncScheduleToApp({ silent: true })
+
+    const interval = window.setInterval(() => {
+      void syncScheduleToApp({ silent: true })
+    }, 30000)
+
+    const handleFocus = () => void syncScheduleToApp({ silent: true })
+    window.addEventListener('focus', handleFocus)
+
+    return () => {
+      window.clearInterval(interval)
+      window.removeEventListener('focus', handleFocus)
+    }
+  }, [syncScheduleToApp])
 
   return (
     <Suspense>
