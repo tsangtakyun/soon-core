@@ -1,9 +1,8 @@
 import { NextResponse } from 'next/server'
 
-import { createSupabaseAdmin } from '@/lib/supabase-admin'
 import { createSupabaseRouteClient } from '@/lib/supabase-route'
 
-type SupabaseAdmin = ReturnType<typeof createSupabaseAdmin>
+type SupabaseClient = Awaited<ReturnType<typeof createSupabaseRouteClient>>
 
 type TripRow = {
   id: string
@@ -45,27 +44,13 @@ const durationMinutes: Record<string, number> = {
   '半日': 360,
 }
 
-async function getSessionUser() {
+async function getSession() {
   const supabase = await createSupabaseRouteClient()
   const {
     data: { session },
   } = await supabase.auth.getSession()
 
-  return session?.user ?? null
-}
-
-async function getWorkspaceIds(admin: SupabaseAdmin, userId: string) {
-  const { data, error } = await admin
-    .from('workspace_members')
-    .select('workspace_id')
-    .eq('user_id', userId)
-    .eq('status', 'active')
-
-  if (error) throw error
-
-  return (data ?? [])
-    .map((row) => row.workspace_id)
-    .filter((id): id is string => Boolean(id))
+  return { supabase, user: session?.user ?? null }
 }
 
 function normalizeTime(value: string | null) {
@@ -107,15 +92,15 @@ function buildNotes(trip: TripRow, shot: ShotRow, marker: string) {
 }
 
 async function findExistingSchedule(
-  admin: SupabaseAdmin,
-  workspaceId: string,
+  supabase: SupabaseClient,
+  userId: string,
   marker: string,
   fallback: { date: string; title: string; startTime: string | null }
 ) {
-  const markerResult = await admin
+  const markerResult = await supabase
     .from('schedules')
     .select('id')
-    .eq('workspace_id', workspaceId)
+    .eq('user_id', userId)
     .ilike('notes', `%${marker}%`)
     .limit(1)
     .maybeSingle()
@@ -123,10 +108,10 @@ async function findExistingSchedule(
   if (markerResult.error) throw markerResult.error
   if (markerResult.data?.id) return markerResult.data.id as string
 
-  const fallbackBaseQuery = admin
+  const fallbackBaseQuery = supabase
     .from('schedules')
     .select('id')
-    .eq('workspace_id', workspaceId)
+    .eq('user_id', userId)
     .eq('date', fallback.date)
     .eq('title', fallback.title)
 
@@ -142,21 +127,13 @@ async function findExistingSchedule(
 
 export async function POST() {
   try {
-    const user = await getSessionUser()
+    const { supabase, user } = await getSession()
 
     if (!user?.id) {
       return NextResponse.json({ error: '未登入，請重新登入。' }, { status: 401 })
     }
 
-    const admin = createSupabaseAdmin()
-    const workspaceIds = await getWorkspaceIds(admin, user.id)
-    const workspaceId = workspaceIds[0]
-
-    if (!workspaceId) {
-      return NextResponse.json({ error: '找不到可用工作區，請先新增工作區。' }, { status: 400 })
-    }
-
-    const { data: trips, error: tripError } = await admin
+    const { data: trips, error: tripError } = await supabase
       .from('trips')
       .select('id, name, start_date, end_date')
       .order('created_at', { ascending: false })
@@ -168,7 +145,7 @@ export async function POST() {
     }
 
     const trip = trips[0] as TripRow
-    const { data: shots, error: shotsError } = await admin
+    const { data: shots, error: shotsError } = await supabase
       .from('shots')
       .select('id, trip_id, seq, name, day, start_time, time_of_day, duration, platform, location')
       .eq('trip_id', trip.id)
@@ -191,7 +168,7 @@ export async function POST() {
       const startTime = normalizeTime(shot.start_time)
       const title = shot.name?.trim() || `場景 ${shot.seq ?? index + 1}`
       const payload = {
-        workspace_id: workspaceId,
+        workspace_id: null,
         user_id: user.id,
         title,
         type: '拍攝',
@@ -204,24 +181,24 @@ export async function POST() {
         status: '即將到來',
       }
 
-      const existingId = await findExistingSchedule(admin, workspaceId, marker, {
+      const existingId = await findExistingSchedule(supabase, user.id, marker, {
         date,
         title,
         startTime,
       })
 
       const result = existingId
-        ? await admin.from('schedules').update(payload).eq('id', existingId).eq('workspace_id', workspaceId)
-        : await admin.from('schedules').insert(payload)
+        ? await supabase.from('schedules').update(payload).eq('id', existingId).eq('user_id', user.id)
+        : await supabase.from('schedules').insert(payload)
 
       if (result.error) throw result.error
       synced += 1
     }
 
-    const staleResult = await admin
+    const staleResult = await supabase
       .from('schedules')
       .select('id, notes')
-      .eq('workspace_id', workspaceId)
+      .eq('user_id', user.id)
       .ilike('notes', `%prod-mgt:${trip.id}:%`)
 
     if (staleResult.error) throw staleResult.error
@@ -234,7 +211,7 @@ export async function POST() {
       .map((row) => row.id)
 
     if (staleIds.length > 0) {
-      const { error: deleteError } = await admin.from('schedules').delete().in('id', staleIds).eq('workspace_id', workspaceId)
+      const { error: deleteError } = await supabase.from('schedules').delete().in('id', staleIds).eq('user_id', user.id)
       if (deleteError) throw deleteError
     }
 
