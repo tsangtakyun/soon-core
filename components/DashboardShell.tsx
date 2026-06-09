@@ -60,6 +60,7 @@ type SidebarIconName =
   | 'packaging'
   | 'judge'
   | 'settings'
+  | 'motion'
   | PipelineTool['id']
 
 const primaryNav = [
