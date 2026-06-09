@@ -81,6 +81,7 @@ function buildRundownContent(trip: TripRow, shots: ShotRow[]) {
 export default function SchedulePage() {
   const [iframeError, setIframeError] = useState(false)
   const [savingRundown, setSavingRundown] = useState(false)
+  const [syncingSchedule, setSyncingSchedule] = useState(false)
 
   function openRundownPrint() {
     const params = new URLSearchParams()
@@ -160,6 +161,37 @@ export default function SchedulePage() {
     }
   }
 
+  async function handleSyncSchedule(event: MouseEvent<HTMLButtonElement>) {
+    event.preventDefault()
+
+    if (syncingSchedule) return
+
+    setSyncingSchedule(true)
+    try {
+      const response = await fetch('/api/schedule/sync', { method: 'POST' })
+      const payload = (await response.json().catch(() => ({}))) as {
+        error?: string
+        synced?: number
+        removed?: number
+        tripName?: string
+      }
+
+      if (!response.ok) {
+        window.alert(payload.error || '同步失敗，請稍後再試。')
+        return
+      }
+
+      window.dispatchEvent(new Event('soon-data-updated'))
+      const removedText = payload.removed ? `，並移除 ${payload.removed} 個舊日程` : ''
+      window.alert(`✅ 已同步 ${payload.synced ?? 0} 個日程到 App${removedText}`)
+    } catch (error) {
+      console.error('[syncSchedule]', error)
+      window.alert(error instanceof Error ? `同步失敗：${error.message}` : '同步失敗，請稍後再試。')
+    } finally {
+      setSyncingSchedule(false)
+    }
+  }
+
   return (
     <Suspense>
       <DashboardShell activeSection="schedule">
@@ -203,6 +235,24 @@ export default function SchedulePage() {
                   }}
                 >
                   {savingRundown ? '儲存中...' : '💾 儲存至文件中心'}
+                </button>
+                <button
+                  type="button"
+                  disabled={syncingSchedule}
+                  onClick={(event) => void handleSyncSchedule(event)}
+                  style={{
+                    background: syncingSchedule ? 'rgba(245, 158, 11, 0.35)' : '#f59e0b',
+                    color: '#111827',
+                    border: 'none',
+                    borderRadius: 'var(--soon-radius)',
+                    fontSize: '13px',
+                    padding: '8px 16px',
+                    cursor: syncingSchedule ? 'not-allowed' : 'pointer',
+                    fontFamily: 'system-ui',
+                    fontWeight: 700,
+                  }}
+                >
+                  {syncingSchedule ? '同步中...' : '🔄 同步到 App 日程'}
                 </button>
               </div>
             )}
