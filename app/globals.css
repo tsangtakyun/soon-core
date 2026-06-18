@@ -5264,6 +5264,35 @@ textarea:disabled {
   color: var(--soon-text);
 }
 
+.finance-view-switcher {
+  align-items: center;
+  background: rgba(255,255,255,0.04);
+  border: 0.5px solid var(--soon-border);
+  border-radius: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  justify-content: flex-end;
+  padding: 4px;
+}
+
+.finance-view-switcher button {
+  background: transparent;
+  border: 0;
+  border-radius: 6px;
+  color: var(--soon-text-secondary);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  min-width: 84px;
+  padding: 8px 12px;
+}
+
+.finance-view-switcher button.active {
+  background: var(--soon-purple);
+  color: #fff;
+}
+
 .finance-tabs {
   display: flex;
   flex-wrap: wrap;

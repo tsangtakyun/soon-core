@@ -12,6 +12,7 @@ import { supabase } from '@/lib/supabase'
 import type { CoreDoc } from '@/lib/types'
 
 type InvoiceStatus = 'draft' | 'issued' | 'sent_for_approval' | 'paid' | 'overdue'
+type FinanceView = 'income' | 'expenses' | 'reports'
 
 type FinanceDoc = CoreDoc & {
   invoice_status: InvoiceStatus | null
@@ -81,6 +82,11 @@ const statusMeta: Record<InvoiceStatus, { label: string; color: string }> = {
 }
 
 const receivableStatusOrder: InvoiceStatus[] = ['overdue', 'sent_for_approval', 'issued', 'draft', 'paid']
+const financeViews: Array<{ key: FinanceView; label: string }> = [
+  { key: 'income', label: '收入' },
+  { key: 'expenses', label: '支出' },
+  { key: 'reports', label: '財務報告' },
+]
 
 const categoryColors: Record<string, string> = {
   餐飲: '#f97316',
@@ -219,6 +225,7 @@ function invoiceContentTotal(invoice: ReturnType<typeof parseInvoice>) {
 
 export function FinanceCenter() {
   const { activeWorkspaceId } = useWorkspace()
+  const [activeFinanceView, setActiveFinanceView] = useState<FinanceView>('income')
   const [invoices, setInvoices] = useState<FinanceDoc[]>([])
   const [expenses, setExpenses] = useState<Expense[]>([])
   const [defaultCurrency, setDefaultCurrency] = useState('HK$')
@@ -604,7 +611,27 @@ export function FinanceCenter() {
   return (
     <DashboardShell activeSection="finance">
       <section className="finance-page">
-        <PageHeader icon="💰" title="財務中心" subtitle="收入、支出同財務報告" />
+        <PageHeader
+          icon="💰"
+          title="財務中心"
+          subtitle="收入、支出同財務報告"
+          actions={(
+            <div className="finance-view-switcher" role="tablist" aria-label="財務中心分類">
+              {financeViews.map((view) => (
+                <button
+                  key={view.key}
+                  type="button"
+                  role="tab"
+                  aria-selected={activeFinanceView === view.key}
+                  className={activeFinanceView === view.key ? 'active' : ''}
+                  onClick={() => setActiveFinanceView(view.key)}
+                >
+                  {view.label}
+                </button>
+              ))}
+            </div>
+          )}
+        />
 
         <div className="relative w-full rounded-xl overflow-hidden mb-6" style={{ height: '180px' }}>
           <Image
@@ -616,11 +643,13 @@ export function FinanceCenter() {
           />
         </div>
 
-        <div className="finance-metric-grid">
-          <FinanceMetric label="Paid / 已收款" amount={dashboard.paid} color="#22c55e" currency={defaultCurrency} />
-          <FinanceMetric label="Issued / 已發出" amount={dashboard.issued} color="#7c3aed" currency={defaultCurrency} />
-          <FinanceMetric label="Draft / 草稿" amount={dashboard.draft} color="#6b7280" currency={defaultCurrency} />
-        </div>
+        {activeFinanceView === 'income' && (
+          <>
+            <div className="finance-metric-grid">
+              <FinanceMetric label="Paid / 已收款" amount={dashboard.paid} color="#22c55e" currency={defaultCurrency} />
+              <FinanceMetric label="Issued / 已發出" amount={dashboard.issued} color="#7c3aed" currency={defaultCurrency} />
+              <FinanceMetric label="Draft / 草稿" amount={dashboard.draft} color="#6b7280" currency={defaultCurrency} />
+            </div>
 
         {dashboard.overdueInvoices.length > 0 && (
           <div className="finance-overdue-alert">
@@ -628,7 +657,7 @@ export function FinanceCenter() {
           </div>
         )}
 
-        <section className="finance-section">
+            <section className="finance-section">
           <div className="finance-section-head receivable-section-head">
             <div>
               <h2>應收帳款</h2>
@@ -706,9 +735,12 @@ export function FinanceCenter() {
               )
             })}
           </div>
-        </section>
+            </section>
+          </>
+        )}
 
-        <section className="finance-section">
+        {activeFinanceView === 'expenses' && (
+          <section className="finance-section">
           <div className="finance-section-head">
             <div><h2>支出記錄</h2><p>Expenses</p></div>
           </div>
@@ -806,9 +838,11 @@ export function FinanceCenter() {
               )
             })}
           </div>
-        </section>
+          </section>
+        )}
 
-        <section className="finance-section finance-report-section">
+        {activeFinanceView === 'reports' && (
+          <section className="finance-section finance-report-section">
           <div className="finance-section-head">
             <div><h2>月結報告</h2><p>Monthly Report</p></div>
             <div className="finance-report-controls">
@@ -824,7 +858,8 @@ export function FinanceCenter() {
             <div><span>支出</span><strong>{money(defaultCurrency, monthlyData.expenseTotal)}</strong></div>
             <div><span>淨額</span><strong>{money(defaultCurrency, monthlyData.net)}</strong></div>
           </div>
-        </section>
+          </section>
+        )}
 
         {importOpen && <InvoiceImportModal invoices={invoices} onClose={() => setImportOpen(false)} onImport={importInvoice} defaultCurrency={defaultCurrency} />}
       </section>
