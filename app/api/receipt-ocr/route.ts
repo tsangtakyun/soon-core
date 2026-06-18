@@ -1,6 +1,20 @@
 export const runtime = 'nodejs'
 export const maxDuration = 60
 
+import { createSupabaseAdmin } from '@/lib/supabase-admin'
+import { createSupabaseRouteClient } from '@/lib/supabase-route'
+
+const RECEIPT_BUCKET = 'finance-receipts'
+
+async function getUserId() {
+  const supabase = await createSupabaseRouteClient()
+  const {
+    data: { session },
+  } = await supabase.auth.getSession()
+
+  return session?.user?.id ?? null
+}
+
 type ReceiptResult = {
   merchant?: string | null
   date?: string | null
@@ -15,6 +29,28 @@ function splitDataUrl(dataUrl: string) {
   const match = dataUrl.match(/^data:([^;]+);base64,(.+)$/)
   if (!match) return { media_type: 'image/jpeg', data: dataUrl }
   return { media_type: match[1], data: match[2] }
+}
+
+async function fileFromStorage(path: string, fallbackMimeType?: string | null) {
+  const admin = createSupabaseAdmin()
+  const { data, error } = await admin.storage.from(RECEIPT_BUCKET).download(path)
+  if (error || !data) throw new Error(error?.message || 'Receipt file not found')
+
+  const buffer = Buffer.from(await data.arrayBuffer())
+  return {
+    media_type: fallbackMimeType || data.type || inferMimeType(path),
+    data: buffer.toString('base64'),
+  }
+}
+
+function inferMimeType(path: string) {
+  const lower = path.toLowerCase()
+  if (lower.endsWith('.pdf')) return 'application/pdf'
+  if (lower.endsWith('.png')) return 'image/png'
+  if (lower.endsWith('.webp')) return 'image/webp'
+  if (lower.endsWith('.heic')) return 'image/heic'
+  if (lower.endsWith('.heif')) return 'image/heif'
+  return 'image/jpeg'
 }
 
 async function convertCurrency(amount: number, from: string, to: string) {
@@ -74,11 +110,19 @@ export async function POST(request: Request) {
   const apiKey = process.env.ANTHROPIC_API_KEY
   if (!apiKey) return Response.json({ error: 'Missing ANTHROPIC_API_KEY' }, { status: 500 })
 
-  const body = await request.json() as { file?: string; image?: string; targetCurrency?: string }
+  const body = await request.json() as { file?: string; image?: string; storagePath?: string; mimeType?: string; targetCurrency?: string }
   const inputFile = body.file ?? body.image
-  if (!inputFile) return Response.json({ error: 'Missing receipt file' }, { status: 400 })
+  if (!inputFile && !body.storagePath) return Response.json({ error: 'Missing receipt file' }, { status: 400 })
+  if (body.storagePath) {
+    const userId = await getUserId()
+    if (!userId || !body.storagePath.startsWith(`${userId}/`)) {
+      return Response.json({ error: 'Not allowed to analyse this receipt file' }, { status: 403 })
+    }
+  }
 
-  const file = splitDataUrl(inputFile)
+  const file = body.storagePath
+    ? await fileFromStorage(body.storagePath, body.mimeType)
+    : splitDataUrl(inputFile!)
   const isPdf = file.media_type === 'application/pdf'
   const filePart = isPdf
     ? { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: file.data } }

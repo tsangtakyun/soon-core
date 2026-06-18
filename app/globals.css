@@ -6149,6 +6149,63 @@ textarea:disabled {
   font-weight: 700;
 }
 
+.receipt-viewer-modal {
+  max-height: min(82vh, 820px);
+  overflow: hidden;
+  width: min(920px, calc(100vw - 40px));
+}
+
+.receipt-viewer-modal header p {
+  color: var(--soon-text-muted);
+  font-size: 12px;
+  margin: 4px 0 0;
+}
+
+.receipt-viewer-list {
+  display: grid;
+  gap: 14px;
+  max-height: 68vh;
+  overflow: auto;
+  padding-right: 4px;
+}
+
+.receipt-viewer-item {
+  border: 0.5px solid var(--soon-border);
+  border-radius: 10px;
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+}
+
+.receipt-viewer-item > div:first-child {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.receipt-viewer-item span {
+  color: var(--soon-text-muted);
+  font-size: 12px;
+}
+
+.receipt-viewer-item img,
+.receipt-viewer-item iframe {
+  background: #fff;
+  border: 0;
+  border-radius: 8px;
+  max-height: 520px;
+  min-height: 360px;
+  object-fit: contain;
+  width: 100%;
+}
+
+.receipt-viewer-item a {
+  color: var(--soon-purple-light);
+  font-size: 13px;
+  text-decoration: none;
+}
+
 .expense-amount-row {
   display: grid;
   grid-template-columns: 100px minmax(0, 1fr);

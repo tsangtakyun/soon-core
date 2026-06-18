@@ -22,6 +22,16 @@ type FinanceDoc = CoreDoc & {
   invoice_currency: string | null
 }
 
+type ReceiptFile = {
+  kind: 'storage'
+  path: string
+  name: string
+  mimeType: string
+  size: number
+  uploadedAt: string
+  previewUrl?: string
+}
+
 type Expense = {
   id: string
   workspace_id: string | null
@@ -35,7 +45,7 @@ type Expense = {
   converted_currency: string | null
   exchange_rate: number | null
   category: string | null
-  receipt_images: string[] | null
+  receipt_images: Array<string | ReceiptFile> | null
   ai_extracted: boolean | null
   notes: string | null
   created_at: string
@@ -44,6 +54,7 @@ type Expense = {
 type ExpenseDraft = {
   id: string
   receiptImages: string[]
+  receiptFiles: ReceiptFile[]
   sourceNames: string[]
   merchant: string
   date: string
@@ -70,6 +81,12 @@ type ReceiptOcrResult = {
   exchange_rate?: number | null
   category?: string | null
   notes?: string | null
+}
+
+type ReceiptViewerState = {
+  expense: Expense
+  files: ReceiptFile[]
+  legacyImages: string[]
 }
 
 const statusMeta: Record<InvoiceStatus, { label: string; color: string }> = {
@@ -186,6 +203,62 @@ function fileToDataUrl(file: File) {
   })
 }
 
+function isReceiptFile(value: unknown): value is ReceiptFile {
+  return Boolean(
+    value &&
+    typeof value === 'object' &&
+    (value as ReceiptFile).kind === 'storage' &&
+    typeof (value as ReceiptFile).path === 'string',
+  )
+}
+
+function splitReceiptAttachments(value: Array<string | ReceiptFile> | null | undefined) {
+  const files: ReceiptFile[] = []
+  const legacyImages: string[] = []
+
+  ;(value ?? []).forEach((item) => {
+    if (isReceiptFile(item)) files.push(item)
+    else if (typeof item === 'string' && item) legacyImages.push(item)
+  })
+
+  return { files, legacyImages }
+}
+
+async function uploadReceiptFile(file: File, workspaceId: string | null): Promise<ReceiptFile> {
+  const response = await fetch('/api/receipt-upload-url', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      fileName: file.name,
+      mimeType: file.type || 'application/octet-stream',
+      workspace_id: workspaceId,
+    }),
+  })
+  const payload = await response.json().catch(() => ({}))
+  if (!response.ok) throw new Error(payload.error || '無法準備上傳單據。')
+
+  const { error } = await supabase.storage
+    .from(payload.bucket || 'finance-receipts')
+    .uploadToSignedUrl(payload.path, payload.token, file)
+
+  if (error) throw error
+
+  return {
+    kind: 'storage',
+    path: payload.path,
+    name: file.name,
+    mimeType: file.type || payload.mimeType || 'application/octet-stream',
+    size: file.size,
+    uploadedAt: new Date().toISOString(),
+    previewUrl: file.type.startsWith('image/') ? URL.createObjectURL(file) : undefined,
+  }
+}
+
+function stripReceiptPreview(file: ReceiptFile): ReceiptFile {
+  const { previewUrl: _previewUrl, ...rest } = file
+  return rest
+}
+
 async function readJsonResponse(response: Response) {
   const text = await response.text()
   try {
@@ -235,7 +308,9 @@ export function FinanceCenter() {
   const [customStart, setCustomStart] = useState(today())
   const [customEnd, setCustomEnd] = useState(today())
   const [receiptDrafts, setReceiptDrafts] = useState<ExpenseDraft[]>([])
+  const [uploadingReceipts, setUploadingReceipts] = useState(false)
   const [analysingReceipts, setAnalysingReceipts] = useState(false)
+  const [receiptViewer, setReceiptViewer] = useState<ReceiptViewerState | null>(null)
   const [showEmptyExpenseCategories, setShowEmptyExpenseCategories] = useState(false)
   const [expandedExpenseCategories, setExpandedExpenseCategories] = useState<Set<string>>(() => new Set(categories))
   const [showAllExpenseCategories, setShowAllExpenseCategories] = useState<Set<string>>(() => new Set())
@@ -373,19 +448,20 @@ export function FinanceCenter() {
 
   async function handleReceiptUpload(event: ChangeEvent<HTMLInputElement>) {
     const files = Array.from(event.target.files ?? [])
-    const maxBytes = 3 * 1024 * 1024
-    const oversized = files.find((file) => file.type === 'application/pdf' && file.size > maxBytes)
-    if (oversized) {
-      window.alert(`${oversized.name} 檔案太大，請使用 3MB 以下 PDF，或改用圖片收據。`)
+    if (!files.length) return
+    setUploadingReceipts(true)
+    try {
+      const nextDrafts = await Promise.all(files.map(async (file) => {
+        const uploaded = await uploadReceiptFile(file, activeWorkspaceId)
+        return createExpenseDraft([], defaultCurrency, [file.name], [uploaded])
+      }))
+      setReceiptDrafts((current) => [...current, ...nextDrafts])
+    } catch (error) {
+      window.alert(error instanceof Error ? error.message : '上傳單據失敗。')
+    } finally {
+      setUploadingReceipts(false)
       event.target.value = ''
-      return
     }
-    const nextDrafts = await Promise.all(files.map(async (file) => {
-      const dataUrl = await fileToDataUrl(file)
-      return createExpenseDraft([dataUrl], defaultCurrency, [file.name])
-    }))
-    setReceiptDrafts((current) => [...current, ...nextDrafts])
-    event.target.value = ''
   }
 
   async function analyseReceipts() {
@@ -393,10 +469,13 @@ export function FinanceCenter() {
     setAnalysingReceipts(true)
     try {
       const analysedGroups = await Promise.all(receiptDrafts.map(async (draft) => {
+        const firstFile = draft.receiptFiles[0]
         const response = await fetch('/api/receipt-ocr', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ file: draft.receiptImages[0], targetCurrency: defaultCurrency }),
+          body: JSON.stringify(firstFile
+            ? { storagePath: firstFile.path, mimeType: firstFile.mimeType, targetCurrency: defaultCurrency }
+            : { file: draft.receiptImages[0], targetCurrency: defaultCurrency }),
         })
         const data = await readJsonResponse(response)
         if (!response.ok || data.error) throw new Error(data.error || 'Receipt analysis failed')
@@ -482,7 +561,10 @@ export function FinanceCenter() {
         converted_currency: draft.convertedCurrency,
         exchange_rate: draft.exchangeRate,
         category: draft.category,
-        receipt_images: draft.receiptImages,
+        receipt_images: [
+          ...draft.receiptFiles.map(stripReceiptPreview),
+          ...draft.receiptImages,
+        ],
         ai_extracted: true,
         notes: draft.notes,
       }),
@@ -535,6 +617,12 @@ export function FinanceCenter() {
       return
     }
     setExpenses((current) => current.map((item) => (item.id === expense.id ? result.expense as Expense : item)))
+  }
+
+  function openReceiptViewer(expense: Expense) {
+    const attachments = splitReceiptAttachments(expense.receipt_images)
+    if (!attachments.files.length && !attachments.legacyImages.length) return
+    setReceiptViewer({ expense, ...attachments })
   }
 
   function toggleExpenseCategory(category: string) {
@@ -744,8 +832,8 @@ export function FinanceCenter() {
             </div>
           </div>
           <label className="receipt-upload-zone">
-            <span>上傳收據（圖片或 PDF）</span>
-            <input type="file" accept="image/*,application/pdf" multiple onChange={(event) => void handleReceiptUpload(event)} />
+            <span>{uploadingReceipts ? '上傳單據中...' : '上傳收據（圖片或 PDF）'}</span>
+            <input type="file" accept="image/*,application/pdf" multiple disabled={uploadingReceipts} onChange={(event) => void handleReceiptUpload(event)} />
           </label>
           {receiptDrafts.length > 0 && (
             <div className="receipt-drafts">
@@ -797,6 +885,8 @@ export function FinanceCenter() {
                         const convertedCurrencyCode = currencyCodeFromSetting(convertedCurrency)
                         const originalCurrencyCode = originalCurrency || convertedCurrencyCode
                         const showConverted = Boolean(originalCurrencyCode) && originalCurrencyCode !== convertedCurrencyCode
+                        const receiptAttachments = splitReceiptAttachments(expense.receipt_images)
+                        const hasReceipts = receiptAttachments.files.length > 0 || receiptAttachments.legacyImages.length > 0
                         return (
                           <article className="expense-row-card" key={expense.id}>
                             <div className="expense-row-meta">
@@ -814,6 +904,7 @@ export function FinanceCenter() {
                               )}
                             </div>
                             <div className="expense-row-actions">
+                              {hasReceipts && <button type="button" onClick={() => openReceiptViewer(expense)}>查看單據</button>}
                               <button type="button" onClick={() => void editExpense(expense)}>編輯</button>
                               <button type="button" onClick={() => void deleteExpense(expense.id)}>刪除</button>
                             </div>
@@ -851,14 +942,15 @@ export function FinanceCenter() {
         )}
 
         {importOpen && <InvoiceImportModal invoices={invoices} onClose={() => setImportOpen(false)} onImport={importInvoice} defaultCurrency={defaultCurrency} />}
+        {receiptViewer && <ReceiptViewer viewer={receiptViewer} onClose={() => setReceiptViewer(null)} />}
       </section>
     </DashboardShell>
   )
 }
 
-function createExpenseDraft(files: string[], currency: string, sourceNames: string[] = []): ExpenseDraft {
+function createExpenseDraft(files: string[], currency: string, sourceNames: string[] = [], receiptFiles: ReceiptFile[] = []): ExpenseDraft {
   const code = currencyCodeFromSetting(currency)
-  return { id: crypto.randomUUID(), receiptImages: files, sourceNames, merchant: '', date: today(), description: '', originalAmount: null, originalCurrency: code, convertedAmount: 0, convertedCurrency: code, exchangeRate: 1, category: '雜項', notes: '', aiMissingFields: ['merchant', 'amount', 'category'], conversionError: false }
+  return { id: crypto.randomUUID(), receiptImages: files, receiptFiles, sourceNames, merchant: '', date: today(), description: '', originalAmount: null, originalCurrency: code, convertedAmount: 0, convertedCurrency: code, exchangeRate: 1, category: '雜項', notes: '', aiMissingFields: ['merchant', 'amount', 'category'], conversionError: false }
 }
 
 function FinanceMetric({ label, amount, color, currency }: { label: string; amount: number; color: string; currency: string }) {
@@ -890,7 +982,10 @@ function ExpenseDraftCard({ draft, index, defaultCurrency, onChange, onAmountCha
         <button type="button" onClick={onRemove}>移除</button>
       </header>
       {draft.sourceNames.length > 0 && <small className="receipt-source-name">{draft.sourceNames.join(', ')}</small>}
-      <div className={draft.receiptImages.length > 1 ? 'receipt-preview-row' : 'receipt-full-preview'}>
+      <div className={(draft.receiptImages.length + draft.receiptFiles.length) > 1 ? 'receipt-preview-row' : 'receipt-full-preview'}>
+        {draft.receiptFiles.map((file) => file.mimeType.startsWith('image/') && file.previewUrl
+          ? <img key={file.path} src={file.previewUrl} alt="" />
+          : <div className="receipt-pdf-thumb" key={file.path}>{file.mimeType === 'application/pdf' ? 'PDF' : 'FILE'}</div>)}
         {draft.receiptImages.map((file) => file.startsWith('data:application/pdf')
           ? <div className="receipt-pdf-thumb" key={file}>PDF</div>
           : <img key={file} src={file} alt="" />)}
@@ -940,6 +1035,86 @@ function ExpenseDraftCard({ draft, index, defaultCurrency, onChange, onAmountCha
 
 function FieldWarning() {
   return <div className="expense-field-warning">⚠️ AI 未能識別，請手動填寫</div>
+}
+
+function ReceiptViewer({ viewer, onClose }: { viewer: ReceiptViewerState; onClose: () => void }) {
+  const [fileUrls, setFileUrls] = useState<Record<string, string>>({})
+  const [error, setError] = useState('')
+
+  useEffect(() => {
+    let cancelled = false
+
+    async function loadUrls() {
+      setError('')
+      const entries: Record<string, string> = {}
+
+      try {
+        await Promise.all(viewer.files.map(async (file) => {
+          const response = await fetch('/api/receipt-file-url', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ path: file.path }),
+          })
+          const payload = await response.json().catch(() => ({}))
+          if (!response.ok) throw new Error(payload.error || '無法載入單據。')
+          entries[file.path] = payload.url
+        }))
+
+        if (!cancelled) setFileUrls(entries)
+      } catch (err) {
+        if (!cancelled) setError(err instanceof Error ? err.message : '無法載入單據。')
+      }
+    }
+
+    void loadUrls()
+    return () => {
+      cancelled = true
+    }
+  }, [viewer])
+
+  return (
+    <div className="finance-modal-backdrop">
+      <div className="finance-modal receipt-viewer-modal">
+        <header>
+          <div>
+            <h2>查看單據</h2>
+            <p>{viewer.expense.merchant || viewer.expense.description || viewer.expense.date}</p>
+          </div>
+          <button type="button" onClick={onClose}>關閉</button>
+        </header>
+        {error && <div className="finance-overdue-alert">{error}</div>}
+        <div className="receipt-viewer-list">
+          {viewer.files.map((file) => {
+            const url = fileUrls[file.path]
+            const isImage = file.mimeType.startsWith('image/')
+            return (
+              <article className="receipt-viewer-item" key={file.path}>
+                <div>
+                  <strong>{file.name}</strong>
+                  <span>{Math.max(1, Math.round(file.size / 1024))} KB</span>
+                </div>
+                {url && isImage && <img src={url} alt="" />}
+                {url && !isImage && <iframe src={url} title={file.name} />}
+                {url ? <a href={url} download={file.name} target="_blank" rel="noreferrer">下載 / 開啟</a> : <span>載入中...</span>}
+              </article>
+            )
+          })}
+          {viewer.legacyImages.map((image, index) => (
+            <article className="receipt-viewer-item" key={`${image}-${index}`}>
+              <div>
+                <strong>舊單據 {index + 1}</strong>
+                <span>Stored in database</span>
+              </div>
+              {image.startsWith('data:application/pdf')
+                ? <iframe src={image} title={`舊單據 ${index + 1}`} />
+                : <img src={image} alt="" />}
+              <a href={image} download={`receipt-${index + 1}`}>下載</a>
+            </article>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
 }
 
 function InvoiceImportModal({ invoices, onClose, onImport, defaultCurrency }: { invoices: FinanceDoc[]; onClose: () => void; onImport: (invoice: FinanceDoc) => Promise<boolean>; defaultCurrency: string }) {
