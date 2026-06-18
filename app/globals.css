@@ -271,6 +271,18 @@ a {
   transition: 0.15s ease;
 }
 
+.sidebar-icon {
+  display: block;
+  width: 20px;
+  height: 20px;
+  min-width: 20px;
+  max-width: 20px;
+  min-height: 20px;
+  max-height: 20px;
+  flex: 0 0 20px;
+  color: currentColor;
+}
+
 .core-nav a:hover,
 .tool-nav a:hover,
 .workspace-link:hover {

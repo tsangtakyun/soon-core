@@ -1,6 +1,5 @@
 'use client'
 
-import Image from 'next/image'
 import { useEffect, useMemo, useState, type ChangeEvent } from 'react'
 import * as XLSX from 'xlsx'
 
@@ -632,16 +631,6 @@ export function FinanceCenter() {
             </div>
           )}
         />
-
-        <div className="relative w-full rounded-xl overflow-hidden mb-6" style={{ height: '180px' }}>
-          <Image
-            src="/finance.jpg"
-            alt="財務中心"
-            fill
-            className="object-cover"
-            priority
-          />
-        </div>
 
         {activeFinanceView === 'income' && (
           <>
