@@ -1,5 +1,5 @@
 export type PipelineId = 'ig' | 'youtube'
-export type ToolId = 'idea' | 'script' | 'storyboard' | 'production' | 'subtitle'
+export type ToolId = 'idea' | 'script' | 'storyboard' | 'video' | 'production' | 'subtitle'
 
 export interface PipelineTool {
   id: ToolId
@@ -15,10 +15,11 @@ export interface PipelineConfig {
   tools: PipelineTool[]
 }
 
-export const pipelineSteps = ['idea', 'script', 'storyboard', 'production', 'subtitle', 'done'] as const
+export const pipelineSteps = ['idea', 'script', 'storyboard', 'video', 'production', 'subtitle', 'done'] as const
 
 const subtitleToolUrl =
   'https://soon-subtitle.vercel.app?embedded=true&user_id=bb3e47cc-90c8-4eac-a5ff-cabfcefb89ae'
+const videoGeneratorToolUrl = 'https://soon-video-generator.vercel.app?embedded=true'
 
 export const pipelines: Record<PipelineId, PipelineConfig> = {
   ig: {
@@ -43,6 +44,12 @@ export const pipelines: Record<PipelineId, PipelineConfig> = {
         label: 'Storyboard',
         icon: '🎬',
         url: 'https://soon-storyboard.vercel.app?embedded=true',
+      },
+      {
+        id: 'video',
+        label: 'Video Generator',
+        icon: '🎥',
+        url: videoGeneratorToolUrl,
       },
       {
         id: 'subtitle',
@@ -74,6 +81,12 @@ export const pipelines: Record<PipelineId, PipelineConfig> = {
         label: 'Storyboard',
         icon: '🎬',
         url: 'https://soon-storyboard-youtube.vercel.app?embedded=true',
+      },
+      {
+        id: 'video',
+        label: 'Video Generator',
+        icon: '🎥',
+        url: videoGeneratorToolUrl,
       },
       {
         id: 'production',

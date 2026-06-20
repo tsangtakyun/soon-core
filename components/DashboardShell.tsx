@@ -1150,6 +1150,12 @@ function SidebarIcon({ name }: { name: SidebarIconName }) {
         <rect x="13" y="13" width="7" height="6" rx="1" />
       </>
     ),
+    video: (
+      <>
+        <rect x="4" y="7" width="12" height="10" rx="2" />
+        <path d="m16 10 4-2.5v9L16 14M8 11.5h4" />
+      </>
+    ),
     production: (
       <>
         <rect x="4" y="7" width="13" height="10" rx="2" />
