@@ -9,8 +9,12 @@ export async function middleware(req: NextRequest) {
   let res = NextResponse.next({ request: req })
   const pathname = req.nextUrl.pathname
   const publicApiRoutes = ['/api/invite/accept', '/api/auth', '/api/ai/generate']
+  const topicApiSegment = pathname.startsWith('/api/topics/') ? pathname.slice('/api/topics/'.length) : ''
+  const isPublicTopicRoute =
+    pathname === '/api/topics' ||
+    (Boolean(topicApiSegment) && !topicApiSegment.includes('/') && !['admin', 'assist', 'upload'].includes(topicApiSegment))
 
-  if (publicApiRoutes.some((route) => pathname.startsWith(route))) {
+  if (isPublicTopicRoute || publicApiRoutes.some((route) => pathname.startsWith(route))) {
     return res
   }
 
