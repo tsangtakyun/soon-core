@@ -10,7 +10,7 @@ import { supabase } from '@/lib/supabase'
 import type { Project, Workspace, WorkspaceType } from '@/lib/types'
 import { workspaceTypeOptions } from '@/lib/types'
 
-type Section = 'home' | 'work' | 'docs' | 'schedule' | 'finance' | 'reply' | 'predikt' | 'deals' | 'packaging' | 'judge' | 'settings' | 'pipeline'
+type Section = 'home' | 'work' | 'docs' | 'schedule' | 'finance' | 'reply' | 'predikt' | 'topics' | 'deals' | 'packaging' | 'judge' | 'settings' | 'pipeline'
 
 interface DashboardShellProps {
   activeSection: Section
@@ -56,6 +56,7 @@ type SidebarIconName =
   | 'finance'
   | 'reply'
   | 'predikt'
+  | 'topics'
   | 'deals'
   | 'packaging'
   | 'judge'
@@ -71,6 +72,7 @@ const primaryNav = [
   { href: '/finance', label: '財務中心', icon: 'finance', section: 'finance' },
   { href: '/reply', label: '回覆中心', icon: 'reply', section: 'reply' },
   { href: '/predikt', label: '討論區中心', icon: 'predikt', section: 'predikt' },
+  { href: '/topic-library', label: '題材編輯中心', icon: 'topics', section: 'topics' },
   { href: '/deals', label: '交易中心', icon: 'deals', section: 'deals' },
 ] as const satisfies ReadonlyArray<{
   href: string
@@ -1103,6 +1105,12 @@ function SidebarIcon({ name }: { name: SidebarIconName }) {
       <>
         <path d="M4 6.5h16M4 12h12M4 17.5h9" />
         <path d="m17 15 3 2.5-3 2.5z" />
+      </>
+    ),
+    topics: (
+      <>
+        <rect x="4" y="5" width="16" height="14" rx="2" />
+        <path d="M8 9h8M8 13h5M16 13l1 1 2-2" />
       </>
     ),
     deals: (
