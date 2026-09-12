@@ -8,7 +8,20 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 export async function middleware(req: NextRequest) {
   let res = NextResponse.next({ request: req })
   const pathname = req.nextUrl.pathname
-  const publicApiRoutes = ['/api/invite/accept', '/api/auth', '/api/ai/generate']
+  // Machine-to-machine routes must reach their own secret validation before
+  // session middleware. They are not public data endpoints: each handler
+  // rejects requests without its CRON/knowledge credential.
+  const publicApiRoutes = [
+    '/api/invite/accept',
+    '/api/auth',
+    '/api/ai/generate',
+    '/api/campaign-experiences/search',
+    '/api/campaign-experiences/sync-brand',
+    '/api/intelligence/bundle',
+    '/api/intelligence/styles',
+    '/api/intelligence/dna/sync',
+    '/api/cron',
+  ]
   const topicApiSegment = pathname.startsWith('/api/topics/') ? pathname.slice('/api/topics/'.length) : ''
   const isPublicTopicRoute =
     pathname === '/api/topics' ||
