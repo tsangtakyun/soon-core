@@ -51,7 +51,21 @@ Example response:
       "publishedAt": "2026-09-12T12:00:00.000Z",
       "rules": { "schema_version": 1, "format": "instagram_carousel" }
     },
-    "evidence": { "confirmedReferenceCount": 1 }
+    "evidence": { "confirmedReferenceCount": 1 },
+    "templates": [{
+      "templateId": "cb000001-0000-4000-8000-000000000001",
+      "code": "clear_magazine_carousel",
+      "name": "Clear Magazine Carousel Template",
+      "version": {
+        "number": 1,
+        "ref": "template:clear_magazine_carousel:v1",
+        "rendererCode": "clear-magazine-carousel-v1",
+        "contentHash": "sha256...",
+        "creatorCommit": "5d42b26",
+        "publishedAt": "2026-09-13T12:00:00.000Z",
+        "contract": {}
+      }
+    }]
   }]
 }
 ```
@@ -68,6 +82,7 @@ The envelope is the same, with a singular `style` property. Unknown/unpublished 
 2. Store `styleId`, `version.id`, `version.number`, `version.ref`, and `version.contentHash` on the new project.
 3. Use `version.rules` for production. Do not silently replace the stored version on an existing project.
 4. A new project may read the newest published version. If Core is unavailable, use the project's saved rules snapshot; do not fall back to an arbitrary different Style.
+5. Resolve the renderer from `templates[].version.rendererCode` and persist the Template version/content hash/contract snapshot beside the Style snapshot. A published Template v1 is immutable; later renderer changes publish v2.
 
 ## Core authoring lifecycle
 

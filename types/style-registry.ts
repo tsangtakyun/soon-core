@@ -8,6 +8,22 @@ export type StyleRules = Record<string, unknown> & {
   format: StyleFormat
 }
 
+export type PublishedTemplate = {
+  templateId: string
+  code: string
+  name: string
+  version: {
+    id: string
+    number: number
+    ref: string
+    rendererCode: string
+    contentHash: string
+    creatorCommit: string | null
+    publishedAt: string
+    contract: Record<string, unknown>
+  }
+}
+
 export type PublishedStyle = {
   styleId: string
   code: string
@@ -24,6 +40,7 @@ export type PublishedStyle = {
     rules: StyleRules
   }
   evidence: { confirmedReferenceCount: number }
+  templates: PublishedTemplate[]
 }
 
 export type PublishedStylesResponse = {
