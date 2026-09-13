@@ -122,10 +122,10 @@ export async function collectWatchlist(row: WatchlistRow, credentials: MetaColle
     const discoveredItems = discovery?.media?.data ?? []
     const items = await Promise.all(discoveredItems.map(async (item) => {
       if (item.media_type !== 'CAROUSEL_ALBUM' || mediaChildren(item.children).length) return item
-      const childUrl = new URL(`https://graph.facebook.com/${graphVersion}/${String(item.id)}/children`)
-      childUrl.searchParams.set('fields', 'id,media_type,media_url,thumbnail_url')
-      const children = await graphJson(childUrl, token).catch(() => null)
-      return children ? { ...item, children } : item
+      const childUrl = new URL(`https://graph.facebook.com/${graphVersion}/${String(item.id)}`)
+      childUrl.searchParams.set('fields', 'children.limit(10){id,media_type,media_url,thumbnail_url}')
+      const childResult = await graphJson(childUrl, token).catch(() => null)
+      return childResult?.children ? { ...item, children: childResult.children } : item
     }))
     return items.map((item) => ({
       platformItemId: String(item.id), sourceUrl: String(item.permalink ?? ''), sourceAccount: discovery?.username ?? identifier,
