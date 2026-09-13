@@ -108,18 +108,26 @@ export async function collectWatchlist(row: WatchlistRow, credentials: MetaColle
     if (!igUserId) throw new Error('Meta 帳號未連接 Instagram Professional account')
     const url = new URL(`https://graph.facebook.com/${graphVersion}/${igUserId}`)
     const baseFields = 'id,caption,media_type,media_url,permalink,thumbnail_url,timestamp'
-    url.searchParams.set('fields', `business_discovery.username(${identifier}){username,media.limit(25){${baseFields},children{id,media_type,media_url,thumbnail_url}}}`)
+    url.searchParams.set('fields', `business_discovery.username(${identifier}){username,media.limit(50){${baseFields},children{id,media_type,media_url,thumbnail_url}}}`)
     let body: Record<string, unknown>
     try {
       body = await graphJson(url, token)
     } catch (error) {
       // A stale Graph version or restricted account may reject nested children.
       // Keep cover-level capture working; a later run can safely backfill pages.
-      url.searchParams.set('fields', `business_discovery.username(${identifier}){username,media.limit(25){${baseFields}}}`)
+      url.searchParams.set('fields', `business_discovery.username(${identifier}){username,media.limit(50){${baseFields}}}`)
       body = await graphJson(url, token).catch(() => { throw error })
     }
     const discovery = body.business_discovery as { username?: string; media?: { data?: Array<Record<string, unknown>> } } | undefined
-    return (discovery?.media?.data ?? []).map((item) => ({
+    const discoveredItems = discovery?.media?.data ?? []
+    const items = await Promise.all(discoveredItems.map(async (item) => {
+      if (item.media_type !== 'CAROUSEL_ALBUM' || mediaChildren(item.children).length) return item
+      const childUrl = new URL(`https://graph.facebook.com/${graphVersion}/${String(item.id)}/children`)
+      childUrl.searchParams.set('fields', 'id,media_type,media_url,thumbnail_url')
+      const children = await graphJson(childUrl, token).catch(() => null)
+      return children ? { ...item, children } : item
+    }))
+    return items.map((item) => ({
       platformItemId: String(item.id), sourceUrl: String(item.permalink ?? ''), sourceAccount: discovery?.username ?? identifier,
       contentText: String(item.caption ?? ''), mediaType: String(item.media_type ?? ''), thumbnailUrl: String(item.thumbnail_url ?? item.media_url ?? ''),
       mediaChildren: item.media_type === 'CAROUSEL_ALBUM' ? mediaChildren(item.children) : [],
