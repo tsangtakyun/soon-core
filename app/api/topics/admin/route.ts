@@ -107,7 +107,7 @@ export async function GET() {
 
   const admin = createSupabaseAdmin()
   const [{ data: topics, error: topicsError }, { data: directions, error: directionsError }] = await Promise.all([
-    admin.from('topic_items').select(topicSelect()).order('created_at', { ascending: false }),
+    admin.from('topic_items').select(topicSelect()).order('updated_at', { ascending: false }),
     admin.from('topic_directions').select('*').eq('is_active', true).order('sort_order'),
   ])
 

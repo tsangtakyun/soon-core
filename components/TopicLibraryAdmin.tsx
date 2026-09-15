@@ -267,7 +267,7 @@ export function TopicLibraryAdmin() {
       <header className="topic-admin-header">
         <div>
           <span>SOON.AI CONTENT INTELLIGENCE</span>
-          <h1>題材編輯中心</h1>
+          <h1>題材資料庫</h1>
           <p>整理來源、建立 SOON 題材卡，再發布到網站及 App 共用嘅中央 API。</p>
         </div>
         <button type="button" className="secondary" onClick={() => setDraft(emptyDraft)}>＋ 新題材</button>
@@ -286,9 +286,17 @@ export function TopicLibraryAdmin() {
           {topics.map((topic) => (
             <article key={topic.id} className={draft.id === topic.id ? 'active' : ''}>
               <button type="button" className="topic-open" onClick={() => setDraft(topicToDraft(topic))}>
-                <span className={`status ${topic.status}`}>{topic.status}</span>
-                <strong>{topic.title}</strong>
-                <small>{topic.topic_item_directions?.map((item) => item.topic_directions?.label_zh).filter(Boolean).join(' · ') || '未分類'}</small>
+                <span className="topic-card-image">
+                  <span className="topic-card-fallback"><b>未有封面預覽</b><small>可繼續編輯題材</small></span>
+                  {topic.cover_url ? <Image src={topic.cover_url} alt={topic.cover_alt || topic.title} fill sizes="(max-width: 760px) 100vw, 25vw" /> : null}
+                </span>
+                <span className="topic-card-copy">
+                  <span className={`status ${topic.status}`}>{topic.status}</span>
+                  <strong>{topic.title}</strong>
+                  <small>{topic.topic_item_directions?.map((item) => item.topic_directions?.label_zh).filter(Boolean).join(' · ') || '未分類'}</small>
+                  <em>{topic.summary || topic.hook || '未有摘要'}</em>
+                  <time dateTime={topic.updated_at}>更新：{new Date(topic.updated_at).toLocaleDateString('zh-HK')}</time>
+                </span>
               </button>
               <button type="button" className="topic-delete" aria-label={`刪除 ${topic.title}`} onClick={() => void removeTopic(topic)}>×</button>
             </article>
@@ -407,20 +415,28 @@ export function TopicLibraryAdmin() {
         .topic-message { max-width: 1500px; margin: 0 auto 16px; border-radius: 10px; padding: 11px 14px; font-size: 13px; }
         .topic-message.error { background: rgba(239,68,68,.14); color: #fca5a5; }
         .topic-message.success { background: rgba(52,211,153,.12); color: #6ee7b7; }
-        .topic-admin-grid { max-width: 1500px; margin: auto; display: grid; grid-template-columns: 310px minmax(0,1fr); gap: 18px; align-items: start; }
+        .topic-admin-grid { max-width: 1500px; margin: auto; display: grid; gap: 18px; }
         .topic-list, .topic-editor { border: 1px solid rgba(255,255,255,.08); background: #141414; border-radius: 14px; }
-        .topic-list { position: sticky; top: 20px; overflow: hidden; }
-        .topic-list-title { display: flex; justify-content: space-between; padding: 16px; border-bottom: 1px solid rgba(255,255,255,.08); }
+        .topic-list { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 10px; padding: 16px; }
+        .topic-list-title { grid-column: 1/-1; display: flex; justify-content: space-between; padding-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,.08); }
         .topic-list-title span, .empty { color: #777; font-size: 12px; }
-        .empty { padding: 16px; }
-        .topic-list article { position: relative; border-bottom: 1px solid rgba(255,255,255,.06); }
-        .topic-list article.active { background: rgba(124,58,237,.14); }
-        .topic-open { width: 100%; display: grid; gap: 6px; text-align: left; padding: 14px 40px 14px 14px; color: inherit; background: transparent; }
-        .topic-open strong { line-height: 1.4; }
-        .topic-open small { color: #777; }
+        .empty { grid-column: 1/-1; padding: 16px; }
+        .topic-list article { position: relative; min-width: 0; overflow: hidden; border: 1px solid rgba(255,255,255,.09); border-radius: 13px; background: #1d1a20; }
+        .topic-list article.active { border-color: #a855f7; box-shadow: 0 0 0 1px rgba(168,85,247,.25); }
+        .topic-open { width: 100%; display: grid; text-align: left; color: inherit; background: transparent; }
+        .topic-card-image { position: relative; display: grid; aspect-ratio: 1/1; place-items: center; overflow: hidden; background: radial-gradient(circle at 30% 20%,#392345,#17131b 70%); }
+        .topic-card-image :global(img) { object-fit: cover; }
+        .topic-card-fallback { display: grid; gap: 5px; place-items: center; color: #8d7696; }
+        .topic-card-fallback b { color: #bda7c6; font-size: 12px; }
+        .topic-card-fallback small { color: #75627d; font-size: 10px; }
+        .topic-card-copy { display: grid; gap: 7px; padding: 13px; }
+        .topic-card-copy strong { line-height: 1.4; padding-right: 22px; }
+        .topic-card-copy small { color: #a78bfa; }
+        .topic-card-copy em { min-height: 3em; display: -webkit-box; overflow: hidden; color: #aaa; font-size: 11px; font-style: normal; line-height: 1.5; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+        .topic-card-copy time { color: #666; font-size: 10px; }
         .status { justify-self: start; border-radius: 99px; padding: 3px 7px; background: #2b2b2b; color: #aaa; font-size: 10px; text-transform: uppercase; }
         .status.published { color: #6ee7b7; background: rgba(52,211,153,.1); }
-        .topic-delete { position: absolute; right: 10px; top: 12px; background: transparent; color: #666; font-size: 20px; }
+        .topic-delete { position: absolute; right: 9px; bottom: 78px; z-index: 2; width: 28px; height: 28px; border-radius: 999px; background: rgba(10,10,10,.75); color: #aaa; font-size: 18px; }
         .topic-editor { padding: 22px; display: grid; gap: 17px; }
         label { display: grid; gap: 7px; }
         label > span, legend { color: #aaa; font-size: 12px; font-weight: 650; }
@@ -446,11 +462,14 @@ export function TopicLibraryAdmin() {
         .editor-actions > span { color: #777; font-size: 12px; }
         .editor-actions > div { display: flex; gap: 9px; }
         @media (max-width: 1100px) {
-          .topic-admin-grid { grid-template-columns: 1fr; }
-          .topic-list { position: static; max-height: 280px; overflow: auto; }
+          .topic-list { grid-template-columns: repeat(3,minmax(0,1fr)); }
+        }
+        @media (max-width: 900px) {
+          .topic-list { grid-template-columns: repeat(2,minmax(0,1fr)); }
         }
         @media (max-width: 760px) {
           .topic-admin { padding: 18px; }
+          .topic-list { grid-template-columns: 1fr; }
           .topic-admin-header, .editor-actions { align-items: stretch; flex-direction: column; }
           .source-row, .two-columns, .three-columns, .direction-groups, .cover-section { grid-template-columns: 1fr; }
           .cover-preview { width: min(100%, 260px); }
