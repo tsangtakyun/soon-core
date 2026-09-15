@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 
 import { createSupabaseAdmin } from '@/lib/supabase-admin'
+import { syncEggTopicsToCore } from '@/lib/egg-topic-sync'
 import { cleanString, publicTopicSelect } from '@/lib/topic-library'
 
 export const runtime = 'nodejs'
@@ -36,6 +37,11 @@ export async function GET(request: NextRequest) {
   const limit = Math.min(Math.max(Number(request.nextUrl.searchParams.get('limit')) || 30, 1), 60)
   const now = new Date().toISOString()
   const admin = createSupabaseAdmin()
+  try {
+    await syncEggTopicsToCore()
+  } catch (error) {
+    console.error('EGG topic contribution sync failed', error)
+  }
 
   let matchingTopicIds: string[] | null = null
   if (direction) {
