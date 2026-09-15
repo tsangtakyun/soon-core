@@ -16,12 +16,14 @@ export function isStyleFormat(value: string | null): value is StyleFormat {
 }
 
 export function authorisedStyleReader(request: Request) {
-  const expected = process.env.SOON_CORE_BUNDLE_KEY || process.env.SOON_CORE_KNOWLEDGE_KEY
   const supplied = request.headers.get('x-soon-knowledge-key')
-  if (!expected || !supplied) return false
-  const a = Buffer.from(expected)
-  const b = Buffer.from(supplied)
-  return a.length === b.length && timingSafeEqual(a, b)
+  if (!supplied) return false
+  const provided = Buffer.from(supplied)
+  return [process.env.SOON_CORE_BUNDLE_KEY, process.env.SOON_CORE_KNOWLEDGE_KEY].some((expected) => {
+    if (!expected) return false
+    const accepted = Buffer.from(expected)
+    return accepted.length === provided.length && timingSafeEqual(accepted, provided)
+  })
 }
 
 function hash(value: unknown) {
