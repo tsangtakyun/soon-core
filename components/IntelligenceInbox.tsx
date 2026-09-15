@@ -23,7 +23,7 @@ export function IntelligenceInbox() {
   const [showSourceForm, setShowSourceForm] = useState(false)
   const [selectedIndustry, setSelectedIndustry] = useState('all')
   const [source, setSource] = useState({ platform: 'threads', collectionMode: 'keyword', identifier: '', label: '', learningFocus: '', industryCodes: [] as string[], consentBasis: 'public_research' })
-  const industries = [{ code: 'food_beverage', label: '飲食' }, { code: 'travel_experience', label: '旅遊' }, { code: 'sports_wellness', label: '運動健康' }, { code: 'home_living', label: '家居產品' }, { code: 'medical_aesthetics_wellness', label: '醫美保健' }, { code: 'beauty_cosmetics', label: '美容化妝' }, { code: 'trend_culture', label: '潮流文化' }]
+  const industries = [{ code: 'food_beverage', label: '飲食' }, { code: 'travel_experience', label: '旅遊' }, { code: 'sports_wellness', label: '運動健康' }, { code: 'home_living', label: '家居產品' }, { code: 'medical_aesthetics_wellness', label: '醫美保健' }, { code: 'beauty_cosmetics', label: '美容化妝' }, { code: 'trend_culture', label: '潮流文化' }, { code: 'technology_information', label: '科技資訊' }]
 
   async function loadCollector() {
     const response = await fetch('/api/intelligence-watchlists', { cache: 'no-store' })
