@@ -75,8 +75,9 @@ async function reclassifyCandidates(workspaceId: string) {
     .select('id,content_text,source_account,industry_codes')
     .eq('workspace_id', workspaceId)
     .in('review_status', ['new', 'reviewing'])
+    .is('industry_classified_at', null)
     .order('captured_at', { ascending: false })
-    .limit(300)
+    .limit(50)
   if (error) throw error
   let classified = 0
   const rows = data ?? []
@@ -99,7 +100,12 @@ async function reclassifyCandidates(workspaceId: string) {
     if (updateError) throw updateError
     classified += batch.length
   }
-  return { classified }
+  const { count: remaining } = await admin.from('intelligence_inbox_items')
+    .select('id', { count: 'exact', head: true })
+    .eq('workspace_id', workspaceId)
+    .in('review_status', ['new', 'reviewing'])
+    .is('industry_classified_at', null)
+  return { classified, remaining: remaining ?? 0 }
 }
 
 export async function POST(request: Request) {

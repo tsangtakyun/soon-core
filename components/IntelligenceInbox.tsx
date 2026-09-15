@@ -72,9 +72,15 @@ export function IntelligenceInbox() {
   async function reclassifyCandidates() {
     setCollectorBusy(true); setMessage('正在逐篇分析候選分類…')
     try {
-      const response = await fetch('/api/intelligence-watchlists/collect', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ action: 'reclassify' }) })
-      const data = await response.json().catch(() => ({})); if (!response.ok) throw new Error(data.error || '重新分類失敗')
-      setMessage(`已逐篇重新分類 ${data.classified ?? 0} 項候選。`); await loadCollector()
+      let total = 0
+      for (let batch = 0; batch < 6; batch += 1) {
+        const response = await fetch('/api/intelligence-watchlists/collect', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ action: 'reclassify' }) })
+        const data = await response.json().catch(() => ({})); if (!response.ok) throw new Error(data.error || '重新分類失敗')
+        total += Number(data.classified) || 0
+        setMessage(`已逐篇重新分類 ${total} 項；尚餘 ${data.remaining ?? 0} 項…`)
+        if (!data.remaining || !data.classified) break
+      }
+      setMessage(`已逐篇重新分類 ${total} 項候選。`); await loadCollector()
     } catch (error) { setMessage(error instanceof Error ? error.message : '重新分類失敗') } finally { setCollectorBusy(false) }
   }
 
