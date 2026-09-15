@@ -104,6 +104,7 @@ export function TopicLibraryAdmin() {
   const [uploading, setUploading] = useState(false)
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
+  const [listScope, setListScope] = useState<'published' | 'review' | 'all'>('published')
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -133,6 +134,12 @@ export function TopicLibraryAdmin() {
       children: directions.filter((item) => item.parent_id === root.id),
     }))
   }, [directions])
+
+  const visibleTopics = useMemo(() => {
+    if (listScope === 'published') return topics.filter((topic) => topic.status === 'published')
+    if (listScope === 'review') return topics.filter((topic) => topic.status !== 'published')
+    return topics
+  }, [listScope, topics])
 
   function update<K extends keyof Draft>(key: K, value: Draft[K]) {
     setDraft((current) => ({ ...current, [key]: value }))
@@ -280,10 +287,15 @@ export function TopicLibraryAdmin() {
         <aside className="topic-list">
           <div className="topic-list-title">
             <strong>題材</strong>
-            <span>{loading ? '載入中…' : `${topics.length} 項`}</span>
+            <span>{loading ? '載入中…' : `${visibleTopics.length} 項`}</span>
           </div>
-          {!loading && topics.length === 0 ? <p className="empty">未有題材，先建立第一張 SOON 題材卡。</p> : null}
-          {topics.map((topic) => (
+          <div className="topic-list-scopes" aria-label="題材狀態">
+            <button type="button" className={listScope === 'published' ? 'active' : ''} onClick={() => setListScope('published')}>已發布中央題材</button>
+            <button type="button" className={listScope === 'review' ? 'active' : ''} onClick={() => setListScope('review')}>草稿與審閱</button>
+            <button type="button" className={listScope === 'all' ? 'active' : ''} onClick={() => setListScope('all')}>全部</button>
+          </div>
+          {!loading && visibleTopics.length === 0 ? <p className="empty">此分類未有題材。</p> : null}
+          {visibleTopics.map((topic) => (
             <article key={topic.id} className={draft.id === topic.id ? 'active' : ''}>
               <button type="button" className="topic-open" onClick={() => setDraft(topicToDraft(topic))}>
                 <span className="topic-card-image">
@@ -419,6 +431,9 @@ export function TopicLibraryAdmin() {
         .topic-list, .topic-editor { border: 1px solid rgba(255,255,255,.08); background: #141414; border-radius: 14px; }
         .topic-list { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 10px; padding: 16px; }
         .topic-list-title { grid-column: 1/-1; display: flex; justify-content: space-between; padding-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,.08); }
+        .topic-list-scopes { grid-column: 1/-1; display: flex; flex-wrap: wrap; gap: 8px; }
+        .topic-list-scopes button { border-radius: 999px; padding: 8px 12px; background: #242124; color: #999; font-size: 12px; }
+        .topic-list-scopes button.active { background: #7c3aed; color: #fff; }
         .topic-list-title span, .empty { color: #777; font-size: 12px; }
         .empty { grid-column: 1/-1; padding: 16px; }
         .topic-list article { position: relative; min-width: 0; overflow: hidden; border: 1px solid rgba(255,255,255,.09); border-radius: 13px; background: #1d1a20; }

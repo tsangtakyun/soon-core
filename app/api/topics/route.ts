@@ -59,7 +59,7 @@ export async function GET(request: NextRequest) {
     .eq('status', 'published')
     .or(`expires_at.is.null,expires_at.gt.${now}`)
     .contains('languages', [language])
-    .order('published_at', { ascending: false, nullsFirst: false })
+    .order('updated_at', { ascending: false, nullsFirst: false })
     .limit(limit)
 
   if (region) query = query.contains('regions', [region])
@@ -69,8 +69,25 @@ export async function GET(request: NextRequest) {
   const { data, error } = await query
   if (error) return NextResponse.json({ error: '暫時未能載入題材' }, { status: 500 })
 
+  const topics = (data ?? []) as unknown as Array<Record<string, unknown> & { id: string }>
+  const topicIds = topics.map((topic) => topic.id)
+  const versions = new Map<string, number>()
+  if (topicIds.length) {
+    const { data: versionRows } = await admin
+      .from('knowledge_asset_versions')
+      .select('asset_id,version')
+      .eq('asset_type', 'topic')
+      .in('asset_id', topicIds)
+      .order('version', { ascending: false })
+    for (const row of versionRows ?? []) if (!versions.has(row.asset_id)) versions.set(row.asset_id, row.version)
+  }
+
   return NextResponse.json({
-    topics: data ?? [],
+    topics: topics.map((topic) => ({
+      ...topic,
+      knowledge_version: versions.get(topic.id) ?? null,
+      knowledge_ref: versions.has(topic.id) ? `topic:${topic.id}:v${versions.get(topic.id)}` : null,
+    })),
     filters: { direction: direction || null, region: region || null, locality: locality || null, language },
   }, { headers: corsHeaders(request) })
 }
