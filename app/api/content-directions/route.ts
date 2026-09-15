@@ -41,21 +41,24 @@ async function context() {
 function parseDoc(doc: JsonRecord) {
   let item: JsonRecord = {}
   try { item = typeof doc.content === 'string' ? JSON.parse(doc.content) : (doc.content as JsonRecord) || {} } catch {}
-  return { id: doc.id, createdAt: doc.created_at, updatedAt: doc.updated_at || item.updatedAt || doc.created_at, ...item }
+  return { id: doc.id, createdAt: doc.created_at, ...item, updatedAt: item.updatedAt || doc.created_at }
 }
 
 export async function GET() {
   const ctx = await context(); if ('error' in ctx) return ctx.error
-  const { data, error } = await ctx.admin.from('docs').select('id,content,created_at,updated_at').eq('workspace_id', ctx.workspaceId).eq('template_type', 'content_direction').order('updated_at', { ascending: false }).limit(500)
+  const { data, error } = await ctx.admin.from('docs').select('id,content,created_at').eq('workspace_id', ctx.workspaceId).eq('template_type', 'content_direction').order('created_at', { ascending: false }).limit(500)
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  return NextResponse.json({ directions: (data || []).map((doc) => parseDoc(doc as JsonRecord)) })
+  const directions = (data || []).map((doc) => parseDoc(doc as JsonRecord)).sort((a, b) =>
+    Date.parse(String(b.updatedAt || b.createdAt || '')) - Date.parse(String(a.updatedAt || a.createdAt || ''))
+  )
+  return NextResponse.json({ directions })
 }
 
 export async function POST(request: Request) {
   const ctx = await context(); if ('error' in ctx) return ctx.error
   const item = normalize(await request.json().catch(() => ({})) as JsonRecord)
   if (!item.title || !item.account || !item.whySave || !item.reusableTemplate) return NextResponse.json({ error: '請填寫標題、帳號、收藏原因及可重用方向' }, { status: 400 })
-  const { data, error } = await ctx.admin.from('docs').insert({ workspace_id: ctx.workspaceId, template_type: 'content_direction', title: item.title, content: JSON.stringify({ ...item, createdAt: new Date().toISOString() }) }).select('id,content,created_at,updated_at').single()
+  const { data, error } = await ctx.admin.from('docs').insert({ workspace_id: ctx.workspaceId, template_type: 'content_direction', title: item.title, content: JSON.stringify({ ...item, createdAt: new Date().toISOString() }) }).select('id,content,created_at').single()
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json({ direction: parseDoc(data as JsonRecord) })
 }
@@ -66,7 +69,7 @@ export async function PATCH(request: Request) {
   const id = text(body.id, 80)
   if (!id) return NextResponse.json({ error: '缺少研究 ID' }, { status: 400 })
   const item = normalize(body)
-  const { data, error } = await ctx.admin.from('docs').update({ title: item.title, content: JSON.stringify(item), updated_at: new Date().toISOString() }).eq('id', id).eq('workspace_id', ctx.workspaceId).eq('template_type', 'content_direction').select('id,content,created_at,updated_at').maybeSingle()
+  const { data, error } = await ctx.admin.from('docs').update({ title: item.title, content: JSON.stringify(item) }).eq('id', id).eq('workspace_id', ctx.workspaceId).eq('template_type', 'content_direction').select('id,content,created_at').maybeSingle()
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   if (!data) return NextResponse.json({ error: '找不到研究' }, { status: 404 })
   return NextResponse.json({ direction: parseDoc(data as JsonRecord) })
