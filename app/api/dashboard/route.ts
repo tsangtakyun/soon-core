@@ -50,7 +50,7 @@ export async function GET() {
   try {
     const values = await Promise.all([
       countRows(core, 'topic_items', [{ kind: 'eq', column: 'status', value: 'published' }]),
-      countRows(core, 'docs', [{ kind: 'eq', column: 'template_type', value: 'content_direction' }]),
+      countRows(core, 'content_styles', [{ kind: 'eq', column: 'status', value: 'active' }]),
       countRows(core, 'docs', [{ kind: 'eq', column: 'template_type', value: 'content_method' }]),
       countRows(core, 'docs', [{ kind: 'eq', column: 'template_type', value: 'campaign_experience' }]),
     ])
