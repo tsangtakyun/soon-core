@@ -1,29 +1,21 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname, useRouter, useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useMemo, useRef, useState } from 'react'
 
 import { useWorkspace } from '@/app/context/workspace-context'
-import { getPipelinePath, pipelines, type PipelineConfig, type PipelineTool } from '@/lib/pipelines'
+import type { PipelineConfig, PipelineTool } from '@/lib/pipelines'
 import { supabase } from '@/lib/supabase'
-import type { Project, Workspace, WorkspaceType } from '@/lib/types'
-import { workspaceTypeOptions } from '@/lib/types'
+import type { Project, Workspace } from '@/lib/types'
 
-type Section = 'home' | 'work' | 'docs' | 'schedule' | 'finance' | 'reply' | 'predikt' | 'topics' | 'deals' | 'packaging' | 'judge' | 'settings' | 'pipeline'
+type Section = 'home' | 'work' | 'docs' | 'schedule' | 'finance' | 'reply' | 'predikt' | 'inbox' | 'topics' | 'directions' | 'methods' | 'experiences' | 'intelligence' | 'deals' | 'packaging' | 'judge' | 'settings' | 'pipeline'
 
 interface DashboardShellProps {
   activeSection: Section
   pipeline?: PipelineConfig
   tool?: PipelineTool
   children?: React.ReactNode
-}
-
-type WorkspaceDraft = {
-  name: string
-  type: WorkspaceType
-  owner: string
-  description: string
 }
 
 type SettingsProfile = {
@@ -56,7 +48,12 @@ type SidebarIconName =
   | 'finance'
   | 'reply'
   | 'predikt'
+  | 'inbox'
   | 'topics'
+  | 'directions'
+  | 'methods'
+  | 'experiences'
+  | 'intelligence'
   | 'deals'
   | 'packaging'
   | 'judge'
@@ -66,14 +63,12 @@ type SidebarIconName =
 
 const primaryNav = [
   { href: '/', label: '首頁', icon: 'home', section: 'home' },
-  { href: '/work', label: '我的工作', icon: 'work', section: 'work' },
-  { href: '/docs', label: '文件中心', icon: 'docs', section: 'docs' },
-  { href: '/schedule', label: '行程中心', icon: 'schedule', section: 'schedule' },
-  { href: '/finance', label: '財務中心', icon: 'finance', section: 'finance' },
-  { href: '/reply', label: '回覆中心', icon: 'reply', section: 'reply' },
-  { href: '/predikt', label: '討論區中心', icon: 'predikt', section: 'predikt' },
-  { href: '/topic-library', label: '題材編輯中心', icon: 'topics', section: 'topics' },
-  { href: '/deals', label: '交易中心', icon: 'deals', section: 'deals' },
+  { href: '/intelligence-inbox', label: 'Intelligence Inbox', icon: 'inbox', section: 'inbox' },
+  { href: '/topic-library', label: '題材資料庫', icon: 'topics', section: 'topics' },
+  { href: '/content-directions', label: 'Content Direction Lab', icon: 'directions', section: 'directions' },
+  { href: '/content-methods', label: 'Content Method Intelligence', icon: 'methods', section: 'methods' },
+  { href: '/campaign-experiences', label: 'Campaign Intelligence', icon: 'experiences', section: 'experiences' },
+  { href: '/intelligence', label: 'Performance Intelligence', icon: 'intelligence', section: 'intelligence' },
 ] as const satisfies ReadonlyArray<{
   href: string
   label: string
@@ -95,26 +90,13 @@ function readCachedWorkspaces(): Workspace[] {
 }
 
 export function DashboardShell({ activeSection, pipeline, tool, children }: DashboardShellProps) {
-  const pathname = usePathname()
   const searchParams = useSearchParams()
   const router = useRouter()
   const urlWorkspace = searchParams.get('workspace')
   const { activeWorkspaceId, setActiveWorkspace } = useWorkspace()
-  const [activePipelineId, setActivePipelineId] = useState<PipelineConfig['id']>(pipeline?.id ?? 'youtube')
   const [workspaces, setWorkspaces] = useState<Workspace[]>(readCachedWorkspaces)
-  const [sidebarDataLoaded, setSidebarDataLoaded] = useState(() => readCachedWorkspaces().length > 0)
   const [projects, setProjects] = useState<Project[]>([])
-  const [workspaceProjectCounts, setWorkspaceProjectCounts] = useState<Record<string, number>>({})
-  const [dealsUnreadCount, setDealsUnreadCount] = useState(0)
   const [activeProject, setActiveProject] = useState<Project | null>(null)
-  const [workspacePanel, setWorkspacePanel] = useState<Workspace | null>(null)
-  const [workspaceEditMode, setWorkspaceEditMode] = useState(false)
-  const [workspaceDraft, setWorkspaceDraft] = useState<WorkspaceDraft>({
-    name: '',
-    type: 'youtube',
-    owner: '',
-    description: '',
-  })
   const [settingsProfile, setSettingsProfile] = useState<SettingsProfile>({
     companyName: 'SOON Studio',
     displayName: 'Tommy',
@@ -252,10 +234,6 @@ export function DashboardShell({ activeSection, pipeline, tool, children }: Dash
   }
 
   useEffect(() => {
-    if (pipeline?.id) setActivePipelineId(pipeline.id)
-  }, [pipeline?.id])
-
-  useEffect(() => {
     void loadSidebarData()
   }, [activeWorkspaceId])
 
@@ -279,21 +257,6 @@ export function DashboardShell({ activeSection, pipeline, tool, children }: Dash
     const refreshSidebar = () => void loadSidebarData()
     window.addEventListener('soon-data-updated', refreshSidebar)
     return () => window.removeEventListener('soon-data-updated', refreshSidebar)
-  }, [])
-
-  useEffect(() => {
-    void loadDealsUnreadCount()
-
-    const channel = supabase
-      .channel('sidebar_deals_activities')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'deals_activities' }, () => {
-        void loadDealsUnreadCount()
-      })
-      .subscribe()
-
-    return () => {
-      void supabase.removeChannel(channel)
-    }
   }, [])
 
   useEffect(() => {
@@ -334,12 +297,6 @@ export function DashboardShell({ activeSection, pipeline, tool, children }: Dash
       setWorkspaces(nextWorkspaces)
       window.localStorage.setItem(SIDEBAR_WORKSPACES_CACHE_KEY, JSON.stringify(nextWorkspaces))
     }
-    setWorkspaceProjectCounts(
-      projectsData?.workspace_counts && typeof projectsData.workspace_counts === 'object'
-        ? projectsData.workspace_counts
-        : {}
-    )
-    setSidebarDataLoaded(true)
     setProjects((projectsData?.projects ?? []) as Project[])
     setSettingsProfile({
       companyName: settingsData?.company_name || 'SOON Studio',
@@ -348,103 +305,7 @@ export function DashboardShell({ activeSection, pipeline, tool, children }: Dash
     })
   }
 
-  function notifyWorkspaceChange() {
-    window.dispatchEvent(new Event('soon-workspaces-changed'))
-  }
-
-  async function createWorkspace() {
-    const name = window.prompt('新增工作區名稱')
-    if (!name?.trim()) return
-
-    const response = await fetch('/api/workspaces', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        name: name.trim(),
-        type: pipeline?.id ?? activePipelineId,
-      }),
-    })
-    const data = await response.json().catch(() => ({}))
-
-    if (!response.ok || !data?.workspace?.id) {
-      window.alert(data?.error || '新增工作區失敗，請重試。')
-      return
-    }
-
-    await loadSidebarData()
-    setActiveWorkspace(data.workspace.id, data.workspace.name)
-    notifyWorkspaceChange()
-    router.push(`/work?workspace=${data.workspace.id}`)
-  }
-
-  function openWorkspacePanel(workspace: Workspace) {
-    setWorkspacePanel(workspace)
-    setWorkspaceEditMode(false)
-    setWorkspaceDraft({
-      name: workspace.name,
-      type: workspace.type ?? 'youtube',
-      owner: workspace.owner ?? '',
-      description: workspace.description ?? '',
-    })
-  }
-
-  async function saveWorkspace() {
-    if (!workspacePanel) return
-    if (!workspaceDraft.name.trim()) {
-      window.alert('請輸入工作區名稱')
-      return
-    }
-
-    const response = await fetch('/api/workspaces', {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        id: workspacePanel.id,
-        name: workspaceDraft.name.trim(),
-        type: workspaceDraft.type,
-        owner: workspaceDraft.owner.trim() || null,
-        description: workspaceDraft.description.trim() || null,
-      }),
-    })
-    const data = await response.json().catch(() => ({}))
-
-    if (!response.ok || !data?.workspace) {
-      window.alert(data?.error || '儲存工作區失敗，請重試。')
-      return
-    }
-
-    setWorkspacePanel(data.workspace as Workspace)
-    setWorkspaceEditMode(false)
-    await loadSidebarData()
-    notifyWorkspaceChange()
-  }
-
-  async function deleteWorkspace() {
-    if (!workspacePanel) return
-    const confirmed = window.confirm(`確認刪除工作區「${workspacePanel.name}」？相關項目都會一併刪除。`)
-    if (!confirmed) return
-
-    const response = await fetch('/api/workspaces', {
-      method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id: workspacePanel.id }),
-    })
-    const data = await response.json().catch(() => ({}))
-
-    if (!response.ok) {
-      window.alert(data?.error || '刪除工作區失敗，請重試。')
-      return
-    }
-
-    const deletedActiveWorkspace = workspacePanel.id === activeWorkspaceId
-    setWorkspacePanel(null)
-    await loadSidebarData()
-    notifyWorkspaceChange()
-    if (deletedActiveWorkspace) router.push('/work')
-  }
-
   const iframeTitle = pipeline && tool ? `${pipeline.label} ${tool.label}` : ''
-  const selectedWorkspaceCount = workspacePanel ? workspaceProjectCounts[workspacePanel.id] ?? 0 : 0
   const sidebarName = authProfile?.name || settingsProfile.displayName
   const sidebarEmail = authProfile?.email || settingsProfile.companyName
   const sidebarAvatar = settingsProfile.logoBase64 || authProfile?.avatarUrl
@@ -467,8 +328,13 @@ export function DashboardShell({ activeSection, pipeline, tool, children }: Dash
     }
   }
 
+  function resolveToolUrl(value: string) {
+    const baseOrigin = typeof window === 'undefined' ? 'https://soon-core.vercel.app' : window.location.origin
+    return new URL(value, baseOrigin)
+  }
+
   function buildToolUrlWithPrefill(baseUrl: string) {
-    const url = new URL(baseUrl)
+    const url = resolveToolUrl(baseUrl)
     if (pipeline?.id === 'youtube' && tool?.id === 'storyboard') {
       url.pathname = '/'
     }
@@ -487,15 +353,6 @@ export function DashboardShell({ activeSection, pipeline, tool, children }: Dash
     return url.toString()
   }
 
-  async function loadDealsUnreadCount() {
-    const { count, error } = await supabase
-      .from('deals_activities')
-      .select('*', { count: 'exact', head: true })
-      .eq('is_read', false)
-
-    if (!error) setDealsUnreadCount(count ?? 0)
-  }
-
   async function sendAuthToToolIframe() {
     if (!tool || !toolIframeRef.current?.contentWindow) return
 
@@ -505,7 +362,7 @@ export function DashboardShell({ activeSection, pipeline, tool, children }: Dash
 
     if (!session?.access_token || !session.refresh_token) return
 
-    const targetOrigin = new URL(tool.url).origin
+    const targetOrigin = resolveToolUrl(tool.url).origin
     toolIframeRef.current.contentWindow.postMessage(
       {
         type: 'SOON_AUTH',
@@ -599,7 +456,7 @@ export function DashboardShell({ activeSection, pipeline, tool, children }: Dash
       topic: doc.title,
     }
 
-    const targetOrigin = tool ? new URL(tool.url).origin : '*'
+    const targetOrigin = tool ? resolveToolUrl(tool.url).origin : '*'
     toolIframeRef.current.contentWindow.postMessage(message, targetOrigin)
     setScriptPickerOpen(false)
   }
@@ -747,51 +604,10 @@ export function DashboardShell({ activeSection, pipeline, tool, children }: Dash
               >
                 <SidebarIcon name={item.icon} />
                 <span>{item.label}</span>
-                {item.section === 'deals' && dealsUnreadCount > 0 && (
-                  <span className="sidebar-badge">{dealsUnreadCount > 99 ? '99+' : dealsUnreadCount}</span>
-                )}
               </Link>
             ))}
           </nav>
 
-          <div className="core-divider" />
-
-          <span className="sidebar-start-label">開始創作</span>
-          <PipelineToggle activeId={activePipelineId} onChange={setActivePipelineId} />
-          <ToolNav pipeline={pipelines[activePipelineId]} activePath={pathname} />
-
-          <div className="core-divider" />
-
-          <section className="workspace-block">
-            <div className="sidebar-section-title">工作區</div>
-            <div className="workspace-list">
-              {workspaces.map((workspace) => (
-                <div key={workspace.id} className={`workspace-item ${workspace.id === activeWorkspaceId ? 'active' : ''}`}>
-                  <Link
-                    href={`/work?workspace=${workspace.id}`}
-                    className="workspace-link"
-                    onClick={() => setActiveWorkspace(workspace.id, workspace.name)}
-                  >
-                    <span>{workspace.type === 'ig' ? 'IG' : workspace.type === 'mixed' ? 'MX' : 'YT'}</span>
-                    <strong>{workspace.name}</strong>
-                    <em>{workspaceProjectCounts[workspace.id] ?? 0}</em>
-                  </Link>
-                  <button
-                    className="workspace-menu-button"
-                    type="button"
-                    aria-label={`開啟 ${workspace.name} 工作區資料`}
-                    onClick={() => openWorkspacePanel(workspace)}
-                  >
-                    ⋯
-                  </button>
-                </div>
-              ))}
-              {sidebarDataLoaded && workspaces.length === 0 && <p className="empty-mini">未有工作區</p>}
-            </div>
-            <button className="ghost-button" type="button" onClick={() => void createWorkspace()}>
-              + 新增工作區
-            </button>
-          </section>
         </div>
 
         <Link href="/settings" className={`sidebar-settings-link ${activeSection === 'settings' ? 'active' : ''}`}>
@@ -843,80 +659,6 @@ export function DashboardShell({ activeSection, pipeline, tool, children }: Dash
           <div className="dashboard-content">{children}</div>
         )}
       </main>
-
-      {workspacePanel && (
-        <aside className="workspace-info-panel">
-          <div className="panel-head">
-            <h2>{workspacePanel.name}</h2>
-            <div className="panel-head-actions">
-              <button type="button" onClick={() => setWorkspaceEditMode((current) => !current)}>
-                {workspaceEditMode ? '取消' : '編輯'}
-              </button>
-              <button type="button" onClick={() => setWorkspacePanel(null)}>
-                關閉
-              </button>
-            </div>
-          </div>
-
-          <label>
-            名稱
-            <input
-              value={workspaceDraft.name}
-              disabled={!workspaceEditMode}
-              onChange={(event) => setWorkspaceDraft({ ...workspaceDraft, name: event.target.value })}
-            />
-          </label>
-          <label>
-            類型
-            <select
-              value={workspaceDraft.type}
-              disabled={!workspaceEditMode}
-              onChange={(event) => setWorkspaceDraft({ ...workspaceDraft, type: event.target.value as WorkspaceType })}
-            >
-              {workspaceTypeOptions.map((item) => (
-                <option key={item.value} value={item.value}>
-                  {item.label}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label>
-            負責人
-            <input
-              value={workspaceDraft.owner}
-              disabled={!workspaceEditMode}
-              onChange={(event) => setWorkspaceDraft({ ...workspaceDraft, owner: event.target.value })}
-            />
-          </label>
-          <label>
-            描述
-            <textarea
-              rows={3}
-              value={workspaceDraft.description}
-              disabled={!workspaceEditMode}
-              onChange={(event) => setWorkspaceDraft({ ...workspaceDraft, description: event.target.value })}
-            />
-          </label>
-          <div className="readonly-field">
-            <span>建立日期</span>
-            <strong>{new Date(workspacePanel.created_at).toLocaleDateString('zh-HK')}</strong>
-          </div>
-          <div className="readonly-field">
-            <span>項目數量</span>
-            <strong>{selectedWorkspaceCount}</strong>
-          </div>
-
-          {workspaceEditMode && (
-            <button className="primary-button" type="button" onClick={() => void saveWorkspace()}>
-              儲存
-            </button>
-          )}
-
-          <button className="danger-button" type="button" onClick={() => void deleteWorkspace()}>
-            刪除工作區
-          </button>
-        </aside>
-      )}
 
       {scriptPickerOpen && (
         <div
@@ -1035,29 +777,6 @@ export function DashboardShell({ activeSection, pipeline, tool, children }: Dash
   )
 }
 
-function PipelineToggle({
-  activeId,
-  onChange,
-}: {
-  activeId: PipelineConfig['id']
-  onChange: (id: PipelineConfig['id']) => void
-}) {
-  return (
-    <div className="pipeline-toggle" aria-label="Pipeline selector">
-      {Object.values(pipelines).map((item) => (
-        <button
-          key={item.id}
-          type="button"
-          className={item.id === activeId ? 'active' : ''}
-          onClick={() => onChange(item.id)}
-        >
-          {item.label}
-        </button>
-      ))}
-    </div>
-  )
-}
-
 function SidebarIcon({ name }: { name: SidebarIconName }) {
   const commonProps = {
     className: 'sidebar-icon',
@@ -1107,10 +826,40 @@ function SidebarIcon({ name }: { name: SidebarIconName }) {
         <path d="m17 15 3 2.5-3 2.5z" />
       </>
     ),
+    inbox: (
+      <>
+        <path d="M4 5h16v14H4z" />
+        <path d="M4 14h5l2 2h2l2-2h5M12 3v8M9 8l3 3 3-3" />
+      </>
+    ),
     topics: (
       <>
         <rect x="4" y="5" width="16" height="14" rx="2" />
         <path d="M8 9h8M8 13h5M16 13l1 1 2-2" />
+      </>
+    ),
+    directions: (
+      <>
+        <path d="M4 18V8l8-4 8 4v10l-8 3z" />
+        <path d="M8 11h8M8 15h5M16.5 4.5l1-2 1 2 2 .7-1.5 1.3.3 2-1.8-1-1.8 1 .3-2-1.5-1.3z" />
+      </>
+    ),
+    methods: (
+      <>
+        <path d="M5 4h14v16H5z" />
+        <path d="M8 8h8M8 12h5M8 16h3M15 14l1.5 1.5L20 12" />
+      </>
+    ),
+    experiences: (
+      <>
+        <path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z" />
+        <path d="M8 8h7M8 12h7M8 16h4M5 17a3 3 0 0 1 3-3h11" />
+      </>
+    ),
+    intelligence: (
+      <>
+        <path d="M5 19V9M10 19V5M15 19v-7M20 19V3" />
+        <path d="m4 14 5-4 5 2 6-6" />
       </>
     ),
     deals: (
@@ -1182,36 +931,14 @@ function SidebarIcon({ name }: { name: SidebarIconName }) {
         <path d="M7 14h5M14 14h3M7 17h10" />
       </>
     ),
+    carousel: (
+      <>
+        <rect x="4" y="4" width="7" height="9" rx="1.5" />
+        <rect x="13" y="4" width="7" height="9" rx="1.5" />
+        <rect x="7" y="15" width="10" height="5" rx="1.5" />
+      </>
+    ),
   }
 
   return <svg {...commonProps}>{paths[name]}</svg>
-}
-
-function ToolNav({ pipeline, activePath }: { pipeline: PipelineConfig; activePath: string }) {
-  const youtubeExperimentLinks = pipeline.id === 'youtube'
-    ? [
-        { href: '/packaging', label: 'Packaging', icon: 'packaging' as const },
-        { href: '/judge', label: 'Hook/Ending Judge', icon: 'judge' as const },
-      ]
-    : []
-
-  return (
-    <nav className="tool-nav compact" aria-label={`${pipeline.label} 工具`}>
-      {pipeline.tools.map((item) => {
-        const href = getPipelinePath(pipeline.id, item.id)
-        return (
-          <Link key={`${pipeline.id}-${item.id}`} href={href} className={activePath === href ? 'active' : ''}>
-            <SidebarIcon name={item.id} />
-            <span>{item.label}</span>
-          </Link>
-        )
-      })}
-      {youtubeExperimentLinks.map((item) => (
-        <Link key={item.href} href={item.href} className={activePath === item.href ? 'active' : ''}>
-          <SidebarIcon name={item.icon} />
-          <span>{item.label}</span>
-        </Link>
-      ))}
-    </nav>
-  )
 }
