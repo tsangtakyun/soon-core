@@ -63,10 +63,35 @@ function attachData<T extends EditableObject>(object: T, role: string) {
   return object
 }
 
-function addStarterObjects(canvas: Canvas, role: PageRole) {
+const REFERENCE_IMAGES: Record<PageRole, string> = {
+  cover: '/templates/clear-magazine-carousel-v1/01-cover.png',
+  longform: '/templates/clear-magazine-carousel-v1/02-content.png',
+  split: '/templates/clear-magazine-carousel-v1/03-content.png',
+  comparison: '/templates/clear-magazine-carousel-v1/04-content.png',
+  feature: '/templates/clear-magazine-carousel-v1/05-content.png',
+  end: '/templates/clear-magazine-carousel-v1/06-end.png',
+}
+
+async function addStarterObjects(canvas: Canvas, role: PageRole) {
   const copy = placeholderFor(role)
   canvas.clear()
   canvas.backgroundColor = '#F4F0E8'
+
+  // The source page is a visual underlay only. It helps an editor compare the
+  // reusable structure without embedding reference artwork in saved JSON.
+  const reference = await FabricImage.fromURL(REFERENCE_IMAGES[role]) as EditableObject
+  const referenceScale = Math.max(DISPLAY_WIDTH / (reference.width || 1), DISPLAY_HEIGHT / (reference.height || 1))
+  reference.set({
+    evented: false,
+    excludeFromExport: true,
+    left: 0,
+    opacity: 0.28,
+    selectable: false,
+    scaleX: referenceScale,
+    scaleY: referenceScale,
+    top: 0,
+  })
+  reference.data = { id: `reference-${role}`, role: 'reference_underlay' }
 
   const accent = attachData(new Rect({
     fill: role === 'comparison' ? '#E24B35' : '#3159C6',
@@ -119,7 +144,7 @@ function addStarterObjects(canvas: Canvas, role: PageRole) {
     width: 42,
   }) as EditableObject, 'page_number')
 
-  canvas.add(accent, eyebrow, title, body, page)
+  canvas.add(reference, accent, eyebrow, title, body, page)
   canvas.renderAll()
 }
 
@@ -194,7 +219,7 @@ export function TemplateMasterEditor({ draftId, styleCode }: { draftId: string; 
       canvas.dispose()
       fabricRef.current = null
     }
-  }, [])
+  }, [loading])
 
   useEffect(() => {
     const canvas = fabricRef.current
@@ -212,7 +237,7 @@ export function TemplateMasterEditor({ draftId, styleCode }: { draftId: string; 
         if (cancelled) return
         canvas.renderAll()
       } else {
-        addStarterObjects(canvas, role)
+        await addStarterObjects(canvas, role)
       }
       loadingCanvasRef.current = false
       setDirty(false)
