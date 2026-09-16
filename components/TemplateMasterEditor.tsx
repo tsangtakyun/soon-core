@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import type { CSSProperties } from 'react'
 import { Canvas, FabricImage, FabricObject, Group, Rect, Textbox } from 'fabric'
 
 const PAGE_ROLES = [
@@ -53,6 +54,35 @@ const DISPLAY_WIDTH = 432
 const DISPLAY_HEIGHT = 540
 const OUTPUT_WIDTH = 1080
 const OUTPUT_HEIGHT = 1350
+
+const MASTER_STATE_STYLES = {
+  actions: { display: 'flex', flexWrap: 'wrap', gap: 10, justifyContent: 'center', marginTop: 24 },
+  badge: { color: '#a78bfa', fontSize: 10, fontWeight: 850, letterSpacing: '0.16em' },
+  button: { background: '#7c3aed', border: 0, borderRadius: 9, color: '#fff', cursor: 'pointer', fontSize: 12, fontWeight: 800, padding: '11px 18px' },
+  card: { background: '#16131b', border: '1px solid #332742', borderRadius: 18, boxShadow: '0 28px 80px rgba(0,0,0,.38)', maxWidth: 460, padding: '38px 34px', textAlign: 'center', width: 'calc(100% - 32px)' },
+  heading: { color: '#f6f3f8', fontSize: 25, margin: '16px 0 10px' },
+  icon: { alignItems: 'center', background: '#281c39', border: '1px solid #65449a', borderRadius: 16, color: '#c4b5fd', display: 'inline-flex', fontSize: 24, fontWeight: 900, height: 54, justifyContent: 'center', marginTop: 22, width: 54 },
+  link: { background: '#211e25', border: '1px solid #37323d', borderRadius: 9, color: '#ddd', fontSize: 12, fontWeight: 750, padding: '10px 17px', textDecoration: 'none' },
+  message: { color: '#aaa3af', fontSize: 13, lineHeight: 1.65, margin: 0 },
+  page: { alignItems: 'center', background: '#0b0b0d', display: 'flex', justifyContent: 'center', minHeight: '100vh', padding: 20 },
+} satisfies Record<string, CSSProperties>
+
+function MasterEditorState({ loading, message, onRetry }: { loading?: boolean; message: string; onRetry?: () => void }) {
+  return (
+    <main aria-live="polite" style={MASTER_STATE_STYLES.page}>
+      <section style={MASTER_STATE_STYLES.card}>
+        <small style={MASTER_STATE_STYLES.badge}>SOON CORE · TEMPLATE MASTER</small>
+        <div aria-hidden="true" style={MASTER_STATE_STYLES.icon}>{loading ? '…' : '!'}</div>
+        <h1 style={MASTER_STATE_STYLES.heading}>{loading ? '正在準備母版' : '無法開啟母版'}</h1>
+        <p style={MASTER_STATE_STYLES.message}>{message}</p>
+        <div style={MASTER_STATE_STYLES.actions}>
+          {onRetry ? <button onClick={onRetry} style={MASTER_STATE_STYLES.button} type="button">重新載入</button> : null}
+          <Link href="/content-directions" style={MASTER_STATE_STYLES.link}>返回內容風格</Link>
+        </div>
+      </section>
+    </main>
+  )
+}
 
 function placeholderFor(role: PageRole) {
   const copy: Record<PageRole, { eyebrow: string; title: string; body: string }> = {
@@ -284,20 +314,28 @@ export function TemplateMasterEditor({ draftId, styleCode }: { draftId: string; 
   }, [])
 
   const loadMaster = useCallback(async () => {
+    setLoading(true)
+    setMessage('')
     if (!draftId) {
       setMessage('缺少 Template draft ID，請由內容風格頁重新開啟。')
       setLoading(false)
       return
     }
-    const response = await fetch(`/api/content-directions/template-drafts/${encodeURIComponent(draftId)}`, { cache: 'no-store' })
-    const payload = await response.json().catch(() => ({}))
-    if (!response.ok) {
-      setMessage(payload.error || '未能載入標準母版')
+    try {
+      const response = await fetch(`/api/content-directions/template-drafts/${encodeURIComponent(draftId)}`, { cache: 'no-store' })
+      const payload = await response.json().catch(() => ({}))
+      if (!response.ok) {
+        setMaster(null)
+        setMessage(payload.error || '未能載入標準母版，請稍後再試。')
+        return
+      }
+      setMaster(payload)
+    } catch {
+      setMaster(null)
+      setMessage('暫時未能連接 SOON Core，請檢查網絡後重新載入。')
+    } finally {
       setLoading(false)
-      return
     }
-    setMaster(payload)
-    setLoading(false)
   }, [draftId])
 
   useEffect(() => { void loadMaster() }, [loadMaster])
@@ -544,8 +582,8 @@ export function TemplateMasterEditor({ draftId, styleCode }: { draftId: string; 
     }
   }
 
-  if (loading) return <main className="master-state">正在載入母版編輯器…</main>
-  if (!master) return <main className="master-state"><p>{message || '找不到母版草稿'}</p><Link href="/content-directions">返回內容風格</Link></main>
+  if (loading) return <MasterEditorState loading message="正在載入 Style、版本及六款標準頁…" />
+  if (!master) return <MasterEditorState message={message || '找不到母版草稿。'} onRetry={draftId ? () => void loadMaster() : undefined} />
 
   const selectedFill = typeof selected?.fill === 'string' ? selected.fill : '#171717'
   const selectedOpacity = Math.round((selected?.opacity ?? 1) * 100)
