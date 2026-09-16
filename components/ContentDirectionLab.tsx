@@ -12,7 +12,9 @@ type PublishedStyle = {
   description: string
   version: { number: number; ref: string; publishedAt: string; rules: Record<string, unknown> }
   evidence: { confirmedReferenceCount: number }
+  templates?: Array<{ templateId: string; version: { number: number; rendererCode: string } }>
 }
+type MasterDraft = { id: string; style_id: string; target_version: number; status: string; page_designs: Record<string, unknown>; updated_at: string }
 const today = () => new Date().toISOString().slice(0, 10)
 const empty: Direction = { title: '', account: '', platform: 'Threads', postUrl: '', imageUrl: '', capturedAt: today(), publishedAt: '', kind: 'moment', eventName: '', eventDate: '', trendStage: '發布後', trendDependency: '高度', reusableWindow: '3 日', responseSpeed: '', hook: '', format: '', visualPattern: '', tone: '', cta: '', mechanism: '', whySave: '', reusableTemplate: '', industries: [], objectives: [], tags: [], risks: '', metrics: {}, metricsCapturedAt: today() }
 const split = (value: string) => value.split(/[，,；;\n]/).map((item) => item.trim()).filter(Boolean)
@@ -21,6 +23,8 @@ const join = (value: unknown) => Array.isArray(value) ? value.join('，') : ''
 export function ContentDirectionLab() {
   const [items, setItems] = useState<Direction[]>([])
   const [styles, setStyles] = useState<PublishedStyle[]>([])
+  const [masterDrafts, setMasterDrafts] = useState<MasterDraft[]>([])
+  const [masterBusy, setMasterBusy] = useState('')
   const [draft, setDraft] = useState<Direction>(empty)
   const [query, setQuery] = useState('')
   const [kind, setKind] = useState('all')
@@ -45,6 +49,7 @@ export function ContentDirectionLab() {
     if (stylesResponse.ok) {
       const published = Array.isArray(stylesPayload.styles) ? stylesPayload.styles : []
       setStyles([...published].sort((a, b) => Date.parse(b.version?.publishedAt || '') - Date.parse(a.version?.publishedAt || '')))
+      setMasterDrafts(Array.isArray(stylesPayload.masterDrafts) ? stylesPayload.masterDrafts : [])
     } else setMessage(stylesPayload.error || '未能載入已發布內容風格')
     setLoading(false)
   }, [])
@@ -94,10 +99,28 @@ export function ContentDirectionLab() {
     setSaving(false)
   }
 
+  async function editMaster(style: PublishedStyle) {
+    setMasterBusy(style.code); setMessage('')
+    const response = await fetch(`/api/content-directions/styles/${encodeURIComponent(style.code)}/master-draft`, { method: 'POST' })
+    const payload = await response.json().catch(() => ({}))
+    if (response.ok && payload.editUrl) window.location.href = payload.editUrl
+    else setMessage(payload.error || '未能開啟標準母版編輯器')
+    setMasterBusy('')
+  }
+
+  async function publishMaster(draft: MasterDraft) {
+    setMasterBusy(draft.id); setMessage('')
+    const response = await fetch(`/api/content-directions/template-drafts/${encodeURIComponent(draft.id)}/publish`, { method: 'POST' })
+    const payload = await response.json().catch(() => ({}))
+    if (response.ok) { setMessage(`Template v${payload.templateVersion} 已發布。`); await load() }
+    else setMessage(payload.error || '未能發布標準母版')
+    setMasterBusy('')
+  }
+
   return <section className="lab"><header><div><small>SOON CONTENT STYLES</small><h1>選擇內容風格</h1><p>以卡片瀏覽內容風格與 reference；最新更新會排最前。</p></div><div className="summary"><strong>{items.length}</strong><span>個風格研究</span></div></header>
     {message ? <div className="notice">{message}</div> : null}
     <section className="published-styles"><div className="published-head"><div><small>PUBLISHED STYLE REGISTRY</small><h2>已發布內容風格</h2><p>Content Studio 讀取同一版本；新版不會覆蓋已建立項目的規格快照。</p></div><strong>{styles.length} 款</strong></div>
-      {loading ? <p className="empty">正在載入風格…</p> : styles.length ? <div className="style-cards">{styles.map((style) => <article key={style.styleId} className="style-card"><div className="style-preview"><span>{style.code.split('_').slice(0, 2).join(' ')}</span><b>{style.name}</b><i>V{style.version.number}</i></div><div className="style-copy"><small>{style.format}</small><h3>{style.name}</h3><p>{style.description}</p><div><span>{style.version.ref}</span><b>{style.evidence.confirmedReferenceCount} references</b></div></div></article>)}</div> : <p className="empty">未有已發布內容風格。</p>}
+      {loading ? <p className="empty">正在載入風格…</p> : styles.length ? <div className="style-cards">{styles.map((style) => { const draft = masterDrafts.find((item) => item.style_id === style.styleId); const pageCount = draft ? Object.keys(draft.page_designs || {}).length : 0; return <article key={style.styleId} className="style-card"><div className="style-preview"><span>{style.code.split('_').slice(0, 2).join(' ')}</span><b>{style.name}</b><i>V{style.templates?.[0]?.version.number || style.version.number}</i></div><div className="style-copy"><small>{style.format}</small><h3>{style.name}</h3><p>{style.description}</p><div><span>{style.version.ref}</span><b>{style.evidence.confirmedReferenceCount} references</b></div>{style.templates?.length ? <div className="master-actions"><button type="button" disabled={Boolean(masterBusy)} onClick={() => void editMaster(style)}>{masterBusy === style.code ? '開啟中…' : draft ? `繼續編輯 v${draft.target_version}（${pageCount}/6）` : '編輯標準版本'}</button>{draft?.status === 'review' ? <button type="button" className="publish" disabled={Boolean(masterBusy)} onClick={() => void publishMaster(draft)}>{masterBusy === draft.id ? '發布中…' : `發布 v${draft.target_version}`}</button> : null}</div> : <small className="no-template">尚未連接可編輯 Template</small>}</div></article> })}</div> : <p className="empty">未有已發布內容風格。</p>}
     </section>
     <div className="quick"><div><small>QUICK CAPTURE</small><h2>Screenshot ＋帳號，AI 幫你起稿</h2><p>先生成可編輯草稿；確認內容後才正式加入研究庫。</p></div><div className="quick-actions"><label><span>帳號／品牌</span><input value={draft.account} onChange={(e) => update('account', e.target.value)} placeholder="例如：@ikea_taiwan" /></label><label className="quick-upload">{uploading ? '正在上載…' : draft.imageUrl ? '✓ 更換 Screenshot' : '上載 Screenshot'}<input type="file" accept="image/png,image/jpeg,image/webp" disabled={uploading || analysing} onChange={(e) => { const file = e.target.files?.[0]; if (file) void upload(file); e.target.value = '' }} /></label><button type="button" disabled={uploading || analysing || !draft.imageUrl || !draft.account.trim()} onClick={() => void analyse()}>{analysing ? 'AI 正在拆解…' : 'AI 建立草稿'}</button></div></div>
     <div className="layout"><form onSubmit={(event) => { event.preventDefault(); void save() }}><div className="form-head"><div><small>{draft.id ? 'EDIT RESEARCH' : 'DAILY CAPTURE'}</small><h2>{draft.id ? '編輯方向研究' : '收藏今日好帖'}</h2></div>{draft.id ? <button type="button" onClick={() => setDraft({ ...empty, capturedAt: today(), metricsCapturedAt: today() })}>新增另一篇</button> : null}</div>
@@ -131,6 +154,11 @@ export function ContentDirectionLab() {
       .style-copy p { min-height: 44px; margin: 0; color: #8d8991; font-size: 10px; line-height: 1.45; }
       .style-copy > div { display: flex; justify-content: space-between; gap: 8px; margin-top: 11px; color: #777; font-size: 8px; }
       .style-copy > div b { color: #a78bfa; }
+      .master-actions { display: grid!important; grid-template-columns: 1fr auto; gap: 7px!important; margin-top: 12px!important; }
+      .master-actions button { border: 1px solid #57406f; border-radius: 8px; background: #2a1b3d; color: #e9d5ff; padding: 8px; font-size: 9px; font-weight: 800; cursor: pointer; }
+      .master-actions .publish { border-color: #166534; background: #153a25; color: #bbf7d0; }
+      .master-actions button:disabled { opacity: .45; cursor: wait; }
+      .no-template { display: block; margin-top: 10px; color: #6f6a73!important; letter-spacing: 0!important; }
       .layout { grid-template-columns: 1fr; }
       .layout > aside { order: -1; }
       .cards { grid-template-columns: repeat(4, minmax(0, 1fr)); max-height: none; }
