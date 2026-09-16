@@ -15,12 +15,61 @@ export async function POST(_request: Request, context: { params: Promise<{ code:
   if (!/^[a-z][a-z0-9_]{2,79}$/.test(code)) return NextResponse.json({ error: 'Invalid style code' }, { status: 400 })
 
   const admin = createSupabaseAdmin()
-  const { data: style } = await admin.from('content_styles').select('id,code,name').eq('code', code).eq('status', 'active').maybeSingle()
+  const { data: style } = await admin.from('content_styles').select('id,code,name,description,format,scope,source_workspace_id').eq('code', code).eq('status', 'active').maybeSingle()
   if (!style) return NextResponse.json({ error: '找不到已發布 Style' }, { status: 404 })
   const { data: styleVersion } = await admin.from('style_versions').select('id,version').eq('style_id', style.id).eq('status', 'published').order('version', { ascending: false }).limit(1).maybeSingle()
   if (!styleVersion) return NextResponse.json({ error: 'Style 尚未發布' }, { status: 409 })
-  const { data: binding } = await admin.from('style_template_bindings').select('template_version_id').eq('style_version_id', styleVersion.id).eq('status', 'active').order('priority').limit(1).maybeSingle()
-  if (!binding) return NextResponse.json({ error: '呢款 Style 尚未連接可編輯 Template' }, { status: 409 })
+  let { data: binding } = await admin.from('style_template_bindings').select('template_version_id').eq('style_version_id', styleVersion.id).eq('status', 'active').order('priority').limit(1).maybeSingle()
+
+  if (!binding) {
+    const templateCode = style.code.endsWith('_carousel') ? style.code : `${style.code}_carousel`
+    const { data: template, error: templateError } = await admin.from('content_templates').upsert({
+      code: templateCode,
+      description: style.description,
+      format: style.format,
+      name: `${style.name} Master Template`,
+      scope: style.scope,
+      source_workspace_id: style.source_workspace_id,
+      status: 'active',
+      updated_at: new Date().toISOString(),
+    }, { onConflict: 'code' }).select('id').single()
+    if (templateError) throw templateError
+
+    let { data: initialVersion } = await admin.from('template_versions').select('id,version').eq('template_id', template.id).eq('status', 'published').order('version', { ascending: false }).limit(1).maybeSingle()
+    if (!initialVersion) {
+      const rendererCode = `${style.code.replaceAll('_', '-')}-v1`
+      const contract = {
+        schema_version: 1,
+        output: { width: 1080, height: 1350, aspect_ratio: '4:5' },
+        page_roles: ['cover','longform','split','comparison','feature','end'].map((role, index) => ({ position: String(index + 1).padStart(2, '0'), role })),
+        brand_bindings: { logo: 'workspace.logo_url', font: 'workspace.font_style', colors: 'brand_profiles.brand_colors', fallback: 'template_defaults' },
+      }
+      const { data: created, error: createError } = await admin.from('template_versions').insert({
+        change_summary: `Initial editable master contract for ${style.name}.`,
+        contract,
+        created_by: auth.userId,
+        renderer_code: rendererCode,
+        status: 'draft',
+        template_id: template.id,
+        version: 1,
+      }).select('id,version').single()
+      if (createError) throw createError
+      const { error: reviewError } = await admin.from('template_versions').update({ status: 'review', reviewed_by: auth.userId }).eq('id', created.id)
+      if (reviewError) throw reviewError
+      const { data: published, error: publishError } = await admin.from('template_versions').update({ status: 'published', published_by: auth.userId }).eq('id', created.id).select('id,version').single()
+      if (publishError) throw publishError
+      initialVersion = published
+    }
+    const { data: createdBinding, error: bindingError } = await admin.from('style_template_bindings').insert({
+      priority: 10,
+      status: 'active',
+      style_version_id: styleVersion.id,
+      template_version_id: initialVersion.id,
+    }).select('template_version_id').single()
+    if (bindingError) throw bindingError
+    binding = createdBinding
+  }
+
   const { data: baseVersion } = await admin.from('template_versions').select('id,template_id,version,renderer_code').eq('id', binding.template_version_id).eq('status', 'published').maybeSingle()
   if (!baseVersion) return NextResponse.json({ error: '找不到已發布 Template version' }, { status: 409 })
 

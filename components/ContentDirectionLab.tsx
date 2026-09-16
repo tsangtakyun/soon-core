@@ -3,6 +3,8 @@
 import Image from 'next/image'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
+import { TemplateCanvasPreview } from '@/components/TemplateCanvasPreview'
+
 type Direction = Record<string, any> & { id?: string; title: string; account: string; whySave: string; reusableTemplate: string }
 type PublishedStyle = {
   styleId: string
@@ -12,9 +14,10 @@ type PublishedStyle = {
   description: string
   version: { number: number; ref: string; publishedAt: string; rules: Record<string, unknown> }
   evidence: { confirmedReferenceCount: number }
-  templates?: Array<{ templateId: string; version: { number: number; rendererCode: string } }>
+  templates?: Array<{ templateId: string; version: { number: number; rendererCode: string; contract: Record<string, unknown> } }>
 }
-type MasterDraft = { id: string; style_id: string; target_version: number; status: string; page_designs: Record<string, unknown>; updated_at: string }
+type PageDesign = { canvasJson?: Record<string, unknown>; canvasWidth?: number; canvasHeight?: number; coordinateWidth?: number; coordinateHeight?: number }
+type MasterDraft = { id: string; style_id: string; target_version: number; status: string; page_designs: Record<string, PageDesign>; updated_at: string }
 const today = () => new Date().toISOString().slice(0, 10)
 const empty: Direction = { title: '', account: '', platform: 'Threads', postUrl: '', imageUrl: '', capturedAt: today(), publishedAt: '', kind: 'moment', eventName: '', eventDate: '', trendStage: '發布後', trendDependency: '高度', reusableWindow: '3 日', responseSpeed: '', hook: '', format: '', visualPattern: '', tone: '', cta: '', mechanism: '', whySave: '', reusableTemplate: '', industries: [], objectives: [], tags: [], risks: '', metrics: {}, metricsCapturedAt: today() }
 const split = (value: string) => value.split(/[，,；;\n]/).map((item) => item.trim()).filter(Boolean)
@@ -120,7 +123,27 @@ export function ContentDirectionLab() {
   return <section className="lab"><header><div><small>SOON CONTENT STYLES</small><h1>選擇內容風格</h1><p>以卡片瀏覽內容風格與 reference；最新更新會排最前。</p></div><div className="summary"><strong>{items.length}</strong><span>個風格研究</span></div></header>
     {message ? <div className="notice">{message}</div> : null}
     <section className="published-styles"><div className="published-head"><div><small>PUBLISHED STYLE REGISTRY</small><h2>已發布內容風格</h2><p>Content Studio 讀取同一版本；新版不會覆蓋已建立項目的規格快照。</p></div><strong>{styles.length} 款</strong></div>
-      {loading ? <p className="empty">正在載入風格…</p> : styles.length ? <div className="style-cards">{styles.map((style) => { const draft = masterDrafts.find((item) => item.style_id === style.styleId); const pageCount = draft ? Object.keys(draft.page_designs || {}).length : 0; return <article key={style.styleId} className="style-card"><div className="style-preview"><span>{style.code.split('_').slice(0, 2).join(' ')}</span><b>{style.name}</b><i>V{style.templates?.[0]?.version.number || style.version.number}</i></div><div className="style-copy"><small>{style.format}</small><h3>{style.name}</h3><p>{style.description}</p><div><span>{style.version.ref}</span><b>{style.evidence.confirmedReferenceCount} references</b></div>{style.templates?.length ? <div className="master-actions"><button type="button" disabled={Boolean(masterBusy)} onClick={() => void editMaster(style)}>{masterBusy === style.code ? '開啟中…' : draft ? `繼續編輯 v${draft.target_version}（${pageCount}/6）` : '編輯標準版本'}</button>{draft?.status === 'review' ? <button type="button" className="publish" disabled={Boolean(masterBusy)} onClick={() => void publishMaster(draft)}>{masterBusy === draft.id ? '發布中…' : `發布 v${draft.target_version}`}</button> : null}</div> : <small className="no-template">尚未連接可編輯 Template</small>}</div></article> })}</div> : <p className="empty">未有已發布內容風格。</p>}
+      {loading ? <p className="empty">正在載入風格…</p> : styles.length ? <div className="style-cards">{styles.map((style) => {
+        const draft = masterDrafts.find((item) => item.style_id === style.styleId)
+        const template = style.templates?.[0]
+        const contract = template?.version.contract || {}
+        const publishedDesigns = contract.master_designs && typeof contract.master_designs === 'object' && !Array.isArray(contract.master_designs)
+          ? contract.master_designs as Record<string, PageDesign>
+          : null
+        const pageCount = draft ? Object.keys(draft.page_designs || {}).length : 0
+        const legacyImage = style.code === 'clear_magazine_carousel' ? '/templates/clear-magazine-carousel-v1/01-cover.png' : null
+        return <article key={style.styleId} className="style-card">
+          <TemplateCanvasPreview
+            draftDesigns={draft?.page_designs}
+            draftVersion={draft?.target_version}
+            legacyImage={legacyImage}
+            name={style.name}
+            publishedDesigns={publishedDesigns}
+            publishedVersion={template?.version.number || null}
+          />
+          <div className="style-copy"><small>{style.format}</small><h3>{style.name}</h3><p>{style.description}</p><div><span>{style.version.ref}</span><b>{style.evidence.confirmedReferenceCount} references</b></div><div className="master-actions"><button type="button" disabled={Boolean(masterBusy)} onClick={() => void editMaster(style)}>{masterBusy === style.code ? '開啟中…' : draft ? `繼續編輯 v${draft.target_version}（${pageCount}/6）` : template ? '編輯標準版本' : '建立標準母版'}</button>{draft?.status === 'review' ? <button type="button" className="publish" disabled={Boolean(masterBusy)} onClick={() => void publishMaster(draft)}>{masterBusy === draft.id ? '發布中…' : `發布 v${draft.target_version}`}</button> : null}</div></div>
+        </article>
+      })}</div> : <p className="empty">未有已發布內容風格。</p>}
     </section>
     <div className="quick"><div><small>QUICK CAPTURE</small><h2>Screenshot ＋帳號，AI 幫你起稿</h2><p>先生成可編輯草稿；確認內容後才正式加入研究庫。</p></div><div className="quick-actions"><label><span>帳號／品牌</span><input value={draft.account} onChange={(e) => update('account', e.target.value)} placeholder="例如：@ikea_taiwan" /></label><label className="quick-upload">{uploading ? '正在上載…' : draft.imageUrl ? '✓ 更換 Screenshot' : '上載 Screenshot'}<input type="file" accept="image/png,image/jpeg,image/webp" disabled={uploading || analysing} onChange={(e) => { const file = e.target.files?.[0]; if (file) void upload(file); e.target.value = '' }} /></label><button type="button" disabled={uploading || analysing || !draft.imageUrl || !draft.account.trim()} onClick={() => void analyse()}>{analysing ? 'AI 正在拆解…' : 'AI 建立草稿'}</button></div></div>
     <div className="layout"><form onSubmit={(event) => { event.preventDefault(); void save() }}><div className="form-head"><div><small>{draft.id ? 'EDIT RESEARCH' : 'DAILY CAPTURE'}</small><h2>{draft.id ? '編輯方向研究' : '收藏今日好帖'}</h2></div>{draft.id ? <button type="button" onClick={() => setDraft({ ...empty, capturedAt: today(), metricsCapturedAt: today() })}>新增另一篇</button> : null}</div>
@@ -143,12 +166,23 @@ export function ContentDirectionLab() {
       .published-head > strong { color: #c4b5fd; font-size: 12px; }
       .style-cards { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 11px; }
       .style-card { min-width: 0; overflow: hidden; border: 1px solid #302b37; border-radius: 13px; background: #1a181d; }
-      .style-preview { position: relative; aspect-ratio: 1 / 1; display: flex; flex-direction: column; justify-content: flex-end; gap: 7px; padding: 18px; background: linear-gradient(145deg,#f0ece4,#9fa6b2); color: #111; }
-      .style-card:nth-child(2n) .style-preview { background: linear-gradient(145deg,#0d1016,#75606b); color: white; }
-      .style-card:nth-child(3n) .style-preview { background: linear-gradient(145deg,#f6d260,#fff4cf); color: #202126; }
-      .style-preview span { font-size: 8px; font-weight: 850; letter-spacing: .12em; text-transform: uppercase; opacity: .65; }
-      .style-preview b { max-width: 90%; font-size: 22px; line-height: 1.05; }
-      .style-preview i { position: absolute; right: 11px; top: 11px; border-radius: 999px; background: rgba(0,0,0,.72); color: white; padding: 5px 7px; font-size: 8px; font-style: normal; }
+      :global(.template-actual-preview) { position: relative; background: #0d0c0f; }
+      :global(.template-preview-stage) { position: relative; aspect-ratio: 4 / 5; overflow: hidden; background: #0d0c0f; }
+      :global(.template-preview-stage .canvas-container), :global(.template-preview-stage canvas) { width: 100%!important; height: 100%!important; }
+      :global(.template-preview-stage img) { object-fit: cover; }
+      :global(.template-preview-badges) { position: absolute; z-index: 4; top: 10px; left: 10px; display: flex; gap: 5px; }
+      :global(.template-preview-badges button) { border: 1px solid rgba(255,255,255,.28); border-radius: 999px; background: rgba(10,10,12,.78); color: #bbb; padding: 5px 8px; font-size: 8px; font-weight: 850; backdrop-filter: blur(8px); }
+      :global(.template-preview-badges button.active) { border-color: #bbf7d0; background: rgba(20,83,45,.9); color: #dcfce7; }
+      :global(.template-preview-badges button.active.draft) { border-color: #d8b4fe; background: rgba(74,29,108,.92); color: #f3e8ff; }
+      :global(.template-preview-status) { position: absolute; z-index: 4; right: 9px; top: 10px; border-radius: 999px; background: rgba(10,10,12,.82); color: #ddd; padding: 5px 8px; font-size: 7px; font-weight: 850; letter-spacing: .06em; backdrop-filter: blur(8px); }
+      :global(.template-preview-status.published) { color: #bbf7d0; }
+      :global(.template-preview-status.draft) { color: #e9d5ff; }
+      :global(.template-preview-empty) { position: absolute; inset: 0; display: grid; place-content: center; gap: 6px; padding: 24px; background: repeating-linear-gradient(135deg,#17151a,#17151a 12px,#1c1920 12px,#1c1920 24px); color: #aaa; text-align: center; }
+      :global(.template-preview-empty b) { color: #ddd; font-size: 13px; }
+      :global(.template-preview-empty span) { max-width: 180px; font-size: 9px; line-height: 1.45; }
+      :global(.template-preview-pages) { position: absolute; z-index: 5; right: 0; bottom: 12px; left: 0; display: flex; justify-content: center; gap: 5px; pointer-events: none; }
+      :global(.template-preview-pages button) { width: 17px; height: 17px; border: 1px solid rgba(255,255,255,.28); border-radius: 999px; background: rgba(10,10,12,.72); color: #aaa; padding: 0; font-size: 7px; font-weight: 800; pointer-events: auto; }
+      :global(.template-preview-pages button.active) { border-color: white; background: white; color: #111; }
       .style-copy { padding: 13px; }
       .style-copy h3 { margin: 6px 0; font-size: 14px; }
       .style-copy p { min-height: 44px; margin: 0; color: #8d8991; font-size: 10px; line-height: 1.45; }
