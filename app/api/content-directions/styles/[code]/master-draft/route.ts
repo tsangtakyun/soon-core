@@ -46,7 +46,6 @@ export async function POST(_request: Request, context: { params: Promise<{ code:
     if (error) throw error
     draft = data
   }
-  const creatorBase = (process.env.SOON_CREATOR_URL || 'https://sooncreator.network').replace(/\/$/, '')
-  const editUrl = `${creatorBase}/onboarding/scheduled-posts?mode=template-master&templateDraftId=${encodeURIComponent(draft!.id)}&templateToken=${encodeURIComponent(token)}&masterPage=cover`
+  const editUrl = `/content-directions/styles/${encodeURIComponent(style.code)}/template-editor?draft=${encodeURIComponent(draft!.id)}`
   return NextResponse.json({ draft, editUrl })
 }

@@ -30,7 +30,15 @@ export async function POST(_request: Request, context: { params: Promise<{ id: s
 
   const rendererBase = baseVersion.renderer_code.replace(/-v\d+$/, '')
   const rendererCode = `${rendererBase}-v${draft.target_version}`
-  const nextContract = { ...contract, master_designs: pageDesigns, master_editor: { source: 'soon_creator_fabric', publishedFromDraftId: draft.id } }
+  const nextContract = {
+    ...contract,
+    master_designs: pageDesigns,
+    master_editor: {
+      source: 'soon_core_fabric',
+      contractVersion: 1,
+      publishedFromDraftId: draft.id,
+    },
+  }
   const { data: version, error: insertError } = await admin.from('template_versions').insert({
     template_id: draft.template_id,
     version: draft.target_version,
