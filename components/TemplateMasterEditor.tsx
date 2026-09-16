@@ -65,12 +65,12 @@ function attachData<T extends EditableObject>(object: T, role: string) {
 }
 
 const REFERENCE_IMAGES: Record<PageRole, string> = {
-  cover: '/templates/clear-magazine-carousel-v1/01-cover.png',
-  longform: '/templates/clear-magazine-carousel-v1/02-content.png',
-  split: '/templates/clear-magazine-carousel-v1/03-content.png',
-  comparison: '/templates/clear-magazine-carousel-v1/04-content.png',
-  feature: '/templates/clear-magazine-carousel-v1/05-content.png',
-  end: '/templates/clear-magazine-carousel-v1/06-end.png',
+  cover: '/templates/editorial-vector-underlay-v1.png',
+  longform: '/templates/editorial-vector-underlay-v1.png',
+  split: '/templates/editorial-vector-underlay-v1.png',
+  comparison: '/templates/editorial-vector-underlay-v1.png',
+  feature: '/templates/editorial-vector-underlay-v1.png',
+  end: '/templates/editorial-vector-underlay-v1.png',
 }
 
 async function addStarterObjects(canvas: Canvas, role: PageRole) {
@@ -86,7 +86,7 @@ async function addStarterObjects(canvas: Canvas, role: PageRole) {
     evented: false,
     excludeFromExport: true,
     left: 0,
-    opacity: 0.28,
+    opacity: 0.42,
     originX: 'left',
     originY: 'top',
     selectable: false,
