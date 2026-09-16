@@ -19,6 +19,7 @@ export async function middleware(req: NextRequest) {
     '/api/campaign-experiences/sync-brand',
     '/api/intelligence/bundle',
     '/api/intelligence/styles',
+    '/api/intelligence/template-drafts',
     '/api/intelligence/dna/sync',
     '/api/cron',
   ]
