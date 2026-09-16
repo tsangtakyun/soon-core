@@ -77,6 +77,8 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
       canvasJson,
       canvasWidth: Math.max(100, Math.round(Number(body.canvasWidth) || 1080)),
       canvasHeight: Math.max(100, Math.round(Number(body.canvasHeight) || 1350)),
+      coordinateWidth: Math.max(100, Math.round(Number(body.coordinateWidth) || Number(body.canvasWidth) || 1080)),
+      coordinateHeight: Math.max(100, Math.round(Number(body.coordinateHeight) || Number(body.canvasHeight) || 1350)),
       previewImageUrl: typeof body.previewImageUrl === 'string' ? body.previewImageUrl.slice(0, 1500) : '',
       updatedAt: now,
     },

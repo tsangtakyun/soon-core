@@ -19,6 +19,8 @@ type PageDesign = {
   canvasJson?: Record<string, unknown>
   canvasWidth?: number
   canvasHeight?: number
+  coordinateWidth?: number
+  coordinateHeight?: number
   updatedAt?: string
 }
 type MasterPayload = {
@@ -558,6 +560,8 @@ export function TemplateMasterEditor({ draftId, styleCode }: { draftId: string; 
           canvasJson,
           canvasWidth: OUTPUT_WIDTH,
           canvasHeight: OUTPUT_HEIGHT,
+          coordinateWidth: DISPLAY_WIDTH,
+          coordinateHeight: DISPLAY_HEIGHT,
         }),
       })
       const payload = await response.json().catch(() => ({}))
