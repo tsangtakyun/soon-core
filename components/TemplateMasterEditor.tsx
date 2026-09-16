@@ -162,6 +162,10 @@ export function TemplateMasterEditor({ draftId, styleCode }: { draftId: string; 
   const canvasElementRef = useRef<HTMLCanvasElement | null>(null)
   const fabricRef = useRef<Canvas | null>(null)
   const loadingCanvasRef = useRef(false)
+  const restoringHistoryRef = useRef(false)
+  const historyRef = useRef<Partial<Record<PageRole, string[]>>>({})
+  const savedSnapshotRef = useRef<Partial<Record<PageRole, string>>>({})
+  const roleRef = useRef<PageRole>('cover')
   const imageInputRef = useRef<HTMLInputElement | null>(null)
   const [master, setMaster] = useState<MasterPayload | null>(null)
   const [role, setRole] = useState<PageRole>('cover')
@@ -171,9 +175,57 @@ export function TemplateMasterEditor({ draftId, styleCode }: { draftId: string; 
   const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [message, setMessage] = useState('')
+  const [historyDepth, setHistoryDepth] = useState(0)
   const [, redrawInspector] = useState(0)
 
   const completed = useMemo(() => Object.keys(master?.draft.pageDesigns || {}).length, [master])
+
+  function serialiseHistory(canvas: Canvas) {
+    const underlays = canvas.getObjects().filter((object) => (object as EditableObject).data?.role === 'reference_underlay')
+    underlays.forEach((object) => { object.excludeFromExport = false })
+    const snapshot = JSON.stringify(canvas.toObject(['data', 'excludeFromExport']))
+    underlays.forEach((object) => { object.excludeFromExport = true })
+    return snapshot
+  }
+
+  const recordHistory = useCallback((canvas: Canvas) => {
+    if (loadingCanvasRef.current || restoringHistoryRef.current) return
+    const currentRole = roleRef.current
+    const snapshot = serialiseHistory(canvas)
+    const stack = historyRef.current[currentRole] ?? []
+    if (stack.at(-1) === snapshot) return
+    const next = [...stack, snapshot].slice(-50)
+    historyRef.current[currentRole] = next
+    setHistoryDepth(next.length)
+    setDirty(snapshot !== savedSnapshotRef.current[currentRole])
+  }, [])
+
+  const undoCanvas = useCallback(async () => {
+    const canvas = fabricRef.current
+    if (!canvas) return
+    const currentRole = roleRef.current
+    const stack = historyRef.current[currentRole] ?? []
+    if (stack.length <= 1 || restoringHistoryRef.current) return
+    stack.pop()
+    const previous = stack.at(-1)
+    if (!previous) return
+    restoringHistoryRef.current = true
+    setSelected(null)
+    try {
+      await canvas.loadFromJSON(JSON.parse(previous))
+      canvas.getObjects().forEach((object) => {
+        if ((object as EditableObject).data?.role === 'reference_underlay') object.excludeFromExport = true
+      })
+      canvas.discardActiveObject()
+      canvas.requestRenderAll()
+      historyRef.current[currentRole] = stack
+      setHistoryDepth(stack.length)
+      setDirty(previous !== savedSnapshotRef.current[currentRole])
+      setMessage('已復原上一步。')
+    } finally {
+      restoringHistoryRef.current = false
+    }
+  }, [])
 
   const loadMaster = useCallback(async () => {
     if (!draftId) {
@@ -209,7 +261,7 @@ export function TemplateMasterEditor({ draftId, styleCode }: { draftId: string; 
       redrawInspector((value) => value + 1)
     }
     const changed = () => {
-      if (!loadingCanvasRef.current) setDirty(true)
+      recordHistory(canvas)
       redrawInspector((value) => value + 1)
     }
     canvas.on('selection:created', select)
@@ -222,7 +274,7 @@ export function TemplateMasterEditor({ draftId, styleCode }: { draftId: string; 
       canvas.dispose()
       fabricRef.current = null
     }
-  }, [loading])
+  }, [loading, recordHistory])
 
   useEffect(() => {
     const canvas = fabricRef.current
@@ -230,6 +282,7 @@ export function TemplateMasterEditor({ draftId, styleCode }: { draftId: string; 
     let cancelled = false
     void (async () => {
       loadingCanvasRef.current = true
+      roleRef.current = role
       setSelected(null)
       const saved = master.draft.pageDesigns?.[role]?.canvasJson
       const publishedDesigns = master.baseVersion?.contract?.master_designs as Partial<Record<PageRole, PageDesign>> | undefined
@@ -243,6 +296,10 @@ export function TemplateMasterEditor({ draftId, styleCode }: { draftId: string; 
         await addStarterObjects(canvas, role)
       }
       loadingCanvasRef.current = false
+      const initialSnapshot = serialiseHistory(canvas)
+      historyRef.current[role] = [initialSnapshot]
+      savedSnapshotRef.current[role] = initialSnapshot
+      setHistoryDepth(1)
       setDirty(false)
     })()
     return () => { cancelled = true }
@@ -327,18 +384,60 @@ export function TemplateMasterEditor({ draftId, styleCode }: { draftId: string; 
     if (selected instanceof Textbox) selected.initDimensions()
     selected.setCoords()
     canvas.requestRenderAll()
-    setDirty(true)
+    recordHistory(canvas)
     redrawInspector((value) => value + 1)
   }
 
   function removeSelected() {
     const canvas = fabricRef.current
-    if (!canvas || !selected) return
-    canvas.remove(selected)
+    if (!canvas) return
+    const activeObjects = canvas.getActiveObjects()
+    const objects = activeObjects.length > 0 ? activeObjects : selected ? [selected] : []
+    if (objects.length === 0) return
+    loadingCanvasRef.current = true
+    canvas.remove(...objects)
     canvas.discardActiveObject()
-    canvas.renderAll()
+    canvas.requestRenderAll()
+    loadingCanvasRef.current = false
     setSelected(null)
+    recordHistory(canvas)
+    setMessage(objects.length > 1 ? `已刪除 ${objects.length} 個元素。` : '已刪除元素。')
   }
+
+  function moveSelectedLayer(direction: 'forward' | 'backward') {
+    const canvas = fabricRef.current
+    if (!canvas || !selected) return
+    if (direction === 'forward') canvas.bringObjectForward(selected)
+    else canvas.sendObjectBackwards(selected)
+    canvas.requestRenderAll()
+    recordHistory(canvas)
+  }
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      const target = event.target as HTMLElement | null
+      const isFormField = target instanceof HTMLInputElement
+        || target instanceof HTMLTextAreaElement
+        || target instanceof HTMLSelectElement
+        || Boolean(target?.isContentEditable)
+      const active = fabricRef.current?.getActiveObject()
+      const isEditingCanvasText = active instanceof Textbox && active.isEditing
+      if (isFormField || isEditingCanvasText) return
+
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'z' && !event.shiftKey) {
+        event.preventDefault()
+        void undoCanvas()
+        return
+      }
+      if (event.key === 'Delete' || event.key === 'Backspace') {
+        if (!active) return
+        event.preventDefault()
+        removeSelected()
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [undoCanvas, selected])
 
   async function savePage() {
     const canvas = fabricRef.current
@@ -369,6 +468,8 @@ export function TemplateMasterEditor({ draftId, styleCode }: { draftId: string; 
         },
       } : current)
       setDirty(false)
+      const snapshot = serialiseHistory(canvas)
+      savedSnapshotRef.current[role] = snapshot
       setMessage(`${PAGE_ROLES.find((item) => item.code === role)?.label} 已儲存到 v${master.draft.targetVersion} 草稿。`)
     } catch (error) {
       setMessage(error instanceof Error ? error.message : '未能儲存標準頁')
@@ -426,8 +527,9 @@ export function TemplateMasterEditor({ draftId, styleCode }: { draftId: string; 
               }} />
             </div>
             <div>
-              <button disabled={!selected} onClick={() => { if (selected) { fabricRef.current?.bringObjectForward(selected); fabricRef.current?.renderAll(); setDirty(true) } }} type="button">上一層</button>
-              <button disabled={!selected} onClick={() => { if (selected) { fabricRef.current?.sendObjectBackwards(selected); fabricRef.current?.renderAll(); setDirty(true) } }} type="button">下一層</button>
+              <button disabled={historyDepth <= 1} onClick={() => void undoCanvas()} type="button">復原 ⌘Z</button>
+              <button disabled={!selected} onClick={() => moveSelectedLayer('forward')} type="button">上一層</button>
+              <button disabled={!selected} onClick={() => moveSelectedLayer('backward')} type="button">下一層</button>
               <button className="danger" disabled={!selected} onClick={removeSelected} type="button">刪除</button>
             </div>
           </div>
