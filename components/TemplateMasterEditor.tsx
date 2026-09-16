@@ -152,82 +152,154 @@ function ensureBrandLogoSlot(canvas: Canvas, role: PageRole) {
   return true
 }
 
-const REFERENCE_IMAGES: Record<PageRole, string> = {
-  cover: '/templates/editorial-vector-underlay-v1.png',
-  longform: '/templates/editorial-vector-underlay-v1.png',
-  split: '/templates/editorial-vector-underlay-v1.png',
-  comparison: '/templates/editorial-vector-underlay-v1.png',
-  feature: '/templates/editorial-vector-underlay-v1.png',
-  end: '/templates/editorial-vector-underlay-v1.png',
+type StarterStyle = 'product_focus' | 'ranking_review' | 'editorial_office_flash' | 'default'
+
+function starterStyleFor(styleCode: string): StarterStyle {
+  if (styleCode.includes('product_focus')) return 'product_focus'
+  if (styleCode.includes('ranking_review')) return 'ranking_review'
+  if (styleCode.includes('editorial_office_flash')) return 'editorial_office_flash'
+  return 'default'
 }
 
-async function addStarterObjects(canvas: Canvas, role: PageRole) {
-  const copy = placeholderFor(role)
-  canvas.clear()
-  canvas.backgroundColor = '#F4F0E8'
+function referenceName(style: StarterStyle) {
+  if (style === 'product_focus') return '產品主角 · 米白產品舞台'
+  if (style === 'ranking_review') return '排行榜評測 · 大圖＋白底評語'
+  if (style === 'editorial_office_flash') return '冷調閃光編輯風 · PAZZO 辦公室攝影'
+  return 'SOON 基本版面'
+}
 
-  // The source page is a visual underlay only. It helps an editor compare the
-  // reusable structure without embedding reference artwork in saved JSON.
-  const reference = await FabricImage.fromURL(REFERENCE_IMAGES[role]) as EditableObject
-  const referenceScale = Math.max(DISPLAY_WIDTH / (reference.width || 1), DISPLAY_HEIGHT / (reference.height || 1))
-  reference.set({
+function createReferenceGuide(styleCode: string, role: PageRole) {
+  const style = starterStyleFor(styleCode)
+  const objects: FabricObject[] = []
+  const addRect = (options: ConstructorParameters<typeof Rect>[0]) => objects.push(new Rect(options))
+  const addLabel = (text: string, options: ConstructorParameters<typeof Textbox>[1]) => objects.push(new Textbox(text, options))
+
+  if (style === 'ranking_review') {
+    if (role === 'cover') {
+      addRect({ fill: '#262321', height: 540, left: 0, top: 0, width: 432 })
+      addRect({ fill: '#5a5049', height: 350, left: 0, top: 0, width: 432 })
+      addRect({ fill: '#050505', height: 58, left: 22, top: 356, width: 388 })
+      addRect({ fill: '#050505', height: 30, left: 22, top: 420, width: 330 })
+    } else {
+      addRect({ fill: '#ddd8d1', height: 303, left: 0, top: 0, width: 432 })
+      addRect({ fill: '#fbfaf7', height: 237, left: 0, top: 303, width: 432 })
+      addRect({ fill: '#161616', height: 152, left: 26, top: 342, width: 2 })
+      if (role === 'comparison') {
+        addRect({ fill: '#ece8e2', height: 122, left: 52, top: 343, width: 150 })
+        addRect({ fill: '#ece8e2', height: 122, left: 230, top: 343, width: 150 })
+      }
+    }
+  } else if (style === 'editorial_office_flash') {
+    addRect({ fill: '#e8e9e5', height: 540, left: 0, top: 0, width: 432 })
+    addRect({ fill: '#f7f7f3', height: role === 'end' ? 492 : 420, left: 0, top: 0, width: 432 })
+    addRect({ fill: '#205ed4', height: role === 'cover' ? 188 : 96, left: 0, top: role === 'cover' ? 352 : 444, width: 432 })
+    if (role === 'cover') {
+      addRect({ fill: '#d0d3d0', height: 300, left: 54, top: 36, width: 324 })
+    } else if (role === 'end') {
+      ;[0, 1, 2, 3, 4, 5].forEach((index) => addRect({
+        fill: '#dadbd7', height: 126, left: 42 + (index % 3) * 120, top: 92 + Math.floor(index / 3) * 150, width: 100,
+      }))
+    } else {
+      addRect({ fill: '#d4d5d2', height: 330, left: role === 'split' ? 170 : 94, top: 66, width: role === 'split' ? 224 : 244 })
+      addRect({ fill: 'rgba(204,226,255,.88)', height: 48, left: 28, top: role === 'feature' ? 338 : 370, width: 376 })
+    }
+  } else if (style === 'product_focus') {
+    addRect({ fill: '#f7f3ed', height: 540, left: 0, top: 0, width: 432 })
+    addRect({ fill: '#ead8d4', height: role === 'cover' ? 248 : 214, left: role === 'split' ? 198 : 74, rx: 70, ry: 70, top: role === 'cover' ? 210 : 188, width: role === 'split' ? 210 : 322 })
+    addRect({ fill: '#fffdfa', height: role === 'cover' ? 224 : 190, left: role === 'split' ? 218 : 94, rx: 10, ry: 10, stroke: '#c9a9a5', strokeWidth: 2, top: role === 'cover' ? 222 : 200, width: role === 'split' ? 170 : 282 })
+    addRect({ fill: '#bc8f88', height: 5, left: 30, top: 108, width: 54 })
+  } else {
+    addRect({ fill: '#ebe7df', height: 540, left: 0, top: 0, width: 432 })
+    addRect({ fill: '#d9d3ca', height: 260, left: 55, top: 150, width: 322 })
+  }
+
+  addLabel(referenceName(style), {
+    fill: style === 'editorial_office_flash' ? '#1557d6' : '#7d6d68', fontFamily: 'Arial, sans-serif', fontSize: 10,
+    fontWeight: 700, left: 14, top: 12, width: 350,
+  })
+  addLabel('REFERENCE GUIDE · 只供對照，不會輸出', {
+    fill: '#7b7480', fontFamily: 'Arial, sans-serif', fontSize: 8, fontWeight: 700, left: 214, textAlign: 'right', top: 518, width: 204,
+  })
+
+  const guide = attachData(new Group(objects, {
     evented: false,
     excludeFromExport: true,
     left: 0,
-    opacity: 0.42,
-    originX: 'left',
-    originY: 'top',
+    opacity: 0.26,
     selectable: false,
-    scaleX: referenceScale,
-    scaleY: referenceScale,
     top: 0,
-  })
-  reference.data = { id: `reference-${role}`, role: 'reference_underlay' }
+  }) as EditableObject, 'reference_underlay')
+  guide.data = { id: `reference-${style}-${role}`, role: 'reference_underlay' }
+  return guide
+}
+
+function ensureReferenceGuide(canvas: Canvas, styleCode: string, role: PageRole) {
+  const existing = canvas.getObjects().filter((object) => (object as EditableObject).data?.role === 'reference_underlay')
+  existing.forEach((object) => canvas.remove(object))
+  const guide = createReferenceGuide(styleCode, role)
+  canvas.add(guide)
+  canvas.sendObjectToBack(guide)
+  return guide
+}
+
+function addStarterObjects(canvas: Canvas, role: PageRole, styleCode: string) {
+  const copy = placeholderFor(role)
+  const style = starterStyleFor(styleCode)
+  canvas.clear()
+  canvas.backgroundColor = style === 'ranking_review' && role === 'cover' ? '#262321'
+    : style === 'editorial_office_flash' ? '#E8E9E5'
+      : style === 'product_focus' ? '#F7F3ED' : '#F4F0E8'
+  const reference = createReferenceGuide(styleCode, role)
+
+  const isRankingCover = style === 'ranking_review' && role === 'cover'
+  const isRankingBody = style === 'ranking_review' && role !== 'cover'
+  const isEditorial = style === 'editorial_office_flash'
+  const isProduct = style === 'product_focus'
 
   const accent = attachData(new Rect({
-    fill: role === 'comparison' ? '#E24B35' : '#3159C6',
-    height: role === 'cover' ? 12 : 8,
+    fill: isEditorial ? '#1557D6' : isProduct ? '#B7837B' : role === 'comparison' ? '#E24B35' : '#3159C6',
+    height: isRankingBody ? 2 : role === 'cover' ? 12 : 8,
     left: 30,
     rx: 4,
     ry: 4,
-    top: 30,
+    top: isRankingBody ? 332 : 30,
     width: role === 'cover' ? 150 : 92,
   }) as EditableObject, 'accent')
   const eyebrow = attachData(new Textbox(copy.eyebrow, {
-    fill: '#3159C6',
+    fill: isRankingCover ? '#F3C83E' : isEditorial ? '#1557D6' : isProduct ? '#8F625C' : '#3159C6',
     fontFamily: 'Arial, sans-serif',
     fontSize: 13,
     fontWeight: 700,
     left: 30,
     letterSpacing: 60,
-    top: 58,
+    top: isRankingBody ? 326 : 58,
     width: 360,
   }) as EditableObject, 'eyebrow')
   const title = attachData(new Textbox(copy.title, {
-    fill: '#171717',
+    fill: isRankingCover ? '#FFFFFF' : '#171717',
     fontFamily: 'Arial, sans-serif',
     fontSize: role === 'cover' ? 46 : 38,
     fontWeight: 800,
-    left: 30,
+    left: isRankingCover ? 24 : 30,
     lineHeight: 1.02,
     splitByGrapheme: true,
-    top: role === 'cover' ? 270 : 115,
-    width: 370,
+    top: isRankingCover ? 362 : isRankingBody ? 344 : isEditorial && role !== 'cover' ? 376 : role === 'cover' ? 270 : 115,
+    width: isRankingCover ? 382 : 370,
   }) as EditableObject, 'headline')
   const body = attachData(new Textbox(copy.body, {
-    fill: '#303030',
+    fill: isRankingCover ? '#FFFFFF' : isEditorial && role === 'cover' ? '#FFFFFF' : '#303030',
     fontFamily: 'Arial, sans-serif',
-    fontSize: role === 'comparison' ? 25 : 20,
+    fontSize: role === 'comparison' ? 25 : isRankingBody ? 17 : 20,
     fontWeight: 400,
-    left: 30,
+    left: isRankingBody ? 48 : 30,
     lineHeight: 1.35,
     splitByGrapheme: true,
     textAlign: role === 'comparison' ? 'center' : 'left',
-    top: role === 'cover' ? 405 : 245,
-    width: 370,
+    top: isRankingCover ? 448 : isRankingBody ? 405 : isEditorial && role !== 'cover' ? 438 : role === 'cover' ? 405 : 245,
+    width: isRankingBody ? 338 : 370,
   }) as EditableObject, 'body')
   const page = attachData(new Textbox(PAGE_ROLES.findIndex((item) => item.code === role) + 1 + '/6', {
-    fill: '#646464',
+    fill: isRankingCover || (isEditorial && role === 'cover') ? '#FFFFFF' : '#646464',
     fontFamily: 'Arial, sans-serif',
     fontSize: 11,
     left: 362,
@@ -236,6 +308,7 @@ async function addStarterObjects(canvas: Canvas, role: PageRole) {
   }) as EditableObject, 'page_number')
 
   canvas.add(reference, accent, eyebrow, title, body, page, createBrandLogoSlot(role))
+  canvas.sendObjectToBack(reference)
   canvas.renderAll()
 }
 
@@ -264,6 +337,7 @@ export function TemplateMasterEditor({ draftId, styleCode }: { draftId: string; 
   const [uploading, setUploading] = useState(false)
   const [message, setMessage] = useState('')
   const [historyDepth, setHistoryDepth] = useState(0)
+  const [referenceVisible, setReferenceVisible] = useState(true)
   const [, redrawInspector] = useState(0)
 
   const completed = useMemo(() => Object.keys(master?.draft.pageDesigns || {}).length, [master])
@@ -389,13 +463,15 @@ export function TemplateMasterEditor({ draftId, styleCode }: { draftId: string; 
       if (existingDesign) {
         await canvas.loadFromJSON(existingDesign)
         if (cancelled) return
+        ensureReferenceGuide(canvas, master.style.code, role)
         savedSnapshot = serialiseHistory(canvas)
         needsSave = ensureBrandLogoSlot(canvas, role)
         canvas.renderAll()
       } else {
-        await addStarterObjects(canvas, role)
+        addStarterObjects(canvas, role, master.style.code)
         needsSave = true
       }
+      setReferenceVisible(true)
       loadingCanvasRef.current = false
       const initialSnapshot = serialiseHistory(canvas)
       historyRef.current[role] = [initialSnapshot]
@@ -406,6 +482,17 @@ export function TemplateMasterEditor({ draftId, styleCode }: { draftId: string; 
     })()
     return () => { cancelled = true }
   }, [master, role])
+
+  function toggleReferenceGuide() {
+    const canvas = fabricRef.current
+    if (!canvas) return
+    const nextVisible = !referenceVisible
+    canvas.getObjects().forEach((object) => {
+      if ((object as EditableObject).data?.role === 'reference_underlay') object.set({ opacity: nextVisible ? 0.26 : 0 })
+    })
+    canvas.requestRenderAll()
+    setReferenceVisible(nextVisible)
+  }
 
   function chooseRole(next: PageRole) {
     if (next === role) return
@@ -635,6 +722,7 @@ export function TemplateMasterEditor({ draftId, styleCode }: { draftId: string; 
               }} />
             </div>
             <div>
+              <button className="reference" onClick={toggleReferenceGuide} type="button">{referenceVisible ? '隱藏參考' : '顯示參考'}</button>
               <button disabled={historyDepth <= 1} onClick={() => void undoCanvas()} type="button">復原 ⌘Z</button>
               <button disabled={!selected} onClick={() => moveSelectedLayer('forward')} type="button">上一層</button>
               <button disabled={!selected} onClick={() => moveSelectedLayer('backward')} type="button">下一層</button>
@@ -642,6 +730,7 @@ export function TemplateMasterEditor({ draftId, styleCode }: { draftId: string; 
             </div>
           </div>
           <div className="master-canvas-wrap">
+            <div className="master-reference-note"><b>{referenceName(starterStyleFor(master.style.code))}</b><span>參考層只供對照，不會儲存或輸出</span></div>
             <div className="master-canvas-label"><b>{currentPage.label}</b><span>1080 × 1350 · 4:5</span></div>
             <div className="master-canvas-shell"><canvas ref={canvasElementRef} /></div>
             <p>拖曳移動；拉動控制點縮放及旋轉；雙擊文字直接修改。</p>
@@ -671,7 +760,7 @@ export function TemplateMasterEditor({ draftId, styleCode }: { draftId: string; 
       </div>
 
       <style jsx>{`
-        .master-editor{min-height:100vh;background:#0b0b0d;color:#f6f3f8;padding:24px 28px 40px}.master-topbar{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;max-width:1500px;margin:0 auto 18px}.master-topbar a{display:block;margin-bottom:18px;color:#a78bfa;font-size:12px;text-decoration:none}.master-topbar small,.master-pages>small,.master-inspector>small{color:#a78bfa;font-size:9px;font-weight:850;letter-spacing:.16em}.master-topbar h1{margin:6px 0 0;font-size:28px}.master-topbar h1 span{color:#a78bfa}.master-progress{display:grid;grid-template-columns:auto auto;gap:2px 10px;align-items:center;border:1px solid #332742;border-radius:12px;background:#16131b;padding:12px 16px}.master-progress strong{grid-row:span 2;font-size:25px}.master-progress span{color:#aaa;font-size:10px}.master-progress i{color:#c4b5fd;font-size:9px;font-style:normal}.master-notice{max-width:1500px;margin:0 auto 14px;border:1px solid #4c3764;border-radius:10px;background:#21182b;padding:10px 14px;color:#ddd0ee;font-size:11px}.master-workspace{display:grid;grid-template-columns:190px minmax(520px,1fr) 270px;max-width:1500px;min-height:720px;margin:auto;border:1px solid #27242b;border-radius:16px;background:#121115;overflow:hidden}.master-pages{display:grid;align-content:start;gap:8px;border-right:1px solid #29252e;padding:18px 12px}.master-pages>small{margin:0 8px 6px}.master-pages button{position:relative;display:grid;gap:4px;border:1px solid #2d2931;border-radius:10px;background:#19171c;color:#ddd;padding:12px 30px 12px 12px;text-align:left}.master-pages button.active{border-color:#8b5cf6;background:#281c39}.master-pages button span{font-size:11px;font-weight:800}.master-pages button small{color:#777;font-size:9px}.master-pages button b{position:absolute;right:11px;top:50%;color:#a78bfa;transform:translateY(-50%)}.master-stage{min-width:0;background:#17151a}.master-toolbar{display:flex;justify-content:space-between;gap:12px;border-bottom:1px solid #2b2830;background:#111014;padding:10px 14px}.master-toolbar>div{display:flex;gap:6px}.master-toolbar button{border:1px solid #37323d;border-radius:7px;background:#211e25;color:#ddd;padding:8px 10px;font-size:9px}.master-toolbar button:disabled{opacity:.35}.master-toolbar .danger{color:#fda4af}.master-canvas-wrap{display:grid;place-items:center;padding:20px}.master-canvas-label{display:flex;justify-content:space-between;width:432px;margin-bottom:8px;color:#8f8994;font-size:9px}.master-canvas-label b{color:#d8d3dc}.master-canvas-shell{box-shadow:0 22px 55px rgba(0,0,0,.45);line-height:0}.master-canvas-wrap>p{margin:12px 0 0;color:#777;font-size:9px}.master-inspector{position:relative;border-left:1px solid #29252e;background:#131217;padding:18px 16px}.master-inspector h2{margin:9px 0 18px;font-size:18px}.master-inspector label{display:grid;gap:6px;margin-bottom:13px;color:#999;font-size:9px}.master-inspector label>b{color:#ddd}.master-inspector input,.master-inspector textarea,.master-inspector select{width:100%;border:1px solid #34303a;border-radius:7px;background:#1c1920;color:#eee;padding:8px;font:inherit;outline:none}.master-inspector input:disabled{color:#a78bfa;opacity:.8}.master-inspector textarea{font-size:11px;resize:vertical}.master-inspector input:focus,.master-inspector textarea:focus,.master-inspector select:focus{border-color:#8b5cf6}.logo-binding-note{margin:-4px 0 13px;border:1px solid #312842;border-radius:7px;background:#1d1726;padding:8px;color:#a78bfa;font-size:8px;line-height:1.45}.inspector-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.color-control{display:grid;grid-template-columns:38px 1fr;gap:7px}.color-control input[type=color]{height:34px;padding:3px}.inspector-empty{margin-top:18px;border:1px dashed #35313a;border-radius:10px;padding:18px;color:#777}.inspector-empty b{color:#bbb;font-size:11px}.inspector-empty p{font-size:9px;line-height:1.5}.master-save{position:absolute;right:16px;bottom:16px;left:16px}.master-save button{width:100%;border:0;border-radius:9px;background:#7c3aed;color:#fff;padding:11px;font-size:10px;font-weight:850}.master-save button:disabled{background:#302b35;color:#777}.master-save p{margin:8px 2px 0;color:#6f6974;font-size:8px;line-height:1.45}.master-state{min-height:70vh;display:grid;place-content:center;gap:12px;background:#0b0b0d;color:#ddd;text-align:center}.master-state a{color:#a78bfa}@media(max-width:1100px){.master-workspace{grid-template-columns:160px minmax(480px,1fr)}.master-inspector{grid-column:1/-1;min-height:310px;border-top:1px solid #29252e;border-left:0}.master-save{position:static;margin-top:20px}}@media(max-width:760px){.master-editor{padding:16px}.master-topbar{align-items:flex-start;flex-direction:column}.master-workspace{display:block}.master-pages{grid-template-columns:repeat(2,1fr);border-right:0}.master-stage{overflow:auto}.master-inspector{min-height:360px}}
+        .master-editor{min-height:100vh;background:#0b0b0d;color:#f6f3f8;padding:24px 28px 40px}.master-topbar{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;max-width:1500px;margin:0 auto 18px}.master-topbar a{display:block;margin-bottom:18px;color:#a78bfa;font-size:12px;text-decoration:none}.master-topbar small,.master-pages>small,.master-inspector>small{color:#a78bfa;font-size:9px;font-weight:850;letter-spacing:.16em}.master-topbar h1{margin:6px 0 0;font-size:28px}.master-topbar h1 span{color:#a78bfa}.master-progress{display:grid;grid-template-columns:auto auto;gap:2px 10px;align-items:center;border:1px solid #332742;border-radius:12px;background:#16131b;padding:12px 16px}.master-progress strong{grid-row:span 2;font-size:25px}.master-progress span{color:#aaa;font-size:10px}.master-progress i{color:#c4b5fd;font-size:9px;font-style:normal}.master-notice{max-width:1500px;margin:0 auto 14px;border:1px solid #4c3764;border-radius:10px;background:#21182b;padding:10px 14px;color:#ddd0ee;font-size:11px}.master-workspace{display:grid;grid-template-columns:190px minmax(520px,1fr) 270px;max-width:1500px;min-height:720px;margin:auto;border:1px solid #27242b;border-radius:16px;background:#121115;overflow:hidden}.master-pages{display:grid;align-content:start;gap:8px;border-right:1px solid #29252e;padding:18px 12px}.master-pages>small{margin:0 8px 6px}.master-pages button{position:relative;display:grid;gap:4px;border:1px solid #2d2931;border-radius:10px;background:#19171c;color:#ddd;padding:12px 30px 12px 12px;text-align:left}.master-pages button.active{border-color:#8b5cf6;background:#281c39}.master-pages button span{font-size:11px;font-weight:800}.master-pages button small{color:#777;font-size:9px}.master-pages button b{position:absolute;right:11px;top:50%;color:#a78bfa;transform:translateY(-50%)}.master-stage{min-width:0;background:#17151a}.master-toolbar{display:flex;justify-content:space-between;gap:12px;border-bottom:1px solid #2b2830;background:#111014;padding:10px 14px}.master-toolbar>div{display:flex;gap:6px}.master-toolbar button{border:1px solid #37323d;border-radius:7px;background:#211e25;color:#ddd;padding:8px 10px;font-size:9px}.master-toolbar button:disabled{opacity:.35}.master-toolbar .reference{border-color:#65449a;color:#c4b5fd}.master-toolbar .danger{color:#fda4af}.master-canvas-wrap{display:grid;place-items:center;padding:16px 20px 20px}.master-reference-note{display:flex;justify-content:space-between;width:432px;margin:0 0 8px;border:1px solid #40364f;border-radius:7px;background:#201a29;padding:7px 9px;color:#928a99;font-size:8px}.master-reference-note b{color:#c4b5fd}.master-canvas-label{display:flex;justify-content:space-between;width:432px;margin-bottom:8px;color:#8f8994;font-size:9px}.master-canvas-label b{color:#d8d3dc}.master-canvas-shell{box-shadow:0 22px 55px rgba(0,0,0,.45);line-height:0}.master-canvas-wrap>p{margin:12px 0 0;color:#777;font-size:9px}.master-inspector{position:relative;border-left:1px solid #29252e;background:#131217;padding:18px 16px}.master-inspector h2{margin:9px 0 18px;font-size:18px}.master-inspector label{display:grid;gap:6px;margin-bottom:13px;color:#999;font-size:9px}.master-inspector label>b{color:#ddd}.master-inspector input,.master-inspector textarea,.master-inspector select{width:100%;border:1px solid #34303a;border-radius:7px;background:#1c1920;color:#eee;padding:8px;font:inherit;outline:none}.master-inspector input:disabled{color:#a78bfa;opacity:.8}.master-inspector textarea{font-size:11px;resize:vertical}.master-inspector input:focus,.master-inspector textarea:focus,.master-inspector select:focus{border-color:#8b5cf6}.logo-binding-note{margin:-4px 0 13px;border:1px solid #312842;border-radius:7px;background:#1d1726;padding:8px;color:#a78bfa;font-size:8px;line-height:1.45}.inspector-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.color-control{display:grid;grid-template-columns:38px 1fr;gap:7px}.color-control input[type=color]{height:34px;padding:3px}.inspector-empty{margin-top:18px;border:1px dashed #35313a;border-radius:10px;padding:18px;color:#777}.inspector-empty b{color:#bbb;font-size:11px}.inspector-empty p{font-size:9px;line-height:1.5}.master-save{position:absolute;right:16px;bottom:16px;left:16px}.master-save button{width:100%;border:0;border-radius:9px;background:#7c3aed;color:#fff;padding:11px;font-size:10px;font-weight:850}.master-save button:disabled{background:#302b35;color:#777}.master-save p{margin:8px 2px 0;color:#6f6974;font-size:8px;line-height:1.45}.master-state{min-height:70vh;display:grid;place-content:center;gap:12px;background:#0b0b0d;color:#ddd;text-align:center}.master-state a{color:#a78bfa}@media(max-width:1100px){.master-workspace{grid-template-columns:160px minmax(480px,1fr)}.master-inspector{grid-column:1/-1;min-height:310px;border-top:1px solid #29252e;border-left:0}.master-save{position:static;margin-top:20px}}@media(max-width:760px){.master-editor{padding:16px}.master-topbar{align-items:flex-start;flex-direction:column}.master-workspace{display:block}.master-pages{grid-template-columns:repeat(2,1fr);border-right:0}.master-stage{overflow:auto}.master-inspector{min-height:360px}}
       `}</style>
     </main>
   )
