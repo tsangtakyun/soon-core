@@ -59,6 +59,7 @@ function placeholderFor(role: PageRole) {
 }
 
 function attachData<T extends EditableObject>(object: T, role: string) {
+  object.set({ originX: 'left', originY: 'top' })
   object.data = { id: crypto.randomUUID(), role }
   return object
 }
@@ -86,6 +87,8 @@ async function addStarterObjects(canvas: Canvas, role: PageRole) {
     excludeFromExport: true,
     left: 0,
     opacity: 0.28,
+    originX: 'left',
+    originY: 'top',
     selectable: false,
     scaleX: referenceScale,
     scaleY: referenceScale,
