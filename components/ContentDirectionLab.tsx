@@ -133,6 +133,8 @@ export function ContentDirectionLab() {
         const pageCount = draft ? Object.keys(draft.page_designs || {}).length : 0
         const legacyImage = style.code === 'clear_magazine_carousel'
           ? '/templates/clear-magazine-carousel-v1/01-cover.png'
+          : style.code === 'ranking_review'
+            ? '/templates/ranking-review-v1/01-cover.jpg'
           : style.code === 'moody_lifestyle_quiz'
             ? '/templates/moody-lifestyle-quiz-v1/01-cover.jpg'
             : style.code === 'classical_culture_remix'

@@ -183,6 +183,15 @@ const MOODY_REFERENCE_IMAGES: Record<PageRole, string> = {
   end: '/templates/moody-lifestyle-quiz-v1/09-cta.jpg',
 }
 
+const RANKING_REFERENCE_IMAGES: Record<PageRole, string> = {
+  cover: '/templates/ranking-review-v1/01-cover.jpg',
+  longform: '/templates/ranking-review-v1/02-rank-1.jpg',
+  split: '/templates/ranking-review-v1/03-rank-2.jpg',
+  comparison: '/templates/ranking-review-v1/04-rank-3.jpg',
+  feature: '/templates/ranking-review-v1/05-rank-4.jpg',
+  end: '/templates/ranking-review-v1/06-rank-5.jpg',
+}
+
 const CLASSICAL_REFERENCE_IMAGES: Record<PageRole, string> = {
   cover: '/templates/classical-culture-remix-v1/01-cover.jpg',
   longform: '/templates/classical-culture-remix-v1/02-editorial.jpg',
@@ -202,6 +211,7 @@ const QUIET_RESEARCH_REFERENCE_IMAGES: Record<PageRole, string> = {
 }
 
 function referenceImagesFor(style: StarterStyle) {
+  if (style === 'ranking_review') return RANKING_REFERENCE_IMAGES
   if (style === 'moody_lifestyle_quiz') return MOODY_REFERENCE_IMAGES
   if (style === 'classical_culture_remix') return CLASSICAL_REFERENCE_IMAGES
   if (style === 'quiet_research_editorial') return QUIET_RESEARCH_REFERENCE_IMAGES
