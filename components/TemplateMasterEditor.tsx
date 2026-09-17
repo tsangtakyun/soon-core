@@ -192,6 +192,15 @@ const RANKING_REFERENCE_IMAGES: Record<PageRole, string> = {
   end: '/templates/ranking-review-v1/06-rank-5.jpg',
 }
 
+const EDITORIAL_OFFICE_REFERENCE_IMAGES: Record<PageRole, string> = {
+  cover: '/templates/editorial-office-flash-v1/01-cover.jpg',
+  longform: '/templates/editorial-office-flash-v1/02-research-highlight.jpg',
+  split: '/templates/editorial-office-flash-v1/03-key-finding.jpg',
+  comparison: '/templates/editorial-office-flash-v1/04-engagement-cta.jpg',
+  feature: '/templates/editorial-office-flash-v1/05-photo-caption.jpg',
+  end: '/templates/editorial-office-flash-v1/06-lookbook-grid.jpg',
+}
+
 const CLASSICAL_REFERENCE_IMAGES: Record<PageRole, string> = {
   cover: '/templates/classical-culture-remix-v1/01-cover.jpg',
   longform: '/templates/classical-culture-remix-v1/02-editorial.jpg',
@@ -212,6 +221,7 @@ const QUIET_RESEARCH_REFERENCE_IMAGES: Record<PageRole, string> = {
 
 function referenceImagesFor(style: StarterStyle) {
   if (style === 'ranking_review') return RANKING_REFERENCE_IMAGES
+  if (style === 'editorial_office_flash') return EDITORIAL_OFFICE_REFERENCE_IMAGES
   if (style === 'moody_lifestyle_quiz') return MOODY_REFERENCE_IMAGES
   if (style === 'classical_culture_remix') return CLASSICAL_REFERENCE_IMAGES
   if (style === 'quiet_research_editorial') return QUIET_RESEARCH_REFERENCE_IMAGES
