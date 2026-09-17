@@ -135,7 +135,11 @@ export function ContentDirectionLab() {
           ? '/templates/clear-magazine-carousel-v1/01-cover.png'
           : style.code === 'moody_lifestyle_quiz'
             ? '/templates/moody-lifestyle-quiz-v1/01-cover.jpg'
-            : null
+            : style.code === 'classical_culture_remix'
+              ? '/templates/classical-culture-remix-v1/01-cover.jpg'
+              : style.code === 'quiet_research_editorial'
+                ? '/templates/quiet-research-editorial-v1/01-cover.jpg'
+                : null
         return <article key={style.styleId} className="style-card">
           <TemplateCanvasPreview
             draftDesigns={draft?.page_designs}

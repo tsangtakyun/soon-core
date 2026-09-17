@@ -152,13 +152,15 @@ function ensureBrandLogoSlot(canvas: Canvas, role: PageRole) {
   return true
 }
 
-type StarterStyle = 'product_focus' | 'ranking_review' | 'editorial_office_flash' | 'moody_lifestyle_quiz' | 'default'
+type StarterStyle = 'product_focus' | 'ranking_review' | 'editorial_office_flash' | 'moody_lifestyle_quiz' | 'classical_culture_remix' | 'quiet_research_editorial' | 'default'
 
 function starterStyleFor(styleCode: string): StarterStyle {
   if (styleCode.includes('product_focus')) return 'product_focus'
   if (styleCode.includes('ranking_review')) return 'ranking_review'
   if (styleCode.includes('editorial_office_flash')) return 'editorial_office_flash'
   if (styleCode.includes('moody_lifestyle_quiz')) return 'moody_lifestyle_quiz'
+  if (styleCode.includes('classical_culture_remix')) return 'classical_culture_remix'
+  if (styleCode.includes('quiet_research_editorial')) return 'quiet_research_editorial'
   return 'default'
 }
 
@@ -167,6 +169,8 @@ function referenceName(style: StarterStyle) {
   if (style === 'ranking_review') return '排行榜評測 · 大圖＋白底評語'
   if (style === 'editorial_office_flash') return '冷調閃光編輯風 · PAZZO 辦公室攝影'
   if (style === 'moody_lifestyle_quiz') return '暮色生活測驗風 · 暖灰照片與長文卡'
+  if (style === 'classical_culture_remix') return '古典文化拼貼 · 名畫二創與文化解說'
+  if (style === 'quiet_research_editorial') return '沉靜研究敘事 · 低飽和影像與知識長文'
   return 'SOON 基本版面'
 }
 
@@ -179,14 +183,40 @@ const MOODY_REFERENCE_IMAGES: Record<PageRole, string> = {
   end: '/templates/moody-lifestyle-quiz-v1/09-cta.jpg',
 }
 
+const CLASSICAL_REFERENCE_IMAGES: Record<PageRole, string> = {
+  cover: '/templates/classical-culture-remix-v1/01-cover.jpg',
+  longform: '/templates/classical-culture-remix-v1/02-editorial.jpg',
+  split: '/templates/classical-culture-remix-v1/03-editorial.jpg',
+  comparison: '/templates/classical-culture-remix-v1/03-editorial.jpg',
+  feature: '/templates/classical-culture-remix-v1/04-visual-interlude.jpg',
+  end: '/templates/classical-culture-remix-v1/04-visual-interlude.jpg',
+}
+
+const QUIET_RESEARCH_REFERENCE_IMAGES: Record<PageRole, string> = {
+  cover: '/templates/quiet-research-editorial-v1/01-cover.jpg',
+  longform: '/templates/quiet-research-editorial-v1/02-full-image-body.jpg',
+  split: '/templates/quiet-research-editorial-v1/03-evidence-card.jpg',
+  comparison: '/templates/quiet-research-editorial-v1/05-list.jpg',
+  feature: '/templates/quiet-research-editorial-v1/07-conclusion.jpg',
+  end: '/templates/quiet-research-editorial-v1/08-cta.jpg',
+}
+
+function referenceImagesFor(style: StarterStyle) {
+  if (style === 'moody_lifestyle_quiz') return MOODY_REFERENCE_IMAGES
+  if (style === 'classical_culture_remix') return CLASSICAL_REFERENCE_IMAGES
+  if (style === 'quiet_research_editorial') return QUIET_RESEARCH_REFERENCE_IMAGES
+  return null
+}
+
 function referenceOpacityFor(styleCode: string) {
-  return starterStyleFor(styleCode) === 'moody_lifestyle_quiz' ? 0.52 : 0.26
+  return referenceImagesFor(starterStyleFor(styleCode)) ? 0.52 : 0.26
 }
 
 async function createReferenceGuide(styleCode: string, role: PageRole) {
   const style = starterStyleFor(styleCode)
-  if (style === 'moody_lifestyle_quiz') {
-    const reference = await FabricImage.fromURL(MOODY_REFERENCE_IMAGES[role]) as EditableObject
+  const referenceImages = referenceImagesFor(style)
+  if (referenceImages) {
+    const reference = await FabricImage.fromURL(referenceImages[role]) as EditableObject
     const referenceScale = Math.max(DISPLAY_WIDTH / (reference.width || 1), DISPLAY_HEIGHT / (reference.height || 1))
     reference.set({
       evented: false,
@@ -290,9 +320,11 @@ async function addStarterObjects(canvas: Canvas, role: PageRole, styleCode: stri
   const isEditorial = style === 'editorial_office_flash'
   const isProduct = style === 'product_focus'
   const isMoody = style === 'moody_lifestyle_quiz'
+  const isClassical = style === 'classical_culture_remix'
+  const isQuietResearch = style === 'quiet_research_editorial'
 
   const accent = attachData(new Rect({
-    fill: isMoody ? '#E8E1D8' : isEditorial ? '#1557D6' : isProduct ? '#B7837B' : role === 'comparison' ? '#E24B35' : '#3159C6',
+    fill: isMoody ? '#E8E1D8' : isClassical ? '#F3E9D8' : isQuietResearch ? '#D7C3A6' : isEditorial ? '#1557D6' : isProduct ? '#B7837B' : role === 'comparison' ? '#E24B35' : '#3159C6',
     height: isRankingBody ? 2 : role === 'cover' ? 12 : 8,
     left: 30,
     rx: 4,
@@ -301,7 +333,7 @@ async function addStarterObjects(canvas: Canvas, role: PageRole, styleCode: stri
     width: role === 'cover' ? 150 : 92,
   }) as EditableObject, 'accent')
   const eyebrow = attachData(new Textbox(copy.eyebrow, {
-    fill: isMoody ? '#FFFFFF' : isRankingCover ? '#F3C83E' : isEditorial ? '#1557D6' : isProduct ? '#8F625C' : '#3159C6',
+    fill: isMoody || isClassical || isQuietResearch ? '#FFFFFF' : isRankingCover ? '#F3C83E' : isEditorial ? '#1557D6' : isProduct ? '#8F625C' : '#3159C6',
     fontFamily: 'Arial, sans-serif',
     fontSize: 13,
     fontWeight: 700,
@@ -311,9 +343,9 @@ async function addStarterObjects(canvas: Canvas, role: PageRole, styleCode: stri
     width: 360,
   }) as EditableObject, 'eyebrow')
   const title = attachData(new Textbox(copy.title, {
-    fill: isMoody ? '#FFFFFF' : isRankingCover ? '#FFFFFF' : '#171717',
-    fontFamily: isMoody ? 'Georgia, serif' : 'Arial, sans-serif',
-    fontSize: isMoody ? role === 'cover' ? 32 : 31 : role === 'cover' ? 46 : 38,
+    fill: isMoody || isClassical || isQuietResearch ? '#FFFFFF' : isRankingCover ? '#FFFFFF' : '#171717',
+    fontFamily: isMoody || isClassical || isQuietResearch ? 'Georgia, serif' : 'Arial, sans-serif',
+    fontSize: isMoody || isClassical || isQuietResearch ? role === 'cover' ? 32 : 31 : role === 'cover' ? 46 : 38,
     fontWeight: 800,
     left: isRankingCover ? 24 : 30,
     lineHeight: 1.02,
@@ -322,9 +354,9 @@ async function addStarterObjects(canvas: Canvas, role: PageRole, styleCode: stri
     width: isRankingCover ? 382 : 370,
   }) as EditableObject, 'headline')
   const body = attachData(new Textbox(copy.body, {
-    fill: isMoody ? '#FFFFFF' : isRankingCover ? '#FFFFFF' : isEditorial && role === 'cover' ? '#FFFFFF' : '#303030',
-    fontFamily: isMoody ? 'Georgia, serif' : 'Arial, sans-serif',
-    fontSize: isMoody ? role === 'split' ? 15 : 17 : role === 'comparison' ? 25 : isRankingBody ? 17 : 20,
+    fill: isMoody || isClassical || isQuietResearch ? '#FFFFFF' : isRankingCover ? '#FFFFFF' : isEditorial && role === 'cover' ? '#FFFFFF' : '#303030',
+    fontFamily: isMoody || isClassical || isQuietResearch ? 'Georgia, serif' : 'Arial, sans-serif',
+    fontSize: isMoody || isClassical || isQuietResearch ? role === 'split' ? 15 : 17 : role === 'comparison' ? 25 : isRankingBody ? 17 : 20,
     fontWeight: 400,
     left: isRankingBody ? 48 : 30,
     lineHeight: 1.35,
@@ -334,7 +366,7 @@ async function addStarterObjects(canvas: Canvas, role: PageRole, styleCode: stri
     width: isMoody && role !== 'cover' ? 344 : isRankingBody ? 338 : 370,
   }) as EditableObject, 'body')
   const page = attachData(new Textbox(PAGE_ROLES.findIndex((item) => item.code === role) + 1 + '/6', {
-    fill: isMoody || isRankingCover || (isEditorial && role === 'cover') ? '#FFFFFF' : '#646464',
+    fill: isMoody || isClassical || isQuietResearch || isRankingCover || (isEditorial && role === 'cover') ? '#FFFFFF' : '#646464',
     fontFamily: 'Arial, sans-serif',
     fontSize: 11,
     left: 362,
