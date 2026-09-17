@@ -131,7 +131,11 @@ export function ContentDirectionLab() {
           ? contract.master_designs as Record<string, PageDesign>
           : null
         const pageCount = draft ? Object.keys(draft.page_designs || {}).length : 0
-        const legacyImage = style.code === 'clear_magazine_carousel' ? '/templates/clear-magazine-carousel-v1/01-cover.png' : null
+        const legacyImage = style.code === 'clear_magazine_carousel'
+          ? '/templates/clear-magazine-carousel-v1/01-cover.png'
+          : style.code === 'moody_lifestyle_quiz'
+            ? '/templates/moody-lifestyle-quiz-v1/01-cover.jpg'
+            : null
         return <article key={style.styleId} className="style-card">
           <TemplateCanvasPreview
             draftDesigns={draft?.page_designs}

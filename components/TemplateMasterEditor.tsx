@@ -152,12 +152,13 @@ function ensureBrandLogoSlot(canvas: Canvas, role: PageRole) {
   return true
 }
 
-type StarterStyle = 'product_focus' | 'ranking_review' | 'editorial_office_flash' | 'default'
+type StarterStyle = 'product_focus' | 'ranking_review' | 'editorial_office_flash' | 'moody_lifestyle_quiz' | 'default'
 
 function starterStyleFor(styleCode: string): StarterStyle {
   if (styleCode.includes('product_focus')) return 'product_focus'
   if (styleCode.includes('ranking_review')) return 'ranking_review'
   if (styleCode.includes('editorial_office_flash')) return 'editorial_office_flash'
+  if (styleCode.includes('moody_lifestyle_quiz')) return 'moody_lifestyle_quiz'
   return 'default'
 }
 
@@ -165,11 +166,43 @@ function referenceName(style: StarterStyle) {
   if (style === 'product_focus') return '產品主角 · 米白產品舞台'
   if (style === 'ranking_review') return '排行榜評測 · 大圖＋白底評語'
   if (style === 'editorial_office_flash') return '冷調閃光編輯風 · PAZZO 辦公室攝影'
+  if (style === 'moody_lifestyle_quiz') return '暮色生活測驗風 · 暖灰照片與長文卡'
   return 'SOON 基本版面'
 }
 
-function createReferenceGuide(styleCode: string, role: PageRole) {
+const MOODY_REFERENCE_IMAGES: Record<PageRole, string> = {
+  cover: '/templates/moody-lifestyle-quiz-v1/01-cover.jpg',
+  longform: '/templates/moody-lifestyle-quiz-v1/03-profile-short.jpg',
+  split: '/templates/moody-lifestyle-quiz-v1/02-quiz.jpg',
+  comparison: '/templates/moody-lifestyle-quiz-v1/05-profile-team.jpg',
+  feature: '/templates/moody-lifestyle-quiz-v1/07-profile-deep.jpg',
+  end: '/templates/moody-lifestyle-quiz-v1/09-cta.jpg',
+}
+
+function referenceOpacityFor(styleCode: string) {
+  return starterStyleFor(styleCode) === 'moody_lifestyle_quiz' ? 0.52 : 0.26
+}
+
+async function createReferenceGuide(styleCode: string, role: PageRole) {
   const style = starterStyleFor(styleCode)
+  if (style === 'moody_lifestyle_quiz') {
+    const reference = await FabricImage.fromURL(MOODY_REFERENCE_IMAGES[role]) as EditableObject
+    const referenceScale = Math.max(DISPLAY_WIDTH / (reference.width || 1), DISPLAY_HEIGHT / (reference.height || 1))
+    reference.set({
+      evented: false,
+      excludeFromExport: true,
+      left: 0,
+      opacity: referenceOpacityFor(styleCode),
+      originX: 'left',
+      originY: 'top',
+      scaleX: referenceScale,
+      scaleY: referenceScale,
+      selectable: false,
+      top: 0,
+    })
+    reference.data = { id: `reference-${style}-${role}`, role: 'reference_underlay' }
+    return reference
+  }
   const objects: FabricObject[] = []
   const addRect = (options: ConstructorParameters<typeof Rect>[0]) => objects.push(new Rect(options))
   const addLabel = (text: string, options: ConstructorParameters<typeof Textbox>[1]) => objects.push(new Textbox(text, options))
@@ -233,31 +266,33 @@ function createReferenceGuide(styleCode: string, role: PageRole) {
   return guide
 }
 
-function ensureReferenceGuide(canvas: Canvas, styleCode: string, role: PageRole) {
+async function ensureReferenceGuide(canvas: Canvas, styleCode: string, role: PageRole) {
   const existing = canvas.getObjects().filter((object) => (object as EditableObject).data?.role === 'reference_underlay')
   existing.forEach((object) => canvas.remove(object))
-  const guide = createReferenceGuide(styleCode, role)
+  const guide = await createReferenceGuide(styleCode, role)
   canvas.add(guide)
   canvas.sendObjectToBack(guide)
   return guide
 }
 
-function addStarterObjects(canvas: Canvas, role: PageRole, styleCode: string) {
+async function addStarterObjects(canvas: Canvas, role: PageRole, styleCode: string) {
   const copy = placeholderFor(role)
   const style = starterStyleFor(styleCode)
   canvas.clear()
   canvas.backgroundColor = style === 'ranking_review' && role === 'cover' ? '#262321'
     : style === 'editorial_office_flash' ? '#E8E9E5'
-      : style === 'product_focus' ? '#F7F3ED' : '#F4F0E8'
-  const reference = createReferenceGuide(styleCode, role)
+      : style === 'product_focus' ? '#F7F3ED'
+        : style === 'moody_lifestyle_quiz' ? '#4A413B' : '#F4F0E8'
+  const reference = await createReferenceGuide(styleCode, role)
 
   const isRankingCover = style === 'ranking_review' && role === 'cover'
   const isRankingBody = style === 'ranking_review' && role !== 'cover'
   const isEditorial = style === 'editorial_office_flash'
   const isProduct = style === 'product_focus'
+  const isMoody = style === 'moody_lifestyle_quiz'
 
   const accent = attachData(new Rect({
-    fill: isEditorial ? '#1557D6' : isProduct ? '#B7837B' : role === 'comparison' ? '#E24B35' : '#3159C6',
+    fill: isMoody ? '#E8E1D8' : isEditorial ? '#1557D6' : isProduct ? '#B7837B' : role === 'comparison' ? '#E24B35' : '#3159C6',
     height: isRankingBody ? 2 : role === 'cover' ? 12 : 8,
     left: 30,
     rx: 4,
@@ -266,7 +301,7 @@ function addStarterObjects(canvas: Canvas, role: PageRole, styleCode: string) {
     width: role === 'cover' ? 150 : 92,
   }) as EditableObject, 'accent')
   const eyebrow = attachData(new Textbox(copy.eyebrow, {
-    fill: isRankingCover ? '#F3C83E' : isEditorial ? '#1557D6' : isProduct ? '#8F625C' : '#3159C6',
+    fill: isMoody ? '#FFFFFF' : isRankingCover ? '#F3C83E' : isEditorial ? '#1557D6' : isProduct ? '#8F625C' : '#3159C6',
     fontFamily: 'Arial, sans-serif',
     fontSize: 13,
     fontWeight: 700,
@@ -276,30 +311,30 @@ function addStarterObjects(canvas: Canvas, role: PageRole, styleCode: string) {
     width: 360,
   }) as EditableObject, 'eyebrow')
   const title = attachData(new Textbox(copy.title, {
-    fill: isRankingCover ? '#FFFFFF' : '#171717',
-    fontFamily: 'Arial, sans-serif',
-    fontSize: role === 'cover' ? 46 : 38,
+    fill: isMoody ? '#FFFFFF' : isRankingCover ? '#FFFFFF' : '#171717',
+    fontFamily: isMoody ? 'Georgia, serif' : 'Arial, sans-serif',
+    fontSize: isMoody ? role === 'cover' ? 32 : 31 : role === 'cover' ? 46 : 38,
     fontWeight: 800,
     left: isRankingCover ? 24 : 30,
     lineHeight: 1.02,
     splitByGrapheme: true,
-    top: isRankingCover ? 362 : isRankingBody ? 344 : isEditorial && role !== 'cover' ? 376 : role === 'cover' ? 270 : 115,
+    top: isMoody ? role === 'cover' ? 360 : role === 'end' ? 222 : 84 : isRankingCover ? 362 : isRankingBody ? 344 : isEditorial && role !== 'cover' ? 376 : role === 'cover' ? 270 : 115,
     width: isRankingCover ? 382 : 370,
   }) as EditableObject, 'headline')
   const body = attachData(new Textbox(copy.body, {
-    fill: isRankingCover ? '#FFFFFF' : isEditorial && role === 'cover' ? '#FFFFFF' : '#303030',
-    fontFamily: 'Arial, sans-serif',
-    fontSize: role === 'comparison' ? 25 : isRankingBody ? 17 : 20,
+    fill: isMoody ? '#FFFFFF' : isRankingCover ? '#FFFFFF' : isEditorial && role === 'cover' ? '#FFFFFF' : '#303030',
+    fontFamily: isMoody ? 'Georgia, serif' : 'Arial, sans-serif',
+    fontSize: isMoody ? role === 'split' ? 15 : 17 : role === 'comparison' ? 25 : isRankingBody ? 17 : 20,
     fontWeight: 400,
     left: isRankingBody ? 48 : 30,
     lineHeight: 1.35,
     splitByGrapheme: true,
-    textAlign: role === 'comparison' ? 'center' : 'left',
-    top: isRankingCover ? 448 : isRankingBody ? 405 : isEditorial && role !== 'cover' ? 438 : role === 'cover' ? 405 : 245,
-    width: isRankingBody ? 338 : 370,
+    textAlign: isMoody && role !== 'cover' ? 'center' : role === 'comparison' ? 'center' : 'left',
+    top: isMoody ? role === 'cover' ? 424 : role === 'end' ? 300 : role === 'split' ? 236 : 210 : isRankingCover ? 448 : isRankingBody ? 405 : isEditorial && role !== 'cover' ? 438 : role === 'cover' ? 405 : 245,
+    width: isMoody && role !== 'cover' ? 344 : isRankingBody ? 338 : 370,
   }) as EditableObject, 'body')
   const page = attachData(new Textbox(PAGE_ROLES.findIndex((item) => item.code === role) + 1 + '/6', {
-    fill: isRankingCover || (isEditorial && role === 'cover') ? '#FFFFFF' : '#646464',
+    fill: isMoody || isRankingCover || (isEditorial && role === 'cover') ? '#FFFFFF' : '#646464',
     fontFamily: 'Arial, sans-serif',
     fontSize: 11,
     left: 362,
@@ -463,12 +498,14 @@ export function TemplateMasterEditor({ draftId, styleCode }: { draftId: string; 
       if (existingDesign) {
         await canvas.loadFromJSON(existingDesign)
         if (cancelled) return
-        ensureReferenceGuide(canvas, master.style.code, role)
+        await ensureReferenceGuide(canvas, master.style.code, role)
+        if (cancelled) return
         savedSnapshot = serialiseHistory(canvas)
         needsSave = ensureBrandLogoSlot(canvas, role)
         canvas.renderAll()
       } else {
-        addStarterObjects(canvas, role, master.style.code)
+        await addStarterObjects(canvas, role, master.style.code)
+        if (cancelled) return
         needsSave = true
       }
       setReferenceVisible(true)
@@ -488,7 +525,9 @@ export function TemplateMasterEditor({ draftId, styleCode }: { draftId: string; 
     if (!canvas) return
     const nextVisible = !referenceVisible
     canvas.getObjects().forEach((object) => {
-      if ((object as EditableObject).data?.role === 'reference_underlay') object.set({ opacity: nextVisible ? 0.26 : 0 })
+      if ((object as EditableObject).data?.role === 'reference_underlay') {
+        object.set({ opacity: nextVisible ? referenceOpacityFor(master?.style.code || '') : 0 })
+      }
     })
     canvas.requestRenderAll()
     setReferenceVisible(nextVisible)
