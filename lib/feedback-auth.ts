@@ -12,7 +12,20 @@ export type FeedbackActor = {
 
 export async function requireFeedbackActor(): Promise<FeedbackActor | null> {
   const sessionClient = await createSupabaseRouteClient()
-  const { data: { user } } = await sessionClient.auth.getUser()
+  const { data: { user: cookieUser } } = await sessionClient.auth.getUser()
+  let user = cookieUser
+
+  // Some existing Core sessions were issued by the older auth-helper flow.
+  // Validate their access token with Supabase Auth before accepting the user;
+  // never trust the locally decoded getSession() payload by itself.
+  if (!user) {
+    const { data: { session } } = await sessionClient.auth.getSession()
+    if (session?.access_token) {
+      const admin = createSupabaseAdmin()
+      const { data: { user: verifiedUser } } = await admin.auth.getUser(session.access_token)
+      user = verifiedUser
+    }
+  }
   const email = user?.email?.trim().toLowerCase() ?? ''
   if (!user || !email) return null
 
