@@ -81,11 +81,11 @@ Migrations：
 | CODE / CONTRACT | PASS | `node scripts/verify-feedback-contract.mjs`、scoped ESLint、`npx tsc --noEmit` |
 | DATABASE v1/v2 | PASS | 已套用 production，並完成第一筆 TEST report AI 閉環 |
 | DATABASE v3 | PASS | `20260919193000_feedback_engineering_handoff_v3.sql` 已套用到 production |
-| PRODUCTION DEPLOYMENT | PENDING | 待本次變更 remote build 及 production alias 更新 |
-| PRODUCTION TOMMY UI | PARTIAL PASS | 上一版已驗證 `/login` → `/`、首頁共同回報板、四產品及既有 TEST report；待本次附件兩步保存版本重新驗證 |
+| PRODUCTION DEPLOYMENT | PASS | `dpl_24rtkVvp5drNkuCsQ4mFxtanzHcJ` Ready；alias `https://soon-core.vercel.app` 已更新 |
+| PRODUCTION TOMMY UI | PASS | 已驗證 `/login` → `/`、首頁問候語下方共同回報板、四產品、清晰繁體中文、既有 TEST report 詳情；沒有第二個 Master Chief 輸入框 |
 | PRODUCTION RENEE ROLE | NOT TESTED / BLOCKED | 未有 Renee access row／已確認登入 email；不可猜測身份 |
-| TEXT SUBMIT + AI | PREVIOUS VERSION PASS / CURRENT PENDING | TEST report `SOON-20260919-C9A0B4` 已完成 AI；待本次版本重新驗證 |
+| TEXT SUBMIT + AI | PREVIOUS VERSION PASS / CURRENT NOT TESTED | TEST report `SOON-20260919-C9A0B4` 已完成 AI；本次兩步保存版本未新增 production report |
 | IMAGE / FILE / AUDIO | CODE PASS / PROD NOT TESTED | 私密 storage、兩步保存、格式／大小及重試已實作；需要實機檔案及麥克風權限驗證 |
 | FOLLOW-UP | CODE PASS / PROD NOT TESTED | message 先保存、附件後上載、完整對話重新分析 |
-| MOBILE | CODE PASS / PROD PENDING | 760px breakpoint 單欄及操作列換行；待 production viewport 驗證 |
+| MOBILE | CODE PASS / PROD NOT TESTED | 760px breakpoint 單欄及操作列換行；目前瀏覽器控制工具未提供 viewport resize，未作 production 實機驗證 |
 | AUTO ENGINEERING RUNNER | NOT CONNECTED | 可審計 engineering task／work order 已建立；沒有真實 code execution runner |
