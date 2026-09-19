@@ -59,6 +59,7 @@ type SidebarIconName =
   | 'judge'
   | 'settings'
   | 'motion'
+  | 'carousel'
   | PipelineTool['id']
 
 const primaryNav = [
