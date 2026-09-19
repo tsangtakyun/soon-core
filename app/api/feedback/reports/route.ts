@@ -11,6 +11,7 @@ import {
   GENERAL_FILE_MIME_TYPES,
   isFeedbackProduct,
   MAX_AUDIO_BYTES,
+  MAX_ATTACHMENT_REQUEST_BYTES,
   MAX_GENERAL_FILE_BYTES,
   MAX_GENERAL_FILES,
   MAX_SCREENSHOT_BYTES,
@@ -65,36 +66,39 @@ export async function POST(request: Request) {
   if (!actor) return NextResponse.json({ error: '未獲授權使用回報系統' }, { status: 403 })
 
   const contentLength = Number(request.headers.get('content-length') ?? 0)
-  if (contentLength > 36 * 1024 * 1024) return NextResponse.json({ error: '附件總大小超出限制' }, { status: 413 })
+  if (contentLength > MAX_ATTACHMENT_REQUEST_BYTES) return NextResponse.json({ error: '請求總大小超出 4MB 限制' }, { status: 413 })
 
-  const form = await request.formData()
-  const product = form.get('product')
-  const description = String(form.get('description') ?? '').trim()
+  const isJson = request.headers.get('content-type')?.includes('application/json')
+  const json = isJson ? await request.json().catch(() => ({})) as Record<string, unknown> : null
+  const form = isJson ? null : await request.formData()
+  const field = (name: string) => form?.get(name) ?? json?.[name]
+  const product = field('product')
+  const description = String(field('description') ?? '').trim()
   if (!isFeedbackProduct(product)) return NextResponse.json({ error: '請選擇產品' }, { status: 400 })
   if (description.length < 3 || description.length > 8000) return NextResponse.json({ error: '內容需要 3 至 8000 字' }, { status: 400 })
 
-  const expectedBehavior = cleanOptionalText(form.get('expectedBehavior'), 4000)
-  const problemUrl = cleanOptionalText(form.get('problemUrl'), 2048)
-  const appVersion = cleanOptionalText(form.get('appVersion'), 120)
-  const screenshots = form.getAll('screenshots').filter((item): item is File => item instanceof File && item.size > 0)
-  const generalFiles = form.getAll('files').filter((item): item is File => item instanceof File && item.size > 0)
-  const audio = form.get('audio')
+  const expectedBehavior = cleanOptionalText(field('expectedBehavior'), 4000)
+  const problemUrl = cleanOptionalText(field('problemUrl'), 2048)
+  const appVersion = cleanOptionalText(field('appVersion'), 120)
+  const screenshots = form?.getAll('screenshots').filter((item): item is File => item instanceof File && item.size > 0) ?? []
+  const generalFiles = form?.getAll('files').filter((item): item is File => item instanceof File && item.size > 0) ?? []
+  const audio = form?.get('audio')
   const audioFile = audio instanceof File && audio.size > 0 ? audio : null
 
   if (screenshots.length > MAX_SCREENSHOTS) return NextResponse.json({ error: `最多上載 ${MAX_SCREENSHOTS} 張截圖` }, { status: 400 })
   if (generalFiles.length > MAX_GENERAL_FILES) return NextResponse.json({ error: `最多上載 ${MAX_GENERAL_FILES} 個檔案` }, { status: 400 })
   for (const file of screenshots) {
     if (!SCREENSHOT_MIME_TYPES.has(file.type) || file.size > MAX_SCREENSHOT_BYTES) {
-      return NextResponse.json({ error: '截圖只接受 JPG、PNG、WEBP，每張最多 8MB' }, { status: 400 })
+      return NextResponse.json({ error: '圖片只接受 JPG、PNG、WEBP，每張最多 3MB' }, { status: 400 })
     }
   }
   for (const file of generalFiles) {
     if (!GENERAL_FILE_MIME_TYPES.has(file.type) || file.size > MAX_GENERAL_FILE_BYTES) {
-      return NextResponse.json({ error: '檔案只接受 PDF、文字、Word、Excel，每個最多 20MB' }, { status: 400 })
+      return NextResponse.json({ error: '檔案只接受 PDF、文字、Word、Excel，每個最多 3MB' }, { status: 400 })
     }
   }
   if (audioFile && (!AUDIO_MIME_TYPES.has(audioFile.type) || audioFile.size > MAX_AUDIO_BYTES)) {
-    return NextResponse.json({ error: '語音只接受 MP3、M4A、WAV、WEBM、OGG，最多 20MB' }, { status: 400 })
+    return NextResponse.json({ error: '語音只接受 MP3、M4A、WAV、WEBM、OGG，最多 3MB' }, { status: 400 })
   }
 
   const admin = createSupabaseAdmin()
@@ -124,7 +128,7 @@ export async function POST(request: Request) {
     app_version: appVersion,
     source_context: clientSourceContext(request),
     dedupe_hash: dedupeHash,
-    is_test: actor.isAdmin && form.get('isTest') === 'true',
+    is_test: actor.isAdmin && field('isTest') === 'true',
   }).select('id,reference_number').single()
   if (reportError || !report) return NextResponse.json({ error: reportError?.message ?? '未能保存回報' }, { status: 500 })
 
@@ -167,12 +171,13 @@ export async function POST(request: Request) {
     }
   }
 
-  after(() => triageFeedbackReport(report.id))
+  const deferAnalysis = json?.deferAnalysis === true
+  if (!deferAnalysis) after(() => triageFeedbackReport(report.id))
   return NextResponse.json({
     ok: true,
     reportId: report.id,
     referenceNumber: report.reference_number,
-    aiStatus: 'queued',
+    aiStatus: deferAnalysis ? 'queued_for_attachments' : 'queued',
     uploadWarnings,
   }, { status: 201 })
 }

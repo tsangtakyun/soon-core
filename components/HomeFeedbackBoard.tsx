@@ -50,6 +50,7 @@ type Message = {
 type EngineeringTask = {
   disposition: 'eligible_auto_fix' | 'needs_discussion' | 'manual_engineering' | 'not_needed'
   execution_status: string
+  runner_status: 'not_connected' | 'connected' | 'disabled' | null
   eligibility_reason: string | null
   commit_sha: string | null
   diff_summary: string | null
@@ -78,6 +79,13 @@ type ReportDetail = {
   attachments: Attachment[]
   messages: Message[]
   engineeringTask: EngineeringTask | null
+}
+type PendingUpload = {
+  reportId: string
+  messageId?: string
+  screenshots: File[]
+  files: File[]
+  audio: File | null
 }
 
 const AI_LABELS: Record<string, string> = {
@@ -120,8 +128,11 @@ export function HomeFeedbackBoard() {
   const [reply, setReply] = useState('')
   const [recording, setRecording] = useState(false)
   const [recordedAudio, setRecordedAudio] = useState<File | null>(null)
+  const [pendingUpload, setPendingUpload] = useState<PendingUpload | null>(null)
   const recorderRef = useRef<MediaRecorder | null>(null)
   const chunksRef = useRef<Blob[]>([])
+  const composerFormRef = useRef<HTMLFormElement | null>(null)
+  const replyFormRef = useRef<HTMLFormElement | null>(null)
 
   const loadReports = useCallback(async () => {
     const response = await fetch('/api/feedback/reports', { cache: 'no-store' })
@@ -156,23 +167,104 @@ export function HomeFeedbackBoard() {
     return () => window.clearInterval(timer)
   }, [detail, loadDetail, loadReports])
 
+  async function uploadAttachments(input: PendingUpload) {
+    const attachmentForm = new FormData()
+    input.screenshots.forEach((file) => attachmentForm.append('screenshots', file))
+    input.files.forEach((file) => attachmentForm.append('files', file))
+    if (input.audio) attachmentForm.set('audio', input.audio)
+    if (input.messageId) attachmentForm.set('messageId', input.messageId)
+    const response = await fetch(`/api/feedback/reports/${input.reportId}/attachments`, {
+      method: 'POST',
+      body: attachmentForm,
+    })
+    const payload = await response.json().catch(() => ({}))
+    if (!response.ok && response.status !== 207) throw new Error(payload.error || '未能上載附件')
+    if (payload.uploadWarnings?.length) throw new Error(`部分附件未能上載：${payload.uploadWarnings.join('；')}`)
+  }
+
+  async function retryPendingUpload() {
+    if (!pendingUpload) return
+    setSubmitting(true)
+    setError('')
+    try {
+      await uploadAttachments(pendingUpload)
+      if (pendingUpload.messageId) replyFormRef.current?.reset()
+      else {
+        composerFormRef.current?.reset()
+        setRecordedAudio(null)
+      }
+      setPendingUpload(null)
+      setNotice('附件已成功上載，AI 分析已重新排隊。')
+      await Promise.allSettled([loadReports(), loadDetail(pendingUpload.reportId)])
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : '未能上載附件；原檔仍保留在此頁，可再次重試。')
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  function discardPendingUpload() {
+    if (pendingUpload?.messageId) replyFormRef.current?.reset()
+    else {
+      composerFormRef.current?.reset()
+      setRecordedAudio(null)
+    }
+    setPendingUpload(null)
+    setNotice('文字已保存；未成功的附件已從待重試清單移除。')
+  }
+
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     const form = event.currentTarget
     const formData = new FormData(form)
-    if (recordedAudio) formData.set('audio', recordedAudio)
+    const screenshots = formData.getAll('screenshots').filter((item): item is File => item instanceof File && item.size > 0)
+    const files = formData.getAll('files').filter((item): item is File => item instanceof File && item.size > 0)
+    const selectedAudio = formData.get('audio')
+    const audio = recordedAudio ?? (selectedAudio instanceof File && selectedAudio.size > 0 ? selectedAudio : null)
+    const hasAttachments = screenshots.length > 0 || files.length > 0 || Boolean(audio)
     setSubmitting(true)
     setError('')
     setNotice('')
+    let attachmentFailed = false
     try {
-      const response = await fetch('/api/feedback/reports', { method: 'POST', body: formData })
+      const response = await fetch('/api/feedback/reports', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          product: formData.get('product'),
+          description: formData.get('description'),
+          expectedBehavior: formData.get('expectedBehavior'),
+          problemUrl: formData.get('problemUrl'),
+          appVersion: formData.get('appVersion'),
+          isTest: formData.get('isTest'),
+          deferAnalysis: hasAttachments,
+        }),
+      })
       const payload = await response.json().catch(() => ({}))
       if (!response.ok) throw new Error(payload.error || '未能保存內容')
-      setNotice(`${payload.duplicate ? '相同內容已存在' : '已可靠保存'} · ${payload.referenceNumber}${payload.uploadWarnings?.length ? ' · 部分附件未成功，文字已保留' : ''}`)
-      form.reset()
-      setRecordedAudio(null)
-      await loadReports()
-      if (payload.reportId) await loadDetail(payload.reportId)
+      setNotice(`${payload.duplicate ? '相同內容已存在' : '內容已保存'} · ${payload.referenceNumber}`)
+      if (hasAttachments && payload.reportId) {
+        const upload = { reportId: payload.reportId, screenshots, files, audio }
+        try {
+          await uploadAttachments(upload)
+          setNotice(`內容及附件已保存 · ${payload.referenceNumber}`)
+        } catch (uploadError) {
+          attachmentFailed = true
+          setPendingUpload(upload)
+          setError(uploadError instanceof Error ? `${uploadError.message}；文字及參考編號已保存，可直接重試附件。` : '附件未能上載；文字及參考編號已保存，可直接重試附件。')
+        }
+      }
+      if (!attachmentFailed) {
+        form.reset()
+        setRecordedAudio(null)
+      }
+      const refreshes = await Promise.allSettled([
+        loadReports(),
+        payload.reportId ? loadDetail(payload.reportId) : Promise.resolve(),
+      ])
+      if (refreshes.some((item) => item.status === 'rejected')) {
+        setNotice(`內容已保存 · ${payload.referenceNumber}；列表暫時未能更新，重新整理頁面後仍可查看。`)
+      }
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : '未能保存內容')
     } finally {
@@ -196,7 +288,7 @@ export function HomeFeedbackBoard() {
       recorderRef.current = recorder
       setRecording(true)
     } catch {
-      setError('未能使用咪高峰；你仍可上載錄音檔。')
+      setError('未能使用麥克風；你仍可上載錄音檔。')
     }
   }
 
@@ -213,15 +305,36 @@ export function HomeFeedbackBoard() {
     setError('')
     const form = event.currentTarget
     const formData = new FormData(form)
-    formData.set('body', reply.trim())
+    const screenshots = formData.getAll('screenshots').filter((item): item is File => item instanceof File && item.size > 0)
+    const files = formData.getAll('files').filter((item): item is File => item instanceof File && item.size > 0)
+    const audioItem = formData.get('audio')
+    const audio = audioItem instanceof File && audioItem.size > 0 ? audioItem : null
+    let attachmentFailed = false
     try {
-      const response = await fetch(`/api/feedback/reports/${detail.report.id}/messages`, { method: 'POST', body: formData })
+      const response = await fetch(`/api/feedback/reports/${detail.report.id}/messages`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ body: reply.trim() }),
+      })
       const payload = await response.json().catch(() => ({}))
       if (!response.ok) throw new Error(payload.error || '未能加入補充')
+      const hasAttachments = screenshots.length > 0 || files.length > 0 || Boolean(audio)
+      if (hasAttachments && payload.message?.id) {
+        const upload = { reportId: detail.report.id, messageId: payload.message.id, screenshots, files, audio }
+        try {
+          await uploadAttachments(upload)
+        } catch (uploadError) {
+          attachmentFailed = true
+          setPendingUpload(upload)
+          setError(uploadError instanceof Error ? `${uploadError.message}；補充文字已保存，可直接重試附件。` : '附件未能上載；補充文字已保存，可直接重試附件。')
+        }
+      }
       setReply('')
-      form.reset()
-      if (payload.uploadWarnings?.length) setNotice('補充已保存；部分附件未能上載。')
-      await Promise.all([loadDetail(detail.report.id), loadReports()])
+      if (!attachmentFailed) form.reset()
+      const refreshes = await Promise.allSettled([loadDetail(detail.report.id), loadReports()])
+      if (refreshes.some((item) => item.status === 'rejected')) {
+        setNotice('補充內容已保存；列表暫時未能更新，重新整理頁面後仍可查看。')
+      }
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : '未能加入補充')
     } finally {
@@ -243,22 +356,22 @@ export function HomeFeedbackBoard() {
   return (
     <section className={styles.board} aria-label="共同問題與建議板">
       <div className={styles.intro}>
-        <div><span>SOON SHARED BOARD</span><h2>有咩想問，或者邊度要改善？</h2></div>
-        <p>文字會先保存，再交俾 AI 分析。附件或 AI 失敗都唔會令原文消失。</p>
+        <div><span>SOON SHARED BOARD</span><h2>有甚麼問題或建議？</h2></div>
+        <p>系統會先保存文字，再交由 AI 分析。附件或 AI 處理失敗，均不會令原文遺失。</p>
       </div>
 
-      <form className={styles.composer} onSubmit={submit}>
+      <form ref={composerFormRef} className={styles.composer} onSubmit={submit}>
         <div className={styles.composerTop}>
           <select name="product" required defaultValue="soon_core" aria-label="選擇產品">
             {Object.entries(FEEDBACK_PRODUCT_LABELS).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
           </select>
           <span>{actor?.sharedBoard || actor?.isAdmin ? 'Tommy × Renee 共同測試板' : '個人回報'}</span>
         </div>
-        <textarea name="description" required minLength={3} maxLength={8000} rows={3} placeholder="輸入問題、建議、一般提問，或者貼低你見到嘅情況…" />
+        <textarea name="description" required minLength={3} maxLength={8000} rows={3} placeholder="輸入問題、建議、一般提問，或描述你所見的情況…" />
         <details className={styles.advanced}>
           <summary>補充預期結果、網址或版本</summary>
           <div>
-            <textarea name="expectedBehavior" maxLength={4000} rows={2} placeholder="你預期應該點樣？（選填）" />
+            <textarea name="expectedBehavior" maxLength={4000} rows={2} placeholder="你預期系統應如何運作？（選填）" />
             <input name="problemUrl" type="url" maxLength={2048} placeholder="問題頁面 URL（選填）" />
             <input name="appVersion" maxLength={120} placeholder="App／版本（選填）" />
           </div>
@@ -271,13 +384,15 @@ export function HomeFeedbackBoard() {
           {recordedAudio && <button type="button" onClick={() => setRecordedAudio(null)}>移除已錄音</button>}
           <button className={styles.send} disabled={submitting}>{submitting ? '保存中…' : '送出 →'}</button>
         </div>
+        <small className={styles.uploadHint}>每次附件請求上限為 4MB；單一圖片、檔案或錄音最多 3MB。文字會先獨立保存。</small>
       </form>
 
       {error && <div className={styles.error} role="alert">{error}</div>}
       {notice && <div className={styles.notice} role="status">{notice}</div>}
+      {pendingUpload && <div className={styles.notice} role="status">文字已保存；原附件仍保留在此頁。<button type="button" disabled={submitting} onClick={() => void retryPendingUpload()}>{submitting ? '重試中…' : '重試附件上載'}</button><button type="button" disabled={submitting} onClick={discardPendingUpload}>放棄附件</button></div>}
 
       <div className={styles.feedHeader}><div><span>COMMENTS</span><h3>共同回報與對話</h3></div><b>{reports.length}</b></div>
-      {loading ? <div className={styles.empty}>載入中…</div> : !reports.length ? <div className={styles.empty}>未有內容。第一個 comment 可以直接喺上面輸入。</div> : (
+      {loading ? <div className={styles.empty}>載入中…</div> : !reports.length ? <div className={styles.empty}>暫時沒有內容。你可以直接在上方提交第一則回報。</div> : (
         <div className={styles.feed}>
           {reports.map((report) => (
             <button key={report.id} className={`${styles.card} ${detail?.report.id === report.id ? styles.selected : ''}`} onClick={() => void loadDetail(report.id)}>
@@ -309,7 +424,7 @@ export function HomeFeedbackBoard() {
 
         <section className={styles.engineering}>
           <h4>工程閉環</h4>
-          {detail.engineeringTask ? <><div><span>{DISPOSITION_LABELS[detail.engineeringTask.disposition] || detail.engineeringTask.disposition}</span><b>{detail.engineeringTask.execution_status === 'not_connected' ? 'NOT CONNECTED · 待工程處理' : detail.engineeringTask.execution_status}</b></div><p>{detail.engineeringTask.eligibility_reason}</p>{detail.engineeringTask.commit_sha && <code>{detail.engineeringTask.commit_sha}</code>}</> : <p>AI 完成分析後先建立工程判斷；未有 runner 就唔會聲稱已修正。</p>}
+          {detail.engineeringTask ? <><div><span>{DISPOSITION_LABELS[detail.engineeringTask.disposition] || detail.engineeringTask.disposition}</span><b>{detail.engineeringTask.execution_status === 'not_connected' || detail.engineeringTask.execution_status === 'awaiting_engineering' ? '待工程處理' : detail.engineeringTask.execution_status}</b></div><p>{detail.engineeringTask.eligibility_reason}</p>{detail.engineeringTask.runner_status === 'not_connected' && <p>工程任務已加入可審計工作清單，但目前未連接自動工程執行器，必須由工程人員接手及提交驗證證據。</p>}{detail.engineeringTask.commit_sha && <code>{detail.engineeringTask.commit_sha}</code>}</> : <p>AI 完成分析後才會建立工程判斷。系統未有工程執行器時，只會標示為「待工程處理」，不會聲稱已完成修正。</p>}
         </section>
 
         <section className={styles.thread}>
@@ -318,7 +433,7 @@ export function HomeFeedbackBoard() {
             const attachments = detail.attachments.filter((attachment) => attachment.message_id === item.id)
             return <div className={styles.message} key={item.id}><div><strong>{item.author_email}</strong><time>{formatDate(item.created_at)}</time><span>{AI_LABELS[item.ai_analysis_status] || item.ai_analysis_status}</span></div><p>{item.body}</p>{attachments.length > 0 && <AttachmentList items={attachments} />}</div>
           })}
-          <form className={styles.reply} onSubmit={addReply}>
+          <form ref={replyFormRef} className={styles.reply} onSubmit={addReply}>
             <textarea value={reply} onChange={(event) => setReply(event.target.value)} rows={2} maxLength={4000} placeholder="補充資料或繼續對話…" />
             <div><label>圖片<input name="screenshots" type="file" accept="image/png,image/jpeg,image/webp" multiple /></label><label>檔案<input name="files" type="file" accept=".pdf,.txt,.md,.csv,.doc,.docx,.xls,.xlsx" multiple /></label><label>錄音<input name="audio" type="file" accept="audio/*" /></label><button disabled={!reply.trim() || replying}>{replying ? '保存中…' : '回覆 →'}</button></div>
           </form>
@@ -347,7 +462,7 @@ export function FeedbackOnlyHome({ displayName }: { displayName: string }) {
     router.replace('/login')
     router.refresh()
   }
-  return <main className={styles.feedbackOnlyPage}><header><div><span>SOON CORE</span><h1>早晨，{displayName}。</h1><p>呢度只顯示 Tommy × Renee 共同測試板；公司營運及敏感資料不會在此帳戶開放。</p></div><button onClick={() => void signOut()}>登出</button></header><HomeFeedbackBoard /></main>
+  return <main className={styles.feedbackOnlyPage}><header><div><span>SOON CORE</span><h1>早晨，{displayName}。</h1><p>此頁只顯示 Tommy × Renee 共同測試板；公司營運及敏感資料不會向此帳戶開放。</p></div><button onClick={() => void signOut()}>登出</button></header><HomeFeedbackBoard /></main>
 }
 
 export function AdminHomeFeedbackMount() {

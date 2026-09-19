@@ -7,6 +7,7 @@ import {
   AUDIO_MIME_TYPES,
   GENERAL_FILE_MIME_TYPES,
   MAX_AUDIO_BYTES,
+  MAX_ATTACHMENT_REQUEST_BYTES,
   MAX_GENERAL_FILE_BYTES,
   MAX_GENERAL_FILES,
   MAX_SCREENSHOT_BYTES,
@@ -27,6 +28,11 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
   if (!actor) return NextResponse.json({ error: '未獲授權' }, { status: 403 })
   const { id } = await context.params
   if (!(await canReadFeedbackReport(id, actor))) return NextResponse.json({ error: '找不到回報' }, { status: 404 })
+
+  const contentLength = Number(request.headers.get('content-length') ?? 0)
+  if (contentLength > MAX_ATTACHMENT_REQUEST_BYTES) {
+    return NextResponse.json({ error: '請求總大小超出 4MB 限制' }, { status: 413 })
+  }
 
   const multipart = request.headers.get('content-type')?.includes('multipart/form-data')
   const form = multipart ? await request.formData() : null

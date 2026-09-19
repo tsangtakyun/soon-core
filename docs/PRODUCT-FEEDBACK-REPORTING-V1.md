@@ -1,108 +1,91 @@
-# SOON 問題與建議 v1 — 實作及驗證狀態
+# SOON 共同問題與建議板 — 實作及驗證狀態
 
 更新：2026-09-19（Europe/London）
 
-Implementation commits：`07a7d4a`、`909ae57`、`e4654a2`（如本文件其後更新，最新 commit 以 `git log` 為準）
+## 目的與入口
 
-## 目的
+SOON Core 首頁在問候語下方提供 Tommy × Renee 共同問題與建議板。文字會先保存並取得參考編號，附件再以獨立請求上載；附件、列表刷新或 AI 失敗均不會刪除原文。
 
-SOON Core 提供統一、邀請制的產品回報入口，支援 SOON Creator、SOON EGG 及 EGG App。回報先保存並立即取得參考編號，AI 整理及語音轉錄在回應後執行，失敗不會令原始回報遺失。
+- 主要入口：`https://soon-core.vercel.app/`
+- 相容及管理入口：`https://soon-core.vercel.app/feedback`
+- 浮動入口已移除；首頁原有 Master Chief 輸入區在共同回報板掛載後隱藏，避免重複。
+- 產品 machine values／顯示名稱：
+  - `soon_creator` → `Sooncreator.network`
+  - `soon_egg` → `egg.sooncreator.network`
+  - `egg_app` → `EGG App`
+  - `soon_core` → `SOON-Core`
 
-## 使用入口
+## 權限與資料分隔
 
-- Core／管理員：`https://soon-core.vercel.app/feedback`
-- Core 全站入口：`components/FeedbackEntry.tsx` 由 `app/layout.tsx` 掛載；除登入、註冊、auth callback 及回報頁本身外，右下角固定顯示「◇ 問題與建議」，連到 `/feedback`。
-- 外部產品預填：`/feedback?product=soon_creator&problem_url=<encoded-url>&app_version=<encoded-version>`
-- `product` 可用值：`soon_creator`、`soon_egg`、`egg_app`
+- Tommy Core admin：可使用完整 Core 首頁、查看共同回報、管理狀態及 access。
+- `feedback_shared`：只可開 `/`、`/feedback`、`/api/feedback/*` 及 auth routes；首頁只顯示問候語、登出及共同回報板，不會輸出公司營運、客戶、財務或其他敏感 Core 資料。
+- `feedback_only` 保留作向後相容，權限同樣受限；系統不會自動把所有 reporter 提升為共享角色。
+- 只有已存在且 active 的 access row 才可登入共享板；截至本次驗證，production access 清單沒有 Renee 記錄，因此未建立或猜測她的身份。
+- 資料表只授權 `service_role`；附件 bucket `product-feedback-private` 為 private，下載前再驗證角色及 report access，signed URL 有效 60 秒。
 
-外部產品只應傳入實際問題頁及自身版本。Core 只記錄 intake host 及 browser user-agent，不會把 Core 當成問題產品版本或問題頁。
+## 保存與附件流程
 
-## 權限
+1. 首頁先以 JSON `POST /api/feedback/reports` 保存文字及 metadata。
+2. 如有附件，再以 `POST /api/feedback/reports/:id/attachments` 上載並關聯至 report／message。
+3. 附件失敗時，瀏覽器保留原本的 `File`，顯示「重試附件上載」；文字及參考編號不受影響。
+4. 列表或詳情刷新失敗時，介面明確顯示「內容已保存」，不會誤報提交失敗。
+5. 補充對話先以 JSON 保存 message，附件再獨立上載，並保留相同重試行為。
 
-- Tommy Core admin：可以看全部回報、狀態、附件、跟進、負責人及受邀回報者。
-- `feedback_only`：只可開 `/feedback` 及 `/api/feedback/*`；middleware 會封鎖其他 Core 頁面及 API。
-- Reporter API 只回傳本人 `reporter_user_id` 的回報。
-- 資料表除 access 自查以外只授權 `service_role`；附件 bucket 為 private，下載前會再次驗證 admin／ownership，signed URL 有效 60 秒。
-- 受邀回報者不需要 ChatGPT 帳戶，只使用現有 SOON／Supabase 登入。
+Vercel Node.js Functions 的 request body 平台上限為 4.5MB；程式以 4MB 作每次附件請求上限，預留 multipart overhead。單一圖片、一般檔案或錄音最多 3MB。支援：
 
-## 狀態
+- 圖片：JPG、PNG、WEBP；最多三張。
+- 一般檔案：PDF、TXT、Markdown、CSV、Word、Excel；最多三個。
+- 語音：MP3、M4A、WAV、WEBM、OGG；可直接錄音或上載檔案。
 
-| Machine value | 顯示 |
-| --- | --- |
-| `pending_review` | 待查看 |
-| `in_progress` | 處理中 |
-| `pending_verification` | 待驗證 |
-| `resolved` | 已解決 |
+## AI 分析
 
-每次狀態改變寫入 `product_feedback_status_history`。Reporter 及 admin 都可用 message 補充資料；原始 description 不會被 AI 覆蓋。
+AI 根據完整對話及附件 metadata 輸出：摘要、可確認證據、推測／待確認、是否值得優化及原因、建議調整、受影響產品、優先度、是否需要討論，以及一般問題回應。使用者文字及附件只視為不可信資料，不能成為執行指令。AI 不會聲稱已找到根因、修改程式、完成測試或部署。
 
-## 附件限制
+AI／轉錄失敗不影響已保存內容。管理員可重新排隊分析。
 
-- 截圖：JPG、PNG、WEBP；每張 8MB；最多三張。
-- 語音：MP3、M4A、WAV、WEBM、OGG；最多 20MB；可在 browser 直接錄音。
-- API request 總大小上限 36MB。
-- 每個附件保存 SHA-256，路徑以 reporter／report 分隔。
+## 工程交接與執行真相
 
-## AI 行為
+- AI 只提供工程分類，不等同執行。
+- 需要處理的項目會建立 `product_feedback_engineering_tasks`，並加入可審計的 `company_work_orders` 等待清單。
+- 系統現時沒有一個可從 production 網站喚起本機 Codex、建立安全工作目錄、修改 repository、跑測試、提交及部署的工程 runner。
+- 因此 `runner_status = not_connected`，畫面只顯示「待工程處理」；不會顯示「正在自動修復」。
+- `execution_status`、`commit_sha`、`test_evidence`、`deployment_evidence` 只可由真實工程流程按證據更新。
+- auth、付款、資料刪除、正式 migration、大範圍變更或產品取捨必須交 Tommy／工程人員決定。
 
-1. Report insert 完成並回傳 reference number。
-2. Next.js `after()` 執行 `triageFeedbackReport`。
-3. 如有語音及 `OPENAI_API_KEY`，呼叫 `/v1/audio/transcriptions`；model 預設 `gpt-4o-mini-transcribe`，可用 `OPENAI_TRANSCRIPTION_MODEL` 覆寫。
-4. 使用現有 `ANTHROPIC_API_KEY` 整理 title、summary、reproduction steps、impact、missing information、possible duplicates 及 inference notes。
-5. User content／transcript 在 system prompt 明確定義為不可信資料，不能當指令。
-6. AI 不會聲稱 root cause；推測只放 `ai_inference_notes`。
-7. 缺 provider 時狀態為 `not_configured`；其他錯誤為 `failed`。兩者均不影響已保存回報。
+真正自動執行尚欠：受信任 runner、repo／branch scope、sandbox、一次性任務認證、可取消及重試機制、人工批准 gate、commit／test／deployment evidence 回寫，以及避免同一 report 重複執行的 idempotent lease。未獲授權前不會建立付費服務或持續排程。
 
-## Database
+## Database／API
 
-Migration：`supabase/migrations/20260919140000_product_feedback_reporting_v1.sql`
+Migrations：
 
-- `product_feedback_reporter_access`
-- `product_feedback_reports`
-- `product_feedback_attachments`
-- `product_feedback_messages`
-- `product_feedback_status_history`
-- private storage bucket：`product-feedback-private`
+- `20260919140000_product_feedback_reporting_v1.sql`
+- `20260919170000_feedback_home_shared_board_v2.sql`
+- `20260919193000_feedback_engineering_handoff_v3.sql`
 
-## API contract
+主要 tables：`product_feedback_reporter_access`、`product_feedback_reports`、`product_feedback_attachments`、`product_feedback_messages`、`product_feedback_status_history`、`product_feedback_engineering_tasks`。
 
-- `GET /api/feedback/reports`：admin 全部；reporter 本人。
-- `POST /api/feedback/reports`：multipart form；先保存，201 回 reference。
-- `GET /api/feedback/reports/:id`：詳情、附件 metadata、messages、history。
-- `PATCH /api/feedback/reports/:id`：admin 更新 status／assignee。
-- `POST /api/feedback/reports/:id/messages`：本人或 admin 補充。
-- `GET /api/feedback/attachments/:id`：授權後 302 到 60 秒 private signed URL。
-- `GET|POST|PATCH /api/feedback/access`：admin 管理邀請制 access。
+主要 API：
 
-成功提交範例：
+- `GET|POST /api/feedback/reports`
+- `GET|PATCH /api/feedback/reports/:id`
+- `POST /api/feedback/reports/:id/messages`
+- `POST /api/feedback/reports/:id/attachments`
+- `POST /api/feedback/reports/:id/retry`
+- `GET /api/feedback/attachments/:id`
+- `GET|POST|PATCH /api/feedback/access`
 
-```json
-{
-  "ok": true,
-  "reportId": "uuid",
-  "referenceNumber": "SOON-20260919-A1B2C3",
-  "aiStatus": "queued",
-  "uploadWarnings": []
-}
-```
-
-## 驗證證據
+## 驗證狀態
 
 | Area | Status | Evidence / remaining |
 | --- | --- | --- |
-| CODE | PASS | `npx tsc --noEmit`; scoped ESLint；contract regression；完整 Next production build（以 non-secret placeholder Supabase env 驗證 build-time contract） |
-| DATABASE | PASS | `20260919140000_product_feedback_reporting_v1.sql` 已於 2026-09-19 套用到 `SOON - core` production，remote migration list 已核對一致 |
-| DEPLOYMENT | PASS | Production deployment `dpl_FgPEsSiPYBdkPnPNKeyYitTwEC4Q` Ready；alias `https://soon-core.vercel.app` 已指向由 Vercel remote build 產生、包含正確 production environment 的 artifact |
-| PRODUCTION ADMIN | PASS | Tommy 已完成 Google OAuth；`/login` 會自動導向 dashboard；production 首頁右下角已顯示「問題與建議」入口；`/feedback` 顯示管理員模式、queue 及 access 管理 |
-| PRODUCTION REPORTER | NOT TESTED | 等 migration + deploy，並需 admin 加入一個 reporter email |
-| AUDIO / SCREENSHOT | CODE PASS / PROD NOT TESTED | MIME、size、count、private storage、signed URL 已實作；待 production upload |
-| AI TRIAGE | PASS | Production TEST report `SOON-20260919-C9A0B4` 已保存及顯示 TEST 標記；AI 已完成 title、summary、reproduction steps、impact、missing information 及 inference notes |
-
-本機最初因只有 `.env.local.example`，在 `/ig/idea` prerender 報缺 Supabase env。以 `vercel pull` 取得的本機 production env 對 secret 只提供 `[SENSITIVE]` placeholder，因此 prebuilt artifact 曾令 OAuth callback 出現 `Invalid API key`。其後改用 Vercel remote production build，92 個 static pages、全部 feedback routes、TypeScript 及 production build 已完整通過；Google OAuth、dashboard redirect 及 feedback 管理員介面亦已在 production 驗證。首次 smoke test 另發現既有 auth-helper session 無法通過 `getUser()`；`e4654a2` 加入以 access token 向 Supabase Auth 再驗證的安全 fallback。
-
-## 安全及操作注意
-
-- 回報只係問題資料，永遠不會自動執行附件／文字指令，亦不會自動授權 code change 或 deploy。
-- 不應將 `product-feedback-private` 改成 public。
-- 不應將 feedback-only 使用者加入一般 workspace member，除非確實需要 Core 權限。
-- 測試回報由 admin 用 `isTest=true` 標記；production 驗證後應保留作 audit 或由 Tommy 明確批准清理。
+| CODE / CONTRACT | PASS | `node scripts/verify-feedback-contract.mjs`、scoped ESLint、`npx tsc --noEmit` |
+| DATABASE v1/v2 | PASS | 已套用 production，並完成第一筆 TEST report AI 閉環 |
+| DATABASE v3 | PASS | `20260919193000_feedback_engineering_handoff_v3.sql` 已套用到 production |
+| PRODUCTION DEPLOYMENT | PENDING | 待本次變更 remote build 及 production alias 更新 |
+| PRODUCTION TOMMY UI | PARTIAL PASS | 上一版已驗證 `/login` → `/`、首頁共同回報板、四產品及既有 TEST report；待本次附件兩步保存版本重新驗證 |
+| PRODUCTION RENEE ROLE | NOT TESTED / BLOCKED | 未有 Renee access row／已確認登入 email；不可猜測身份 |
+| TEXT SUBMIT + AI | PREVIOUS VERSION PASS / CURRENT PENDING | TEST report `SOON-20260919-C9A0B4` 已完成 AI；待本次版本重新驗證 |
+| IMAGE / FILE / AUDIO | CODE PASS / PROD NOT TESTED | 私密 storage、兩步保存、格式／大小及重試已實作；需要實機檔案及麥克風權限驗證 |
+| FOLLOW-UP | CODE PASS / PROD NOT TESTED | message 先保存、附件後上載、完整對話重新分析 |
+| MOBILE | CODE PASS / PROD PENDING | 760px breakpoint 單欄及操作列換行；待 production viewport 驗證 |
+| AUTO ENGINEERING RUNNER | NOT CONNECTED | 可審計 engineering task／work order 已建立；沒有真實 code execution runner |

@@ -17,9 +17,13 @@ export const GENERAL_FILE_MIME_TYPES = new Set([
   'application/vnd.ms-excel',
   'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
 ])
-export const MAX_SCREENSHOT_BYTES = 8 * 1024 * 1024
-export const MAX_AUDIO_BYTES = 20 * 1024 * 1024
-export const MAX_GENERAL_FILE_BYTES = 20 * 1024 * 1024
+// Vercel Functions reject request bodies above 4.5 MB before the route runs.
+// Keep every attachment request below that platform ceiling, including
+// multipart overhead. Text is saved in a separate JSON request first.
+export const MAX_ATTACHMENT_REQUEST_BYTES = 4 * 1024 * 1024
+export const MAX_SCREENSHOT_BYTES = 3 * 1024 * 1024
+export const MAX_AUDIO_BYTES = 3 * 1024 * 1024
+export const MAX_GENERAL_FILE_BYTES = 3 * 1024 * 1024
 export const MAX_SCREENSHOTS = 3
 export const MAX_GENERAL_FILES = 3
 

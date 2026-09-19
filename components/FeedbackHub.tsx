@@ -131,7 +131,7 @@ export function FeedbackHub({ styles: s }: { styles: Styles }) {
         stream.getTracks().forEach((track) => track.stop())
       }
       recorder.start(); recorderRef.current = recorder; setRecording(true)
-    } catch { setError('未能使用咪高峰，請改為上載語音檔。') }
+    } catch { setError('未能使用麥克風，請改為上載語音檔。') }
   }
 
   function stopRecording() {
@@ -181,7 +181,7 @@ export function FeedbackHub({ styles: s }: { styles: Styles }) {
         <div>
           <div className={s.eyebrow}>SOON PRODUCT SUPPORT</div>
           <h1>問題與建議</h1>
-          <p>請描述遇到嘅情況。系統會先保存回報，再交由 AI 協助整理；AI 狀態唔會影響提交。</p>
+          <p>請描述遇到的情況。系統會先保存回報，再交由 AI 協助整理；AI 狀態不會影響提交。</p>
         </div>
         <div className={s.headerActions}>
           {actor?.isAdmin && <span className={s.adminBadge}>管理員模式</span>}
@@ -202,28 +202,28 @@ export function FeedbackHub({ styles: s }: { styles: Styles }) {
           <div className={s.panelHeading}><div><span>NEW REPORT</span><h2>提交新回報</h2></div></div>
           <form className={s.form} onSubmit={submitReport}>
             <label>產品<select name="product" required defaultValue={prefillProduct}><option value="" disabled>請選擇</option>{Object.entries(FEEDBACK_PRODUCT_LABELS).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
-            <label>問題／建議描述<textarea name="description" required minLength={10} maxLength={8000} rows={6} placeholder="發生咗乜、你做過咩步驟、畫面有咩反應？" /></label>
-            <label>預期應該點樣（選填）<textarea name="expectedBehavior" maxLength={4000} rows={3} placeholder="例如：按儲存後應該返回內容列表。" /></label>
+            <label>問題／建議描述<textarea name="description" required minLength={10} maxLength={8000} rows={6} placeholder="發生了甚麼情況、你曾進行哪些步驟、畫面有甚麼反應？" /></label>
+            <label>預期系統應如何運作（選填）<textarea name="expectedBehavior" maxLength={4000} rows={3} placeholder="例如：按儲存後應該返回內容列表。" /></label>
             <div className={s.formGrid}>
               <label>問題頁面（選填）<input name="problemUrl" type="url" maxLength={2048} placeholder="https://…" defaultValue={prefillProblemUrl} /></label>
               <label>App／版本（選填）<input name="appVersion" maxLength={120} placeholder="例如 iOS 2.4.1" defaultValue={prefillAppVersion} /></label>
             </div>
             <div className={s.formGrid}>
               <label>截圖（最多 3 張）<input name="screenshots" type="file" accept="image/png,image/jpeg,image/webp" multiple /></label>
-              <label>語音檔（最多 20MB）<input name="audio" type="file" accept="audio/mpeg,audio/mp4,audio/x-m4a,audio/wav,audio/webm,audio/ogg" disabled={Boolean(recordedAudio)} /></label>
+              <label>語音檔（最多 3MB）<input name="audio" type="file" accept="audio/mpeg,audio/mp4,audio/x-m4a,audio/wav,audio/webm,audio/ogg" disabled={Boolean(recordedAudio)} /></label>
             </div>
             <div className={s.recorder}>
               <button type="button" onClick={recording ? stopRecording : startRecording}>{recording ? '停止錄音' : '錄低語音'}</button>
               <span>{recording ? '錄音中…' : recordedAudio ? `已錄製：${recordedAudio.name}` : '語音只用作呢次回報。'}</span>
               {recordedAudio && <button type="button" className={s.textButton} onClick={() => setRecordedAudio(null)}>移除</button>}
             </div>
-            <p className={s.privacy}>截圖同語音會私密保存，只供獲授權嘅回報者及 SOON 管理員查看。回報不會自動授權系統改程式或部署。</p>
+            <p className={s.privacy}>截圖及語音會私密保存，只供獲授權的回報者及 SOON 管理員查看。回報不會自動授權系統修改程式或部署。</p>
             <button className={s.primaryButton} disabled={submitting}>{submitting ? '正在保存…' : '提交並取得參考編號'}</button>
           </form>
         </section>
 
         <section className={s.panel}>
-          <div className={s.panelHeading}><div><span>{actor.isAdmin ? 'ADMIN QUEUE' : 'MY REPORTS'}</span><h2>{actor.isAdmin ? '全部回報' : '我嘅回報'}</h2></div><b>{reports.length}</b></div>
+          <div className={s.panelHeading}><div><span>{actor.isAdmin ? 'ADMIN QUEUE' : 'MY REPORTS'}</span><h2>{actor.isAdmin ? '全部回報' : '我的回報'}</h2></div><b>{reports.length}</b></div>
           <div className={s.reportList}>
             {!reports.length && <div className={s.empty}>目前未有回報。</div>}
             {reports.map((report) => <button key={report.id} className={`${s.reportCard} ${detail?.report.id === report.id ? s.selected : ''}`} onClick={() => void loadDetail(report.id)}>
