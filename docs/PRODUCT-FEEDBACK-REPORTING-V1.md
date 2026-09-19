@@ -11,6 +11,7 @@ SOON Core 提供統一、邀請制的產品回報入口，支援 SOON Creator、
 ## 使用入口
 
 - Core／管理員：`https://soon-core.vercel.app/feedback`
+- Core 全站入口：`components/FeedbackEntry.tsx` 由 `app/layout.tsx` 掛載；除登入、註冊、auth callback 及回報頁本身外，右下角固定顯示「◇ 問題與建議」，連到 `/feedback`。
 - 外部產品預填：`/feedback?product=soon_creator&problem_url=<encoded-url>&app_version=<encoded-version>`
 - `product` 可用值：`soon_creator`、`soon_egg`、`egg_app`
 
@@ -92,7 +93,7 @@ Migration：`supabase/migrations/20260919140000_product_feedback_reporting_v1.sq
 | CODE | PASS | `npx tsc --noEmit`; scoped ESLint；contract regression；完整 Next production build（以 non-secret placeholder Supabase env 驗證 build-time contract） |
 | DATABASE | PASS | `20260919140000_product_feedback_reporting_v1.sql` 已於 2026-09-19 套用到 `SOON - core` production，remote migration list 已核對一致 |
 | DEPLOYMENT | PASS | Production deployment `dpl_FgPEsSiPYBdkPnPNKeyYitTwEC4Q` Ready；alias `https://soon-core.vercel.app` 已指向由 Vercel remote build 產生、包含正確 production environment 的 artifact |
-| PRODUCTION ADMIN | PASS | Tommy 已完成 Google OAuth；`/login` 會自動導向 dashboard，`/feedback` 顯示管理員模式、queue 及 access 管理 |
+| PRODUCTION ADMIN | PASS | Tommy 已完成 Google OAuth；`/login` 會自動導向 dashboard；production 首頁右下角已顯示「問題與建議」入口；`/feedback` 顯示管理員模式、queue 及 access 管理 |
 | PRODUCTION REPORTER | NOT TESTED | 等 migration + deploy，並需 admin 加入一個 reporter email |
 | AUDIO / SCREENSHOT | CODE PASS / PROD NOT TESTED | MIME、size、count、private storage、signed URL 已實作；待 production upload |
 | AI TRIAGE | PASS | Production TEST report `SOON-20260919-C9A0B4` 已保存及顯示 TEST 標記；AI 已完成 title、summary、reproduction steps、impact、missing information 及 inference notes |
