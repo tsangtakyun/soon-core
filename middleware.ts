@@ -28,9 +28,7 @@ export async function middleware(req: NextRequest) {
     pathname === '/api/topics' ||
     (Boolean(topicApiSegment) && !topicApiSegment.includes('/') && !['admin', 'assist', 'upload'].includes(topicApiSegment))
 
-  if (isPublicTopicRoute || publicApiRoutes.some((route) => pathname.startsWith(route))) {
-    return res
-  }
+  const isPublicMachineRoute = isPublicTopicRoute || publicApiRoutes.some((route) => pathname.startsWith(route))
 
   if (!supabaseUrl || !supabaseAnonKey) {
     return res
@@ -63,12 +61,43 @@ export async function middleware(req: NextRequest) {
     pathname.startsWith('/auth') ||
     pathname.startsWith('/invite')
 
+  if (!session && isPublicMachineRoute) return res
+
   if (!session && !isAuthPage) {
     return NextResponse.redirect(new URL('/login', req.url))
   }
 
+  let feedbackOnly = false
+  if (session?.user) {
+    const email = session.user.email?.trim().toLowerCase() ?? ''
+    const { data: userFeedbackAccess } = await supabase
+      .from('product_feedback_reporter_access')
+      .select('access_scope,status')
+      .eq('status', 'active')
+      .eq('user_id', session.user.id)
+      .limit(1)
+      .maybeSingle()
+    const { data: emailFeedbackAccess } = userFeedbackAccess ? { data: null } : await supabase
+      .from('product_feedback_reporter_access')
+      .select('access_scope,status')
+      .eq('status', 'active')
+      .eq('email', email)
+      .limit(1)
+      .maybeSingle()
+    const feedbackAccess = userFeedbackAccess ?? emailFeedbackAccess
+    feedbackOnly = feedbackAccess?.access_scope === 'feedback_only'
+  }
+
+  if (session && feedbackOnly) {
+    const allowed = pathname === '/feedback' || pathname.startsWith('/api/feedback') || pathname.startsWith('/auth')
+    if (!allowed) {
+      if (pathname.startsWith('/api/')) return NextResponse.json({ error: 'Feedback-only account' }, { status: 403 })
+      return NextResponse.redirect(new URL('/feedback', req.url))
+    }
+  }
+
   if (session && pathname === '/login') {
-    return NextResponse.redirect(new URL('/', req.url))
+    return NextResponse.redirect(new URL(feedbackOnly ? '/feedback' : '/', req.url))
   }
 
   return res

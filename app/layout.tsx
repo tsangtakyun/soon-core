@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next'
 import { WorkspaceProvider } from '@/app/context/workspace-context'
+import { FeedbackEntry } from '@/components/FeedbackEntry'
 import './globals.css'
 
 export const metadata: Metadata = {
@@ -25,7 +26,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="zh-HK">
       <body>
-        <WorkspaceProvider>{children}</WorkspaceProvider>
+        <WorkspaceProvider>{children}<FeedbackEntry /></WorkspaceProvider>
       </body>
     </html>
   )
