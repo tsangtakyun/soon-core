@@ -2,6 +2,8 @@
 
 更新：2026-09-19（Europe/London）
 
+Implementation commit：`07a7d4a`（如本文件其後更新，最新 commit 以 `git log` 為準）
+
 ## 目的
 
 SOON Core 提供統一、邀請制的產品回報入口，支援 SOON Creator、SOON EGG 及 EGG App。回報先保存並立即取得參考編號，AI 整理及語音轉錄在回應後執行，失敗不會令原始回報遺失。
