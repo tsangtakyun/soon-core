@@ -200,6 +200,7 @@ export function FeedbackHub({ styles: s }: { styles: Styles }) {
         <section className={s.panel}>
           <div className={s.panelHeading}><div><span>NEW REPORT</span><h2>提交新回報</h2></div></div>
           <form className={s.form} onSubmit={submitReport}>
+            {actor.isAdmin && <input type="hidden" name="isTest" value="true" />}
             <label>產品<select name="product" required defaultValue={prefillProduct}><option value="" disabled>請選擇</option>{Object.entries(FEEDBACK_PRODUCT_LABELS).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
             <label>問題／建議描述<textarea name="description" required minLength={10} maxLength={8000} rows={6} placeholder="發生咗乜、你做過咩步驟、畫面有咩反應？" /></label>
             <label>預期應該點樣（選填）<textarea name="expectedBehavior" maxLength={4000} rows={3} placeholder="例如：按儲存後應該返回內容列表。" /></label>
