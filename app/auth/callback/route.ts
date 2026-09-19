@@ -26,7 +26,13 @@ export async function GET(request: Request) {
       await bootstrapUserWorkspace(data.user)
     } catch (bootstrapError) {
       console.error('[auth/callback] workspace bootstrap failed', bootstrapError)
-      return NextResponse.redirect(new URL('/login?error=workspace_bootstrap_failed', requestUrl.origin))
+      // Authentication has already succeeded at this point. A transient
+      // workspace bootstrap failure must not send the user back to /login and
+      // create an OAuth loop. The signed-in app can retry/bootstrap its data
+      // independently after the session cookie has been established.
+      const destination = new URL(next, requestUrl.origin)
+      destination.searchParams.set('auth_warning', 'workspace_bootstrap_failed')
+      return NextResponse.redirect(destination)
     }
   }
 
