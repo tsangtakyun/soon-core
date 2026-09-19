@@ -13,11 +13,12 @@ export async function GET(_request: Request, context: { params: Promise<{ id: st
   if (!(await canReadFeedbackReport(id, actor))) return NextResponse.json({ error: '找不到回報' }, { status: 404 })
 
   const admin = createSupabaseAdmin()
-  const [{ data: report, error }, { data: attachments }, { data: messages }, { data: history }] = await Promise.all([
+  const [{ data: report, error }, { data: attachments }, { data: messages }, { data: history }, { data: engineeringTask }] = await Promise.all([
     admin.from('product_feedback_reports').select('*').eq('id', id).single(),
-    admin.from('product_feedback_attachments').select('id,kind,original_filename,mime_type,size_bytes,created_at').eq('report_id', id).order('created_at'),
-    admin.from('product_feedback_messages').select('id,author_email,author_role,body,created_at').eq('report_id', id).order('created_at'),
+    admin.from('product_feedback_attachments').select('id,message_id,kind,original_filename,mime_type,size_bytes,created_at').eq('report_id', id).order('created_at'),
+    admin.from('product_feedback_messages').select('id,author_email,author_role,body,ai_analysis_status,created_at').eq('report_id', id).order('created_at'),
     admin.from('product_feedback_status_history').select('id,from_status,to_status,changed_by_email,note,created_at').eq('report_id', id).order('created_at'),
+    admin.from('product_feedback_engineering_tasks').select('*').eq('report_id', id).maybeSingle(),
   ])
   if (error || !report) return NextResponse.json({ error: error?.message ?? '找不到回報' }, { status: 404 })
   return NextResponse.json({
@@ -26,6 +27,7 @@ export async function GET(_request: Request, context: { params: Promise<{ id: st
     attachments: (attachments ?? []).map((item) => ({ ...item, downloadUrl: `/api/feedback/attachments/${item.id}` })),
     messages: messages ?? [],
     history: history ?? [],
+    engineeringTask: engineeringTask ?? null,
   })
 }
 

@@ -8,8 +8,11 @@ import {
   buildFeedbackDedupeHash,
   buildFeedbackReference,
   cleanOptionalText,
+  GENERAL_FILE_MIME_TYPES,
   isFeedbackProduct,
   MAX_AUDIO_BYTES,
+  MAX_GENERAL_FILE_BYTES,
+  MAX_GENERAL_FILES,
   MAX_SCREENSHOT_BYTES,
   MAX_SCREENSHOTS,
   safeFeedbackFilename,
@@ -45,11 +48,11 @@ export async function GET(request: Request) {
   const product = url.searchParams.get('product')
   let query = admin
     .from('product_feedback_reports')
-    .select('id,reference_number,reporter_email,product,description,status,assigned_to_email,ai_status,ai_title,ai_summary,is_test,created_at,updated_at')
+    .select('id,reference_number,reporter_email,reporter_name,product,description,status,assigned_to_email,ai_status,ai_title,ai_summary,ai_priority,ai_needs_discussion,is_test,created_at,updated_at')
     .order('created_at', { ascending: false })
     .limit(100)
 
-  if (!actor.isAdmin) query = query.eq('reporter_user_id', actor.userId)
+  if (!actor.isAdmin && !actor.sharedBoard) query = query.eq('reporter_user_id', actor.userId)
   if (status) query = query.eq('status', status)
   if (product) query = query.eq('product', product)
   const { data, error } = await query
@@ -68,19 +71,26 @@ export async function POST(request: Request) {
   const product = form.get('product')
   const description = String(form.get('description') ?? '').trim()
   if (!isFeedbackProduct(product)) return NextResponse.json({ error: '請選擇產品' }, { status: 400 })
-  if (description.length < 10 || description.length > 8000) return NextResponse.json({ error: '問題描述需要 10 至 8000 字' }, { status: 400 })
+  if (description.length < 3 || description.length > 8000) return NextResponse.json({ error: '內容需要 3 至 8000 字' }, { status: 400 })
 
   const expectedBehavior = cleanOptionalText(form.get('expectedBehavior'), 4000)
   const problemUrl = cleanOptionalText(form.get('problemUrl'), 2048)
   const appVersion = cleanOptionalText(form.get('appVersion'), 120)
   const screenshots = form.getAll('screenshots').filter((item): item is File => item instanceof File && item.size > 0)
+  const generalFiles = form.getAll('files').filter((item): item is File => item instanceof File && item.size > 0)
   const audio = form.get('audio')
   const audioFile = audio instanceof File && audio.size > 0 ? audio : null
 
   if (screenshots.length > MAX_SCREENSHOTS) return NextResponse.json({ error: `最多上載 ${MAX_SCREENSHOTS} 張截圖` }, { status: 400 })
+  if (generalFiles.length > MAX_GENERAL_FILES) return NextResponse.json({ error: `最多上載 ${MAX_GENERAL_FILES} 個檔案` }, { status: 400 })
   for (const file of screenshots) {
     if (!SCREENSHOT_MIME_TYPES.has(file.type) || file.size > MAX_SCREENSHOT_BYTES) {
       return NextResponse.json({ error: '截圖只接受 JPG、PNG、WEBP，每張最多 8MB' }, { status: 400 })
+    }
+  }
+  for (const file of generalFiles) {
+    if (!GENERAL_FILE_MIME_TYPES.has(file.type) || file.size > MAX_GENERAL_FILE_BYTES) {
+      return NextResponse.json({ error: '檔案只接受 PDF、文字、Word、Excel，每個最多 20MB' }, { status: 400 })
     }
   }
   if (audioFile && (!AUDIO_MIME_TYPES.has(audioFile.type) || audioFile.size > MAX_AUDIO_BYTES)) {
@@ -106,6 +116,7 @@ export async function POST(request: Request) {
     reference_number: referenceNumber,
     reporter_user_id: actor.userId,
     reporter_email: actor.email,
+    reporter_name: actor.displayName,
     product,
     description,
     expected_behavior: expectedBehavior,
@@ -130,6 +141,7 @@ export async function POST(request: Request) {
   const files = [
     ...screenshots.map((file) => ({ file, kind: 'screenshot' as const })),
     ...(audioFile ? [{ file: audioFile, kind: 'audio' as const }] : []),
+    ...generalFiles.map((file) => ({ file, kind: 'file' as const })),
   ]
   for (const { file, kind } of files) {
     const buffer = Buffer.from(await file.arrayBuffer())

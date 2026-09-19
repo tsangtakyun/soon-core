@@ -85,19 +85,19 @@ export async function middleware(req: NextRequest) {
       .limit(1)
       .maybeSingle()
     const feedbackAccess = userFeedbackAccess ?? emailFeedbackAccess
-    feedbackOnly = feedbackAccess?.access_scope === 'feedback_only'
+    feedbackOnly = feedbackAccess?.access_scope === 'feedback_only' || feedbackAccess?.access_scope === 'feedback_shared'
   }
 
   if (session && feedbackOnly) {
-    const allowed = pathname === '/feedback' || pathname.startsWith('/api/feedback') || pathname.startsWith('/auth')
+    const allowed = pathname === '/' || pathname === '/feedback' || pathname.startsWith('/api/feedback') || pathname.startsWith('/auth')
     if (!allowed) {
       if (pathname.startsWith('/api/')) return NextResponse.json({ error: 'Feedback-only account' }, { status: 403 })
-      return NextResponse.redirect(new URL('/feedback', req.url))
+      return NextResponse.redirect(new URL('/', req.url))
     }
   }
 
   if (session && pathname === '/login') {
-    return NextResponse.redirect(new URL(feedbackOnly ? '/feedback' : '/', req.url))
+    return NextResponse.redirect(new URL('/', req.url))
   }
 
   return res

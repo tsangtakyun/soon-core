@@ -7,19 +7,20 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { FEEDBACK_PRODUCT_LABELS, FEEDBACK_STATUS_LABELS, type FeedbackProduct, type FeedbackStatus } from '@/lib/feedback-shared'
 
 type Styles = Record<string, string>
-type Actor = { userId: string; email: string; isAdmin: boolean; feedbackOnly: boolean }
+type Actor = { userId: string; email: string; displayName: string; isAdmin: boolean; feedbackOnly: boolean; sharedBoard: boolean }
 type ReportSummary = {
   id: string; reference_number: string; reporter_email: string; product: FeedbackProduct; description: string
   status: FeedbackStatus; assigned_to_email: string | null; ai_status: string; ai_title: string | null
   ai_summary: string | null; is_test: boolean; created_at: string; updated_at: string
 }
-type Attachment = { id: string; kind: 'screenshot' | 'audio'; original_filename: string; mime_type: string; size_bytes: number; downloadUrl: string }
+type Attachment = { id: string; message_id: string | null; kind: 'screenshot' | 'audio' | 'file'; original_filename: string; mime_type: string; size_bytes: number; downloadUrl: string }
 type ReportDetail = {
   actor: Actor
   report: ReportSummary & {
     expected_behavior: string | null; problem_url: string | null; app_version: string | null; source_context: Record<string, unknown>
-    ai_reproduction_steps: string[]; ai_impact: string | null; ai_missing_information: string[]
+    ai_response: string | null; ai_reproduction_steps: string[]; ai_impact: string | null; ai_confirmed_evidence: string[]; ai_missing_information: string[]
     ai_possible_duplicates: string[]; ai_inference_notes: string[]; ai_error: string | null; audio_transcript: string | null
+    ai_worth_optimizing: boolean | null; ai_optimization_reason: string | null; ai_suggested_adjustment: string | null; ai_priority: string | null; ai_needs_discussion: boolean | null
   }
   attachments: Attachment[]
   messages: Array<{ id: string; author_email: string; author_role: 'reporter' | 'admin'; body: string; created_at: string }>
@@ -160,7 +161,7 @@ export function FeedbackHub({ styles: s }: { styles: Styles }) {
   async function inviteReporter(event: React.FormEvent) {
     event.preventDefault()
     const response = await fetch('/api/feedback/access', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: inviteEmail, accessScope: 'feedback_only' }),
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: inviteEmail, accessScope: 'feedback_shared' }),
     })
     const payload = await response.json().catch(() => ({}))
     if (!response.ok) return setError(payload.error || '未能加入使用者')
@@ -200,7 +201,6 @@ export function FeedbackHub({ styles: s }: { styles: Styles }) {
         <section className={s.panel}>
           <div className={s.panelHeading}><div><span>NEW REPORT</span><h2>提交新回報</h2></div></div>
           <form className={s.form} onSubmit={submitReport}>
-            {actor.isAdmin && <input type="hidden" name="isTest" value="true" />}
             <label>產品<select name="product" required defaultValue={prefillProduct}><option value="" disabled>請選擇</option>{Object.entries(FEEDBACK_PRODUCT_LABELS).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
             <label>問題／建議描述<textarea name="description" required minLength={10} maxLength={8000} rows={6} placeholder="發生咗乜、你做過咩步驟、畫面有咩反應？" /></label>
             <label>預期應該點樣（選填）<textarea name="expectedBehavior" maxLength={4000} rows={3} placeholder="例如：按儲存後應該返回內容列表。" /></label>
@@ -244,17 +244,21 @@ export function FeedbackHub({ styles: s }: { styles: Styles }) {
             <h3>原始回報</h3><p className={s.prewrap}>{detail.report.description}</p>
             {detail.report.expected_behavior && <><h3>預期行為</h3><p className={s.prewrap}>{detail.report.expected_behavior}</p></>}
             {(detail.report.problem_url || detail.report.app_version) && <div className={s.sourceBox}>{detail.report.problem_url && <a href={detail.report.problem_url} target="_blank" rel="noreferrer">開啟問題頁面</a>}{detail.report.app_version && <span>版本：{detail.report.app_version}</span>}</div>}
-            {!!detail.attachments.length && <><h3>附件</h3><div className={s.attachments}>{detail.attachments.map((file) => <a key={file.id} href={file.downloadUrl} target="_blank" rel="noreferrer">{file.kind === 'audio' ? '語音' : '截圖'} · {file.original_filename} <small>{Math.ceil(file.size_bytes / 1024)}KB</small></a>)}</div></>}
+            {!!detail.attachments.length && <><h3>附件</h3><div className={s.attachments}>{detail.attachments.map((file) => <a key={file.id} href={file.downloadUrl} target="_blank" rel="noreferrer">{file.kind === 'audio' ? '語音' : file.kind === 'file' ? '檔案' : '截圖'} · {file.original_filename} <small>{Math.ceil(file.size_bytes / 1024)}KB</small></a>)}</div></>}
             {detail.report.audio_transcript && <><h3>語音轉錄</h3><p className={s.prewrap}>{detail.report.audio_transcript}</p></>}
           </article>
           <aside className={s.aiPanel}>
             <div className={s.aiHeading}><h3>AI 整理</h3><span data-ai={detail.report.ai_status}>{aiLabel(detail.report.ai_status)}</span></div>
+            {detail.report.ai_response && <p>{detail.report.ai_response}</p>}
             {detail.report.ai_summary && <p>{detail.report.ai_summary}</p>}
+            {!!detail.report.ai_confirmed_evidence?.length && <><h4>輸入中可確認證據</h4><ul>{detail.report.ai_confirmed_evidence.map((item, index) => <li key={index}>{item}</li>)}</ul></>}
             {!!detail.report.ai_reproduction_steps?.length && <><h4>重現步驟</h4><ol>{detail.report.ai_reproduction_steps.map((step, index) => <li key={index}>{step}</li>)}</ol></>}
             {detail.report.ai_impact && <><h4>影響</h4><p>{detail.report.ai_impact}</p></>}
             {!!detail.report.ai_missing_information?.length && <><h4>尚欠資料</h4><ul>{detail.report.ai_missing_information.map((item, index) => <li key={index}>{item}</li>)}</ul></>}
             {!!detail.report.ai_inference_notes?.length && <><h4>推斷（未驗證）</h4><ul>{detail.report.ai_inference_notes.map((item, index) => <li key={index}>{item}</li>)}</ul></>}
             {!!detail.report.ai_possible_duplicates?.length && <><h4>可能重複（待人手確認）</h4><ul>{detail.report.ai_possible_duplicates.map((item) => <li key={item}>{item}</li>)}</ul></>}
+            {detail.report.ai_optimization_reason && <><h4>值得優化？</h4><p>{detail.report.ai_worth_optimizing ? '值得' : '暫未證明需要'} — {detail.report.ai_optimization_reason}</p></>}
+            {detail.report.ai_suggested_adjustment && <><h4>建議調整</h4><p>{detail.report.ai_suggested_adjustment}</p></>}
             {detail.report.ai_error && <p className={s.aiError}>{detail.report.ai_error}</p>}
             {!detail.report.ai_summary && !detail.report.ai_error && <p className={s.muted}>系統已保存原始回報，AI 整理稍後更新。</p>}
           </aside>

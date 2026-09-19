@@ -7,9 +7,21 @@ export type { FeedbackProduct, FeedbackStatus } from '@/lib/feedback-shared'
 
 export const SCREENSHOT_MIME_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp'])
 export const AUDIO_MIME_TYPES = new Set(['audio/mpeg', 'audio/mp4', 'audio/x-m4a', 'audio/wav', 'audio/webm', 'audio/ogg'])
+export const GENERAL_FILE_MIME_TYPES = new Set([
+  'application/pdf',
+  'text/plain',
+  'text/csv',
+  'text/markdown',
+  'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'application/vnd.ms-excel',
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+])
 export const MAX_SCREENSHOT_BYTES = 8 * 1024 * 1024
 export const MAX_AUDIO_BYTES = 20 * 1024 * 1024
+export const MAX_GENERAL_FILE_BYTES = 20 * 1024 * 1024
 export const MAX_SCREENSHOTS = 3
+export const MAX_GENERAL_FILES = 3
 
 export function isFeedbackProduct(value: unknown): value is FeedbackProduct {
   return typeof value === 'string' && FEEDBACK_PRODUCTS.includes(value as FeedbackProduct)

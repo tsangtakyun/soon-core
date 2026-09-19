@@ -19,7 +19,11 @@ export async function POST(request: Request) {
   const body = await request.json().catch(() => ({})) as Record<string, unknown>
   const email = cleanOptionalText(body.email, 320)?.toLowerCase()
   if (!email || !/^\S+@\S+\.\S+$/.test(email)) return NextResponse.json({ error: '請輸入有效電郵' }, { status: 400 })
-  const accessScope = body.accessScope === 'core_member' ? 'core_member' : 'feedback_only'
+  const accessScope = body.accessScope === 'core_member'
+    ? 'core_member'
+    : body.accessScope === 'feedback_only'
+      ? 'feedback_only'
+      : 'feedback_shared'
 
   const admin = createSupabaseAdmin()
   const { data, error } = await admin.from('product_feedback_reporter_access').upsert({

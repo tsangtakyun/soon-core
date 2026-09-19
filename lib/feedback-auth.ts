@@ -6,8 +6,10 @@ const CORE_ADMIN_EMAILS = new Set(['tsangtakyun@gmail.com'])
 export type FeedbackActor = {
   userId: string
   email: string
+  displayName: string
   isAdmin: boolean
   feedbackOnly: boolean
+  sharedBoard: boolean
 }
 
 export async function requireFeedbackActor(): Promise<FeedbackActor | null> {
@@ -28,9 +30,15 @@ export async function requireFeedbackActor(): Promise<FeedbackActor | null> {
   }
   const email = user?.email?.trim().toLowerCase() ?? ''
   if (!user || !email) return null
+  const metadataName = typeof user.user_metadata?.full_name === 'string'
+    ? user.user_metadata.full_name
+    : typeof user.user_metadata?.name === 'string'
+      ? user.user_metadata.name
+      : ''
+  const displayName = metadataName.trim() || email.split('@')[0] || 'SOON User'
 
   if (CORE_ADMIN_EMAILS.has(email)) {
-    return { userId: user.id, email, isAdmin: true, feedbackOnly: false }
+    return { userId: user.id, email, displayName, isAdmin: true, feedbackOnly: false, sharedBoard: true }
   }
 
   const admin = createSupabaseAdmin()
@@ -58,15 +66,17 @@ export async function requireFeedbackActor(): Promise<FeedbackActor | null> {
   return {
     userId: user.id,
     email,
+    displayName,
     isAdmin: access.role === 'triage_admin',
-    feedbackOnly: access.access_scope === 'feedback_only',
+    feedbackOnly: access.access_scope === 'feedback_only' || access.access_scope === 'feedback_shared',
+    sharedBoard: access.access_scope === 'feedback_shared',
   }
 }
 
 export async function canReadFeedbackReport(reportId: string, actor: FeedbackActor) {
   const admin = createSupabaseAdmin()
   let query = admin.from('product_feedback_reports').select('id,reporter_user_id').eq('id', reportId)
-  if (!actor.isAdmin) query = query.eq('reporter_user_id', actor.userId)
+  if (!actor.isAdmin && !actor.sharedBoard) query = query.eq('reporter_user_id', actor.userId)
   const { data } = await query.maybeSingle()
   return Boolean(data)
 }
