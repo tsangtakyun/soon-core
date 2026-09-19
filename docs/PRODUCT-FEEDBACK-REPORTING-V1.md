@@ -2,7 +2,7 @@
 
 更新：2026-09-19（Europe/London）
 
-Implementation commit：`07a7d4a`（如本文件其後更新，最新 commit 以 `git log` 為準）
+Implementation commits：`07a7d4a`、`909ae57`、`e4654a2`（如本文件其後更新，最新 commit 以 `git log` 為準）
 
 ## 目的
 
@@ -90,14 +90,14 @@ Migration：`supabase/migrations/20260919140000_product_feedback_reporting_v1.sq
 | Area | Status | Evidence / remaining |
 | --- | --- | --- |
 | CODE | PASS | `npx tsc --noEmit`; scoped ESLint；contract regression；完整 Next production build（以 non-secret placeholder Supabase env 驗證 build-time contract） |
-| DATABASE | NOT TESTED | 本機 Supabase CLI 未有 access token；migration 尚未套 production |
-| DEPLOYMENT | NOT TESTED | Vercel CLI network request 受目前 sandbox 阻擋 |
-| PRODUCTION ADMIN | NOT TESTED | 等 migration + deploy |
+| DATABASE | PASS | `20260919140000_product_feedback_reporting_v1.sql` 已於 2026-09-19 套用到 `SOON - core` production，remote migration list 已核對一致 |
+| DEPLOYMENT | PASS | Production deployment `dpl_2LASjgL4J4oftb14asEQ3GSe6TXp` Ready；alias `https://soon-core.vercel.app` 已指向新 artifact |
+| PRODUCTION ADMIN | PASS（讀取介面） | Tommy 已登入 production，`/feedback` 顯示管理員模式、空 queue 及 access 管理；尚未提交 TEST report |
 | PRODUCTION REPORTER | NOT TESTED | 等 migration + deploy，並需 admin 加入一個 reporter email |
 | AUDIO / SCREENSHOT | CODE PASS / PROD NOT TESTED | MIME、size、count、private storage、signed URL 已實作；待 production upload |
 | AI TRIAGE | CODE PASS / PROD NOT TESTED | 非阻塞 queue、provider missing／failure 狀態已實作；待 production provider 實測 |
 
-本機最初因只有 `.env.local.example`，在 `/ig/idea` prerender 報缺 Supabase env；加入 non-secret placeholder build-time env 後，92 個 static pages、全部 feedback routes、TypeScript 及 production build 已完整通過。Production 仍需由 Vercel 真實 env 再 build／部署驗證。
+本機最初因只有 `.env.local.example`，在 `/ig/idea` prerender 報缺 Supabase env。其後用 Vercel production project settings 建立 prebuilt artifact；92 個 static pages、全部 feedback routes、TypeScript 及 production build已完整通過並部署。首次 production smoke test 發現既有 auth-helper session 無法通過 `getUser()`；`e4654a2` 加入以 access token 向 Supabase Auth 再驗證的安全 fallback，重新部署後 Tommy 管理員介面已通過。
 
 ## 安全及操作注意
 
