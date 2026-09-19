@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react'
 import { useRouter } from 'next/navigation'
-import { createPortal } from 'react-dom'
 
 import styles from '@/components/HomeFeedbackBoard.module.css'
 import { FEEDBACK_PRODUCT_LABELS, FEEDBACK_STATUS_LABELS, type FeedbackProduct, type FeedbackStatus } from '@/lib/feedback-shared'
@@ -463,25 +462,4 @@ export function FeedbackOnlyHome({ displayName }: { displayName: string }) {
     router.refresh()
   }
   return <main className={styles.feedbackOnlyPage}><header><div><span>SOON CORE</span><h1>早晨，{displayName}。</h1><p>此頁只顯示 Tommy × Renee 共同測試板；公司營運及敏感資料不會向此帳戶開放。</p></div><button onClick={() => void signOut()}>登出</button></header><HomeFeedbackBoard /></main>
-}
-
-export function AdminHomeFeedbackMount() {
-  const [target, setTarget] = useState<HTMLElement | null>(null)
-  useEffect(() => {
-    const hero = document.querySelector<HTMLElement>('.chief-hero')
-    if (!hero) return
-    const mount = document.createElement('div')
-    mount.className = 'home-feedback-mount'
-    hero.insertAdjacentElement('afterend', mount)
-    const chiefChat = document.querySelector<HTMLElement>('.chief-chat')
-    const previousDisplay = chiefChat?.style.display
-    if (chiefChat) chiefChat.style.display = 'none'
-    const timer = window.setTimeout(() => setTarget(mount), 0)
-    return () => {
-      window.clearTimeout(timer)
-      if (chiefChat) chiefChat.style.display = previousDisplay ?? ''
-      mount.remove()
-    }
-  }, [])
-  return target ? createPortal(<HomeFeedbackBoard />, target) : null
 }

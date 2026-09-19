@@ -1,6 +1,6 @@
 import { Suspense } from 'react'
 
-import { AdminHomeFeedbackMount, FeedbackOnlyHome } from '@/components/HomeFeedbackBoard'
+import { FeedbackOnlyHome, HomeFeedbackBoard } from '@/components/HomeFeedbackBoard'
 import { HomeDashboard } from '@/components/HomeDashboard'
 import { requireFeedbackActor } from '@/lib/feedback-auth'
 
@@ -11,9 +11,8 @@ export default async function Home() {
   return (
     <>
       <Suspense>
-        <HomeDashboard />
+        <HomeDashboard afterHero={<HomeFeedbackBoard />} />
       </Suspense>
-      <AdminHomeFeedbackMount />
     </>
   )
 }
