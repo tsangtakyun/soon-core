@@ -30,6 +30,7 @@ SOON Core 首頁在問候語下方提供 Tommy × Renee 共同問題與建議板
 3. 附件失敗時，瀏覽器保留原本的 `File`，顯示「重試附件上載」；文字及參考編號不受影響。
 4. 列表或詳情刷新失敗時，介面明確顯示「內容已保存」，不會誤報提交失敗。
 5. 補充對話先以 JSON 保存 message，附件再獨立上載，並保留相同重試行為。
+6. 如使用者選擇放棄失敗附件，前端會以 `force: true` 重新排隊，讓已保存文字繼續完成 AI 分析；不會讓 report 永久停在 `queued`。
 
 Vercel Node.js Functions 的 request body 平台上限為 4.5MB；程式以 4MB 作每次附件請求上限，預留 multipart overhead。單一圖片、一般檔案或錄音最多 3MB。支援：
 
@@ -81,11 +82,30 @@ Migrations：
 | CODE / CONTRACT | PASS | `node scripts/verify-feedback-contract.mjs`、scoped ESLint、`npx tsc --noEmit` |
 | DATABASE v1/v2 | PASS | 已套用 production，並完成第一筆 TEST report AI 閉環 |
 | DATABASE v3 | PASS | `20260919193000_feedback_engineering_handoff_v3.sql` 已套用到 production |
-| PRODUCTION DEPLOYMENT | PASS | `dpl_24rtkVvp5drNkuCsQ4mFxtanzHcJ` Ready；alias `https://soon-core.vercel.app` 已更新 |
+| PRODUCTION DEPLOYMENT | PASS | `dpl_93xjBbcXHTCAJNrBgTPkzUA69BVE` Ready；alias `https://soon-core.vercel.app` 已更新 |
+| GOOGLE LOGIN LOOP | PASS | `ab4593d`：OAuth 已成功交換 session 後，即使 workspace bootstrap 暫時失敗亦不再錯誤送回 `/login` |
 | PRODUCTION TOMMY UI | PASS | 已驗證 `/login` → `/`、首頁問候語下方共同回報板、四產品、清晰繁體中文、既有 TEST report 詳情；沒有第二個 Master Chief 輸入框 |
-| PRODUCTION RENEE ROLE | NOT TESTED / BLOCKED | 未有 Renee access row／已確認登入 email；不可猜測身份 |
-| TEXT SUBMIT + AI | PREVIOUS VERSION PASS / CURRENT NOT TESTED | TEST report `SOON-20260919-C9A0B4` 已完成 AI；本次兩步保存版本未新增 production report |
-| IMAGE / FILE / AUDIO | CODE PASS / PROD NOT TESTED | 私密 storage、兩步保存、格式／大小及重試已實作；需要實機檔案及麥克風權限驗證 |
-| FOLLOW-UP | CODE PASS / PROD NOT TESTED | message 先保存、附件後上載、完整對話重新分析 |
-| MOBILE | CODE PASS / PROD NOT TESTED | 760px breakpoint 單欄及操作列換行；目前瀏覽器控制工具未提供 viewport resize，未作 production 實機驗證 |
+| PRODUCTION RENEE ROLE | NOT TESTED / BLOCKED | 未有 Renee access row／已確認登入 email；不可猜測身份或自行建立帳戶。shared role 路由及附件授權 contract 已驗證 |
+| TEXT SUBMIT + AI | PASS | TEST report `SOON-20260919-12E646` 已保存、完成 AI，重新載入及離開再返回仍存在 |
+| IMAGE UPLOAD / PRIVATE DOWNLOAD | PASS | `SOON-20260919-12E646` 已上載實際 PNG；附件 route 驗證權限後產生 60 秒 signed URL，圖片成功開啟 |
+| AUDIO UPLOAD / TRANSCRIPTION | PASS | 同一 TEST report 已上載實際 MP3；AI evidence 包含正確逐字稿。瀏覽器直接麥克風錄音仍為 NOT TESTED，因需要即時裝置權限 |
+| FOLLOW-UP | PASS | 已提交含實際圖片的補充訊息；AI 重新分析完整對話、message attachment metadata 及錄音逐字稿 |
+| ATTACHMENT FAILURE / RETRY | PASS | `SOON-20260919-62964F` 驗證超過 3MB 時文字及參考編號保留、原 File 可重試。此 pre-fix TEST report 本身仍停在 queued，保留作測試證據 |
+| DISCARD FAILED ATTACHMENT | PASS | `SOON-20260919-F8C939`：放棄超過 3MB 的附件後以文字重新排隊，最終顯示「AI 已分析」；修補見 `48aab4b` |
+| MOBILE LAYOUT | SIMULATED PASS / DEVICE NOT TESTED | production 以 390px viewport 驗證問候語、回報板及送出按鈕可見，無水平溢出；`ccc2716` 移除一次性 portal race。最新 deployment 尚未在真實 iPhone Safari 重測 |
 | AUTO ENGINEERING RUNNER | NOT CONNECTED | 可審計 engineering task／work order 已建立；沒有真實 code execution runner |
+
+## 本輪 production 修補
+
+- `ab4593d fix(core): prevent oauth bootstrap redirect loop`
+- `ccc2716 fix(core): render feedback board in dashboard tree`
+- `48aab4b fix(core): complete feedback attachment recovery`
+
+首頁回報板現由 `app/page.tsx` 透過 `HomeDashboard afterHero` 在同一 React tree 直接輸出，不再依賴 hydration 後只查找一次 `.chief-hero` 的 portal，因此慢速／mobile hydration 不會再漏掛載。shared board 使用者可讀共同 report 的私人附件，但非 shared、非 admin 帳戶仍只可讀自己的 report；上載補充附件仍要求 message 屬於目前使用者。
+
+## 尚未宣稱完成的驗證
+
+- Renee 真實帳戶登入及第二使用者 UI：未有已確認 email／access row，故未測。
+- 真實 iPhone Safari：390px production 模擬已通過，但 deployment 後未在實機 Safari 重測。
+- 瀏覽器直接錄音：上載及轉錄已通過；直接麥克風錄音因需要裝置 permission，未測。
+- 自動工程 runner：未接駁；目前只建立可審計 work order，不會自動改 code 或 deploy。
