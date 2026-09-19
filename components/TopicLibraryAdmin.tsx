@@ -2,6 +2,7 @@
 
 import Image from 'next/image'
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { TopicCardCover } from './TopicCardCover'
 
 import type { TopicDirection, TopicItem, TopicSource, TopicStatus } from '@/lib/topic-library'
 
@@ -299,8 +300,9 @@ export function TopicLibraryAdmin() {
             <article key={topic.id} className={draft.id === topic.id ? 'active' : ''}>
               <button type="button" className="topic-open" onClick={() => setDraft(topicToDraft(topic))}>
                 <span className="topic-card-image">
-                  <span className="topic-card-fallback"><b>未有封面預覽</b><small>可繼續編輯題材</small></span>
-                  {topic.cover_url ? <Image src={topic.cover_url} alt={topic.cover_alt || topic.title} fill sizes="(max-width: 760px) 100vw, 25vw" /> : null}
+                  <TopicCardCover key={topic.cover_url} src={topic.cover_url} alt={topic.cover_alt || topic.title}>
+                    <span className="topic-card-fallback"><b>未有封面預覽</b><small>可繼續編輯題材</small></span>
+                  </TopicCardCover>
                 </span>
                 <span className="topic-card-copy">
                   <span className={`status ${topic.status}`}>{topic.status}</span>
