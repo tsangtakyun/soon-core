@@ -12,7 +12,7 @@ export async function GET(_request: Request, context: { params: Promise<{ id: st
     .from('product_feedback_attachments')
     .select('storage_path,product_feedback_reports!inner(reporter_user_id)')
     .eq('id', id)
-  if (!actor.isAdmin) query = query.eq('product_feedback_reports.reporter_user_id', actor.userId)
+  if (!actor.isAdmin && !actor.sharedBoard) query = query.eq('product_feedback_reports.reporter_user_id', actor.userId)
   const { data } = await query.maybeSingle()
   if (!data) return NextResponse.json({ error: '找不到附件' }, { status: 404 })
 

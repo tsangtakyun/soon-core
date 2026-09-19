@@ -202,14 +202,29 @@ export function HomeFeedbackBoard() {
     }
   }
 
-  function discardPendingUpload() {
-    if (pendingUpload?.messageId) replyFormRef.current?.reset()
+  async function discardPendingUpload() {
+    if (!pendingUpload) return
+    const abandoned = pendingUpload
+    if (abandoned.messageId) replyFormRef.current?.reset()
     else {
       composerFormRef.current?.reset()
       setRecordedAudio(null)
     }
     setPendingUpload(null)
-    setNotice('文字已保存；未成功的附件已從待重試清單移除。')
+    setNotice('文字已保存；正在以沒有附件的版本完成 AI 分析。')
+    try {
+      const response = await fetch(`/api/feedback/reports/${abandoned.reportId}/retry`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ force: true }),
+      })
+      const payload = await response.json().catch(() => ({}))
+      if (!response.ok) throw new Error(payload.error || '未能啟動文字分析')
+      setNotice('文字已保存；未成功的附件已移除，AI 已按文字內容重新排隊。')
+      await Promise.allSettled([loadReports(), loadDetail(abandoned.reportId)])
+    } catch (reason) {
+      setError(reason instanceof Error ? `${reason.message}；文字內容仍然安全保存。` : '未能啟動文字分析；文字內容仍然安全保存。')
+    }
   }
 
   async function submit(event: FormEvent<HTMLFormElement>) {
@@ -388,7 +403,7 @@ export function HomeFeedbackBoard() {
 
       {error && <div className={styles.error} role="alert">{error}</div>}
       {notice && <div className={styles.notice} role="status">{notice}</div>}
-      {pendingUpload && <div className={styles.notice} role="status">文字已保存；原附件仍保留在此頁。<button type="button" disabled={submitting} onClick={() => void retryPendingUpload()}>{submitting ? '重試中…' : '重試附件上載'}</button><button type="button" disabled={submitting} onClick={discardPendingUpload}>放棄附件</button></div>}
+      {pendingUpload && <div className={styles.notice} role="status">文字已保存；原附件仍保留在此頁。<button type="button" disabled={submitting} onClick={() => void retryPendingUpload()}>{submitting ? '重試中…' : '重試附件上載'}</button><button type="button" disabled={submitting} onClick={() => void discardPendingUpload()}>放棄附件</button></div>}
 
       <div className={styles.feedHeader}><div><span>COMMENTS</span><h3>共同回報與對話</h3></div><b>{reports.length}</b></div>
       {loading ? <div className={styles.empty}>載入中…</div> : !reports.length ? <div className={styles.empty}>暫時沒有內容。你可以直接在上方提交第一則回報。</div> : (

@@ -2,7 +2,7 @@ import { randomUUID } from 'node:crypto'
 
 import { after, NextResponse } from 'next/server'
 
-import { requireFeedbackActor } from '@/lib/feedback-auth'
+import { canReadFeedbackReport, requireFeedbackActor } from '@/lib/feedback-auth'
 import {
   AUDIO_MIME_TYPES,
   GENERAL_FILE_MIME_TYPES,
@@ -34,15 +34,10 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
   }
 
   const { id } = await context.params
-  const admin = createSupabaseAdmin()
-  const { data: report } = await admin
-    .from('product_feedback_reports')
-    .select('id,reporter_user_id')
-    .eq('id', id)
-    .maybeSingle()
-  if (!report || (!actor.isAdmin && report.reporter_user_id !== actor.userId)) {
+  if (!(await canReadFeedbackReport(id, actor))) {
     return NextResponse.json({ error: '找不到回報' }, { status: 404 })
   }
+  const admin = createSupabaseAdmin()
 
   const form = await request.formData()
   const messageId = String(form.get('messageId') ?? '').trim() || null
