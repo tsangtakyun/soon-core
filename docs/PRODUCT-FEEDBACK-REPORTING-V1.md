@@ -91,13 +91,13 @@ Migration：`supabase/migrations/20260919140000_product_feedback_reporting_v1.sq
 | --- | --- | --- |
 | CODE | PASS | `npx tsc --noEmit`; scoped ESLint；contract regression；完整 Next production build（以 non-secret placeholder Supabase env 驗證 build-time contract） |
 | DATABASE | PASS | `20260919140000_product_feedback_reporting_v1.sql` 已於 2026-09-19 套用到 `SOON - core` production，remote migration list 已核對一致 |
-| DEPLOYMENT | PASS | Production deployment `dpl_2LASjgL4J4oftb14asEQ3GSe6TXp` Ready；alias `https://soon-core.vercel.app` 已指向新 artifact |
-| PRODUCTION ADMIN | PASS（讀取介面） | Tommy 已登入 production，`/feedback` 顯示管理員模式、空 queue 及 access 管理；尚未提交 TEST report |
+| DEPLOYMENT | PASS | Production deployment `dpl_FgPEsSiPYBdkPnPNKeyYitTwEC4Q` Ready；alias `https://soon-core.vercel.app` 已指向由 Vercel remote build 產生、包含正確 production environment 的 artifact |
+| PRODUCTION ADMIN | PASS | Tommy 已完成 Google OAuth；`/login` 會自動導向 dashboard，`/feedback` 顯示管理員模式、queue 及 access 管理 |
 | PRODUCTION REPORTER | NOT TESTED | 等 migration + deploy，並需 admin 加入一個 reporter email |
 | AUDIO / SCREENSHOT | CODE PASS / PROD NOT TESTED | MIME、size、count、private storage、signed URL 已實作；待 production upload |
-| AI TRIAGE | CODE PASS / PROD NOT TESTED | 非阻塞 queue、provider missing／failure 狀態已實作；待 production provider 實測 |
+| AI TRIAGE | PASS | Production TEST report `SOON-20260919-C9A0B4` 已保存及顯示 TEST 標記；AI 已完成 title、summary、reproduction steps、impact、missing information 及 inference notes |
 
-本機最初因只有 `.env.local.example`，在 `/ig/idea` prerender 報缺 Supabase env。其後用 Vercel production project settings 建立 prebuilt artifact；92 個 static pages、全部 feedback routes、TypeScript 及 production build已完整通過並部署。首次 production smoke test 發現既有 auth-helper session 無法通過 `getUser()`；`e4654a2` 加入以 access token 向 Supabase Auth 再驗證的安全 fallback，重新部署後 Tommy 管理員介面已通過。
+本機最初因只有 `.env.local.example`，在 `/ig/idea` prerender 報缺 Supabase env。以 `vercel pull` 取得的本機 production env 對 secret 只提供 `[SENSITIVE]` placeholder，因此 prebuilt artifact 曾令 OAuth callback 出現 `Invalid API key`。其後改用 Vercel remote production build，92 個 static pages、全部 feedback routes、TypeScript 及 production build 已完整通過；Google OAuth、dashboard redirect 及 feedback 管理員介面亦已在 production 驗證。首次 smoke test 另發現既有 auth-helper session 無法通過 `getUser()`；`e4654a2` 加入以 access token 向 Supabase Auth 再驗證的安全 fallback。
 
 ## 安全及操作注意
 
