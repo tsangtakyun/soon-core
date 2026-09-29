@@ -271,7 +271,10 @@ function createBrandLogoSlot(role: PageRole) {
 function ensureBrandLogoSlot(canvas: Canvas, role: PageRole) {
   const exists = canvas
     .getObjects()
-    .some((object) => (object as EditableObject).data?.role === "brand_logo");
+    .some((object) => {
+      const objectRole = (object as EditableObject).data?.role;
+      return objectRole === "brand_logo" || objectRole === "brand_anchor";
+    });
   if (exists) return false;
   canvas.add(createBrandLogoSlot(role));
   return true;
@@ -741,7 +744,7 @@ async function addSingleCharacterPunchlineStarter(canvas: Canvas) {
   canvas.clear();
   canvas.backgroundColor = "#FFFFFF";
 
-  addBoundTextbox(canvas, "慢慢俱樂部", "brand_anchor", "content.brand_anchor", {
+  addBoundTextbox(canvas, "慢慢俱樂部", "brand_logo", "workspace.logo_url", {
     fill: "#000000", fontFamily: "STHeiti, PingFang TC, sans-serif", fontSize: 6,
     fontWeight: 900, left: 164, paintFirst: "stroke", stroke: "#000000",
     strokeWidth: 0.2, textAlign: "center", top: 16.8, width: 104,
