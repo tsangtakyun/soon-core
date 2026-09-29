@@ -511,7 +511,11 @@ export function ContentDirectionLab() {
                       <b>不可生成</b>
                     </div>
                     {registryFormat === "ai_short_video" ? (
-                      <small>Active binding {specification.activeBindingCount ?? 0} · Playable reference {specification.playableReferenceCount ?? 0}</small>
+                      <>
+                        <small>Creator {String(specification.creatorEligible)} · Studio {String(specification.contentStudioEnabled)} · Generation {String(specification.generationEnabled)} · Binding allowed {String(specification.templateBindingAllowed ?? false)}</small>
+                        <small>Active binding {specification.activeBindingCount ?? 0} · Playable reference {specification.playableReferenceCount ?? 0}</small>
+                        <small>Style ID {specification.styleId} · Version ID {specification.versionId}</small>
+                      </>
                     ) : null}
                   </div>
                 </article>
