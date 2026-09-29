@@ -13,6 +13,8 @@ const PAGE_ROLES = [
   { code: 'end', label: '結尾' },
 ] as const
 
+type PageRole = { role: string; purpose?: string; position?: string }
+
 type PageDesign = {
   canvasJson?: Record<string, unknown>
   canvasWidth?: number
@@ -23,9 +25,24 @@ type PageDesign = {
 
 type DesignMap = Record<string, PageDesign>
 
-function availableRoles(designs?: DesignMap | null) {
+function roleLabel(role: string) {
+  return role.split('_').map((word) => word ? word[0].toUpperCase() + word.slice(1) : '').join(' ')
+}
+
+function availableRoles(designs?: DesignMap | null, pageRoles: PageRole[] = []) {
   if (!designs) return []
-  return PAGE_ROLES.filter((role) => Boolean(designs[role.code]?.canvasJson))
+  const configured = pageRoles
+    .filter((item) => item.role && Boolean(designs[item.role]?.canvasJson))
+    .map((item) => ({ code: item.role, label: item.purpose || roleLabel(item.role) }))
+  const seen = new Set(configured.map((item) => item.code))
+  const legacy = PAGE_ROLES
+    .filter((item) => !seen.has(item.code) && Boolean(designs[item.code]?.canvasJson))
+    .map((item) => ({ ...item }))
+  legacy.forEach((item) => seen.add(item.code))
+  const remaining = Object.keys(designs)
+    .filter((code) => !seen.has(code) && Boolean(designs[code]?.canvasJson))
+    .map((code) => ({ code, label: roleLabel(code) }))
+  return [...configured, ...legacy, ...remaining]
 }
 
 function ActualCanvas({ design, label }: { design: PageDesign; label: string }) {
@@ -66,6 +83,7 @@ export function TemplateCanvasPreview({
   draftVersion,
   legacyImage,
   name,
+  pageRoles = [],
   publishedDesigns,
   publishedVersion,
 }: {
@@ -73,11 +91,12 @@ export function TemplateCanvasPreview({
   draftVersion?: number | null
   legacyImage?: string | null
   name: string
+  pageRoles?: PageRole[]
   publishedDesigns?: DesignMap | null
   publishedVersion?: number | null
 }) {
-  const publishedRoles = useMemo(() => availableRoles(publishedDesigns), [publishedDesigns])
-  const draftRoles = useMemo(() => availableRoles(draftDesigns), [draftDesigns])
+  const publishedRoles = useMemo(() => availableRoles(publishedDesigns, pageRoles), [pageRoles, publishedDesigns])
+  const draftRoles = useMemo(() => availableRoles(draftDesigns, pageRoles), [draftDesigns, pageRoles])
   const hasPublishedPreview = publishedRoles.length > 0 || Boolean(legacyImage)
   const [source, setSource] = useState<'published' | 'draft'>(hasPublishedPreview ? 'published' : 'draft')
   const roles = source === 'published' ? publishedRoles : draftRoles
