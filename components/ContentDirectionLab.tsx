@@ -51,6 +51,20 @@ type MasterDraft = {
   page_designs: Record<string, PageDesign>;
   updated_at: string;
 };
+type InternalSpecification = {
+  code: string;
+  name: string;
+  description: string;
+  styleId: string;
+  versionId: string;
+  version: number;
+  status: "draft" | "review";
+  specificationType: "new_direction" | "existing_direction_supplement";
+  creatorEligible: false;
+  contentStudioEnabled: false;
+  generationEnabled: false;
+  rules: Record<string, unknown>;
+};
 type RegistryFormat =
   | "instagram_carousel"
   | "instagram_single_feed"
@@ -124,6 +138,8 @@ export function ContentDirectionLab() {
   const [items, setItems] = useState<Direction[]>([]);
   const [styles, setStyles] = useState<PublishedStyle[]>([]);
   const [masterDrafts, setMasterDrafts] = useState<MasterDraft[]>([]);
+  const [internalSpecifications, setInternalSpecifications] = useState<InternalSpecification[]>([]);
+  const [importingInternalSpecifications, setImportingInternalSpecifications] = useState(false);
   const [masterBusy, setMasterBusy] = useState("");
   const [draft, setDraft] = useState<Direction>(empty);
   const [query, setQuery] = useState("");
@@ -140,16 +156,20 @@ export function ContentDirectionLab() {
   const load = useCallback(async () => {
     const sequence = ++loadSequence.current;
     setLoading(true);
-    const [directionsResponse, stylesResponse] = await Promise.all([
+    const [directionsResponse, stylesResponse, internalResponse] = await Promise.all([
       fetch("/api/content-directions", { cache: "no-store" }),
       fetch(
         `/api/content-directions/styles?format=${encodeURIComponent(registryFormat)}`,
         { cache: "no-store" },
       ),
+      registryFormat === "human_short_video"
+        ? fetch("/api/content-directions/internal-human-video-specifications", { cache: "no-store" })
+        : Promise.resolve(null),
     ]);
-    const [directionsPayload, stylesPayload] = await Promise.all([
+    const [directionsPayload, stylesPayload, internalPayload] = await Promise.all([
       directionsResponse.json().catch(() => ({})),
       stylesResponse.json().catch(() => ({})),
+      internalResponse?.json().catch(() => ({})) ?? Promise.resolve({}),
     ]);
     if (sequence !== loadSequence.current) return;
     if (directionsResponse.ok) setItems(directionsPayload.directions || []);
@@ -171,6 +191,9 @@ export function ContentDirectionLab() {
           : [],
       );
     } else setMessage(stylesPayload.error || "未能載入已發布內容風格");
+    if (registryFormat === "human_short_video" && internalResponse?.ok) {
+      setInternalSpecifications(Array.isArray(internalPayload.specifications) ? internalPayload.specifications : []);
+    } else setInternalSpecifications([]);
     setLoading(false);
   }, [registryFormat]);
   useEffect(() => {
@@ -296,6 +319,18 @@ export function ContentDirectionLab() {
       await load();
     } else setMessage(payload.error || "未能發布標準母版");
     setMasterBusy("");
+  }
+
+  async function importInternalHumanVideoSpecifications() {
+    setImportingInternalSpecifications(true);
+    setMessage("");
+    const response = await fetch("/api/content-directions/internal-human-video-specifications", { method: "POST" });
+    const payload = await response.json().catch(() => ({}));
+    if (response.ok) {
+      setMessage("真人短片規格已存入 Core 內部審閱層；Creator／Content Studio 仍未啟用。");
+      await load();
+    } else setMessage(payload.error || "未能匯入真人短片規格");
+    setImportingInternalSpecifications(false);
   }
 
   return (
@@ -435,6 +470,46 @@ export function ContentDirectionLab() {
           <p className="empty">未有已發布內容風格。</p>
         )}
       </section>
+      {registryFormat === "human_short_video" ? (
+        <section className="published-styles internal-specifications">
+          <div className="published-head">
+            <div>
+              <small>Core 內部規格</small>
+              <h2>真人短片規格審閱層</h2>
+              <p>只供 SOON Core 閱讀及核對；未發布、沒有 Template binding，亦不會分發到 Creator／Content Studio。</p>
+            </div>
+            <strong>{internalSpecifications.length} 份</strong>
+          </div>
+          {internalSpecifications.length ? (
+            <div className="style-cards">
+              {internalSpecifications.map((specification) => (
+                <article key={specification.versionId} className="style-card">
+                  <div className="placeholder-preview">
+                    <span>Core only</span>
+                    <strong>{specification.specificationType === "new_direction" ? "新方向" : "既有方向增補"}</strong>
+                    <small>Creator 未啟用</small>
+                  </div>
+                  <div className="style-copy">
+                    <small>human_short_video · {specification.status}</small>
+                    <h3>{specification.name}</h3>
+                    <p>{specification.description}</p>
+                    <div>
+                      <span>style:{specification.code}:v{specification.version}</span>
+                      <b>不可生成</b>
+                    </div>
+                  </div>
+                </article>
+              ))}
+            </div>
+          ) : (
+            <div className="master-actions">
+              <button type="button" disabled={importingInternalSpecifications} onClick={() => void importInternalHumanVideoSpecifications()}>
+                {importingInternalSpecifications ? "匯入中…" : "匯入已確認真人短片規格"}
+              </button>
+            </div>
+          )}
+        </section>
+      ) : null}
       <div className="quick">
         <div>
           <small>快速收集</small>
@@ -1438,6 +1513,34 @@ export function ContentDirectionLab() {
           max-width: 180px;
           font-size: 9px;
           line-height: 1.45;
+        }
+        .placeholder-preview {
+          display: grid;
+          aspect-ratio: 4 / 5;
+          place-content: center;
+          gap: 8px;
+          padding: 24px;
+          background:
+            linear-gradient(145deg, rgba(82, 40, 120, 0.3), transparent 58%),
+            repeating-linear-gradient(135deg, #15131a, #15131a 13px, #1b1720 13px, #1b1720 26px);
+          color: #aaa;
+          text-align: center;
+        }
+        .placeholder-preview span {
+          color: #c4b5fd;
+          font-size: 9px;
+          font-weight: 900;
+          letter-spacing: 0.16em;
+          text-transform: uppercase;
+        }
+        .placeholder-preview strong {
+          color: #f3e8ff;
+          font-size: 17px;
+        }
+        .placeholder-preview small {
+          color: #86efac;
+          font-size: 10px;
+          font-weight: 800;
         }
         :global(.template-preview-pages) {
           position: absolute;
