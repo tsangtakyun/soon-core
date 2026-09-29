@@ -355,6 +355,12 @@ export function ContentDirectionLab() {
               const pageCount = draft
                 ? Object.keys(draft.page_designs || {}).length
                 : 0;
+              const supportsVisualMaster =
+                style.format === "instagram_carousel" ||
+                style.format === "instagram_single_feed";
+              const pageTarget =
+                pageRoles.length ||
+                (style.format === "instagram_single_feed" ? 1 : 6);
               const legacyImage =
                 style.code === "clear_magazine_carousel"
                   ? "/templates/clear-magazine-carousel-v1/01-cover.png"
@@ -400,7 +406,7 @@ export function ContentDirectionLab() {
                       <span>{style.version.ref}</span>
                       <b>{style.evidence.confirmedReferenceCount} references</b>
                     </div>
-                    {style.format === "instagram_carousel" ? (
+                    {supportsVisualMaster ? (
                       <div className="master-actions">
                         <button
                           type="button"
@@ -410,7 +416,7 @@ export function ContentDirectionLab() {
                           {masterBusy === style.code
                             ? "開啟中…"
                             : draft
-                              ? `繼續編輯 v${draft.target_version}（${pageCount}/6）`
+                              ? `繼續編輯 v${draft.target_version}（${pageCount}/${pageTarget}）`
                               : template
                                 ? "編輯標準版本"
                                 : "建立標準母版"}
@@ -428,10 +434,6 @@ export function ContentDirectionLab() {
                           </button>
                         ) : null}
                       </div>
-                    ) : style.format === "instagram_single_feed" ? (
-                      <small className="single-post-status">
-                        單張貼文規格 · Creator 可讀取
-                      </small>
                     ) : (
                       <small className="single-post-status">
                         短片時間軸母版 · Script 與鏡頭規格可供 Creator 讀取

@@ -22,7 +22,9 @@ export async function POST(_request: Request, context: { params: Promise<{ code:
   let { data: binding } = await admin.from('style_template_bindings').select('template_version_id').eq('style_version_id', styleVersion.id).eq('status', 'active').order('priority').limit(1).maybeSingle()
 
   if (!binding) {
-    const templateCode = style.code.endsWith('_carousel') ? style.code : `${style.code}_carousel`
+    const templateCode = style.format === 'instagram_carousel' && !style.code.endsWith('_carousel')
+      ? `${style.code}_carousel`
+      : style.code
     const { data: template, error: templateError } = await admin.from('content_templates').upsert({
       code: templateCode,
       description: style.description,
@@ -38,10 +40,13 @@ export async function POST(_request: Request, context: { params: Promise<{ code:
     let { data: initialVersion } = await admin.from('template_versions').select('id,version').eq('template_id', template.id).eq('status', 'published').order('version', { ascending: false }).limit(1).maybeSingle()
     if (!initialVersion) {
       const rendererCode = `${style.code.replaceAll('_', '-')}-v1`
+      const pageRoles = style.format === 'instagram_single_feed'
+        ? [{ position: '01', role: 'single', required: true, repeatable: false }]
+        : ['cover','longform','split','comparison','feature','end'].map((role, index) => ({ position: String(index + 1).padStart(2, '0'), role }))
       const contract = {
         schema_version: 1,
         output: { width: 1080, height: 1350, aspect_ratio: '4:5' },
-        page_roles: ['cover','longform','split','comparison','feature','end'].map((role, index) => ({ position: String(index + 1).padStart(2, '0'), role })),
+        page_roles: pageRoles,
         brand_bindings: { logo: 'workspace.logo_url', font: 'workspace.font_style', colors: 'brand_profiles.brand_colors', fallback: 'template_defaults' },
       }
       const { data: created, error: createError } = await admin.from('template_versions').insert({
