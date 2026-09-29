@@ -59,8 +59,8 @@ Core 正式 UI 會另設「真人短片規格審閱層」，清楚標示 Core on
 
 ## 部署及驗證
 
-- Production deployment：`dpl_o7K4GZ2YxEKqmjog5VHS7kD2kprT`
-- Deployment URL：`https://soon-core-a5i09a5ik-tsangtakyun-4639s-projects.vercel.app`
+- Production deployment：`dpl_EDbuFF7Csb9q1gdYojATyNYqEre2`
+- Deployment URL：`https://soon-core-xn4o4untu-tsangtakyun-4639s-projects.vercel.app`
 - Production alias：`https://soon-core.vercel.app`
 - Vercel production build：72／72 pages，TypeScript 通過，狀態 `READY`。
 - Core 正式 UI 儲存後重開：真人短片顯示 10 款 `published`，另有 6 份 Core-only `review` 規格。
