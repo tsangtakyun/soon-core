@@ -285,6 +285,7 @@ type StarterStyle =
   | "quiet_research_editorial"
   | "character_emotion_story"
   | "immersive_folklore_ritual"
+  | "single_photo_news_card"
   | "default";
 
 function starterStyleFor(styleCode: string): StarterStyle {
@@ -301,6 +302,8 @@ function starterStyleFor(styleCode: string): StarterStyle {
     return "character_emotion_story";
   if (styleCode.includes("immersive_folklore_ritual"))
     return "immersive_folklore_ritual";
+  if (styleCode.includes("single_photo_news_card"))
+    return "single_photo_news_card";
   return "default";
 }
 
@@ -319,6 +322,8 @@ function referenceName(style: StarterStyle) {
     return "角色情緒短劇 · 一句一幕情緒推進";
   if (style === "immersive_folklore_ritual")
     return "都市傳說體驗誌 · 第十三層電梯";
+  if (style === "single_photo_news_card")
+    return "圖像即時話題卡 · Tommy 批准 v2.1";
   return "SOON 基本版面";
 }
 
@@ -396,6 +401,10 @@ const IMMERSIVE_FOLKLORE_REFERENCE_IMAGES: Partial<Record<PageRole, string>> = {
   fiction_close: "/templates/immersive-folklore-ritual-v2/previews/page-08.png",
 };
 
+const SINGLE_PHOTO_NEWS_REFERENCE_IMAGES: Partial<Record<PageRole, string>> = {
+  single: "/templates/single-photo-news-card-v3/approved-preview.png",
+};
+
 function referenceImagesFor(style: StarterStyle) {
   if (style === "product_focus") return PRODUCT_FOCUS_REFERENCE_IMAGES;
   if (style === "ranking_review") return RANKING_REFERENCE_IMAGES;
@@ -409,7 +418,144 @@ function referenceImagesFor(style: StarterStyle) {
     return CHARACTER_EMOTION_REFERENCE_IMAGES;
   if (style === "immersive_folklore_ritual")
     return IMMERSIVE_FOLKLORE_REFERENCE_IMAGES;
+  if (style === "single_photo_news_card")
+    return SINGLE_PHOTO_NEWS_REFERENCE_IMAGES;
   return null;
+}
+
+async function addSinglePhotoNewsCardStarter(canvas: Canvas) {
+  canvas.clear();
+  canvas.backgroundColor = "#000000";
+  const panelHeight = DISPLAY_HEIGHT / 2;
+  const sourceWidth = 1122;
+  const sourceHeight = 1402;
+  const imageScale = DISPLAY_WIDTH / sourceWidth;
+  const cropHeight = panelHeight / imageScale;
+  const cropOverflow = sourceHeight - cropHeight;
+
+  const addImage = async (
+    src: string,
+    role: "primary_image" | "secondary_image",
+    binding: string,
+    top: number,
+    focalY: number,
+  ) => {
+    const image = (await FabricImage.fromURL(src, {
+      crossOrigin: "anonymous",
+    })) as EditableObject;
+    image.set({
+      cropX: 0,
+      cropY: cropOverflow * focalY,
+      height: cropHeight,
+      left: 0,
+      originX: "left",
+      originY: "top",
+      scaleX: imageScale,
+      scaleY: imageScale,
+      top,
+      width: sourceWidth,
+    });
+    image.data = { id: crypto.randomUUID(), role, binding, required: true };
+    canvas.add(image);
+  };
+
+  const addBoundText = (
+    text: string,
+    role: string,
+    binding: string | undefined,
+    options: ConstructorParameters<typeof Textbox>[1],
+  ) => {
+    const object = attachData(new Textbox(text, options) as EditableObject, role);
+    object.data = { ...object.data, binding, required: true };
+    canvas.add(object);
+    return object;
+  };
+
+  await addImage(
+    "/templates/single-photo-news-card-v3/01-fat-bear-editorial.png",
+    "primary_image",
+    "content.asset.primary",
+    0,
+    0.08,
+  );
+  await addImage(
+    "/templates/single-photo-news-card-v3/02-fat-bear-salmon-editorial.png",
+    "secondary_image",
+    "content.asset.secondary",
+    panelHeight,
+    0.54,
+  );
+
+  [
+    { top: 160, height: 110, opacity: 0.14 },
+    { top: 200, height: 70, opacity: 0.2 },
+    { top: 430, height: 110, opacity: 0.16 },
+    { top: 470, height: 70, opacity: 0.22 },
+  ].forEach(({ top, height, opacity }, index) => {
+    const shade = attachData(new Rect({
+      fill: `rgba(0,0,0,${opacity})`,
+      height,
+      left: 0,
+      selectable: false,
+      top,
+      width: DISPLAY_WIDTH,
+    }) as EditableObject, `shade_${index + 1}`);
+    canvas.add(shade);
+  });
+
+  canvas.add(attachData(new Rect({
+    fill: "#FFFFFF",
+    height: 4,
+    left: 0,
+    selectable: false,
+    top: panelHeight - 2,
+    width: DISPLAY_WIDTH,
+  }) as EditableObject, "panel_divider"));
+
+  canvas.add(attachData(new Rect({ fill: "#111111", height: 18, left: 11, top: 10, width: 66 }) as EditableObject, "publisher_mark_background"));
+  addBoundText("SOON 今日焦點", "brand_logo", "workspace.logo_url", {
+    fill: "#FFFFFF", fontFamily: "Arial", fontSize: 7.2, fontWeight: 900,
+    left: 16, lineHeight: 1, top: 15, width: 56,
+  });
+  canvas.add(attachData(new Rect({ fill: "#DCFF00", height: 18, left: 355, top: 10, width: 66 }) as EditableObject, "metric_background"));
+  addBoundText("9月29日・冠軍日", "metric", "content.metric", {
+    fill: "#000000", fontFamily: "Arial", fontSize: 7.2, fontWeight: 900,
+    left: 359, lineHeight: 1, textAlign: "center", top: 15, width: 58,
+  });
+
+  const headlineBase = {
+    fill: "#FFFFFF",
+    fontFamily: "Arial",
+    fontSize: 27.2,
+    fontWeight: 900,
+    lineHeight: 0.98,
+    stroke: "#000000",
+    strokeWidth: 3.6,
+    paintFirst: "stroke" as const,
+    textAlign: "center" as const,
+    width: 390,
+  };
+  addBoundText("胖熊週決賽日\n全球網民選出年度冠軍", "primary_headline", "content.headline", {
+    ...headlineBase, left: 21, top: 205,
+  });
+  addBoundText("夏秋不停進食\n為冬眠儲備脂肪", "secondary_headline", "content.secondary_headline", {
+    ...headlineBase, left: 21, top: 443,
+  });
+  addBoundText("誰最成功把自己養胖？", "conclusion", "content.conclusion", {
+    fill: "#FF4A3D", fontFamily: "Arial", fontSize: 15.6, fontWeight: 900,
+    left: 14, lineHeight: 1.05, paintFirst: "stroke", stroke: "#FFFFFF",
+    strokeWidth: 2.4, textAlign: "center", top: 510, width: 404,
+  });
+  addBoundText("AI 生成示意圖", "image_credit", undefined, {
+    fill: "rgba(255,255,255,.82)", fontFamily: "Arial", fontSize: 4.8,
+    left: 338, lineHeight: 1, textAlign: "right", top: 532, width: 42,
+  });
+  addBoundText("資料：美國國家公園管理局", "source", "content.source", {
+    fill: "rgba(255,255,255,.82)", fontFamily: "Arial", fontSize: 4.8,
+    left: 379, lineHeight: 1, textAlign: "right", top: 532, width: 50,
+  });
+
+  canvas.requestRenderAll();
 }
 
 function referenceOpacityFor(styleCode: string) {
@@ -615,6 +761,10 @@ async function addStarterObjects(
 ) {
   const copy = placeholderFor(role);
   const style = starterStyleFor(styleCode);
+  if (style === "single_photo_news_card" && role === "single") {
+    await addSinglePhotoNewsCardStarter(canvas);
+    return;
+  }
   canvas.clear();
   canvas.backgroundColor =
     style === "ranking_review" && role === "cover"
