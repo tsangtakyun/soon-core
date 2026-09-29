@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { CSSProperties } from "react";
 import {
   Canvas,
+  Circle,
   FabricImage,
   FabricObject,
   Group,
@@ -286,6 +287,8 @@ type StarterStyle =
   | "character_emotion_story"
   | "immersive_folklore_ritual"
   | "single_photo_news_card"
+  | "single_people_news_collage"
+  | "single_character_punchline"
   | "default";
 
 function starterStyleFor(styleCode: string): StarterStyle {
@@ -304,6 +307,10 @@ function starterStyleFor(styleCode: string): StarterStyle {
     return "immersive_folklore_ritual";
   if (styleCode.includes("single_photo_news_card"))
     return "single_photo_news_card";
+  if (styleCode.includes("single_people_news_collage"))
+    return "single_people_news_collage";
+  if (styleCode.includes("single_character_punchline"))
+    return "single_character_punchline";
   return "default";
 }
 
@@ -324,6 +331,10 @@ function referenceName(style: StarterStyle) {
     return "都市傳說體驗誌 · 第十三層電梯";
   if (style === "single_photo_news_card")
     return "圖像即時話題卡 · Tommy 批准 v2.1";
+  if (style === "single_people_news_collage")
+    return "人物話題拼貼 · Tommy 批准 v3.1";
+  if (style === "single_character_punchline")
+    return "角色金句海報 · Tommy 批准 v3.1";
   return "SOON 基本版面";
 }
 
@@ -405,6 +416,14 @@ const SINGLE_PHOTO_NEWS_REFERENCE_IMAGES: Partial<Record<PageRole, string>> = {
   single: "/templates/single-photo-news-card-v3/approved-preview.png",
 };
 
+const SINGLE_PEOPLE_NEWS_REFERENCE_IMAGES: Partial<Record<PageRole, string>> = {
+  single: "/templates/single-people-news-collage-v2/approved-preview.png",
+};
+
+const SINGLE_CHARACTER_REFERENCE_IMAGES: Partial<Record<PageRole, string>> = {
+  single: "/templates/single-character-punchline-v2/approved-preview.png",
+};
+
 function referenceImagesFor(style: StarterStyle) {
   if (style === "product_focus") return PRODUCT_FOCUS_REFERENCE_IMAGES;
   if (style === "ranking_review") return RANKING_REFERENCE_IMAGES;
@@ -420,7 +439,56 @@ function referenceImagesFor(style: StarterStyle) {
     return IMMERSIVE_FOLKLORE_REFERENCE_IMAGES;
   if (style === "single_photo_news_card")
     return SINGLE_PHOTO_NEWS_REFERENCE_IMAGES;
+  if (style === "single_people_news_collage")
+    return SINGLE_PEOPLE_NEWS_REFERENCE_IMAGES;
+  if (style === "single_character_punchline")
+    return SINGLE_CHARACTER_REFERENCE_IMAGES;
   return null;
+}
+
+async function createCoverImage(
+  src: string,
+  role: string,
+  binding: string,
+  frame: { left: number; top: number; width: number; height: number },
+  focalX = 0.5,
+  focalY = 0.5,
+) {
+  const image = (await FabricImage.fromURL(src, {
+    crossOrigin: "anonymous",
+  })) as EditableObject;
+  const sourceWidth = image.width || 1;
+  const sourceHeight = image.height || 1;
+  const scale = Math.max(frame.width / sourceWidth, frame.height / sourceHeight);
+  const cropWidth = frame.width / scale;
+  const cropHeight = frame.height / scale;
+  image.set({
+    cropX: Math.max(0, Math.min(sourceWidth - cropWidth, (sourceWidth - cropWidth) * focalX)),
+    cropY: Math.max(0, Math.min(sourceHeight - cropHeight, (sourceHeight - cropHeight) * focalY)),
+    height: cropHeight,
+    left: frame.left,
+    originX: "left",
+    originY: "top",
+    scaleX: scale,
+    scaleY: scale,
+    top: frame.top,
+    width: cropWidth,
+  });
+  image.data = { id: crypto.randomUUID(), role, binding, required: true };
+  return image;
+}
+
+function addBoundTextbox(
+  canvas: Canvas,
+  text: string,
+  role: string,
+  binding: string | undefined,
+  options: ConstructorParameters<typeof Textbox>[1],
+) {
+  const object = attachData(new Textbox(text, options) as EditableObject, role);
+  object.data = { ...object.data, binding, required: true };
+  canvas.add(object);
+  return object;
 }
 
 async function addSinglePhotoNewsCardStarter(canvas: Canvas) {
@@ -555,6 +623,156 @@ async function addSinglePhotoNewsCardStarter(canvas: Canvas) {
     left: 379, lineHeight: 1, textAlign: "right", top: 532, width: 50,
   });
 
+  canvas.requestRenderAll();
+}
+
+async function addSinglePeopleNewsCollageStarter(canvas: Canvas) {
+  canvas.clear();
+  canvas.backgroundColor = "#1B1207";
+
+  const main = await createCoverImage(
+    "/templates/single-people-news-collage-v2/01-mae-jemison-space.jpg",
+    "primary_image",
+    "content.asset.primary",
+    { left: 0, top: 83.2, width: 268, height: 208 },
+    0.5,
+    0.45,
+  );
+  const science = await createCoverImage(
+    "/templates/single-people-news-collage-v2/05-sts47-science-module.jpg",
+    "evidence_image_science",
+    "content.asset.evidence.0",
+    { left: 270.8, top: 83.2, width: 161.2, height: 208 },
+    0.57,
+    0.48,
+  );
+  const crew = await createCoverImage(
+    "/templates/single-people-news-collage-v2/04-sts47-crew-inflight.jpg",
+    "evidence_image_crew",
+    "content.asset.evidence.1",
+    { left: 124, top: 316, width: 308, height: 180 },
+    0.5,
+    0.52,
+  );
+  canvas.add(main, science, crew);
+  canvas.add(attachData(new Rect({
+    fill: "#F4FF22", height: 208, left: 268, selectable: false, top: 83.2, width: 2.8,
+  }) as EditableObject, "image_divider"));
+  canvas.add(attachData(new Rect({
+    fill: "#1B1207", height: 42, left: 0, selectable: false, top: 498, width: 432,
+  }) as EditableObject, "footer_background"));
+
+  addBoundTextbox(canvas, "奮進號執行 STS-47\n梅・傑米森首度升空\n八日完成44項實驗", "headline", "content.headline", {
+    fill: "#FFFFFF", fontFamily: "Arial", fontSize: 26, fontWeight: 900,
+    left: 12, lineHeight: 0.92, paintFirst: "stroke", stroke: "#000000",
+    strokeWidth: 1.6, top: 7.2, width: 384,
+  });
+  canvas.add(attachData(new Circle({
+    fill: "#1B1207", left: 374, radius: 17.6, stroke: "#FFFFFF", strokeWidth: 2,
+    top: 9.6,
+  }) as EditableObject, "publisher_badge"));
+  addBoundTextbox(canvas, "任務\n焦點", "publisher_mark", "content.publisher_mark", {
+    fill: "#F4FF22", fontFamily: "Arial", fontSize: 6.8, fontWeight: 900,
+    left: 378, lineHeight: 1.02, textAlign: "center", top: 19, width: 28,
+  });
+
+  const zoom = await createCoverImage(
+    "/templates/single-people-news-collage-v2/05-sts47-science-module.jpg",
+    "detail_inset",
+    "content.asset.detail_inset",
+    { left: -16, top: 254.8, width: 144, height: 144 },
+    0.53,
+    0.73,
+  );
+  zoom.set({
+    clipPath: new Circle({ originX: "center", originY: "center", radius: 69 }),
+  });
+  canvas.add(zoom);
+  canvas.add(attachData(new Circle({
+    fill: "transparent", left: -16, radius: 72, selectable: false,
+    stroke: "#F4FF22", strokeWidth: 5.2, top: 254.8,
+  }) as EditableObject, "detail_inset_border"));
+  canvas.add(attachData(new Rect({
+    angle: -18, fill: "#F4FF22", height: 4, left: 112, selectable: false,
+    top: 264, width: 72,
+  }) as EditableObject, "detail_pointer"));
+
+  const fact = (text: string, role: string, binding: string, left: number, top: number, width: number, fontSize: number, angle: number) => {
+    canvas.add(attachData(new Rect({
+      angle, fill: "#F4FF22", height: fontSize + 10, left, top, width,
+    }) as EditableObject, `${role}_background`));
+    addBoundTextbox(canvas, text, role, binding, {
+      angle, fill: "#151009", fontFamily: "Arial", fontSize, fontWeight: 900,
+      left: left + 5.6, lineHeight: 1.03, top: top + 3.6, width: width - 11.2,
+    });
+  };
+  fact("1992年9月12日升空", "fact_band_1", "content.fact_bands.0", 127, 270, 158, 13.6, -2);
+  fact("首位進入太空的非裔美國女性", "fact_band_2", "content.fact_bands.1", 140, 296.8, 268, 12, -2);
+  fact("7名成員｜材料與生命科學任務", "fact_band_3", "content.fact_bands.2", 121.6, 480, 300, 14.4, -1);
+
+  canvas.add(attachData(new Rect({
+    angle: 1, fill: "#F4FF22", height: 19, left: 10, top: 401.6, width: 115,
+  }) as EditableObject, "detail_label_background"));
+  addBoundTextbox(canvas, "右上圖片放大｜科學艙操作", "detail_label", "content.detail_inset.label", {
+    angle: 1, fill: "#161009", fontFamily: "Arial", fontSize: 8.8, fontWeight: 900,
+    left: 15, lineHeight: 1.1, top: 405, width: 105,
+  });
+  addBoundTextbox(canvas, "與日本太空機構合作\n太空實驗室 J", "supporting_context", "content.supporting_context", {
+    fill: "#FFFFFF", fontFamily: "Arial", fontSize: 10, fontWeight: 500,
+    left: 11, lineHeight: 1.25, top: 426, width: 108,
+  });
+  addBoundTextbox(canvas, "SOON｜太空檔案", "brand_logo", "workspace.logo_url", {
+    fill: "#FFFFFF", fontFamily: "Arial", fontSize: 6, fontWeight: 900,
+    left: 10, top: 524, width: 130,
+  });
+  addBoundTextbox(canvas, "圖片及資料：NASA\nSTS-47・1992年9月", "source", "content.source", {
+    fill: "#D1C6B9", fontFamily: "Arial", fontSize: 5.2, fontWeight: 500,
+    left: 314, lineHeight: 1.4, textAlign: "right", top: 518, width: 109,
+  });
+  canvas.requestRenderAll();
+}
+
+async function addSingleCharacterPunchlineStarter(canvas: Canvas) {
+  canvas.clear();
+  canvas.backgroundColor = "#FFFFFF";
+
+  addBoundTextbox(canvas, "慢慢俱樂部", "brand_anchor", "content.brand_anchor", {
+    fill: "#000000", fontFamily: "STHeiti, PingFang TC, sans-serif", fontSize: 6,
+    fontWeight: 900, left: 164, paintFirst: "stroke", stroke: "#000000",
+    strokeWidth: 0.2, textAlign: "center", top: 16.8, width: 104,
+  });
+  canvas.add(attachData(new Rect({
+    fill: "transparent", height: 15, left: 160, rx: 8, ry: 8, selectable: false,
+    stroke: "#000000", strokeWidth: 1.6, top: 15, width: 112,
+  }) as EditableObject, "brand_anchor_border"));
+
+  const character = (await FabricImage.fromURL(
+    "/templates/single-character-punchline-v2/02-original-snail-monochrome.png",
+    { crossOrigin: "anonymous" },
+  )) as EditableObject;
+  const characterScale = Math.min(148 / (character.width || 1), 184.8 / (character.height || 1));
+  character.set({
+    left: 142, originX: "left", originY: "top", scaleX: characterScale,
+    scaleY: characterScale, top: 42,
+  });
+  character.data = {
+    id: crypto.randomUUID(), role: "character", binding: "content.asset.character", required: true,
+  };
+  canvas.add(character);
+
+  addBoundTextbox(canvas, "時間一到，我就有自己的安排。", "setup", "content.setup", {
+    fill: "#000000", fontFamily: "STHeiti, PingFang TC, sans-serif", fontSize: 12,
+    fontWeight: 900, left: 28, lineHeight: 1.15, textAlign: "center", top: 230, width: 376,
+  });
+  addBoundTextbox(canvas, "唔好阻我\n準時收工", "headline", "content.headline", {
+    fill: "#000000", fontFamily: "STHeiti, PingFang TC, sans-serif", fontSize: 50.4,
+    fontWeight: 900, left: 0, lineHeight: 0.94, scaleX: 1.04, textAlign: "center",
+    top: 258, width: 415,
+  });
+  addBoundTextbox(canvas, "原創角色示範｜文字可編輯", "footer", "content.footer", {
+    fill: "#000000", fontFamily: "STHeiti, PingFang TC, sans-serif", fontSize: 6.8,
+    fontWeight: 900, left: 28, textAlign: "center", top: 511, width: 376,
+  });
   canvas.requestRenderAll();
 }
 
@@ -763,6 +981,14 @@ async function addStarterObjects(
   const style = starterStyleFor(styleCode);
   if (style === "single_photo_news_card" && role === "single") {
     await addSinglePhotoNewsCardStarter(canvas);
+    return;
+  }
+  if (style === "single_people_news_collage" && role === "single") {
+    await addSinglePeopleNewsCollageStarter(canvas);
+    return;
+  }
+  if (style === "single_character_punchline" && role === "single") {
+    await addSingleCharacterPunchlineStarter(canvas);
     return;
   }
   canvas.clear();
