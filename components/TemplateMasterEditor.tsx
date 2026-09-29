@@ -684,8 +684,13 @@ async function addSinglePeopleNewsCollageStarter(canvas: Canvas) {
     0.53,
     0.73,
   );
+  const zoomScale = zoom.scaleX || 1;
   zoom.set({
-    clipPath: new Circle({ originX: "center", originY: "center", radius: 69 }),
+    clipPath: new Circle({
+      originX: "center",
+      originY: "center",
+      radius: 69 / zoomScale,
+    }),
   });
   canvas.add(zoom);
   canvas.add(attachData(new Circle({
