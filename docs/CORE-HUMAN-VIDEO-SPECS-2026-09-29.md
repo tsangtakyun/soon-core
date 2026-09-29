@@ -47,7 +47,15 @@ Core 正式 UI 會另設「真人短片規格審閱層」，清楚標示 Core on
 | `spectacle_first_experience_micro` | `40d9abb0-4029-4015-9789-52beebcb54ea` | `8496133c-629e-440f-b9d8-e91c595973cb` | v1 `review` |
 | `immersive_experience_reflection` | `efde0b7e-fd72-4341-851b-bd808c137403` | `273e62b4-258a-4b6c-9410-5bf4ceb20e14` | v1 `review` |
 
-既有方向增補保存為 `on_location_fact_sprint` v2、`first_person_journey_diary` v2、`human_product_demo_conversion` v2，三者均為 `review`；各自原有 v1 `published` 保持不變。
+既有方向增補保存結果：
+
+| 方向 | Version ID | 版本／狀態 |
+| --- | --- | --- |
+| `first_person_journey_diary` | `494682e8-0feb-429b-8742-31adefa5b9bf` | v2 `review` |
+| `on_location_fact_sprint` | `97df797c-62a2-4e63-af59-b4633e098525` | v2 `review` |
+| `human_product_demo_conversion` | `6933f212-d5b1-4cef-a7eb-f9a2c354ee05` | v2 `review` |
+
+三者各自原有 v1 `published` 保持不變。
 
 ## 部署及驗證
 
