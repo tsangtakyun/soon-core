@@ -14,6 +14,9 @@ export const APPROVED_VALIDATION_DRAFT_IDS = new Set([
   '96794188-4e0b-4807-8529-fe88cc062cbb',
   '08fcdb25-1de1-4338-b74d-4807b460d74a',
   'bbf884d2-a02e-4c9f-9f74-d816dc0a7399',
+  'a5b258e2-a7b1-4340-a9f6-debe3629bfae',
+  'e81923c1-a5d1-4a67-a9bb-9b275da8bd89',
+  'b135a39d-bfd5-446c-b060-0d4f5bf6d3a8',
 ])
 
 export const VALIDATION_TOKEN_TTL_MS = 2 * 60 * 1000
