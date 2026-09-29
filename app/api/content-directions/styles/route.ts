@@ -2,17 +2,21 @@ import { NextResponse } from 'next/server'
 
 import { requireCoreAdmin } from '@/lib/admin-auth'
 import { createSupabaseAdmin } from '@/lib/supabase-admin'
-import { loadPublishedStyles } from '@/lib/style-registry'
+import { isStyleFormat, loadPublishedStyles } from '@/lib/style-registry'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
-export async function GET() {
+export async function GET(request: Request) {
   const auth = await requireCoreAdmin()
   if (!auth.isAdmin) return NextResponse.json({ error: '沒有管理權限' }, { status: 403 })
 
   try {
-    const payload = await loadPublishedStyles({ format: 'instagram_carousel' })
+    const requestedFormat = new URL(request.url).searchParams.get('format') ?? 'instagram_carousel'
+    if (!isStyleFormat(requestedFormat)) {
+      return NextResponse.json({ error: '不支援的內容格式' }, { status: 422 })
+    }
+    const payload = await loadPublishedStyles({ format: requestedFormat })
     const admin = createSupabaseAdmin()
     const { data: drafts, error } = await admin.from('template_master_drafts')
       .select('id,style_id,target_version,status,page_designs,updated_at')
