@@ -55,14 +55,18 @@ type InternalSpecification = {
   code: string;
   name: string;
   description: string;
+  format?: "human_short_video" | "ai_short_video";
   styleId: string;
   versionId: string;
   version: number;
   status: "draft" | "review";
   specificationType: "new_direction" | "existing_direction_supplement";
-  creatorEligible: false;
-  contentStudioEnabled: false;
-  generationEnabled: false;
+  creatorEligible: boolean;
+  contentStudioEnabled: boolean;
+  generationEnabled: boolean;
+  templateBindingAllowed?: boolean;
+  activeBindingCount?: number;
+  playableReferenceCount?: number;
   rules: Record<string, unknown>;
 };
 type RegistryFormat =
@@ -156,14 +160,19 @@ export function ContentDirectionLab() {
   const load = useCallback(async () => {
     const sequence = ++loadSequence.current;
     setLoading(true);
+    const internalEndpoint = registryFormat === "human_short_video"
+      ? "/api/content-directions/internal-human-video-specifications"
+      : registryFormat === "ai_short_video"
+        ? "/api/content-directions/internal-ai-video-specifications"
+        : "";
     const [directionsResponse, stylesResponse, internalResponse] = await Promise.all([
       fetch("/api/content-directions", { cache: "no-store" }),
       fetch(
         `/api/content-directions/styles?format=${encodeURIComponent(registryFormat)}`,
         { cache: "no-store" },
       ),
-      registryFormat === "human_short_video"
-        ? fetch("/api/content-directions/internal-human-video-specifications", { cache: "no-store" })
+      internalEndpoint
+        ? fetch(internalEndpoint, { cache: "no-store" })
         : Promise.resolve(null),
     ]);
     const [directionsPayload, stylesPayload, internalPayload] = await Promise.all([
@@ -191,7 +200,7 @@ export function ContentDirectionLab() {
           : [],
       );
     } else setMessage(stylesPayload.error || "未能載入已發布內容風格");
-    if (registryFormat === "human_short_video" && internalResponse?.ok) {
+    if (internalEndpoint && internalResponse?.ok) {
       setInternalSpecifications(Array.isArray(internalPayload.specifications) ? internalPayload.specifications : []);
     } else setInternalSpecifications([]);
     setLoading(false);
@@ -321,15 +330,19 @@ export function ContentDirectionLab() {
     setMasterBusy("");
   }
 
-  async function importInternalHumanVideoSpecifications() {
+  async function importInternalVideoSpecifications() {
     setImportingInternalSpecifications(true);
     setMessage("");
-    const response = await fetch("/api/content-directions/internal-human-video-specifications", { method: "POST" });
+    const isAiVideo = registryFormat === "ai_short_video";
+    const endpoint = isAiVideo
+      ? "/api/content-directions/internal-ai-video-specifications"
+      : "/api/content-directions/internal-human-video-specifications";
+    const response = await fetch(endpoint, { method: "POST" });
     const payload = await response.json().catch(() => ({}));
     if (response.ok) {
-      setMessage("真人短片規格已存入 Core 內部審閱層；Creator／Content Studio 仍未啟用。");
+      setMessage(`${isAiVideo ? "AI" : "真人"}短片規格已存入 Core 內部審閱層；Creator／Content Studio／生成流程仍未啟用。`);
       await load();
-    } else setMessage(payload.error || "未能匯入真人短片規格");
+    } else setMessage(payload.error || `未能匯入${isAiVideo ? "AI" : "真人"}短片規格`);
     setImportingInternalSpecifications(false);
   }
 
@@ -470,13 +483,13 @@ export function ContentDirectionLab() {
           <p className="empty">未有已發布內容風格。</p>
         )}
       </section>
-      {registryFormat === "human_short_video" ? (
+      {registryFormat === "human_short_video" || registryFormat === "ai_short_video" ? (
         <section className="published-styles internal-specifications">
           <div className="published-head">
             <div>
               <small>Core 內部規格</small>
-              <h2>真人短片規格審閱層</h2>
-              <p>只供 SOON Core 閱讀及核對；未發布、沒有 Template binding，亦不會分發到 Creator／Content Studio。</p>
+              <h2>{registryFormat === "ai_short_video" ? "AI" : "真人"}短片規格審閱層</h2>
+              <p>只供 SOON Core 閱讀及核對；未發布、沒有 Template binding，亦不會分發到 Creator／Content Studio 或啟用生成流程。</p>
             </div>
             <strong>{internalSpecifications.length} 份</strong>
           </div>
@@ -490,21 +503,24 @@ export function ContentDirectionLab() {
                     <small>Creator 未啟用</small>
                   </div>
                   <div className="style-copy">
-                    <small>human_short_video · {specification.status}</small>
+                    <small>{registryFormat} · {specification.status}</small>
                     <h3>{specification.name}</h3>
                     <p>{specification.description}</p>
                     <div>
                       <span>style:{specification.code}:v{specification.version}</span>
                       <b>不可生成</b>
                     </div>
+                    {registryFormat === "ai_short_video" ? (
+                      <small>Active binding {specification.activeBindingCount ?? 0} · Playable reference {specification.playableReferenceCount ?? 0}</small>
+                    ) : null}
                   </div>
                 </article>
               ))}
             </div>
           ) : (
             <div className="master-actions">
-              <button type="button" disabled={importingInternalSpecifications} onClick={() => void importInternalHumanVideoSpecifications()}>
-                {importingInternalSpecifications ? "匯入中…" : "匯入已確認真人短片規格"}
+              <button type="button" disabled={importingInternalSpecifications} onClick={() => void importInternalVideoSpecifications()}>
+                {importingInternalSpecifications ? "匯入中…" : `匯入已確認${registryFormat === "ai_short_video" ? "AI" : "真人"}短片規格`}
               </button>
             </div>
           )}
