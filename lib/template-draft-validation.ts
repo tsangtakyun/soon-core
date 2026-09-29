@@ -1,6 +1,6 @@
 import 'server-only'
 
-import { createHash, timingSafeEqual } from 'node:crypto'
+import { createHash, createHmac, randomBytes, timingSafeEqual } from 'node:crypto'
 
 export const APPROVED_VALIDATION_DRAFT_IDS = new Set([
   '2b1422f3-c42e-40d9-b7fe-632abc987797',
@@ -21,6 +21,12 @@ export const APPROVED_VALIDATION_DRAFT_IDS = new Set([
 
 export const VALIDATION_TOKEN_TTL_MS = 2 * 60 * 1000
 
+export const SIGNED_VALIDATION_DRAFT_IDS = new Set([
+  'a5b258e2-a7b1-4340-a9f6-debe3629bfae',
+  'e81923c1-a5d1-4a67-a9bb-9b275da8bd89',
+  'b135a39d-bfd5-446c-b060-0d4f5bf6d3a8',
+])
+
 function matchesSecret(supplied: string | null, expected: string | undefined) {
   if (!supplied || !expected) return false
   const actual = Buffer.from(supplied)
@@ -34,6 +40,56 @@ export function validValidationIssuer(request: Request) {
 
 export function validationTokenHash(token: string) {
   return createHash('sha256').update(token).digest('hex')
+}
+
+type SignedValidationPayload = {
+  draftId: string
+  updatedAt: string
+  expiresAt: string
+  nonce: string
+}
+
+function validationSigningKey() {
+  return process.env.SOON_CORE_VALIDATION_KEY || ''
+}
+
+function signature(value: string) {
+  return createHmac('sha256', validationSigningKey()).update(value).digest('base64url')
+}
+
+export function issueSignedValidationToken(draftId: string, updatedAt: string, expiresAt: string) {
+  if (!validationSigningKey() || !SIGNED_VALIDATION_DRAFT_IDS.has(draftId)) return null
+  const payload: SignedValidationPayload = {
+    draftId,
+    updatedAt,
+    expiresAt,
+    nonce: randomBytes(16).toString('base64url'),
+  }
+  const encoded = Buffer.from(JSON.stringify(payload), 'utf8').toString('base64url')
+  return `${encoded}.${signature(encoded)}`
+}
+
+export function validSignedValidationToken(token: string, draftId: string, updatedAt: string) {
+  if (!validationSigningKey() || !SIGNED_VALIDATION_DRAFT_IDS.has(draftId) || token.length > 1024) return false
+  const [encoded, suppliedSignature, extra] = token.split('.')
+  if (!encoded || !suppliedSignature || extra) return false
+  const expectedSignature = signature(encoded)
+  const supplied = Buffer.from(suppliedSignature)
+  const expected = Buffer.from(expectedSignature)
+  if (supplied.length !== expected.length || !timingSafeEqual(supplied, expected)) return false
+  try {
+    const payload = JSON.parse(Buffer.from(encoded, 'base64url').toString('utf8')) as SignedValidationPayload
+    const expiresAt = Date.parse(payload.expiresAt)
+    return payload.draftId === draftId
+      && payload.updatedAt === updatedAt
+      && Number.isFinite(expiresAt)
+      && expiresAt > Date.now()
+      && expiresAt <= Date.now() + VALIDATION_TOKEN_TTL_MS
+      && typeof payload.nonce === 'string'
+      && payload.nonce.length >= 16
+  } catch {
+    return false
+  }
 }
 
 export function exactUpdatedAt(value: unknown) {

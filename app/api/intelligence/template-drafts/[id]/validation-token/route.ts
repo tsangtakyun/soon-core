@@ -7,6 +7,8 @@ import { authorisedStyleReader } from '@/lib/style-registry'
 import {
   APPROVED_VALIDATION_DRAFT_IDS,
   exactUpdatedAt,
+  issueSignedValidationToken,
+  SIGNED_VALIDATION_DRAFT_IDS,
   VALIDATION_TOKEN_TTL_MS,
   validationTokenHash,
   validValidationIssuer,
@@ -46,6 +48,11 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
 
   const token = randomBytes(32).toString('base64url')
   const expiresAt = new Date(Date.now() + VALIDATION_TOKEN_TTL_MS).toISOString()
+  if (SIGNED_VALIDATION_DRAFT_IDS.has(id)) {
+    const signedToken = issueSignedValidationToken(id, expectedUpdatedAt, expiresAt)
+    if (!signedToken) return NextResponse.json({ error: 'Validation token unavailable' }, { status: 503, headers: responseHeaders })
+    return NextResponse.json({ token: signedToken, draftId: id, updatedAt: expectedUpdatedAt, expiresAt }, { headers: responseHeaders })
+  }
   const { data: issued, error } = await admin.rpc('issue_template_draft_validation_token', {
     p_draft_id: id,
     p_token_hash: validationTokenHash(token),
