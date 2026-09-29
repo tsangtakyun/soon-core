@@ -95,7 +95,10 @@ export function TemplateCanvasPreview({
   publishedDesigns?: DesignMap | null
   publishedVersion?: number | null
 }) {
-  const publishedRoles = useMemo(() => availableRoles(publishedDesigns, pageRoles), [pageRoles, publishedDesigns])
+  const publishedRoles = useMemo(
+    () => legacyImage ? [{ code: 'cover', label: '封面' }] : availableRoles(publishedDesigns, pageRoles),
+    [legacyImage, pageRoles, publishedDesigns],
+  )
   const draftRoles = useMemo(() => availableRoles(draftDesigns, pageRoles), [draftDesigns, pageRoles])
   const hasPublishedPreview = publishedRoles.length > 0 || Boolean(legacyImage)
   const [source, setSource] = useState<'published' | 'draft'>(hasPublishedPreview ? 'published' : 'draft')
@@ -123,7 +126,7 @@ export function TemplateCanvasPreview({
     </div>
 
     <div className="template-preview-stage">
-      {design?.canvasJson ? <ActualCanvas design={design} label={name} /> : legacyImage ? <Image alt={`${name}目前發布版本`} fill priority={false} sizes="(max-width: 560px) 100vw, 25vw" src={legacyImage} /> : <div className="template-preview-empty"><b>未有實際母版</b><span>建立及儲存第一頁後，這裡會顯示真正輸出。</span></div>}
+      {source === 'published' && legacyImage ? <Image alt={`${name}目前發布版本`} fill priority={false} sizes="(max-width: 560px) 100vw, 25vw" src={legacyImage} /> : design?.canvasJson ? <ActualCanvas design={design} label={name} /> : <div className="template-preview-empty"><b>未有實際母版</b><span>建立及儲存第一頁後，這裡會顯示真正輸出。</span></div>}
       <span className={`template-preview-status ${source}`}>{hasActualTemplate ? source === 'published' ? '實際發布輸出' : '修改中・未發布' : '等待建立'}</span>
     </div>
 

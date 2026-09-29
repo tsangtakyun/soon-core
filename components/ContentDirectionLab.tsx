@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { TemplateCanvasPreview } from "@/components/TemplateCanvasPreview";
 
@@ -81,6 +81,28 @@ const registryFormats: Array<{
     note: "AI 畫面、旁白與生成鏡頭規格",
   },
 ];
+const publishedCardPreviews: Record<string, string> = {
+  character_emotion_story:
+    "/templates/character-emotion-story-v1/approved-preview.jpg",
+  classical_culture_remix:
+    "/templates/classical-culture-remix-v1/approved-preview.jpg",
+  clear_magazine_carousel:
+    "/templates/clear-magazine-carousel-v1/approved-preview.jpg",
+  editorial_office_flash:
+    "/templates/editorial-office-flash-v1/approved-preview.jpg",
+  moody_lifestyle_quiz:
+    "/templates/moody-lifestyle-quiz-v1/approved-preview.jpg",
+  product_focus: "/templates/product-focus-v2/approved-preview.jpg",
+  quiet_research_editorial:
+    "/templates/quiet-research-editorial-v1/approved-preview.jpg",
+  ranking_review: "/templates/ranking-review-v1/approved-preview.jpg",
+  single_character_punchline:
+    "/templates/single-character-punchline-v2/approved-preview.png",
+  single_people_news_collage:
+    "/templates/single-people-news-collage-v2/approved-preview.png",
+  single_photo_news_card:
+    "/templates/single-photo-news-card-v3/approved-preview.png",
+};
 const today = () => new Date().toISOString().slice(0, 10);
 const empty: Direction = {
   title: "",
@@ -132,10 +154,12 @@ export function ContentDirectionLab() {
   const [uploading, setUploading] = useState(false);
   const [analysing, setAnalysing] = useState(false);
   const [message, setMessage] = useState("");
+  const loadSequence = useRef(0);
   const [registryFormat, setRegistryFormat] =
     useState<RegistryFormat>("instagram_carousel");
 
   const load = useCallback(async () => {
+    const sequence = ++loadSequence.current;
     setLoading(true);
     const [directionsResponse, stylesResponse] = await Promise.all([
       fetch("/api/content-directions", { cache: "no-store" }),
@@ -148,6 +172,7 @@ export function ContentDirectionLab() {
       directionsResponse.json().catch(() => ({})),
       stylesResponse.json().catch(() => ({})),
     ]);
+    if (sequence !== loadSequence.current) return;
     if (directionsResponse.ok) setItems(directionsPayload.directions || []);
     else setMessage(directionsPayload.error || "未能載入研究庫");
     if (stylesResponse.ok) {
@@ -180,6 +205,10 @@ export function ContentDirectionLab() {
           JSON.stringify(item).toLowerCase().includes(query.toLowerCase()),
       ),
     [items, kind, query],
+  );
+  const visibleStyles = useMemo(
+    () => styles.filter((style) => style.format === registryFormat),
+    [registryFormat, styles],
   );
   const update = (key: string, value: unknown) =>
     setDraft((current) => ({ ...current, [key]: value }));
@@ -314,7 +343,7 @@ export function ContentDirectionLab() {
               會按內容格式讀取相應風格池；新版不會覆蓋已建立項目的規格快照。
             </p>
           </div>
-          <strong>{styles.length} 款</strong>
+          <strong>{visibleStyles.length} 款</strong>
         </div>
         <div className="registry-format-tabs" aria-label="內容格式">
           {registryFormats.map((format) => (
@@ -331,9 +360,9 @@ export function ContentDirectionLab() {
         </div>
         {loading ? (
           <p className="empty">正在載入風格…</p>
-        ) : styles.length ? (
+        ) : visibleStyles.length ? (
           <div className="style-cards">
-            {styles.map((style) => {
+            {visibleStyles.map((style) => {
               const draft = masterDrafts.find(
                 (item) => item.style_id === style.styleId,
               );
@@ -362,31 +391,10 @@ export function ContentDirectionLab() {
                 pageRoles.length ||
                 (style.format === "instagram_single_feed" ? 1 : 6);
               const legacyImage =
-                style.code === "clear_magazine_carousel"
-                  ? "/templates/clear-magazine-carousel-v1/01-cover.png"
-                  : style.code === "product_focus"
-                    ? "/templates/product-focus-v2/01-cover.jpg"
-                    : style.code === "single_character_punchline"
-                      ? "/templates/single-post-v1/character-punchline.png"
-                      : style.code === "single_photo_news_card"
-                        ? "/templates/single-post-v1/photo-news-card.png"
-                        : style.code === "single_people_news_collage"
-                          ? "/templates/single-people-news-collage-v1/01-production-rumour.png"
-                          : style.code === "ranking_review"
-                            ? "/templates/ranking-review-v1/01-cover.jpg"
-                            : style.code === "editorial_office_flash"
-                              ? "/templates/editorial-office-flash-v1/01-cover.jpg"
-                              : style.code === "moody_lifestyle_quiz"
-                                ? "/templates/moody-lifestyle-quiz-v1/01-cover.jpg"
-                                : style.code === "character_emotion_story"
-                                  ? "/templates/character-emotion-story-v1/01-cover.jpg"
-                                  : style.code === "classical_culture_remix"
-                                    ? "/templates/classical-culture-remix-v1/01-cover.jpg"
-                                  : style.code === "quiet_research_editorial"
-                                    ? "/templates/quiet-research-editorial-v1/01-cover.jpg"
-                                    : style.code === "first_person_journey_diary"
-                                      ? "/templates/first-person-journey-diary-v1/poster.jpg"
-                                      : null;
+                publishedCardPreviews[style.code] ||
+                (style.code === "first_person_journey_diary"
+                  ? "/templates/first-person-journey-diary-v1/poster.jpg"
+                  : null);
               return (
                 <article key={style.styleId} className="style-card">
                   <TemplateCanvasPreview
