@@ -39,7 +39,8 @@ export type PublishedStyle = {
     publishedAt: string
     rules: StyleRules
   }
-  evidence: { confirmedReferenceCount: number }
+  /** previewAsset is the approved published cover, never a style reference. */
+  evidence: { confirmedReferenceCount: number; previewAsset: string | null }
   templates: PublishedTemplate[]
 }
 

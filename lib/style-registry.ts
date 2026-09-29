@@ -3,6 +3,7 @@ import 'server-only'
 import { createHash, timingSafeEqual } from 'node:crypto'
 
 import { createSupabaseAdmin } from '@/lib/supabase-admin'
+import { approvedStylePreview } from '@/lib/approved-style-previews'
 import { STYLE_FORMATS, type PublishedStyle, type PublishedStylesResponse, type PublishedTemplate, type StyleFormat, type StyleRules } from '@/types/style-registry'
 
 type StyleRow = { id: string; code: string; format: StyleFormat; name: string; description: string }
@@ -88,7 +89,10 @@ export async function loadPublishedStyles(filter: { format?: StyleFormat; code?:
     return [{ styleId: style.id, code: style.code, format: style.format, name: style.name, description: style.description,
       version: { id: version.id, number: version.version, ref: `style:${style.code}:v${version.version}`, contentHash: version.content_hash,
         changeSummary: version.change_summary, publishedAt: version.published_at, rules: version.rules },
-      evidence: { confirmedReferenceCount: counts.get(version.id) ?? 0 }, templates: templatesByStyleVersion.get(version.id) ?? [] }]
+      evidence: {
+        confirmedReferenceCount: counts.get(version.id) ?? 0,
+        previewAsset: approvedStylePreview(style.code),
+      }, templates: templatesByStyleVersion.get(version.id) ?? [] }]
   })
   const contentHash = hash(styles)
   return { schemaVersion: 1, registryVersion: `styles-${contentHash.slice(0, 12)}`,
