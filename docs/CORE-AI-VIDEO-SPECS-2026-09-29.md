@@ -219,3 +219,24 @@
 5. 核對原片 URL／影片資產沒有成為公開 playable reference。
 6. 回報 style ID、style version ID、version、status、binding count、隔離欄位及 UI 驗證證據。
 7. 報告用語只可寫「規格已存入 Core review」，不可寫「已可生成」或「已接入 Content Studio」。
+
+## Production 入庫結果
+
+| 方向 | Style ID | Version ID | 版本／狀態 |
+| --- | --- | --- | --- |
+| `ai_absurd_twist_microdrama` | `92ec1d62-24fa-4833-96a7-a7114a934c8e` | `9cffc550-3dc5-4de7-8188-d143f6d8f570` | v1 `review` |
+| `ai_continuity_ensemble_skit` | `066cdf60-8c70-4d6d-ac2e-8cf4a098bd96` | `7bec6f50-203a-4036-8c99-577643d74fb9` | v1 `review` |
+| `ai_host_time_travel_tour` | `4a500f79-ae68-442e-aab1-e80ed10b5905` | `bb4e6c8b-d401-409b-8d8b-8c57cecd3737` | v1 `review` |
+| `ai_artist_reflective_monologue` 增補 | `4a745995-bdc2-4a6b-9966-8a1091dd8123` | `45dab5e2-e3bf-4bab-8d74-a74d2d4bc8f3` | v2 `review` |
+
+正式 Core UI 儲存及重開驗證：
+
+- 已發布 AI 短片仍為原有 2 款 v1；沒有修改或取代 published row。
+- Core 內部審閱層共有 4 份：3 個新方向及 1 個既有藝術家方向增補。
+- 四份均顯示 `creator_eligible=false`、`content_studio_enabled=false`、`generation_enabled=false`、`template_binding_allowed=false`。
+- 四份 active template binding count 均為 0；playable reference count 均為 0。
+- 05 只保存為藝術家方向視覺模組；06 只保存效果研究；08 排除；09 保留來源、權利及消防／電器／充電事實核實限制。
+- Production deployment：`dpl_8wWC8ue3vzTDxgMmW8FkwwoySBYp`（`READY`）
+- Production URL：`https://soon-core-e8ikbcain-tsangtakyun-4639s-projects.vercel.app`
+- Alias：`https://soon-core.vercel.app/content-directions`
+- 驗證用語：規格已存入 Core review；沒有實作或驗證自動影片生成能力，亦沒有接入 Creator／Content Studio。
