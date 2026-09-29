@@ -1662,7 +1662,15 @@ export function TemplateMasterEditor({
     if (!canvas || !master) return;
 
     const activeObject = canvas.getActiveObject();
+    const underlays = canvas
+      .getObjects()
+      .filter(
+        (object) =>
+          (object as EditableObject).data?.role === "reference_underlay",
+      );
+    const underlayOpacities = underlays.map((object) => object.opacity);
     canvas.discardActiveObject();
+    underlays.forEach((object) => object.set({ opacity: 0 }));
     canvas.requestRenderAll();
     const dataUrl = canvas.toDataURL({
       enableRetinaScaling: false,
@@ -1670,6 +1678,9 @@ export function TemplateMasterEditor({
       multiplier: OUTPUT_WIDTH / DISPLAY_WIDTH,
       quality: 1,
     });
+    underlays.forEach((object, index) =>
+      object.set({ opacity: underlayOpacities[index] }),
+    );
     if (activeObject) canvas.setActiveObject(activeObject);
     canvas.requestRenderAll();
 
