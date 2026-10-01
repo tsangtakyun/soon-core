@@ -1,0 +1,308 @@
+{
+  "schema_version": "1.0",
+  "created_at": "2026-10-01T10:33:25.800570+00:00",
+  "policy": {
+    "published_reference": "May use a representative frame because the source is already displayable in the published library; no broader licence claim is made.",
+    "review_rights_unverified": "Do not create a public thumbnail. Show a neutral 封面待補 state until rights are cleared.",
+    "supplement": "Reuse the mapped published style cover; do not create a duplicate card."
+  },
+  "published_assets": [
+    {
+      "style_code": "ai_artist_reflective_monologue",
+      "display_name": "藝術家第一身情感獨白",
+      "format": "ai_short_video",
+      "reference_id": "a2e39e90-0321-4907-93fc-9fa55af17fdd",
+      "source_time_seconds": 44.251,
+      "source_status": "published_reference",
+      "rights_state": "existing_library_display_only",
+      "rights_note": "來源已在現有已發布風格中顯示；此標記不代表取得素材所有權或外部再授權。",
+      "asset": "/content-direction-covers/ai_artist_reflective_monologue.jpg",
+      "object_position_desktop": "50% 50%",
+      "object_position_mobile": "50% 50%",
+      "selection_reason": "藍色星空、金黃麥田與孤立人物同框，最能代表以人工智能繪畫意象承載情感獨白。",
+      "sha256": "fc1e2433b20ddcb6dcfe9d2a70b22331cedb2545ebf3432986427b07191d1877"
+    },
+    {
+      "style_code": "ai_cinematic_founder_biography",
+      "display_name": "電影感創辦人傳記",
+      "format": "ai_short_video",
+      "reference_id": "dbd59258-a793-457a-a754-0dce7ebad362",
+      "source_time_seconds": 45.368,
+      "source_status": "published_reference",
+      "rights_state": "existing_library_display_only",
+      "rights_note": "來源已在現有已發布風格中顯示；此標記不代表取得素材所有權或外部再授權。",
+      "asset": "/content-direction-covers/ai_cinematic_founder_biography.jpg",
+      "object_position_desktop": "50% 45%",
+      "object_position_mobile": "50% 45%",
+      "selection_reason": "創辦人在工坊與旅行箱同框，清楚呈現人物傳記、工藝與品牌起源。",
+      "sha256": "c6ac92b191b7f42315cedf88272d28d5858f281daae40f45989328ea1586eaf7"
+    },
+    {
+      "style_code": "faceless_sensory_food_discovery",
+      "display_name": "無需出鏡沉浸式探店",
+      "format": "human_short_video",
+      "reference_id": "e17a0c74-e59f-48b0-8c70-1416d7ed9580",
+      "source_time_seconds": 23.468,
+      "source_status": "published_reference",
+      "rights_state": "existing_library_display_only",
+      "rights_note": "來源已在現有已發布風格中顯示；此標記不代表取得素材所有權或外部再授權。",
+      "asset": "/content-direction-covers/faceless_sensory_food_discovery.jpg",
+      "object_position_desktop": "50% 51%",
+      "object_position_mobile": "50% 51%",
+      "selection_reason": "菜式近鏡與餐具動作突出感官細節，畫面不依賴主持人正面。",
+      "sha256": "a13591fb7a5bf91a5821f417f4c9147cf3c5b303a9c25600a6ab2244489c8462"
+    },
+    {
+      "style_code": "first_person_journey_diary",
+      "display_name": "第一身旅程實錄",
+      "format": "human_short_video",
+      "reference_id": "7039d641-ba10-4de6-8652-3db9c3ace073",
+      "source_time_seconds": 65.531,
+      "source_status": "published_reference",
+      "rights_state": "existing_library_display_only",
+      "rights_note": "來源已在現有已發布風格中顯示；此標記不代表取得素材所有權或外部再授權。",
+      "asset": "/content-direction-covers/first_person_journey_diary.jpg",
+      "object_position_desktop": "50% 42%",
+      "object_position_mobile": "50% 42%",
+      "selection_reason": "騎馬自拍式旅程畫面同時交代人物、行動與目的地體驗。",
+      "sha256": "4893d81bd87b86136cfa26ed8726be3d3014df767b60f1762d692dad73c5e664"
+    },
+    {
+      "style_code": "host_led_food_culture_tasting",
+      "display_name": "主持試食文化快解",
+      "format": "human_short_video",
+      "reference_id": "b1de7a19-9ace-4c9d-8c8a-ae947fac24fd",
+      "source_time_seconds": 44.296,
+      "source_status": "published_reference",
+      "rights_state": "existing_library_display_only",
+      "rights_note": "來源已在現有已發布風格中顯示；此標記不代表取得素材所有權或外部再授權。",
+      "asset": "/content-direction-covers/host_led_food_culture_tasting.jpg",
+      "object_position_desktop": "50% 56%",
+      "object_position_mobile": "50% 56%",
+      "selection_reason": "主持人與地道菜式同框，直接顯示邊介紹文化、邊試食的形式。",
+      "sha256": "ec59ea3777c7171c0107492db94d2661e81a652a3fb70bdfd489c4a5932ee370"
+    },
+    {
+      "style_code": "human_product_demo_conversion",
+      "display_name": "真人產品實測導購",
+      "format": "human_short_video",
+      "reference_id": "1579000f-8d7a-40ec-bbf5-cf24ef2b7e7f",
+      "source_time_seconds": 15.942,
+      "source_status": "published_reference",
+      "rights_state": "existing_library_display_only",
+      "rights_note": "來源已在現有已發布風格中顯示；此標記不代表取得素材所有權或外部再授權。",
+      "asset": "/content-direction-covers/human_product_demo_conversion.jpg",
+      "object_position_desktop": "50% 53%",
+      "object_position_mobile": "50% 53%",
+      "selection_reason": "操作產品壓縮垃圾的關鍵瞬間，一眼可見問題與功能示範。",
+      "sha256": "02a92ab1461048946a09ae595dda19c1ec8d14239828074643c71f725ba11d8e"
+    },
+    {
+      "style_code": "on_location_fact_sprint",
+      "display_name": "實景冷知識快講",
+      "format": "human_short_video",
+      "reference_id": "6da1a61b-d60e-4caf-b398-705d0a9a03a3",
+      "source_time_seconds": 2.428,
+      "source_status": "published_reference",
+      "rights_state": "existing_library_display_only",
+      "rights_note": "來源已在現有已發布風格中顯示；此標記不代表取得素材所有權或外部再授權。",
+      "asset": "/content-direction-covers/on_location_fact_sprint.jpg",
+      "object_position_desktop": "50% 48%",
+      "object_position_mobile": "50% 48%",
+      "selection_reason": "主持人在電車現場出鏡並配合主題圖示，能概括現場快速講解冷知識。",
+      "sha256": "48e5523014ab39559c779aa6cc94c6fc008cab60f61505de0a2e2a35d47bd75c"
+    },
+    {
+      "style_code": "problem_first_lifestyle_product",
+      "display_name": "生活痛點解法型產品片",
+      "format": "human_short_video",
+      "reference_id": "dc7b635b-a76c-49e4-8b57-6fb51a636239",
+      "source_time_seconds": 24.084,
+      "source_status": "published_reference",
+      "rights_state": "existing_library_display_only",
+      "rights_note": "來源已在現有已發布風格中顯示；此標記不代表取得素材所有權或外部再授權。",
+      "asset": "/content-direction-covers/problem_first_lifestyle_product.jpg",
+      "object_position_desktop": "50% 50%",
+      "object_position_mobile": "50% 50%",
+      "selection_reason": "快速收納雨傘的產品近鏡，清楚承接前段生活痛點與後段解法。",
+      "sha256": "0609ef440e369a4fadd7c100b9617f0d62cc49eaeccb839ce52d38f2c13d5246"
+    },
+    {
+      "style_code": "route_led_city_portrait",
+      "display_name": "城市路線敘事",
+      "format": "human_short_video",
+      "reference_id": "d4aa2e63-f3c8-4ef0-b261-afbcf58a6123",
+      "source_time_seconds": 6.966,
+      "source_status": "published_reference",
+      "rights_state": "existing_library_display_only",
+      "rights_note": "來源已在現有已發布風格中顯示；此標記不代表取得素材所有權或外部再授權。",
+      "asset": "/content-direction-covers/route_led_city_portrait.jpg",
+      "object_position_desktop": "50% 50%",
+      "object_position_mobile": "50% 50%",
+      "selection_reason": "電車、城市建築與路線同框，最直接表達沿交通路線介紹城市。",
+      "sha256": "3b611068bab793cc8ee5fea4ab272884720313a83e4e700af748c9f3fc0f22b9"
+    },
+    {
+      "style_code": "seated_host_research_explainer",
+      "display_name": "坐定主持考據式解說",
+      "format": "human_short_video",
+      "reference_id": "596b1273-4e0d-4149-8a9d-fe747d962b2b",
+      "source_time_seconds": 80.988,
+      "source_status": "published_reference",
+      "rights_state": "existing_library_display_only",
+      "rights_note": "來源已在現有已發布風格中顯示；此標記不代表取得素材所有權或外部再授權。",
+      "asset": "/content-direction-covers/seated_host_research_explainer.jpg",
+      "object_position_desktop": "50% 48%",
+      "object_position_mobile": "50% 48%",
+      "selection_reason": "坐姿主持人手持資料講解，桌面道具與書本強化考據感。",
+      "sha256": "d90ae19c081bfa695fd127f6751c484549a60831c461c0805ffb638769cf2db0"
+    },
+    {
+      "style_code": "situational_multi_dish_tasting",
+      "display_name": "情境探店逐款試食",
+      "format": "human_short_video",
+      "reference_id": "2fe1923c-3a33-49f0-a6b7-eabaf332d665",
+      "source_time_seconds": 67.517,
+      "source_status": "published_reference",
+      "rights_state": "existing_library_display_only",
+      "rights_note": "來源已在現有已發布風格中顯示；此標記不代表取得素材所有權或外部再授權。",
+      "asset": "/content-direction-covers/situational_multi_dish_tasting.jpg",
+      "object_position_desktop": "50% 58%",
+      "object_position_mobile": "50% 58%",
+      "selection_reason": "主持人與多款菜式同框，呈現現場逐款試食與即時反應。",
+      "sha256": "b69b6b8b10574d647a338b38720537d9541b30bbf092d4e47128eb8f89b98880"
+    },
+    {
+      "style_code": "two_person_misunderstanding_twist",
+      "display_name": "雙人誤會反轉短劇",
+      "format": "human_short_video",
+      "reference_id": "a028530e-58f5-4075-a338-e8a56a7a62b7",
+      "source_time_seconds": 92.225,
+      "source_status": "published_reference",
+      "rights_state": "existing_library_display_only",
+      "rights_note": "來源已在現有已發布風格中顯示；此標記不代表取得素材所有權或外部再授權。",
+      "asset": "/content-direction-covers/two_person_misunderstanding_twist.jpg",
+      "object_position_desktop": "50% 53%",
+      "object_position_mobile": "50% 53%",
+      "selection_reason": "兩名角色在同一空間對峙，清楚交代關係衝突與誤會短劇。",
+      "sha256": "0741b7e185cf60c2e25e1e1885a737af236d9cb1825a2fcd3d9b900f951762d7"
+    }
+  ],
+  "review_new_pending": [
+    {
+      "style_code": "multi_stop_city_curation",
+      "display_name": "多站清單式城市精選",
+      "format": "human",
+      "review_reference_key": "human-01",
+      "status": "pending_rights_clearance",
+      "rights_state": "internal_research_only_rights_unverified",
+      "fallback": {
+        "kind": "neutral_pending_cover",
+        "label": "封面待補",
+        "use_source_frame": false
+      },
+      "note": "保留來源與分析紀錄；未確認公開縮圖使用權前，不抽取或發布參考片畫格。"
+    },
+    {
+      "style_code": "spectacle_first_experience_micro",
+      "display_name": "超短奇觀體驗快拍",
+      "format": "human",
+      "review_reference_key": "human-07",
+      "status": "pending_rights_clearance",
+      "rights_state": "internal_research_only_rights_unverified",
+      "fallback": {
+        "kind": "neutral_pending_cover",
+        "label": "封面待補",
+        "use_source_frame": false
+      },
+      "note": "保留來源與分析紀錄；未確認公開縮圖使用權前，不抽取或發布參考片畫格。"
+    },
+    {
+      "style_code": "immersive_experience_reflection",
+      "display_name": "沉浸式體驗反思敘事",
+      "format": "human",
+      "review_reference_key": "human-11",
+      "status": "pending_rights_clearance",
+      "rights_state": "internal_research_only_rights_unverified",
+      "fallback": {
+        "kind": "neutral_pending_cover",
+        "label": "封面待補",
+        "use_source_frame": false
+      },
+      "note": "保留來源與分析紀錄；未確認公開縮圖使用權前，不抽取或發布參考片畫格。"
+    },
+    {
+      "style_code": "ai_absurd_twist_microdrama",
+      "display_name": "AI 荒誕反轉微劇",
+      "format": "ai",
+      "review_reference_key": "ai-01",
+      "status": "pending_rights_clearance",
+      "rights_state": "internal_research_only_rights_unverified",
+      "fallback": {
+        "kind": "neutral_pending_cover",
+        "label": "封面待補",
+        "use_source_frame": false
+      },
+      "note": "保留來源與分析紀錄；未確認公開縮圖使用權前，不抽取或發布參考片畫格。"
+    },
+    {
+      "style_code": "ai_continuity_ensemble_skit",
+      "display_name": "AI 多角色連續情境短劇",
+      "format": "ai",
+      "review_reference_key": "ai-03",
+      "status": "pending_rights_clearance",
+      "rights_state": "internal_research_only_rights_unverified",
+      "fallback": {
+        "kind": "neutral_pending_cover",
+        "label": "封面待補",
+        "use_source_frame": false
+      },
+      "note": "保留來源與分析紀錄；未確認公開縮圖使用權前，不抽取或發布參考片畫格。"
+    },
+    {
+      "style_code": "ai_host_time_travel_tour",
+      "display_name": "AI 實景主持穿越導覽",
+      "format": "ai",
+      "review_reference_key": "ai-07",
+      "status": "pending_rights_clearance",
+      "rights_state": "internal_research_only_rights_unverified",
+      "fallback": {
+        "kind": "neutral_pending_cover",
+        "label": "封面待補",
+        "use_source_frame": false
+      },
+      "note": "保留來源與分析紀錄；未確認公開縮圖使用權前，不抽取或發布參考片畫格。"
+    }
+  ],
+  "review_supplement_reuse": [
+    {
+      "review_style_code": "first_person_journey_diary_v2",
+      "maps_to_published_style_code": "first_person_journey_diary",
+      "reason": "同一敘事方向的補充參考，沿用正式風格卡封面。",
+      "status": "reuse_published_cover"
+    },
+    {
+      "review_style_code": "on_location_fact_sprint_v2",
+      "maps_to_published_style_code": "on_location_fact_sprint",
+      "reason": "同一現場冷知識方向的補充參考，沿用正式風格卡封面。",
+      "status": "reuse_published_cover"
+    },
+    {
+      "review_style_code": "human_product_demo_conversion_v2",
+      "maps_to_published_style_code": "human_product_demo_conversion",
+      "reason": "同一真人產品示範方向的補充參考，沿用正式風格卡封面。",
+      "status": "reuse_published_cover"
+    },
+    {
+      "review_style_code": "ai_artist_reflective_monologue_v2",
+      "maps_to_published_style_code": "ai_artist_reflective_monologue",
+      "reason": "同一人工智能情感獨白方向的補充參考，沿用正式風格卡封面。",
+      "status": "reuse_published_cover"
+    }
+  ],
+  "summary": {
+    "published_cover_count": 12,
+    "review_new_pending_count": 6,
+    "review_supplement_reuse_count": 4
+  }
+}

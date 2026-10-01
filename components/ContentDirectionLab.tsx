@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { TemplateCanvasPreview } from "@/components/TemplateCanvasPreview";
 import { approvedStylePreview } from "@/lib/approved-style-previews";
+import { videoStyleCover } from "@/lib/video-style-covers";
 
 type PublishedStyle = {
   styleId: string;
@@ -42,6 +43,15 @@ type MasterDraft = {
   status: string;
   page_designs: Record<string, PageDesign>;
   updated_at: string;
+};
+type PublishedReference = {
+  id: string;
+  style_id: string;
+  style_version_id: string | null;
+  source_url: string | null;
+  source_account: string | null;
+  evidence_summary: string;
+  extracted_patterns: Record<string, unknown>;
 };
 type InternalSpecification = {
   code: string;
@@ -154,9 +164,63 @@ const registryFormats: Array<{
     note: "AI 畫面、旁白與生成鏡頭規格",
   },
 ];
+
+const videoStyleFallbacks: Record<string, { icon: string; tone: string }> = {
+  on_location_fact_sprint: { icon: "◎", tone: "teal" },
+  two_person_misunderstanding_twist: { icon: "↯", tone: "rose" },
+  situational_multi_dish_tasting: { icon: "◉", tone: "amber" },
+  route_led_city_portrait: { icon: "⌁", tone: "blue" },
+  faceless_sensory_food_discovery: { icon: "◌", tone: "earth" },
+  problem_first_lifestyle_product: { icon: "＋", tone: "violet" },
+  host_led_food_culture_tasting: { icon: "✦", tone: "red" },
+  human_product_demo_conversion: { icon: "◇", tone: "lime" },
+  seated_host_research_explainer: { icon: "¶", tone: "navy" },
+  first_person_journey_diary: { icon: "↗", tone: "sky" },
+  multi_stop_city_curation: { icon: "⋮", tone: "plum" },
+  spectacle_first_experience_micro: { icon: "⚡", tone: "orange" },
+  immersive_experience_reflection: { icon: "◐", tone: "indigo" },
+  ai_artist_reflective_monologue: { icon: "✧", tone: "mauve" },
+  ai_cinematic_founder_biography: { icon: "▰", tone: "sepia" },
+  ai_absurd_twist_microdrama: { icon: "↻", tone: "coral" },
+  ai_continuity_ensemble_skit: { icon: "◈", tone: "cyan" },
+  ai_host_time_travel_tour: { icon: "⌛", tone: "gold" },
+};
+
+function VideoStyleCover({
+  code,
+  name,
+  status,
+  selected,
+  onOpen,
+}: {
+  code: string;
+  name: string;
+  status: "published" | "review";
+  selected: boolean;
+  onOpen: () => void;
+}) {
+  const fallback = videoStyleFallbacks[code] ?? { icon: "▶", tone: "violet" };
+  const cover = videoStyleCover(code);
+  return (
+    <button type="button" className={`video-style-cover ${selected ? "selected" : ""}`} onClick={onOpen} aria-label={`查看${name}風格內容`}>
+      {cover.asset ? <img src={cover.asset} alt={`${name}代表封面`} loading="lazy" style={{ objectPosition: cover.objectPosition }} /> : (
+        <span className={`video-cover-fallback ${fallback.tone}`}>
+          <b aria-hidden="true">{fallback.icon}</b>
+          <em>{name}</em>
+          <small>封面待補</small>
+        </span>
+      )}
+      <span className="video-cover-shade" />
+      <span className={`video-cover-status ${status}`}>{status === "published" ? "已發布" : "Core 審閱"}</span>
+      <span className="video-cover-rights">{cover.rightsLabel}</span>
+      <span className="video-cover-open">點入查看</span>
+    </button>
+  );
+}
 export function ContentDirectionLab() {
   const [styles, setStyles] = useState<PublishedStyle[]>([]);
   const [masterDrafts, setMasterDrafts] = useState<MasterDraft[]>([]);
+  const [publishedReferences, setPublishedReferences] = useState<PublishedReference[]>([]);
   const [internalSpecifications, setInternalSpecifications] = useState<InternalSpecification[]>([]);
   const [importingInternalSpecifications, setImportingInternalSpecifications] = useState(false);
   const [restorations, setRestorations] = useState<VideoReferenceRestoration[]>([]);
@@ -168,6 +232,7 @@ export function ContentDirectionLab() {
   const loadSequence = useRef(0);
   const [registryFormat, setRegistryFormat] =
     useState<RegistryFormat>("instagram_carousel");
+  const [selectedVideoStyleCode, setSelectedVideoStyleCode] = useState("");
 
   const load = useCallback(async () => {
     const sequence = ++loadSequence.current;
@@ -212,7 +277,11 @@ export function ContentDirectionLab() {
           ? stylesPayload.masterDrafts
           : [],
       );
-    } else setMessage(stylesPayload.error || "未能載入已發布內容風格");
+      setPublishedReferences(Array.isArray(stylesPayload.publishedReferences) ? stylesPayload.publishedReferences : []);
+    } else {
+      setPublishedReferences([]);
+      setMessage(stylesPayload.error || "未能載入已發布內容風格");
+    }
     if (internalEndpoint && internalResponse?.ok) {
       setInternalSpecifications(Array.isArray(internalPayload.specifications) ? internalPayload.specifications : []);
     } else setInternalSpecifications([]);
@@ -232,6 +301,22 @@ export function ContentDirectionLab() {
     () => styles.filter((style) => style.format === registryFormat),
     [registryFormat, styles],
   );
+  const selectedPublishedStyle = visibleStyles.find((style) => style.code === selectedVideoStyleCode) ?? null;
+  const selectedInternalSpecification = internalSpecifications.find((specification) => specification.code === selectedVideoStyleCode) ?? null;
+  const newInternalSpecifications = internalSpecifications.filter(
+    (specification) => !visibleStyles.some((style) => style.code === specification.code),
+  );
+  const selectedRestorations = restorations.filter((restoration) => restoration.styleCode === selectedVideoStyleCode);
+  const selectedPromptSets = reconstructionPromptSets.filter((promptSet) => promptSet.styleCode === selectedVideoStyleCode);
+  const selectedPublishedReferences = selectedPublishedStyle
+    ? publishedReferences.filter((reference) => reference.style_id === selectedPublishedStyle.styleId)
+    : [];
+  const selectedPublishedPreview = selectedPublishedStyle?.version.rules.preview &&
+    typeof selectedPublishedStyle.version.rules.preview === "object" &&
+    !Array.isArray(selectedPublishedStyle.version.rules.preview)
+      ? selectedPublishedStyle.version.rules.preview as { video?: unknown }
+      : null;
+  const selectedPublishedVideo = typeof selectedPublishedPreview?.video === "string" ? selectedPublishedPreview.video : "";
   async function editMaster(style: PublishedStyle) {
     setMasterBusy(style.code);
     setMessage("");
@@ -316,7 +401,10 @@ export function ContentDirectionLab() {
               key={format.id}
               type="button"
               className={registryFormat === format.id ? "active" : ""}
-              onClick={() => setRegistryFormat(format.id)}
+              onClick={() => {
+                setRegistryFormat(format.id);
+                setSelectedVideoStyleCode("");
+              }}
             >
               <b>{format.label}</b>
               <span>{format.note}</span>
@@ -328,6 +416,7 @@ export function ContentDirectionLab() {
         ) : visibleStyles.length ? (
           <div className="style-cards">
             {visibleStyles.map((style) => {
+              const reviewSpecification = internalSpecifications.find((specification) => specification.code === style.code);
               const draft = masterDrafts.find(
                 (item) => item.style_id === style.styleId,
               );
@@ -361,16 +450,26 @@ export function ContentDirectionLab() {
                   ? "/templates/first-person-journey-diary-v1/poster.jpg"
                   : null);
               return (
-                <article key={style.styleId} className="style-card">
-                  <TemplateCanvasPreview
-                    draftDesigns={draft?.page_designs}
-                    draftVersion={draft?.target_version}
-                    legacyImage={legacyImage}
-                    name={style.name}
-                    pageRoles={pageRoles}
-                    publishedDesigns={publishedDesigns}
-                    publishedVersion={template?.version.number || null}
-                  />
+                <article key={style.styleId} className={`style-card ${selectedVideoStyleCode === style.code ? "selected-video-style" : ""}`}>
+                  {supportsVisualMaster ? (
+                    <TemplateCanvasPreview
+                      draftDesigns={draft?.page_designs}
+                      draftVersion={draft?.target_version}
+                      legacyImage={legacyImage}
+                      name={style.name}
+                      pageRoles={pageRoles}
+                      publishedDesigns={publishedDesigns}
+                      publishedVersion={template?.version.number || null}
+                    />
+                  ) : (
+                    <VideoStyleCover
+                      code={style.code}
+                      name={style.name}
+                      status="published"
+                      selected={selectedVideoStyleCode === style.code}
+                      onOpen={() => setSelectedVideoStyleCode(style.code)}
+                    />
+                  )}
                   <div className="style-copy">
                     <small>{style.format}</small>
                     <h3>{style.name}</h3>
@@ -408,9 +507,10 @@ export function ContentDirectionLab() {
                         ) : null}
                       </div>
                     ) : (
-                      <small className="single-post-status">
-                        短片時間軸母版 · Script 與鏡頭規格可供 Creator 讀取
-                      </small>
+                      <>
+                        <small className="single-post-status">已發布 · 點入查看影片與風格資料</small>
+                        {reviewSpecification ? <small className="review-supplement-status">另有 Core 審閱增補 v{reviewSpecification.version} · 不可生成</small> : null}
+                      </>
                     )}
                   </div>
                 </article>
@@ -429,7 +529,7 @@ export function ContentDirectionLab() {
               <h2>{registryFormat === "ai_short_video" ? "AI" : "真人"}短片規格審閱層</h2>
               <p>只供 SOON Core 閱讀及核對；未發布、沒有 Template binding，亦不會分發到 Creator／Content Studio 或啟用生成流程。</p>
             </div>
-            <strong>{internalSpecifications.length} 份</strong>
+            <strong>{newInternalSpecifications.length} 新方向 · {internalSpecifications.length - newInternalSpecifications.length} 增補</strong>
           </div>
           {internalSpecifications.length ? (
             <div className="restoration-import-action">
@@ -440,13 +540,15 @@ export function ContentDirectionLab() {
           ) : null}
           {internalSpecifications.length ? (
             <div className="style-cards">
-              {internalSpecifications.map((specification) => (
-                <article key={specification.versionId} className="style-card">
-                  <div className="placeholder-preview">
-                    <span>Core only</span>
-                    <strong>{specification.specificationType === "new_direction" ? "新方向" : "既有方向增補"}</strong>
-                    <small>Creator 未啟用</small>
-                  </div>
+              {newInternalSpecifications.map((specification) => (
+                <article key={specification.versionId} className={`style-card ${selectedVideoStyleCode === specification.code ? "selected-video-style" : ""}`}>
+                  <VideoStyleCover
+                    code={specification.code}
+                    name={specification.name}
+                    status="review"
+                    selected={selectedVideoStyleCode === specification.code}
+                    onOpen={() => setSelectedVideoStyleCode(specification.code)}
+                  />
                   <div className="style-copy">
                     <small>{registryFormat} · {specification.status}</small>
                     <h3>{specification.name}</h3>
@@ -473,7 +575,52 @@ export function ContentDirectionLab() {
               </button>
             </div>
           )}
-          {restorations.length ? (
+          {selectedVideoStyleCode ? (
+            <section className="selected-video-style-detail">
+              <div>
+                <small>已選風格</small>
+                <h3>{selectedInternalSpecification?.name ?? selectedPublishedStyle?.name ?? selectedVideoStyleCode}</h3>
+                <p>{selectedInternalSpecification?.description ?? selectedPublishedStyle?.description}</p>
+              </div>
+              <div className="selected-style-states">
+                {selectedPublishedStyle ? <b>已發布 v{selectedPublishedStyle.version.number}</b> : <span>未發布</span>}
+                {selectedInternalSpecification ? <b>Core 審閱 v{selectedInternalSpecification.version}</b> : null}
+                {selectedInternalSpecification ? <span>Creator／Studio／生成：未啟用</span> : null}
+              </div>
+              {selectedPublishedVideo ? (
+                <div className="selected-published-video">
+                  <small>已發布參考影片 · 預設不播放</small>
+                  <video
+                    controls
+                    preload="none"
+                    poster={videoStyleCover(selectedVideoStyleCode).asset ?? undefined}
+                    src={selectedPublishedVideo}
+                    aria-label={`${selectedPublishedStyle?.name ?? selectedVideoStyleCode}已發布參考影片`}
+                  />
+                </div>
+              ) : null}
+              {selectedPublishedReferences.length ? (
+                <div className="published-reference-list">
+                  {selectedPublishedReferences.map((reference) => {
+                    const url = reference.source_url ?? "";
+                    const isDirectVideo = /\.(mp4|webm|mov)(?:\?|$)/i.test(url);
+                    return (
+                      <article key={reference.id}>
+                        <small>已確認參考</small>
+                        <b>{reference.source_account || "公開參考"}</b>
+                        <p>{reference.evidence_summary || "已連結至此發布風格。"}</p>
+                        {isDirectVideo ? <video controls preload="none" src={url} aria-label={`${selectedPublishedStyle?.name ?? selectedVideoStyleCode}參考影片`} /> : null}
+                        {!isDirectVideo && /^https?:\/\//.test(url) ? <a href={url} target="_blank" rel="noreferrer">開啟原有參考連結</a> : null}
+                      </article>
+                    );
+                  })}
+                </div>
+              ) : null}
+            </section>
+          ) : (
+            <p className="select-style-hint">點選上方 Published 或 Core 審閱風格卡，才會顯示該風格的影片、原片稿與規格。</p>
+          )}
+          {selectedRestorations.length ? (
             <section className="restoration-library">
               <div className="restoration-heading">
                 <div>
@@ -481,7 +628,7 @@ export function ContentDirectionLab() {
                   <h3>時間軸與核實狀態</h3>
                   <p>完整代表片保留 0 秒至結尾；增補只保留指定片段。100% 時間軸覆蓋不代表對白或音訊已核實。</p>
                 </div>
-                <strong>{restorations.length} 項</strong>
+                <strong>{selectedRestorations.length} 項</strong>
               </div>
               <div className="artifact-separation" aria-label="內容類型分隔">
                 <b>原片還原稿：已入庫</b>
@@ -490,7 +637,7 @@ export function ContentDirectionLab() {
                 <span>重建實驗 Prompt：{registryFormat === "ai_short_video" ? (reconstructionPromptSets.length ? "已獨立入庫／未啟用" : "尚未入庫／未啟用") : "另於 AI 短片分頁／未啟用"}</span>
               </div>
               <div className="restoration-list">
-                {restorations.map((restoration) => (
+                {selectedRestorations.map((restoration) => (
                   <details key={restoration.id} className="restoration-card">
                     <summary>
                       <span>
@@ -532,7 +679,7 @@ export function ContentDirectionLab() {
               </div>
             </section>
           ) : null}
-          {registryFormat === "ai_short_video" && reconstructionPromptSets.length ? (
+          {registryFormat === "ai_short_video" && selectedPromptSets.length ? (
             <section className="restoration-library prompt-library">
               <div className="restoration-heading">
                 <div>
@@ -540,10 +687,10 @@ export function ContentDirectionLab() {
                   <h3>模型無關短鏡測試規格</h3>
                   <p>與原片還原稿、風格規格及示範劇本分開保存；目前未生成、未呼叫 API、未使用 credits。</p>
                 </div>
-                <strong>{reconstructionPromptSets.reduce((sum, item) => sum + item.shotCount, 0)} 鏡／{reconstructionPromptSets.length} 組</strong>
+                <strong>{selectedPromptSets.reduce((sum, item) => sum + item.shotCount, 0)} 鏡／{selectedPromptSets.length} 組</strong>
               </div>
               <div className="restoration-list">
-                {reconstructionPromptSets.map((promptSet) => (
+                {selectedPromptSets.map((promptSet) => (
                   <details key={promptSet.id} className="restoration-card">
                     <summary>
                       <span><b>{promptSet.referenceKey}</b><small>重建 Prompt</small></span>
@@ -1039,6 +1186,99 @@ export function ContentDirectionLab() {
           border-radius: 13px;
           background: #1a181d;
         }
+        .style-card.selected-video-style {
+          border-color: #8b5cf6;
+          box-shadow: 0 0 0 1px rgba(139, 92, 246, 0.35);
+        }
+        .video-style-cover {
+          position: relative;
+          display: block;
+          width: 100%;
+          aspect-ratio: 4 / 5;
+          overflow: hidden;
+          border: 0;
+          background: #111;
+          color: white;
+          padding: 0;
+          cursor: pointer;
+        }
+        .video-style-cover.selected {
+          outline: 2px solid #a78bfa;
+          outline-offset: -2px;
+        }
+        .video-style-cover img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          object-position: center;
+        }
+        .video-cover-fallback {
+          position: absolute;
+          inset: 0;
+          display: grid;
+          place-content: center;
+          gap: 9px;
+          padding: 24px;
+          background:
+            radial-gradient(circle at 72% 18%, rgba(255,255,255,.28), transparent 22%),
+            linear-gradient(145deg, #183047, #101217 58%, #291a36);
+          text-align: center;
+        }
+        .video-cover-fallback.rose, .video-cover-fallback.coral, .video-cover-fallback.red { background: radial-gradient(circle at 70% 18%, #fb7185, transparent 25%), linear-gradient(145deg, #4c1522, #111 66%); }
+        .video-cover-fallback.amber, .video-cover-fallback.orange, .video-cover-fallback.gold, .video-cover-fallback.sepia { background: radial-gradient(circle at 72% 18%, #f59e0b, transparent 25%), linear-gradient(145deg, #473015, #111 66%); }
+        .video-cover-fallback.teal, .video-cover-fallback.cyan, .video-cover-fallback.lime { background: radial-gradient(circle at 72% 18%, #2dd4bf, transparent 25%), linear-gradient(145deg, #103c3b, #111 66%); }
+        .video-cover-fallback.violet, .video-cover-fallback.plum, .video-cover-fallback.mauve, .video-cover-fallback.indigo { background: radial-gradient(circle at 72% 18%, #a78bfa, transparent 25%), linear-gradient(145deg, #31205d, #111 66%); }
+        .video-cover-fallback b {
+          color: white;
+          font-size: 56px;
+          line-height: 1;
+          text-shadow: 0 8px 30px rgba(0,0,0,.35);
+        }
+        .video-cover-fallback em {
+          max-width: 190px;
+          color: #fff;
+          font-size: 14px;
+          font-style: normal;
+          font-weight: 850;
+          line-height: 1.35;
+        }
+        .video-cover-fallback small {
+          color: rgba(255,255,255,.68);
+          letter-spacing: .08em;
+        }
+        .video-cover-shade {
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(180deg, rgba(0,0,0,.08), transparent 55%, rgba(0,0,0,.58));
+          pointer-events: none;
+        }
+        .video-cover-status,
+        .video-cover-open,
+        .video-cover-rights {
+          position: absolute;
+          z-index: 2;
+          top: 10px;
+          border-radius: 999px;
+          background: rgba(12,12,14,.82);
+          padding: 5px 8px;
+          font-size: 8px;
+          font-weight: 850;
+          backdrop-filter: blur(7px);
+        }
+        .video-cover-status { left: 10px; color: #ddd; }
+        .video-cover-status.published { color: #bbf7d0; }
+        .video-cover-status.review { color: #e9d5ff; }
+        .video-cover-open { top: auto; right: 10px; bottom: 10px; color: white; }
+        .video-cover-rights {
+          top: auto;
+          bottom: 10px;
+          left: 10px;
+          max-width: calc(100% - 92px);
+          color: #ddd;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
         :global(.template-actual-preview) {
           position: relative;
           background: #0d0c0f;
@@ -1255,6 +1495,63 @@ export function ContentDirectionLab() {
         .restoration-import-action button:disabled {
           opacity: 0.5;
         }
+        .select-style-hint {
+          margin: 16px 0 0;
+          border: 1px dashed #3a3152;
+          border-radius: 10px;
+          padding: 16px;
+          color: #8d8991;
+          font-size: 11px;
+          text-align: center;
+        }
+        .selected-video-style-detail {
+          display: grid;
+          gap: 12px;
+          margin-top: 18px;
+          border: 1px solid #4c3768;
+          border-radius: 12px;
+          background: #18131f;
+          padding: 16px;
+        }
+        .selected-video-style-detail h3 { margin: 5px 0; }
+        .selected-video-style-detail p { margin: 0; color: #999; font-size: 10px; line-height: 1.5; }
+        .selected-style-states { display: flex; flex-wrap: wrap; gap: 7px; }
+        .selected-style-states > * {
+          border-radius: 999px;
+          background: #29212f;
+          color: #aaa;
+          padding: 6px 9px;
+          font-size: 9px;
+        }
+        .selected-style-states b { color: #d8b4fe; }
+        .selected-published-video {
+          display: grid;
+          gap: 7px;
+          max-width: 360px;
+        }
+        .selected-published-video video {
+          width: 100%;
+          max-height: 520px;
+          border-radius: 9px;
+          background: #0b0b0c;
+        }
+        .published-reference-list {
+          display: grid;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          gap: 8px;
+        }
+        .published-reference-list article {
+          display: grid;
+          gap: 6px;
+          min-width: 0;
+          border: 1px solid #302b37;
+          border-radius: 9px;
+          background: #1b181e;
+          padding: 10px;
+        }
+        .published-reference-list b { color: #ddd; font-size: 10px; }
+        .published-reference-list video { width: 100%; max-height: 260px; background: #0b0b0c; }
+        .published-reference-list a { color: #c4b5fd; font-size: 9px; }
         .restoration-library {
           margin-top: 18px;
           border-top: 1px solid #302747;
@@ -1405,6 +1702,12 @@ export function ContentDirectionLab() {
           color: #bbf7d0 !important;
           letter-spacing: 0.02em !important;
         }
+        .review-supplement-status {
+          display: block;
+          margin-top: 6px;
+          color: #d8b4fe !important;
+          letter-spacing: 0 !important;
+        }
         .layout {
           grid-template-columns: 1fr;
         }
@@ -1451,7 +1754,8 @@ export function ContentDirectionLab() {
             grid-template-columns: repeat(2, minmax(0, 1fr));
           }
           .restoration-card summary,
-          .status-grid {
+          .status-grid,
+          .published-reference-list {
             grid-template-columns: 1fr;
           }
         }

@@ -18,11 +18,21 @@ export async function GET(request: Request) {
     }
     const payload = await loadPublishedStyles({ format: requestedFormat })
     const admin = createSupabaseAdmin()
-    const { data: drafts, error } = await admin.from('template_master_drafts')
-      .select('id,style_id,target_version,status,page_designs,updated_at')
-      .in('status', ['draft','review']).order('updated_at', { ascending: false })
-    if (error) throw error
-    return NextResponse.json({ ...payload, masterDrafts: drafts ?? [] })
+    const styleIds = payload.styles.map((style) => style.styleId)
+    const [{ data: drafts, error: draftError }, { data: publishedReferences, error: referenceError }] = await Promise.all([
+      admin.from('template_master_drafts')
+        .select('id,style_id,target_version,status,page_designs,updated_at')
+        .in('status', ['draft','review']).order('updated_at', { ascending: false }),
+      styleIds.length
+        ? admin.from('style_references')
+            .select('id,style_id,style_version_id,source_url,source_account,evidence_summary,extracted_patterns')
+            .in('style_id', styleIds)
+            .eq('confirmation_status', 'confirmed')
+            .in('source_scope', ['public_research', 'soon_owned'])
+        : Promise.resolve({ data: [], error: null }),
+    ])
+    if (draftError || referenceError) throw draftError || referenceError
+    return NextResponse.json({ ...payload, masterDrafts: drafts ?? [], publishedReferences: publishedReferences ?? [] })
   } catch (error) {
     console.error('Content direction styles unavailable', error)
     return NextResponse.json({ error: '未能載入已發布內容風格' }, { status: 500 })
