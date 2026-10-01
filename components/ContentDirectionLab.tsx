@@ -189,13 +189,11 @@ const videoStyleFallbacks: Record<string, { icon: string; tone: string }> = {
 function VideoStyleCover({
   code,
   name,
-  status,
   selected,
   onOpen,
 }: {
   code: string;
   name: string;
-  status: "published" | "review";
   selected: boolean;
   onOpen: () => void;
 }) {
@@ -211,8 +209,6 @@ function VideoStyleCover({
         </span>
       )}
       <span className="video-cover-shade" />
-      <span className={`video-cover-status ${status}`}>{status === "published" ? "已發布" : "Core 審閱"}</span>
-      <span className="video-cover-rights">{cover.rightsLabel}</span>
       <span className="video-cover-open">點入查看</span>
     </button>
   );
@@ -306,6 +302,8 @@ export function ContentDirectionLab() {
   const newInternalSpecifications = internalSpecifications.filter(
     (specification) => !visibleStyles.some((style) => style.code === specification.code),
   );
+  const isVideoRegistry = registryFormat === "human_short_video" || registryFormat === "ai_short_video";
+  const visibleStyleCount = visibleStyles.length + (isVideoRegistry ? newInternalSpecifications.length : 0);
   const selectedRestorations = restorations.filter((restoration) => restoration.styleCode === selectedVideoStyleCode);
   const selectedPromptSets = reconstructionPromptSets.filter((promptSet) => promptSet.styleCode === selectedVideoStyleCode);
   const selectedPublishedReferences = selectedPublishedStyle
@@ -386,14 +384,11 @@ export function ContentDirectionLab() {
       <section className="published-styles">
         <div className="published-head">
           <div>
-            <small>已發布風格目錄</small>
-            <h2>已發布內容風格</h2>
-            <p>
-              Content Studio
-              會按內容格式讀取相應風格池；新版不會覆蓋已建立項目的規格快照。
-            </p>
+            <small>{isVideoRegistry ? "內容風格" : "已發布風格目錄"}</small>
+            <h2>{isVideoRegistry ? `${registryFormat === "ai_short_video" ? "AI" : "真人"}內容風格` : "已發布內容風格"}</h2>
+            <p>{isVideoRegistry ? "每款風格只顯示一次；點入卡片可查看參考、還原稿及目前接入狀態。" : "Content Studio 會按內容格式讀取相應風格池；新版不會覆蓋已建立項目的規格快照。"}</p>
           </div>
-          <strong>{visibleStyles.length} 款</strong>
+          <strong>{visibleStyleCount} 款</strong>
         </div>
         <div className="registry-format-tabs" aria-label="內容格式">
           {registryFormats.map((format) => (
@@ -413,7 +408,7 @@ export function ContentDirectionLab() {
         </div>
         {loading ? (
           <p className="empty">正在載入風格…</p>
-        ) : visibleStyles.length ? (
+        ) : visibleStyleCount ? (
           <div className="style-cards">
             {visibleStyles.map((style) => {
               const reviewSpecification = internalSpecifications.find((specification) => specification.code === style.code);
@@ -465,7 +460,6 @@ export function ContentDirectionLab() {
                     <VideoStyleCover
                       code={style.code}
                       name={style.name}
-                      status="published"
                       selected={selectedVideoStyleCode === style.code}
                       onOpen={() => setSelectedVideoStyleCode(style.code)}
                     />
@@ -508,73 +502,46 @@ export function ContentDirectionLab() {
                       </div>
                     ) : (
                       <>
-                        <small className="single-post-status">已發布 · 點入查看影片與風格資料</small>
-                        {reviewSpecification ? <small className="review-supplement-status">另有 Core 審閱增補 v{reviewSpecification.version} · 不可生成</small> : null}
+                        {reviewSpecification ? <small className="review-supplement-status">另有規格增補 v{reviewSpecification.version}</small> : null}
                       </>
                     )}
                   </div>
                 </article>
               );
             })}
+            {isVideoRegistry ? newInternalSpecifications.map((specification) => (
+              <article key={specification.versionId} className={`style-card ${selectedVideoStyleCode === specification.code ? "selected-video-style" : ""}`}>
+                <VideoStyleCover
+                  code={specification.code}
+                  name={specification.name}
+                  selected={selectedVideoStyleCode === specification.code}
+                  onOpen={() => setSelectedVideoStyleCode(specification.code)}
+                />
+                <div className="style-copy">
+                  <small>內容風格 · v{specification.version}</small>
+                  <h3>{specification.name}</h3>
+                  <p>{specification.description}</p>
+                  <div>
+                    <span>style:{specification.code}:v{specification.version}</span>
+                    <b>點入查看</b>
+                  </div>
+                </div>
+              </article>
+            )) : null}
           </div>
         ) : (
           <p className="empty">未有已發布內容風格。</p>
         )}
       </section>
-      {registryFormat === "human_short_video" || registryFormat === "ai_short_video" ? (
+      {isVideoRegistry ? (
         <section className="published-styles internal-specifications">
-          <div className="published-head">
-            <div>
-              <small>Core 內部規格</small>
-              <h2>{registryFormat === "ai_short_video" ? "AI" : "真人"}短片規格審閱層</h2>
-              <p>只供 SOON Core 閱讀及核對；未發布、沒有 Template binding，亦不會分發到 Creator／Content Studio 或啟用生成流程。</p>
-            </div>
-            <strong>{newInternalSpecifications.length} 新方向 · {internalSpecifications.length - newInternalSpecifications.length} 增補</strong>
-          </div>
-          {internalSpecifications.length ? (
-            <div className="restoration-import-action">
-              <button type="button" disabled={importingRestorations} onClick={() => void importVideoReferenceRestorations()}>
-                {importingRestorations ? "同步中…" : restorations.length ? "重新同步原片還原稿" : "匯入原片還原稿"}
-              </button>
-            </div>
-          ) : null}
-          {internalSpecifications.length ? (
-            <div className="style-cards">
-              {newInternalSpecifications.map((specification) => (
-                <article key={specification.versionId} className={`style-card ${selectedVideoStyleCode === specification.code ? "selected-video-style" : ""}`}>
-                  <VideoStyleCover
-                    code={specification.code}
-                    name={specification.name}
-                    status="review"
-                    selected={selectedVideoStyleCode === specification.code}
-                    onOpen={() => setSelectedVideoStyleCode(specification.code)}
-                  />
-                  <div className="style-copy">
-                    <small>{registryFormat} · {specification.status}</small>
-                    <h3>{specification.name}</h3>
-                    <p>{specification.description}</p>
-                    <div>
-                      <span>style:{specification.code}:v{specification.version}</span>
-                      <b>不可生成</b>
-                    </div>
-                    {registryFormat === "ai_short_video" ? (
-                      <>
-                        <small>Creator {String(specification.creatorEligible)} · Studio {String(specification.contentStudioEnabled)} · Generation {String(specification.generationEnabled)} · Binding allowed {String(specification.templateBindingAllowed ?? false)}</small>
-                        <small>Active binding {specification.activeBindingCount ?? 0} · Playable reference {specification.playableReferenceCount ?? 0}</small>
-                        <small>Style ID {specification.styleId} · Version ID {specification.versionId}</small>
-                      </>
-                    ) : null}
-                  </div>
-                </article>
-              ))}
-            </div>
-          ) : (
+          {!internalSpecifications.length ? (
             <div className="master-actions">
               <button type="button" disabled={importingInternalSpecifications} onClick={() => void importInternalVideoSpecifications()}>
                 {importingInternalSpecifications ? "匯入中…" : `匯入已確認${registryFormat === "ai_short_video" ? "AI" : "真人"}短片規格`}
               </button>
             </div>
-          )}
+          ) : null}
           {selectedVideoStyleCode ? (
             <section className="selected-video-style-detail">
               <div>
@@ -583,10 +550,17 @@ export function ContentDirectionLab() {
                 <p>{selectedInternalSpecification?.description ?? selectedPublishedStyle?.description}</p>
               </div>
               <div className="selected-style-states">
-                {selectedPublishedStyle ? <b>已發布 v{selectedPublishedStyle.version.number}</b> : <span>未發布</span>}
-                {selectedInternalSpecification ? <b>Core 審閱 v{selectedInternalSpecification.version}</b> : null}
-                {selectedInternalSpecification ? <span>Creator／Studio／生成：未啟用</span> : null}
+                {selectedPublishedStyle ? <b>已發布 v{selectedPublishedStyle.version.number}</b> : <span>Core 內容風格</span>}
+                {selectedInternalSpecification ? <b>規格 v{selectedInternalSpecification.version} · 審閱狀態</b> : null}
+                {selectedInternalSpecification ? <span>尚未接入 Content Studio</span> : null}
               </div>
+              {internalSpecifications.length ? (
+                <div className="restoration-import-action">
+                  <button type="button" disabled={importingRestorations} onClick={() => void importVideoReferenceRestorations()}>
+                    {importingRestorations ? "同步中…" : restorations.length ? "重新同步原片還原稿" : "匯入原片還原稿"}
+                  </button>
+                </div>
+              ) : null}
               {selectedPublishedVideo ? (
                 <div className="selected-published-video">
                   <small>已發布參考影片 · 預設不播放</small>
@@ -618,7 +592,7 @@ export function ContentDirectionLab() {
               ) : null}
             </section>
           ) : (
-            <p className="select-style-hint">點選上方 Published 或 Core 審閱風格卡，才會顯示該風格的影片、原片稿與規格。</p>
+            <p className="select-style-hint">點選上方內容風格卡，查看該風格的參考、原片稿與規格。</p>
           )}
           {selectedRestorations.length ? (
             <section className="restoration-library">
