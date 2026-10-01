@@ -1,0 +1,204 @@
+{
+  "schema_version": 2,
+  "contract_id": "human-video-script-pilot-v2",
+  "script_schema_version": "human_video_script.v2",
+  "format": "human_short_video",
+  "status": "active_pilot",
+  "pilot_style_codes": [
+    "situational_multi_dish_tasting",
+    "on_location_fact_sprint"
+  ],
+  "responsibilities": {
+    "core": [
+      "publish immutable style and template versions",
+      "return the exact pilot contract and preparation gaps",
+      "reject a response when a published ID or content hash drifts"
+    ],
+    "consumer": [
+      "enforce the signed-in workspace and user permissions",
+      "persist drafts only inside the requesting workspace",
+      "reuse the shared script and approval implementation across EGG web, EGG app and Content Studio",
+      "keep legacy script_flow drafts readable and reopenable"
+    ]
+  },
+  "legacy_compatibility": {
+    "read": ["script_flow"],
+    "reopen_without_migration": true,
+    "write_schema": "human_video_script.v2",
+    "approval_owner": "shared_consumer_service"
+  },
+  "permissions": {
+    "core_does_not_authorize_workspace_access": true,
+    "cross_product_does_not_grant_cross_workspace_access": true,
+    "consumer_must_check_workspace_membership": true,
+    "consumer_must_check_write_permission_before_save": true,
+    "core_response_contains_no_workspace_content": true
+  },
+  "excluded_capabilities": [
+    "editing_timeline",
+    "automatic_video_editing",
+    "video_generation",
+    "direct_social_publishing",
+    "automatic_style_publication"
+  ],
+  "paid_ai": {
+    "enabled": false,
+    "model_calls_in_core_pilot": 0,
+    "approval_required_before_test": true
+  },
+  "request": {
+    "required": ["consumer", "format", "brief"],
+    "consumer_values": ["egg", "creator"],
+    "material_values": ["footage", "presenter", "research", "licensed_assets"],
+    "permission_values": ["workspace_access_confirmed", "location_filming_confirmed", "subject_release_confirmed", "asset_rights_confirmed"]
+  },
+  "response": {
+    "output_capability": "human_video_script_contract",
+    "generation_enabled": false,
+    "script_schema_version": "human_video_script.v2",
+    "schema_owner": "shared_consumer_service"
+  },
+  "pilots": [
+    {
+      "code": "situational_multi_dish_tasting",
+      "name": "情境探店逐款試食",
+      "provenance_commit": "281bb73f0093769392743385902c3868c9446099",
+      "style": {
+        "id": "5750fa2c-7cb3-4de9-a549-3b556c17e385",
+        "version_id": "a0abba34-edb9-4f02-928a-f4dfba1c3f5b",
+        "version": 1,
+        "status": "published",
+        "content_hash": "95e45b764715d2a54ad19428ed2ecf5cc34c970367e3cf71c786a3ca62023866"
+      },
+      "template": {
+        "id": "dfcc0f61-8da6-44df-a514-49c2156b5904",
+        "version_id": "1705f130-fbe2-40c7-9291-9b6e127b3ce9",
+        "version": 1,
+        "status": "published",
+        "renderer_code": "situational-multi-dish-tasting-v1",
+        "content_hash": "c16e7a29f191e0d5cfd358db6cfb4d4022abefae258d3a81ad98513e180c1542"
+      },
+      "duration_seconds": { "min": 60, "ideal": 120, "max": 180 },
+      "script_contract": {
+        "required_beat_fields": ["role", "time", "visual.description", "visual.action", "spoken.mode", "shooting.instructions", "bRoll.brief"],
+        "optional_beat_fields": ["visual.framing", "spoken.text", "subtitle.text", "assetRefs"],
+        "beat_count_guidance": { "minimum": 5, "ideal": 6, "maximum": 9 },
+        "role_profile": {
+          "mapping_status": "additive_contract_mapping_from_published_narrative_structure",
+          "allowed_roles": ["situational_hook", "arrival", "dish_tasting", "close"],
+          "counts": {
+            "situational_hook": { "minimum": 1, "maximum": 1 },
+            "arrival": { "minimum": 1, "maximum": 1 },
+            "dish_tasting": { "minimum": 2, "maximum": 6 },
+            "close": { "minimum": 1, "maximum": 1 }
+          },
+          "order": ["situational_hook", "arrival", "dish_tasting", "close"],
+          "definitions": [
+            { "code": "situational_hook", "display_name_zh_hant": "情境提問", "required": true, "repeatable": false, "condition": "Exactly once at the start." },
+            { "code": "arrival", "display_name_zh_hant": "到訪與入座", "required": true, "repeatable": false, "condition": "Exactly once after the hook and before any dish tasting." },
+            { "code": "dish_tasting", "display_name_zh_hant": "逐款試食", "required": true, "repeatable": true, "condition": "Repeat 2–6 times. Each beat covers one dish. If shootStatus is not_visited, spoken.mode remains unknown and the beat cannot assert taste, satisfaction or recipe details." },
+            { "code": "close", "display_name_zh_hant": "回扣到訪情境", "required": true, "repeatable": false, "condition": "Exactly once after all dish_tasting beats." }
+          ]
+        },
+        "validation_rules": [
+          "Use 2–6 dish beats between the situational opening and closing callback.",
+          "When shootStatus is not_visited, reaction beats use spoken.mode unknown and contain no asserted taste, satisfaction or recipe claim.",
+          "Before approval after capture, every dish beat needs creator-confirmed spoken text, subtitle text and actual asset references."
+        ]
+      },
+      "narrative_structure": [
+        { "order": 1, "role": "情境提問", "seconds": 10 },
+        { "order": 2, "role": "到訪與入座", "seconds": 15 },
+        { "order": 3, "role": "首款食物試食", "seconds": 25 },
+        { "order": 4, "role": "第二款與未知", "seconds": 25 },
+        { "order": 5, "role": "第三款與細節", "seconds": 30 },
+        { "order": 6, "role": "回扣到訪情境", "seconds": 15 }
+      ],
+      "repeatable_unit": ["完整上桌與名稱", "關鍵細節或食用動作", "第一口及自然停頓", "具體味道與口感", "有限度評價或保留未知"],
+      "shot_guidance": ["主持與實景同框", "餐桌中近景", "每款完整上桌畫面", "食物及食用動作近鏡", "真實入口與停頓", "同行者互動", "離開及環境回扣"],
+      "voice": {
+        "mode": "第一身現場對話",
+        "rule": "不得在拍攝前虛構味覺、滿意反應或未知配方。"
+      },
+      "captions": {
+        "language": "繁體中文書面語",
+        "max_lines": 2,
+        "cards": "每次換菜用食物名稱字卡；字幕避開食物及手部。",
+        "human_review_required": true
+      },
+      "required_materials": ["footage", "presenter"],
+      "required_permissions": ["workspace_access_confirmed", "location_filming_confirmed", "subject_release_confirmed", "asset_rights_confirmed"],
+      "fact_and_rights_checks": ["店名、位置、價格及營業資料要有來源與日期", "邀約或招待要披露", "味覺不能證明配方", "只使用有權使用的實拍及音樂字體"]
+    },
+    {
+      "code": "on_location_fact_sprint",
+      "name": "實景冷知識快講",
+      "provenance_commit": "2dc003ed0e3d48647e73c3073e34e42908dc18e8",
+      "style": {
+        "id": "b03a01ed-8859-4508-a0db-adf0e74ef2e9",
+        "version_id": "a6f2d8a3-8447-482c-bb6e-81ff3885510f",
+        "version": 1,
+        "status": "published",
+        "content_hash": "bd636192e29c0f3d1be1fb66923780b60698f0fb56d3fe3ecd00f44b94708bbb"
+      },
+      "template": {
+        "id": "be5c42e6-a7e5-4ec7-8867-408a50efafbe",
+        "version_id": "51f7e30e-62dd-4da0-acdf-727cfcebadea",
+        "version": 1,
+        "status": "published",
+        "renderer_code": "on-location-fact-sprint-v1",
+        "content_hash": "eb70e25784fb5fb77b028e7ecec2076eaf04ab0cec84ce8e59a54a707ce8960a"
+      },
+      "duration_seconds": { "min": 45, "ideal": 60, "max": 90 },
+      "script_contract": {
+        "required_beat_fields": ["role", "time", "visual.description", "visual.action", "spoken.mode", "spoken.text", "subtitle.text", "shooting.instructions", "bRoll.brief", "assetRefs", "evidence.sourceRefs"],
+        "optional_beat_fields": ["visual.framing"],
+        "beat_count_guidance": { "minimum": 6, "ideal": 7, "maximum": 9 },
+        "role_profile": {
+          "mapping_status": "additive_contract_mapping_from_published_narrative_structure",
+          "allowed_roles": ["question_hook", "topic_setup", "fact", "close"],
+          "counts": {
+            "question_hook": { "minimum": 1, "maximum": 1 },
+            "topic_setup": { "minimum": 1, "maximum": 1 },
+            "fact": { "minimum": 3, "maximum": 6 },
+            "close": { "minimum": 1, "maximum": 1 }
+          },
+          "order": ["question_hook", "topic_setup", "fact", "close"],
+          "definitions": [
+            { "code": "question_hook", "display_name_zh_hant": "提問開場", "required": true, "repeatable": false, "condition": "Exactly once at the start." },
+            { "code": "topic_setup", "display_name_zh_hant": "系列與主題", "required": true, "repeatable": false, "condition": "Exactly once after the question hook and before factual beats." },
+            { "code": "fact", "display_name_zh_hant": "已核實知識", "required": true, "repeatable": true, "condition": "Repeat 3–6 times. Each beat carries one claim with verified evidence, source references, checked date and corresponding media asset before approval; accelerated Q&A is pacing within these fact beats, not a separate role." },
+            { "code": "close", "display_name_zh_hant": "回扣提問", "required": true, "repeatable": false, "condition": "Exactly once after all fact beats." }
+          ]
+        },
+        "validation_rules": [
+          "Use at least three factual beats between the opening question/topic and closing callback.",
+          "Every factual beat needs verified evidence, source references, checked date and a corresponding media asset before approval.",
+          "Numeric and date claims retain their time sensitivity; unverified claims cannot be approved."
+        ]
+      },
+      "narrative_structure": [
+        { "order": 1, "role": "提問開場", "seconds": 5 },
+        { "order": 2, "role": "系列與主題", "seconds": 5 },
+        { "order": 3, "role": "基礎知識串連", "seconds": 20 },
+        { "order": 4, "role": "加速問答", "seconds": 20 },
+        { "order": 5, "role": "回扣提問", "seconds": 10 }
+      ],
+      "repeatable_unit": ["一項知識", "來源與核對日期", "一個對應實景或資料圖", "一句清楚解釋", "必要的不確定標示"],
+      "shot_guidance": ["主持、主題實物及問題同框", "每項知識換有意義的位置或景別", "實景中景與內部全景", "來源照片及數字字卡", "物件細節", "回到開場構圖"],
+      "voice": {
+        "mode": "主持對鏡快講",
+        "rule": "每句只承擔一項已核實資訊；傳聞及時效數字不得寫成永久事實。"
+      },
+      "captions": {
+        "language": "繁體中文書面語",
+        "max_lines": 2,
+        "cards": "數字、年份及資料來源要與相應畫面同步；字幕避開人物及道具。",
+        "human_review_required": true
+      },
+      "required_materials": ["footage", "presenter", "research", "licensed_assets"],
+      "required_permissions": ["workspace_access_confirmed", "location_filming_confirmed", "subject_release_confirmed", "asset_rights_confirmed"],
+      "fact_and_rights_checks": ["至少三項知識各自有來源", "數字及日期標示核對日期", "來源圖片逐項記錄使用權", "私人提案不得寫成政府政策", "未核實傳聞要刪除或清楚標示"]
+    }
+  ]
+}

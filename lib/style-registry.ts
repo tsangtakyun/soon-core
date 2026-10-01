@@ -4,6 +4,7 @@ import { createHash, timingSafeEqual } from 'node:crypto'
 
 import { createSupabaseAdmin } from '@/lib/supabase-admin'
 import { approvedStylePreview } from '@/lib/approved-style-previews'
+import { humanVideoScriptContract, humanVideoScriptRegistrySeed } from '@/lib/human-video-script-pilots'
 import { STYLE_FORMATS, type PublishedStyle, type PublishedStylesResponse, type PublishedTemplate, type StyleFormat, type StyleRules } from '@/types/style-registry'
 
 type StyleRow = { id: string; code: string; format: StyleFormat; name: string; description: string }
@@ -94,11 +95,16 @@ export async function loadPublishedStyles(filter: { format?: StyleFormat; code?:
         previewAsset: approvedStylePreview(style.code),
       }, templates: templatesByStyleVersion.get(version.id) ?? [] }]
   })
-  const contentHash = hash(styles)
-  return { schemaVersion: 1, registryVersion: `styles-${contentHash.slice(0, 12)}`,
+  const registryVersion = `styles-${hash({ styles, scriptContracts: humanVideoScriptRegistrySeed() }).slice(0, 12)}`
+  const contractedStyles = styles.map((style) => {
+    const scriptContract = humanVideoScriptContract(style, registryVersion)
+    return scriptContract ? { ...style, scriptContract } : style
+  })
+  const contentHash = hash(contractedStyles)
+  return { schemaVersion: 1, registryVersion,
     compatibility: { minimumCreatorContract: 1, supportedFormats: STYLE_FORMATS }, format: filter.format ?? null,
     updatedAt: styles.reduce<string | null>((latestAt, item) => !latestAt || item.version.publishedAt > latestAt ? item.version.publishedAt : latestAt, null),
-    contentHash, styles }
+    contentHash, styles: contractedStyles }
 }
 
 function emptyResponse(format: StyleFormat | null): PublishedStylesResponse {

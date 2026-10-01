@@ -8,6 +8,39 @@ export type StyleRules = Record<string, unknown> & {
   format: StyleFormat
 }
 
+export type HumanVideoBeatField =
+  | 'role'
+  | 'time'
+  | 'visual.description'
+  | 'visual.action'
+  | 'visual.framing'
+  | 'spoken.mode'
+  | 'spoken.text'
+  | 'subtitle.text'
+  | 'shooting.instructions'
+  | 'bRoll.brief'
+  | 'assetRefs'
+  | 'evidence.sourceRefs'
+
+export type HumanVideoScriptStyleContract = {
+  contractVersion: 'human_video_script.v2'
+  format: 'human_short_video'
+  styleCode: string
+  styleName?: string
+  styleVersionId: string | null
+  styleVersionRef: string
+  styleContentHash: string
+  registryVersion: string
+  requiredBeatFields: HumanVideoBeatField[]
+  optionalBeatFields: HumanVideoBeatField[]
+  beatCountGuidance?: { minimum: number; ideal: number; maximum: number }
+  roleProfile?: {
+    allowedRoles: string[]
+    counts: Record<string, { minimum: number; maximum: number }>
+    order: string[]
+  }
+}
+
 export type PublishedTemplate = {
   templateId: string
   code: string
@@ -42,6 +75,8 @@ export type PublishedStyle = {
   /** previewAsset is the approved published cover, never a style reference. */
   evidence: { confirmedReferenceCount: number; previewAsset: string | null }
   templates: PublishedTemplate[]
+  /** Present only when Core publishes a script contract; listing it does not enable generation. */
+  scriptContract?: HumanVideoScriptStyleContract
 }
 
 export type PublishedStylesResponse = {
