@@ -19,7 +19,7 @@ export function videoStyleCover(code: string): VideoStyleCover {
       objectPosition: approved.object_position_desktop,
       status: 'published_reference',
       selectionReason: approved.selection_reason,
-      rightsLabel: '現有內容庫可展示參考',
+      rightsLabel: '可展示封面',
     }
   }
   const waiting = pending.get(code)

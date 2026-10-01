@@ -6,8 +6,9 @@
     "dev": "node node_modules/next/dist/bin/next dev",
     "verify:template-assets": "node scripts/verify-template-assets.mjs",
     "verify:video-style-covers": "node scripts/verify-video-style-covers.mjs",
+    "verify:approved-single-feed-covers": "node scripts/verify-approved-single-feed-covers.mjs",
     "verify:deployed-template-assets": "node scripts/verify-deployed-template-assets.mjs",
-    "prebuild": "npm run verify:template-assets && npm run verify:video-style-covers",
+    "prebuild": "npm run verify:template-assets && npm run verify:video-style-covers && npm run verify:approved-single-feed-covers",
     "build": "node node_modules/next/dist/bin/next build --webpack",
     "start": "node node_modules/next/dist/bin/next start",
     "lint": "node node_modules/eslint/bin/eslint.js"

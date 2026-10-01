@@ -609,7 +609,7 @@ export function ContentDirectionLab() {
                         <small>已確認參考</small>
                         <b>{reference.source_account || "公開參考"}</b>
                         <p>{reference.evidence_summary || "已連結至此發布風格。"}</p>
-                        {isDirectVideo ? <video controls preload="none" src={url} aria-label={`${selectedPublishedStyle?.name ?? selectedVideoStyleCode}參考影片`} /> : null}
+                        {isDirectVideo && !selectedPublishedVideo ? <video controls preload="none" src={url} aria-label={`${selectedPublishedStyle?.name ?? selectedVideoStyleCode}參考影片`} /> : null}
                         {!isDirectVideo && /^https?:\/\//.test(url) ? <a href={url} target="_blank" rel="noreferrer">開啟原有參考連結</a> : null}
                       </article>
                     );
