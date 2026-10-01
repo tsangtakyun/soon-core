@@ -1,18 +1,10 @@
 "use client";
 
-import Image from "next/image";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { TemplateCanvasPreview } from "@/components/TemplateCanvasPreview";
 import { approvedStylePreview } from "@/lib/approved-style-previews";
 
-type Direction = Record<string, any> & {
-  id?: string;
-  title: string;
-  account: string;
-  whySave: string;
-  reusableTemplate: string;
-};
 type PublishedStyle = {
   styleId: string;
   code: string;
@@ -100,58 +92,13 @@ const registryFormats: Array<{
     note: "AI 畫面、旁白與生成鏡頭規格",
   },
 ];
-const today = () => new Date().toISOString().slice(0, 10);
-const empty: Direction = {
-  title: "",
-  account: "",
-  platform: "Threads",
-  postUrl: "",
-  imageUrl: "",
-  capturedAt: today(),
-  publishedAt: "",
-  kind: "moment",
-  eventName: "",
-  eventDate: "",
-  trendStage: "發布後",
-  trendDependency: "高度",
-  reusableWindow: "3 日",
-  responseSpeed: "",
-  hook: "",
-  format: "",
-  visualPattern: "",
-  tone: "",
-  cta: "",
-  mechanism: "",
-  whySave: "",
-  reusableTemplate: "",
-  industries: [],
-  objectives: [],
-  tags: [],
-  risks: "",
-  metrics: {},
-  metricsCapturedAt: today(),
-};
-const split = (value: string) =>
-  value
-    .split(/[，,；;\n]/)
-    .map((item) => item.trim())
-    .filter(Boolean);
-const join = (value: unknown) => (Array.isArray(value) ? value.join("，") : "");
-
 export function ContentDirectionLab() {
-  const [items, setItems] = useState<Direction[]>([]);
   const [styles, setStyles] = useState<PublishedStyle[]>([]);
   const [masterDrafts, setMasterDrafts] = useState<MasterDraft[]>([]);
   const [internalSpecifications, setInternalSpecifications] = useState<InternalSpecification[]>([]);
   const [importingInternalSpecifications, setImportingInternalSpecifications] = useState(false);
   const [masterBusy, setMasterBusy] = useState("");
-  const [draft, setDraft] = useState<Direction>(empty);
-  const [query, setQuery] = useState("");
-  const [kind, setKind] = useState("all");
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [uploading, setUploading] = useState(false);
-  const [analysing, setAnalysing] = useState(false);
   const [message, setMessage] = useState("");
   const loadSequence = useRef(0);
   const [registryFormat, setRegistryFormat] =
@@ -165,8 +112,7 @@ export function ContentDirectionLab() {
       : registryFormat === "ai_short_video"
         ? "/api/content-directions/internal-ai-video-specifications"
         : "";
-    const [directionsResponse, stylesResponse, internalResponse] = await Promise.all([
-      fetch("/api/content-directions", { cache: "no-store" }),
+    const [stylesResponse, internalResponse] = await Promise.all([
       fetch(
         `/api/content-directions/styles?format=${encodeURIComponent(registryFormat)}`,
         { cache: "no-store" },
@@ -175,14 +121,11 @@ export function ContentDirectionLab() {
         ? fetch(internalEndpoint, { cache: "no-store" })
         : Promise.resolve(null),
     ]);
-    const [directionsPayload, stylesPayload, internalPayload] = await Promise.all([
-      directionsResponse.json().catch(() => ({})),
+    const [stylesPayload, internalPayload] = await Promise.all([
       stylesResponse.json().catch(() => ({})),
       internalResponse?.json().catch(() => ({})) ?? Promise.resolve({}),
     ]);
     if (sequence !== loadSequence.current) return;
-    if (directionsResponse.ok) setItems(directionsPayload.directions || []);
-    else setMessage(directionsPayload.error || "未能載入研究庫");
     if (stylesResponse.ok) {
       const published = Array.isArray(stylesPayload.styles)
         ? stylesPayload.styles
@@ -208,100 +151,10 @@ export function ContentDirectionLab() {
   useEffect(() => {
     void load();
   }, [load]);
-  const filtered = useMemo(
-    () =>
-      items.filter(
-        (item) =>
-          (kind === "all" || item.kind === kind) &&
-          JSON.stringify(item).toLowerCase().includes(query.toLowerCase()),
-      ),
-    [items, kind, query],
-  );
   const visibleStyles = useMemo(
     () => styles.filter((style) => style.format === registryFormat),
     [registryFormat, styles],
   );
-  const update = (key: string, value: unknown) =>
-    setDraft((current) => ({ ...current, [key]: value }));
-  const edit = (item: Direction) => {
-    setDraft(item);
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
-
-  async function upload(file: File) {
-    setUploading(true);
-    setMessage("");
-    try {
-      const form = new FormData();
-      form.append("file", file);
-      const response = await fetch("/api/content-directions/upload", {
-        method: "POST",
-        body: form,
-      });
-      const payload = await response.json().catch(() => ({}));
-      if (response.ok) update("imageUrl", payload.url);
-      else setMessage(payload.error || "未能上載截圖");
-    } catch {
-      setMessage("未能上載截圖，請檢查連線後再試。");
-    } finally {
-      setUploading(false);
-    }
-  }
-
-  async function analyse() {
-    if (!draft.imageUrl || !draft.account.trim()) {
-      setMessage("請先上載截圖並輸入帳號或品牌名稱。");
-      return;
-    }
-    setAnalysing(true);
-    setMessage("");
-    try {
-      const response = await fetch("/api/content-directions/analyse", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({
-          imageUrl: draft.imageUrl,
-          account: draft.account,
-          platform: draft.platform,
-          capturedAt: draft.capturedAt,
-        }),
-      });
-      const payload = await response.json().catch(() => ({}));
-      if (response.ok) {
-        setDraft((current) => ({
-          ...current,
-          ...payload.suggestion,
-          imageUrl: current.imageUrl,
-          account: current.account,
-          capturedAt: current.capturedAt,
-          metricsCapturedAt: current.capturedAt,
-        }));
-        setMessage("AI 初步拆解已完成；請核對及修改後再加入研究庫。");
-      } else setMessage(payload.error || "AI 暫時未能分析截圖");
-    } catch {
-      setMessage("AI 分析連線中斷，請稍後再試。");
-    } finally {
-      setAnalysing(false);
-    }
-  }
-
-  async function save() {
-    setSaving(true);
-    setMessage("");
-    const response = await fetch("/api/content-directions", {
-      method: draft.id ? "PATCH" : "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify(draft),
-    });
-    const payload = await response.json().catch(() => ({}));
-    if (response.ok) {
-      setDraft({ ...empty, capturedAt: today(), metricsCapturedAt: today() });
-      setMessage(draft.id ? "研究已更新。" : "已加入內容方向研究室。");
-      await load();
-    } else setMessage(payload.error || "未能儲存研究");
-    setSaving(false);
-  }
-
   async function editMaster(style: PublishedStyle) {
     setMasterBusy(style.code);
     setMessage("");
@@ -353,10 +206,6 @@ export function ContentDirectionLab() {
           <small>SOON 內容風格</small>
           <h1>選擇內容風格</h1>
           <p>以卡片瀏覽內容風格與參考資料；最近更新的項目會優先顯示。</p>
-        </div>
-        <div className="summary">
-          <strong>{items.length}</strong>
-          <span>個風格研究</span>
         </div>
       </header>
       {message ? <div className="notice">{message}</div> : null}
@@ -530,461 +379,6 @@ export function ContentDirectionLab() {
           )}
         </section>
       ) : null}
-      <div className="quick">
-        <div>
-          <small>快速收集</small>
-          <h2>上載截圖及帳號，由 AI 建立初稿</h2>
-          <p>先生成可編輯草稿；確認內容後才正式加入研究庫。</p>
-        </div>
-        <div className="quick-actions">
-          <label>
-            <span>帳號／品牌</span>
-            <input
-              value={draft.account}
-              onChange={(e) => update("account", e.target.value)}
-              placeholder="例如：@ikea_taiwan"
-            />
-          </label>
-          <label className="quick-upload">
-            {uploading ? "正在上載…" : draft.imageUrl ? "更換截圖" : "上載截圖"}
-            <input
-              type="file"
-              accept="image/png,image/jpeg,image/webp"
-              disabled={uploading || analysing}
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) void upload(file);
-                e.target.value = "";
-              }}
-            />
-          </label>
-          <button
-            type="button"
-            disabled={
-              uploading || analysing || !draft.imageUrl || !draft.account.trim()
-            }
-            onClick={() => void analyse()}
-          >
-            {analysing ? "AI 正在拆解…" : "AI 建立草稿"}
-          </button>
-        </div>
-      </div>
-      <div className="layout">
-        <form
-          onSubmit={(event) => {
-            event.preventDefault();
-            void save();
-          }}
-        >
-          <div className="form-head">
-            <div>
-              <small>{draft.id ? "EDIT RESEARCH" : "DAILY CAPTURE"}</small>
-              <h2>{draft.id ? "編輯方向研究" : "收藏今日好帖"}</h2>
-            </div>
-            {draft.id ? (
-              <button
-                type="button"
-                onClick={() =>
-                  setDraft({
-                    ...empty,
-                    capturedAt: today(),
-                    metricsCapturedAt: today(),
-                  })
-                }
-              >
-                新增另一篇
-              </button>
-            ) : null}
-          </div>
-          <div className="fields">
-            <label>
-              研究標題
-              <input
-                required
-                value={draft.title}
-                onChange={(e) => update("title", e.target.value)}
-                placeholder="例如：用高價新品反轉推低價產品"
-              />
-            </label>
-            <label>
-              帳號／品牌
-              <input
-                required
-                value={draft.account}
-                onChange={(e) => update("account", e.target.value)}
-                placeholder="例如：@ikea_taiwan"
-              />
-            </label>
-          </div>
-          <div className="fields three">
-            <label>
-              平台
-              <select
-                value={draft.platform}
-                onChange={(e) => update("platform", e.target.value)}
-              >
-                <option>Threads</option>
-                <option>Instagram</option>
-                <option>TikTok</option>
-                <option>YouTube</option>
-                <option>Facebook</option>
-                <option>LinkedIn</option>
-                <option>其他</option>
-              </select>
-            </label>
-            <label>
-              類型
-              <select
-                value={draft.kind}
-                onChange={(e) => update("kind", e.target.value)}
-              >
-                <option value="moment">時機營銷</option>
-                <option value="evergreen">長青內容方向</option>
-              </select>
-            </label>
-            <label>
-              收藏日期
-              <input
-                type="date"
-                value={draft.capturedAt || ""}
-                onChange={(e) => update("capturedAt", e.target.value)}
-              />
-            </label>
-          </div>
-          <div className="fields">
-            <label>
-              原帖連結
-              <input
-                type="url"
-                value={draft.postUrl || ""}
-                onChange={(e) => update("postUrl", e.target.value)}
-                placeholder="https://…"
-              />
-            </label>
-            <label>
-              發布日期
-              <input
-                type="date"
-                value={draft.publishedAt || ""}
-                onChange={(e) => update("publishedAt", e.target.value)}
-              />
-            </label>
-          </div>
-          <div className="shot">
-            <div>
-              {draft.imageUrl ? (
-                <Image
-                  src={draft.imageUrl}
-                  alt="收藏帖文截圖"
-                  fill
-                  sizes="(max-width: 900px) 100vw, 460px"
-                />
-              ) : (
-                <span>未有截圖</span>
-              )}
-            </div>
-            <label className="upload">
-              {uploading ? "正在上載…" : "上載截圖"}
-              <input
-                type="file"
-                accept="image/png,image/jpeg,image/webp"
-                disabled={uploading}
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) void upload(file);
-                  e.target.value = "";
-                }}
-              />
-            </label>
-          </div>
-          {draft.kind === "moment" ? (
-            <fieldset>
-              <legend>事件背景</legend>
-              <div className="fields">
-                <label>
-                  Event／熱話
-                  <input
-                    value={draft.eventName || ""}
-                    onChange={(e) => update("eventName", e.target.value)}
-                    placeholder="iPhone 18 Pro 發布"
-                  />
-                </label>
-                <label>
-                  Event Date
-                  <input
-                    type="date"
-                    value={draft.eventDate || ""}
-                    onChange={(e) => update("eventDate", e.target.value)}
-                  />
-                </label>
-              </div>
-              <div className="fields four">
-                <label>
-                  Trend Stage
-                  <select
-                    value={draft.trendStage || ""}
-                    onChange={(e) => update("trendStage", e.target.value)}
-                  >
-                    <option>發布前</option>
-                    <option>發布當日</option>
-                    <option>發布後</option>
-                    <option>預訂期</option>
-                    <option>正式發售</option>
-                    <option>熱度回落</option>
-                  </select>
-                </label>
-                <label>
-                  熱話依賴
-                  <select
-                    value={draft.trendDependency || ""}
-                    onChange={(e) => update("trendDependency", e.target.value)}
-                  >
-                    <option>高度</option>
-                    <option>中度</option>
-                    <option>低度</option>
-                  </select>
-                </label>
-                <label>
-                  可重用窗口
-                  <input
-                    value={draft.reusableWindow || ""}
-                    onChange={(e) => update("reusableWindow", e.target.value)}
-                    placeholder="24 小時／3 日"
-                  />
-                </label>
-                <label>
-                  品牌反應速度
-                  <input
-                    value={draft.responseSpeed || ""}
-                    onChange={(e) => update("responseSpeed", e.target.value)}
-                    placeholder="發布後 5 小時"
-                  />
-                </label>
-              </div>
-            </fieldset>
-          ) : null}
-          <fieldset>
-            <legend>內容拆解</legend>
-            <div className="fields">
-              <label>
-                Hook
-                <textarea
-                  rows={3}
-                  value={draft.hook || ""}
-                  onChange={(e) => update("hook", e.target.value)}
-                />
-              </label>
-              <label>
-                格式
-                <input
-                  value={draft.format || ""}
-                  onChange={(e) => update("format", e.target.value)}
-                  placeholder="比較表／單圖／Carousel"
-                />
-              </label>
-            </div>
-            <div className="fields">
-              <label>
-                視覺結構
-                <textarea
-                  rows={3}
-                  value={draft.visualPattern || ""}
-                  onChange={(e) => update("visualPattern", e.target.value)}
-                />
-              </label>
-              <label>
-                語氣／CTA
-                <textarea
-                  rows={3}
-                  value={[draft.tone, draft.cta].filter(Boolean).join("\n")}
-                  onChange={(e) => {
-                    const [tone, ...cta] = e.target.value.split("\n");
-                    setDraft((current) => ({
-                      ...current,
-                      tone,
-                      cta: cta.join("\n"),
-                    }));
-                  }}
-                />
-              </label>
-            </div>
-            <label>
-              內容機制
-              <textarea
-                rows={4}
-                value={draft.mechanism || ""}
-                onChange={(e) => update("mechanism", e.target.value)}
-                placeholder="如何令觀眾停留、產生共鳴、收藏或分享？"
-              />
-            </label>
-          </fieldset>
-          <fieldset className="core">
-            <legend>SOON 判斷</legend>
-            <label>
-              為何值得收藏
-              <textarea
-                required
-                rows={4}
-                value={draft.whySave}
-                onChange={(e) => update("whySave", e.target.value)}
-              />
-            </label>
-            <label>
-              可重用內容方向
-              <textarea
-                required
-                rows={5}
-                value={draft.reusableTemplate}
-                onChange={(e) => update("reusableTemplate", e.target.value)}
-                placeholder="抽象成可套用其他客戶的方向，而非直接抄原帖"
-              />
-            </label>
-            <div className="fields three">
-              <label>
-                適用行業
-                <input
-                  value={join(draft.industries)}
-                  onChange={(e) => update("industries", split(e.target.value))}
-                />
-              </label>
-              <label>
-                宣傳企劃目標
-                <input
-                  value={join(draft.objectives)}
-                  onChange={(e) => update("objectives", split(e.target.value))}
-                />
-              </label>
-              <label>
-                標籤
-                <input
-                  value={join(draft.tags)}
-                  onChange={(e) => update("tags", split(e.target.value))}
-                />
-              </label>
-            </div>
-            <label>
-              風險提示
-              <textarea
-                rows={3}
-                value={draft.risks || ""}
-                onChange={(e) => update("risks", e.target.value)}
-              />
-            </label>
-          </fieldset>
-          <fieldset>
-            <legend>表現快照</legend>
-            <div className="metrics">
-              {[
-                ["likes", "Like"],
-                ["comments", "Comment"],
-                ["shares", "Share"],
-                ["reposts", "Repost"],
-                ["views", "View"],
-              ].map(([key, label]) => (
-                <label key={key}>
-                  {label}
-                  <input
-                    type="number"
-                    min="0"
-                    value={draft.metrics?.[key] ?? ""}
-                    onChange={(e) =>
-                      update("metrics", {
-                        ...(draft.metrics || {}),
-                        [key]: e.target.value,
-                      })
-                    }
-                  />
-                </label>
-              ))}
-              <label>
-                截取日期
-                <input
-                  type="date"
-                  value={draft.metricsCapturedAt || ""}
-                  onChange={(e) => update("metricsCapturedAt", e.target.value)}
-                />
-              </label>
-            </div>
-          </fieldset>
-          <button className="save" disabled={saving || uploading}>
-            {saving ? "正在儲存…" : draft.id ? "儲存修改" : "加入研究庫"}
-          </button>
-        </form>
-        <aside>
-          <div className="index-head">
-            <div>
-              <small>內容方向索引</small>
-              <h2>研究庫</h2>
-            </div>
-            <input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="搜尋品牌、事件或打法"
-            />
-          </div>
-          <div className="filters">
-            <button
-              type="button"
-              className={kind === "all" ? "active" : ""}
-              onClick={() => setKind("all")}
-            >
-              全部
-            </button>
-            <button
-              type="button"
-              className={kind === "moment" ? "active" : ""}
-              onClick={() => setKind("moment")}
-            >
-              Moment
-            </button>
-            <button
-              type="button"
-              className={kind === "evergreen" ? "active" : ""}
-              onClick={() => setKind("evergreen")}
-            >
-              Evergreen
-            </button>
-          </div>
-          {loading ? (
-            <p className="empty">正在載入…</p>
-          ) : filtered.length ? (
-            <div className="cards">
-              {filtered.map((item) => (
-                <button
-                  type="button"
-                  className="card"
-                  key={item.id}
-                  onClick={() => edit(item)}
-                >
-                  {item.imageUrl ? (
-                    <span className="thumb">
-                      <Image src={item.imageUrl} alt="" fill sizes="110px" />
-                    </span>
-                  ) : null}
-                  <span className="card-body">
-                    <span className="meta">
-                      <em className={item.kind}>
-                        {item.kind === "moment" ? "MOMENT" : "EVERGREEN"}
-                      </em>
-                      <i>{item.platform}</i>
-                    </span>
-                    <strong>{item.title}</strong>
-                    <b>{item.account}</b>
-                    {item.eventName ? (
-                      <small>
-                        {item.eventName} · {item.trendStage}
-                      </small>
-                    ) : null}
-                    <p>{item.reusableTemplate}</p>
-                  </span>
-                </button>
-              ))}
-            </div>
-          ) : (
-            <p className="empty">未有研究。由今日第一篇好帖開始。</p>
-          )}
-        </aside>
-      </div>
       <style jsx>{`
         .lab {
           padding: 40px;
