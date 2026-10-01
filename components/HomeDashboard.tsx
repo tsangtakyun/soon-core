@@ -353,8 +353,8 @@ export function HomeDashboard({ afterHero }: { afterHero?: ReactNode }) {
         />
         {data && (
           <UnmatchedDocumentsPanel
-            documents={data.unmatchedDocuments}
-            clients={data.clients}
+            documents={data.unmatchedDocuments ?? []}
+            clients={data.clients ?? []}
             onChanged={() => load()}
           />
         )}
@@ -366,7 +366,7 @@ export function HomeDashboard({ afterHero }: { afterHero?: ReactNode }) {
               aside="身份 · Pipeline · 文件 · Timeline · Audit"
             />
             <div className="quick-links">
-              {data.clients.map((client) => (
+              {(data.clients ?? []).map((client) => (
                 <Link key={client.id} href={`/clients/${client.id}`}>
                   {client.legal_name || client.name} →
                 </Link>
@@ -403,7 +403,7 @@ export function HomeDashboard({ afterHero }: { afterHero?: ReactNode }) {
             />
             {data?.decisions?.length ? (
               <div className="rows">
-                {data.decisions.map((item) => (
+                {(data.decisions ?? []).map((item) => (
                   <article className="decision" key={item.id}>
                     <strong>{item.title}</strong>
                     <p>{item.context}</p>
@@ -472,11 +472,11 @@ export function HomeDashboard({ afterHero }: { afterHero?: ReactNode }) {
           open={editorOpen}
           onClose={() => setEditorOpen(false)}
           onSaved={() => load()}
-          items={data.stateItems}
-          clients={data.clients}
-          decisions={data.decisions}
-          orders={data.workOrders}
-          history={data.history}
+          items={data.stateItems ?? []}
+          clients={data.clients ?? []}
+          decisions={data.decisions ?? []}
+          orders={data.workOrders ?? []}
+          history={data.history ?? []}
         />
       )}
       <style jsx global>{`
