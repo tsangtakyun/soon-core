@@ -97,13 +97,19 @@ export async function loadInternalAiVideoSpecifications(): Promise<InternalSpeci
   const versionIds = sourceVersions.map((version) => version.id)
   const [{ data: bindings, error: bindingError }, { data: references, error: referenceError }] = await Promise.all([
     admin.from('style_template_bindings').select('style_version_id').in('style_version_id', versionIds).eq('status', 'active'),
-    admin.from('style_references').select('style_version_id').in('style_version_id', versionIds),
+    admin.from('style_references').select('style_version_id,extracted_patterns').in('style_version_id', versionIds),
   ])
   if (bindingError || referenceError) throw bindingError || referenceError
   const bindingCounts = new Map<string, number>()
   const referenceCounts = new Map<string, number>()
   for (const binding of bindings ?? []) bindingCounts.set(binding.style_version_id, (bindingCounts.get(binding.style_version_id) ?? 0) + 1)
-  for (const reference of references ?? []) referenceCounts.set(reference.style_version_id, (referenceCounts.get(reference.style_version_id) ?? 0) + 1)
+  for (const reference of references ?? []) {
+    const patterns = reference.extracted_patterns as JsonRecord
+    const rightsPolicy = patterns?.rights_policy as JsonRecord | undefined
+    if (rightsPolicy?.playable_reference === true) {
+      referenceCounts.set(reference.style_version_id, (referenceCounts.get(reference.style_version_id) ?? 0) + 1)
+    }
+  }
   const styleById = new Map((styles ?? []).map((style) => [style.id, style]))
   return sourceVersions.flatMap((version) => {
     const style = styleById.get(version.style_id)

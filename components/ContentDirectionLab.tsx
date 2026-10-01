@@ -61,6 +61,68 @@ type InternalSpecification = {
   playableReferenceCount?: number;
   rules: Record<string, unknown>;
 };
+type RestorationSegment = {
+  order?: number;
+  start_seconds?: number;
+  end_seconds?: number;
+  visual_description_zh?: string;
+  speech_or_narration_zh?: string | null;
+  speech_source?: string;
+  on_screen_text_zh?: string | null;
+  notes?: string | null;
+  verification?: { visual?: string; audio?: string; translation?: string };
+};
+type VideoReferenceRestoration = {
+  id: string;
+  styleCode: string;
+  styleName: string;
+  styleVersionId: string;
+  version: number;
+  status: string;
+  sourceUrl: string;
+  referenceKey: string;
+  format: "human" | "ai";
+  selection: "full_representative" | "fragment_supplement";
+  role: string;
+  sourceFilename: string;
+  durationSeconds: number;
+  coverageSeconds: number;
+  coveragePercent: number;
+  audioTranscriptStatus: string;
+  visualStatus: string;
+  rightsState: string;
+  timeline: RestorationSegment[];
+  unverified: string[];
+};
+type ReconstructionShot = {
+  shot_id?: string;
+  source_time?: { start_seconds?: number; end_seconds?: number };
+  test_duration_seconds?: number;
+  prompt_zh?: string;
+  composition?: string;
+  camera_motion?: string;
+  action?: string;
+  expression?: string;
+  dialogue_or_narration_placeholder_zh?: string;
+  audio_post?: string;
+  transition_out?: string;
+  acceptance_checks?: string[];
+};
+type AiReconstructionPromptSet = {
+  id: string;
+  styleCode: string;
+  styleName: string;
+  styleVersionId: string;
+  version: number;
+  status: string;
+  referenceKey: string;
+  displayName: string;
+  promptStatus: string;
+  sourceDurationSeconds: number;
+  shotCount: number;
+  shots: ReconstructionShot[];
+  unverified: string[];
+};
 type RegistryFormat =
   | "instagram_carousel"
   | "instagram_single_feed"
@@ -97,6 +159,9 @@ export function ContentDirectionLab() {
   const [masterDrafts, setMasterDrafts] = useState<MasterDraft[]>([]);
   const [internalSpecifications, setInternalSpecifications] = useState<InternalSpecification[]>([]);
   const [importingInternalSpecifications, setImportingInternalSpecifications] = useState(false);
+  const [restorations, setRestorations] = useState<VideoReferenceRestoration[]>([]);
+  const [reconstructionPromptSets, setReconstructionPromptSets] = useState<AiReconstructionPromptSet[]>([]);
+  const [importingRestorations, setImportingRestorations] = useState(false);
   const [masterBusy, setMasterBusy] = useState("");
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
@@ -112,7 +177,8 @@ export function ContentDirectionLab() {
       : registryFormat === "ai_short_video"
         ? "/api/content-directions/internal-ai-video-specifications"
         : "";
-    const [stylesResponse, internalResponse] = await Promise.all([
+    const restorationFormat = registryFormat === "human_short_video" ? "human" : registryFormat === "ai_short_video" ? "ai" : "";
+    const [stylesResponse, internalResponse, restorationsResponse] = await Promise.all([
       fetch(
         `/api/content-directions/styles?format=${encodeURIComponent(registryFormat)}`,
         { cache: "no-store" },
@@ -120,10 +186,14 @@ export function ContentDirectionLab() {
       internalEndpoint
         ? fetch(internalEndpoint, { cache: "no-store" })
         : Promise.resolve(null),
+      restorationFormat
+        ? fetch(`/api/content-directions/internal-video-reference-restorations?format=${restorationFormat}`, { cache: "no-store" })
+        : Promise.resolve(null),
     ]);
-    const [stylesPayload, internalPayload] = await Promise.all([
+    const [stylesPayload, internalPayload, restorationsPayload] = await Promise.all([
       stylesResponse.json().catch(() => ({})),
       internalResponse?.json().catch(() => ({})) ?? Promise.resolve({}),
+      restorationsResponse?.json().catch(() => ({})) ?? Promise.resolve({}),
     ]);
     if (sequence !== loadSequence.current) return;
     if (stylesResponse.ok) {
@@ -146,6 +216,13 @@ export function ContentDirectionLab() {
     if (internalEndpoint && internalResponse?.ok) {
       setInternalSpecifications(Array.isArray(internalPayload.specifications) ? internalPayload.specifications : []);
     } else setInternalSpecifications([]);
+    if (restorationsResponse?.ok) {
+      setRestorations(Array.isArray(restorationsPayload.restorations) ? restorationsPayload.restorations : []);
+      setReconstructionPromptSets(Array.isArray(restorationsPayload.promptSets) ? restorationsPayload.promptSets : []);
+    } else {
+      setRestorations([]);
+      setReconstructionPromptSets([]);
+    }
     setLoading(false);
   }, [registryFormat]);
   useEffect(() => {
@@ -197,6 +274,18 @@ export function ContentDirectionLab() {
       await load();
     } else setMessage(payload.error || `未能匯入${isAiVideo ? "AI" : "真人"}短片規格`);
     setImportingInternalSpecifications(false);
+  }
+
+  async function importVideoReferenceRestorations() {
+    setImportingRestorations(true);
+    setMessage("");
+    const response = await fetch("/api/content-directions/internal-video-reference-restorations", { method: "POST" });
+    const payload = await response.json().catch(() => ({}));
+    if (response.ok) {
+      setMessage(`原片還原稿已存入 Core：新增 ${payload.insertedCount ?? 0} 項、更新 ${payload.updatedCount ?? 0} 項；重建 Prompt 新增 ${payload.promptSetInsertedCount ?? 0} 組、更新 ${payload.promptSetUpdatedCount ?? 0} 組；音訊人工逐句核實仍為 0。`);
+      await load();
+    } else setMessage(payload.error || "未能匯入原片還原稿");
+    setImportingRestorations(false);
   }
 
   return (
@@ -343,6 +432,13 @@ export function ContentDirectionLab() {
             <strong>{internalSpecifications.length} 份</strong>
           </div>
           {internalSpecifications.length ? (
+            <div className="restoration-import-action">
+              <button type="button" disabled={importingRestorations} onClick={() => void importVideoReferenceRestorations()}>
+                {importingRestorations ? "同步中…" : restorations.length ? "重新同步原片還原稿" : "匯入原片還原稿"}
+              </button>
+            </div>
+          ) : null}
+          {internalSpecifications.length ? (
             <div className="style-cards">
               {internalSpecifications.map((specification) => (
                 <article key={specification.versionId} className="style-card">
@@ -377,6 +473,113 @@ export function ContentDirectionLab() {
               </button>
             </div>
           )}
+          {restorations.length ? (
+            <section className="restoration-library">
+              <div className="restoration-heading">
+                <div>
+                  <small>原片還原稿</small>
+                  <h3>時間軸與核實狀態</h3>
+                  <p>完整代表片保留 0 秒至結尾；增補只保留指定片段。100% 時間軸覆蓋不代表對白或音訊已核實。</p>
+                </div>
+                <strong>{restorations.length} 項</strong>
+              </div>
+              <div className="artifact-separation" aria-label="內容類型分隔">
+                <b>原片還原稿：已入庫</b>
+                <span>風格規格：連結現有 review 版本</span>
+                <span>示範劇本：獨立內容，未混入本稿</span>
+                <span>重建實驗 Prompt：未交付／未啟用</span>
+              </div>
+              <div className="restoration-list">
+                {restorations.map((restoration) => (
+                  <details key={restoration.id} className="restoration-card">
+                    <summary>
+                      <span>
+                        <b>{restoration.referenceKey}</b>
+                        <small>{restoration.selection === "full_representative" ? "完整代表片" : "精選片段"}</small>
+                      </span>
+                      <span>{restoration.styleName} · v{restoration.version} {restoration.status}</span>
+                      <strong>{restoration.coverageSeconds.toFixed(2)}s / {restoration.durationSeconds.toFixed(2)}s · {restoration.coveragePercent}%</strong>
+                    </summary>
+                    <div className="restoration-body">
+                      <p className="source-file">{restoration.sourceFilename}</p>
+                      <div className="status-grid">
+                        <span><b>畫面</b>{restoration.visualStatus}</span>
+                        <span><b>音訊</b>{restoration.audioTranscriptStatus}</span>
+                        <span><b>權利</b>只供內部研究／未核實／不可重傳</span>
+                      </div>
+                      <div className="timeline-list">
+                        {restoration.timeline.map((segment, index) => (
+                          <article key={`${restoration.id}-${segment.order ?? index}`}>
+                            <header>
+                              <b>{Number(segment.start_seconds ?? 0).toFixed(2)}–{Number(segment.end_seconds ?? 0).toFixed(2)}s</b>
+                              <span>畫面：{segment.verification?.visual ?? "待核實"}</span>
+                              <span>音訊：{segment.verification?.audio ?? "待人工聆聽"}</span>
+                              <span>翻譯：{segment.verification?.translation ?? "不適用／待核實"}</span>
+                            </header>
+                            <p><b>畫面：</b>{segment.visual_description_zh || "未提供"}</p>
+                            <p><b>對白／旁白：</b>{segment.speech_or_narration_zh || "未提供；待人工聆聽"}</p>
+                            {segment.on_screen_text_zh ? <p><b>畫面文字：</b>{segment.on_screen_text_zh}</p> : null}
+                            {segment.notes ? <p><b>備註：</b>{segment.notes}</p> : null}
+                          </article>
+                        ))}
+                      </div>
+                      {restoration.unverified.length ? (
+                        <div className="unverified"><b>尚未核實</b><ul>{restoration.unverified.map((item) => <li key={item}>{item}</li>)}</ul></div>
+                      ) : null}
+                    </div>
+                  </details>
+                ))}
+              </div>
+            </section>
+          ) : null}
+          {registryFormat === "ai_short_video" && reconstructionPromptSets.length ? (
+            <section className="restoration-library prompt-library">
+              <div className="restoration-heading">
+                <div>
+                  <small>重建實驗 Prompt</small>
+                  <h3>模型無關短鏡測試規格</h3>
+                  <p>與原片還原稿、風格規格及示範劇本分開保存；目前未生成、未呼叫 API、未使用 credits。</p>
+                </div>
+                <strong>{reconstructionPromptSets.reduce((sum, item) => sum + item.shotCount, 0)} 鏡／{reconstructionPromptSets.length} 組</strong>
+              </div>
+              <div className="restoration-list">
+                {reconstructionPromptSets.map((promptSet) => (
+                  <details key={promptSet.id} className="restoration-card">
+                    <summary>
+                      <span><b>{promptSet.referenceKey}</b><small>重建 Prompt</small></span>
+                      <span>{promptSet.displayName} · v{promptSet.version} {promptSet.status}</span>
+                      <strong>{promptSet.shotCount} 個短鏡</strong>
+                    </summary>
+                    <div className="restoration-body">
+                      <div className="status-grid">
+                        <span><b>狀態</b>{promptSet.promptStatus}</span>
+                        <span><b>執行</b>生成 0／API 0／credits 0</span>
+                        <span><b>音訊</b>人工逐句核實 0</span>
+                      </div>
+                      <div className="timeline-list">
+                        {promptSet.shots.map((shot, index) => (
+                          <article key={`${promptSet.id}-${shot.shot_id ?? index}`}>
+                            <header>
+                              <b>{shot.shot_id ?? `鏡頭 ${index + 1}`}</b>
+                              <span>來源 {Number(shot.source_time?.start_seconds ?? 0).toFixed(2)}–{Number(shot.source_time?.end_seconds ?? 0).toFixed(2)}s</span>
+                              <span>測試片長 {Number(shot.test_duration_seconds ?? 0).toFixed(2)}s</span>
+                            </header>
+                            <p><b>Prompt：</b>{shot.prompt_zh}</p>
+                            <p><b>構圖／運鏡：</b>{shot.composition}；{shot.camera_motion}</p>
+                            <p><b>動作／表情：</b>{shot.action}；{shot.expression}</p>
+                            <p><b>對白 placeholder：</b>{shot.dialogue_or_narration_placeholder_zh}</p>
+                            <p><b>聲音後期：</b>{shot.audio_post}</p>
+                            {shot.acceptance_checks?.length ? <p><b>QA：</b>{shot.acceptance_checks.join("；")}</p> : null}
+                          </article>
+                        ))}
+                      </div>
+                      {promptSet.unverified.length ? <div className="unverified"><b>尚未核實</b><ul>{promptSet.unverified.map((item) => <li key={item}>{item}</li>)}</ul></div> : null}
+                    </div>
+                  </details>
+                ))}
+              </div>
+            </section>
+          ) : null}
         </section>
       ) : null}
       <style jsx>{`
@@ -1034,6 +1237,162 @@ export function ContentDirectionLab() {
           opacity: 0.45;
           cursor: wait;
         }
+        .restoration-import-action {
+          display: flex;
+          justify-content: flex-end;
+          margin: -4px 0 14px;
+        }
+        .restoration-import-action button {
+          border: 1px solid #57406f;
+          border-radius: 8px;
+          background: #2a1b3d;
+          color: #e9d5ff;
+          padding: 8px 12px;
+          font-size: 9px;
+          font-weight: 800;
+          cursor: pointer;
+        }
+        .restoration-import-action button:disabled {
+          opacity: 0.5;
+        }
+        .restoration-library {
+          margin-top: 18px;
+          border-top: 1px solid #302747;
+          padding-top: 18px;
+        }
+        .restoration-heading {
+          display: flex;
+          justify-content: space-between;
+          gap: 16px;
+          align-items: end;
+        }
+        .restoration-heading h3 {
+          margin: 5px 0;
+          font-size: 18px;
+        }
+        .restoration-heading p {
+          margin: 0;
+          color: #999;
+          font-size: 11px;
+        }
+        .restoration-heading > strong {
+          color: #c4b5fd;
+          font-size: 12px;
+        }
+        .artifact-separation {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 7px;
+          margin: 13px 0;
+        }
+        .artifact-separation > * {
+          border: 1px solid #343039;
+          border-radius: 999px;
+          background: #1a181d;
+          color: #aaa;
+          padding: 6px 9px;
+          font-size: 9px;
+        }
+        .artifact-separation b {
+          border-color: #4c1d95;
+          color: #d8b4fe;
+        }
+        .restoration-list {
+          display: grid;
+          gap: 8px;
+        }
+        .restoration-card {
+          border: 1px solid #302b37;
+          border-radius: 10px;
+          background: #17151a;
+          overflow: hidden;
+        }
+        .restoration-card summary {
+          display: grid;
+          grid-template-columns: minmax(150px, .65fr) 1fr auto;
+          gap: 12px;
+          align-items: center;
+          padding: 12px 14px;
+          color: #aaa;
+          font-size: 10px;
+          cursor: pointer;
+        }
+        .restoration-card summary > span:first-child {
+          display: flex;
+          gap: 8px;
+          align-items: center;
+        }
+        .restoration-card summary b,
+        .restoration-card summary strong {
+          color: #f3e8ff;
+        }
+        .restoration-card summary small {
+          border-radius: 999px;
+          background: #2a1b3d;
+          padding: 4px 7px;
+          color: #c4b5fd;
+          letter-spacing: 0;
+        }
+        .restoration-body {
+          border-top: 1px solid #302b37;
+          padding: 14px;
+        }
+        .source-file {
+          margin: 0 0 10px;
+          color: #8d8991;
+          font-size: 9px;
+          overflow-wrap: anywhere;
+        }
+        .status-grid {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 8px;
+          margin-bottom: 12px;
+        }
+        .status-grid span {
+          display: grid;
+          gap: 4px;
+          border: 1px solid #302b37;
+          border-radius: 8px;
+          padding: 9px;
+          color: #8d8991;
+          font-size: 9px;
+          overflow-wrap: anywhere;
+        }
+        .status-grid b { color: #d8b4fe; }
+        .timeline-list { display: grid; gap: 7px; }
+        .timeline-list article {
+          border-left: 2px solid #6d28d9;
+          background: #1c1920;
+          padding: 10px 11px;
+        }
+        .timeline-list header {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 6px 10px;
+          margin-bottom: 7px;
+          color: #858087;
+          font-size: 8px;
+        }
+        .timeline-list header b { color: #e9d5ff; font-size: 10px; }
+        .timeline-list p {
+          margin: 4px 0;
+          color: #aaa;
+          font-size: 10px;
+          line-height: 1.5;
+        }
+        .timeline-list p b { color: #ddd; }
+        .unverified {
+          margin-top: 11px;
+          border: 1px solid #713f12;
+          border-radius: 8px;
+          background: #21180e;
+          padding: 10px;
+          color: #fbbf24;
+          font-size: 10px;
+        }
+        .unverified ul { margin: 6px 0 0; padding-left: 17px; }
+        .unverified li { margin: 3px 0; color: #d6b985; }
         .no-template {
           display: block;
           margin-top: 10px;
@@ -1090,6 +1449,10 @@ export function ContentDirectionLab() {
         @media (max-width: 850px) {
           .style-cards {
             grid-template-columns: repeat(2, minmax(0, 1fr));
+          }
+          .restoration-card summary,
+          .status-grid {
+            grid-template-columns: 1fr;
           }
         }
         @media (max-width: 560px) {

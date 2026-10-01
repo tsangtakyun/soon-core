@@ -1,0 +1,1794 @@
+{
+  "schema_version": "1.0",
+  "created_at": "2026-10-01",
+  "definitions": {
+    "reference_original_restoration": "來源影片由 0 秒至片尾的連續時間軸、中文對白／旁白及實際畫面描述。",
+    "style_structure_spec": "由多條 reference 抽取的可重用結構與製作規則。",
+    "generated_example_script": "為新題材另寫的示範稿；不是來源影片還原稿。"
+  },
+  "quality_policy": {
+    "asr": "只作輔助；未人工聆聽不得標為已核實。",
+    "unintelligible": "保留時間位置並標待核實，不補寫。",
+    "translation": "非中文來源翻譯必須標示；不得假裝原句。",
+    "visual": "鏡頭描述只記錄 storyboard／原片分析可見內容。"
+  },
+  "full_representatives": [
+    {
+      "reference_key": "human-01",
+      "format": "human",
+      "source_id": "01",
+      "source_filename": "5間在巴黎探到的寶藏小店～၄၃၄၃話雖如此精品也沒少逛哈哈(๑•́ ₃ •̀๑)@sabreparis @brigittetanaka @fotoautomat_france @athanas.mp4",
+      "duration_seconds": 70.24,
+      "selection": "full_representative",
+      "style_code": "multi_stop_city_curation",
+      "style_name_zh": "多站清單式城市精選",
+      "role": "primary_reference",
+      "rights_state": "internal_research_only_rights_unverified",
+      "restoration_scope": "full_timeline_0_to_end",
+      "coverage_seconds": 70.24,
+      "coverage_percent": 100,
+      "audio_transcript_status": "asr_assisted_pending_manual_listening_unless_burned_caption_noted",
+      "visual_status": "direct_source_midpoint_frames_checked_for_every_timeline_segment",
+      "timeline": [
+        {
+          "order": 1,
+          "start_seconds": 0,
+          "end_seconds": 5,
+          "visual_description_zh": "主持站在巴黎店外開場，快切店面及五站預告。",
+          "speech_or_narration_zh": "去巴黎不要只逛精品,這五間店你更難守住錢包,也很適合買回去送禮哦!",
+          "speech_source": "asr_assisted_unverified",
+          "on_screen_text_zh": null,
+          "verification": {
+            "visual": "direct_source_midpoint_frame_manually_checked",
+            "audio": "pending_manual_listening",
+            "translation": "not_applicable"
+          },
+          "notes": null,
+          "verification_frame_path": "human-01-01.jpg"
+        },
+        {
+          "order": 2,
+          "start_seconds": 5,
+          "end_seconds": 21,
+          "visual_description_zh": "Sabre Paris 店內餐具牆、主持挑選 Bistro 系列、手部配色及後方工作區；結尾展示果醬抹刀與起司刀。",
+          "speech_or_narration_zh": "我在Savk Barhi克制了我的專程餐具,挑了最受歡迎的Bistro系列,完美呈現法國小餐館的復古質感。 每一支餐具,從材質到配色都可以自由搭配,實在是選擇困難,在櫃檯確認完訂單,就會直接在後面的工作室悄悄打打直作。 果醬抹刀跟起司刀也可愛到不行!",
+          "speech_source": "asr_assisted_unverified",
+          "on_screen_text_zh": null,
+          "verification": {
+            "visual": "direct_source_midpoint_frame_manually_checked",
+            "audio": "pending_manual_listening",
+            "translation": "not_applicable"
+          },
+          "notes": "品牌名稱由畫面標題核對；工序說法仍待來源核實。",
+          "verification_frame_path": "human-01-02.jpg"
+        },
+        {
+          "order": 3,
+          "start_seconds": 21,
+          "end_seconds": 31,
+          "visual_description_zh": "Brigitte Tanaka 店內，主持試揹歐根紗刺繡袋，近鏡展示不同用途及兩層店面。",
+          "speech_or_narration_zh": "果醬抹刀跟起司刀也可愛到不行! 法日混血的歐根紗刺繡包,金飄飄的像是把巴黎的慵懶氛圍被上身,還有專門裝飯混、葡萄酒、花束的袋子,兩層樓店鋪小而精緻,職親們必廣。",
+          "speech_source": "asr_assisted_unverified",
+          "on_screen_text_zh": null,
+          "verification": {
+            "visual": "direct_source_midpoint_frame_manually_checked",
+            "audio": "pending_manual_listening",
+            "translation": "not_applicable"
+          },
+          "notes": null,
+          "verification_frame_path": "human-01-03.jpg"
+        },
+        {
+          "order": 4,
+          "start_seconds": 31,
+          "end_seconds": 48,
+          "visual_description_zh": "Fotoautomat 外觀、主持自拍、倒數介面、彩色照片及快拍亭細節。",
+          "speech_or_narration_zh": "法日混血的歐根紗刺繡包,金飄飄的像是把巴黎的慵懶氛圍被上身,還有專門裝飯混、葡萄酒、花束的袋子,兩層樓店鋪小而精緻,職親們必廣。 偷偷跟你們分享,萌馬特那台連Jenny都拍過的Photo Automat,今年在附近打造了一台全新空間,這台不用排隊,有倒數計時,而且印出來是彩色的。 每一張都是在相機後面的暗房直接沖洗出來,經過萌馬特一定要走進這間快拍亭,如果你跟我一樣喜歡帶一點有故事的紀念品回家,推薦你來這裡挖宝。",
+          "speech_source": "asr_assisted_unverified",
+          "on_screen_text_zh": null,
+          "verification": {
+            "visual": "direct_source_midpoint_frame_manually_checked",
+            "audio": "pending_manual_listening",
+            "translation": "not_applicable"
+          },
+          "notes": null,
+          "verification_frame_path": "human-01-04.jpg"
+        },
+        {
+          "order": 5,
+          "start_seconds": 48,
+          "end_seconds": 56,
+          "visual_description_zh": "Athanase Vivienne 的高牆木抽屜與古董畫收藏，鏡頭由局部推至空間全貌。",
+          "speech_or_narration_zh": "每一張都是在相機後面的暗房直接沖洗出來,經過萌馬特一定要走進這間快拍亭,如果你跟我一樣喜歡帶一點有故事的紀念品回家,推薦你來這裡挖宝。 一格格木抽屁,衍生到跳高天花板,裡面藏著各式主題的古董畫,簡直是做博物館,慢慢尋找屬於自己的那一股巴黎巴。 馬黑區設計選物店Fluer,一口氣在附近開了六間分店,雖然Max也很經典,但我在Fluer更被燃起狗物浴,甚至有可嗽、辣場狗專區。",
+          "speech_source": "asr_assisted_unverified",
+          "on_screen_text_zh": null,
+          "verification": {
+            "visual": "direct_source_midpoint_frame_manually_checked",
+            "audio": "pending_manual_listening",
+            "translation": "not_applicable"
+          },
+          "notes": null,
+          "verification_frame_path": "human-01-05.jpg"
+        },
+        {
+          "order": 6,
+          "start_seconds": 56,
+          "end_seconds": 64,
+          "visual_description_zh": "Fleux 選物店布袋及不同主題商品近鏡，主持在店內移動。",
+          "speech_or_narration_zh": "馬黑區設計選物店Fluer,一口氣在附近開了六間分店,雖然Max也很經典,但我在Fluer更被燃起狗物浴,甚至有可嗽、辣場狗專區。",
+          "speech_source": "asr_assisted_unverified",
+          "on_screen_text_zh": null,
+          "verification": {
+            "visual": "direct_source_midpoint_frame_manually_checked",
+            "audio": "pending_manual_listening",
+            "translation": "not_applicable"
+          },
+          "notes": null,
+          "verification_frame_path": "human-01-06.jpg"
+        },
+        {
+          "order": 7,
+          "start_seconds": 64,
+          "end_seconds": 70.24,
+          "visual_description_zh": "零食包裝與家居雜貨快切，最後以行李箱能否裝下作購物主題收尾。",
+          "speech_or_narration_zh": "所有你想不到的居家雜貨設計,都能在這找到,不想唯一說反省的只有你的行李箱到底還裝不裝得下。",
+          "speech_source": "asr_assisted_unverified",
+          "on_screen_text_zh": null,
+          "verification": {
+            "visual": "direct_source_midpoint_frame_manually_checked",
+            "audio": "pending_manual_listening",
+            "translation": "not_applicable"
+          },
+          "notes": null,
+          "verification_frame_path": "human-01-07.jpg"
+        }
+      ],
+      "unverified": [
+        "品牌、物料、分店數及製作工序屬原片說法，尚未外部事實核實。",
+        "ASR 對白未經人工逐句聆聽；已修正的品牌拼法只依畫面標題。"
+      ],
+      "verification_sheet_path": "human-01-sheet.jpg"
+    },
+    {
+      "reference_key": "human-07",
+      "format": "human",
+      "source_id": "07",
+      "source_filename": "在這裏看維也納的夜景真的很美 .ᐟ.ᐟ🌌🌃The highest slide in Europe🛝165米高空，40米的滑道只要7-10秒，時速可達18km-h!推薦晚上去整個氣氛完全不.mp4",
+      "duration_seconds": 26.28,
+      "selection": "full_representative",
+      "style_code": "spectacle_first_experience_micro",
+      "style_name_zh": "超短奇觀體驗快拍",
+      "role": "primary_reference",
+      "rights_state": "internal_research_only_rights_unverified",
+      "restoration_scope": "full_timeline_0_to_end",
+      "coverage_seconds": 26.28,
+      "coverage_percent": 100,
+      "audio_transcript_status": "asr_assisted_pending_manual_listening_unless_burned_caption_noted",
+      "visual_status": "direct_source_midpoint_frames_checked_for_every_timeline_segment",
+      "timeline": [
+        {
+          "order": 1,
+          "start_seconds": 0,
+          "end_seconds": 3,
+          "visual_description_zh": "人物坐在滑梯入口，360 相機同時拍到人物、管道與入口。",
+          "speech_or_narration_zh": "無可核實對白；以現場聲及音樂為主。",
+          "speech_source": "no_verified_dialogue",
+          "on_screen_text_zh": "「The highest slide in Europe／全歐洲最高的滑梯」；屬原片聲稱，待核實。",
+          "verification": {
+            "visual": "direct_source_midpoint_frame_manually_checked",
+            "audio": "pending_manual_listening",
+            "translation": "not_applicable"
+          },
+          "notes": null,
+          "verification_frame_path": "human-07-01.jpg"
+        },
+        {
+          "order": 2,
+          "start_seconds": 3,
+          "end_seconds": 10,
+          "visual_description_zh": "第一身進入金屬管道連續下滑，畫面保留計時數字及高速旋轉。",
+          "speech_or_narration_zh": "無可核實對白；可見呼吸／叫聲性質的現場反應，但未作人工聆聽。",
+          "speech_source": "nonverbal_reaction_pending_manual_listening",
+          "on_screen_text_zh": "畫面計時持續增加；約 6–7 秒出現設備／相機已固定的提示。",
+          "verification": {
+            "visual": "direct_source_midpoint_frame_manually_checked",
+            "audio": "pending_manual_listening",
+            "translation": "not_applicable"
+          },
+          "notes": null,
+          "verification_frame_path": "human-07-02.jpg"
+        },
+        {
+          "order": 3,
+          "start_seconds": 10,
+          "end_seconds": 16,
+          "visual_description_zh": "人物滑出出口，360 視角由第一身重構為可同時看見人物及出口的畫面。",
+          "speech_or_narration_zh": "短促現場反應，內容待人工聆聽。",
+          "speech_source": "unintelligible_pending_manual_listening",
+          "on_screen_text_zh": "「10:00」及「It’s quite fast!／很快」類反應字卡。",
+          "verification": {
+            "visual": "direct_source_midpoint_frame_manually_checked",
+            "audio": "pending_manual_listening",
+            "translation": "not_applicable"
+          },
+          "notes": null,
+          "verification_frame_path": "human-07-03.jpg"
+        },
+        {
+          "order": 4,
+          "start_seconds": 16,
+          "end_seconds": 20,
+          "visual_description_zh": "人物離開出口後在戶外自拍步行，保留「害怕」的即時反應。",
+          "speech_or_narration_zh": "短促現場反應，內容待人工聆聽。",
+          "speech_source": "unintelligible_pending_manual_listening",
+          "on_screen_text_zh": "「I’m scared」反應字卡。",
+          "verification": {
+            "visual": "direct_source_midpoint_frame_manually_checked",
+            "audio": "pending_manual_listening",
+            "translation": "not_applicable"
+          },
+          "notes": null,
+          "verification_frame_path": "human-07-04.jpg"
+        },
+        {
+          "order": 5,
+          "start_seconds": 20,
+          "end_seconds": 24,
+          "visual_description_zh": "球形 360 小行星視角揭露塔身、夜景與滑梯全貌。",
+          "speech_or_narration_zh": "無可核實對白。",
+          "speech_source": "no_verified_dialogue",
+          "on_screen_text_zh": "「你會否想來維也納挑戰全歐洲最高的滑梯？」；最高聲稱待核實。",
+          "verification": {
+            "visual": "direct_source_midpoint_frame_manually_checked",
+            "audio": "pending_manual_listening",
+            "translation": "not_applicable"
+          },
+          "notes": null,
+          "verification_frame_path": "human-07-05.jpg"
+        },
+        {
+          "order": 6,
+          "start_seconds": 24,
+          "end_seconds": 26.28,
+          "visual_description_zh": "滑梯塔身與夜景作結。",
+          "speech_or_narration_zh": "無可核實對白。",
+          "speech_source": "no_verified_dialogue",
+          "on_screen_text_zh": "「Follow for more adventures」及帳號標示。",
+          "verification": {
+            "visual": "direct_source_midpoint_frame_manually_checked",
+            "audio": "pending_manual_listening",
+            "translation": "not_applicable"
+          },
+          "notes": null,
+          "verification_frame_path": "human-07-06.jpg"
+        }
+      ],
+      "unverified": [
+        "自動語音辨識完全失真，因此沒有採用為對白。",
+        "全歐洲最高、165 米、40 米滑道、7–10 秒、18 km/h 等均只屬原片／檔名聲稱，未外部核實。"
+      ],
+      "verification_sheet_path": "human-07-sheet.jpg"
+    },
+    {
+      "reference_key": "human-11",
+      "format": "human",
+      "source_id": "11",
+      "source_filename": "這是我第一次躺進棺材裡📍Kid Mai Death Awareness Cafe (Bangkok)@kid_mai_death_awareness_cafe 死亡覺知的畫面來源為東京 @y.mp4",
+      "duration_seconds": 110.5,
+      "selection": "full_representative",
+      "style_code": "immersive_experience_reflection",
+      "style_name_zh": "沉浸式體驗反思敘事",
+      "role": "primary_reference",
+      "rights_state": "internal_research_only_rights_unverified",
+      "restoration_scope": "full_timeline_0_to_end",
+      "coverage_seconds": 110.5,
+      "coverage_percent": 100,
+      "audio_transcript_status": "asr_assisted_pending_manual_listening_unless_burned_caption_noted",
+      "visual_status": "direct_source_midpoint_frames_checked_for_every_timeline_segment",
+      "timeline": [
+        {
+          "order": 1,
+          "start_seconds": 0,
+          "end_seconds": 6,
+          "visual_description_zh": "主持躺進象徵出生的裝置，快速交代「先走一遍人生才喝咖啡」的反常規則。",
+          "speech_or_narration_zh": "那天我去了一間很奇怪的咖啡廳。想喝到咖啡,你得先把人生走一遍。故事要從你還是一顆金子時說起,你會先進到一片紅色的世界,就像重新回到媽媽的身體裡。這裡有一台機器,投下一枚硬幣,它會告訴你,成為人類的機率到底有多低。原來能來到這個世界,本身就是一件很幸運的事。出生後,我們開始慢慢變老。戴上這些裝備後,每一步都變得很吃力。手開始發抖,視線也逐漸磨砍。",
+          "speech_source": "asr_assisted_unverified",
+          "on_screen_text_zh": null,
+          "verification": {
+            "visual": "direct_source_midpoint_frame_manually_checked",
+            "audio": "pending_manual_listening",
+            "translation": "not_applicable"
+          },
+          "notes": null,
+          "verification_frame_path": "human-11-01.jpg"
+        },
+        {
+          "order": 2,
+          "start_seconds": 6,
+          "end_seconds": 23,
+          "visual_description_zh": "進入紅色出生／幸運空間，展示燈光、機器及投幣互動。",
+          "speech_or_narration_zh": "那天我去了一間很奇怪的咖啡廳。想喝到咖啡,你得先把人生走一遍。故事要從你還是一顆金子時說起,你會先進到一片紅色的世界,就像重新回到媽媽的身體裡。這裡有一台機器,投下一枚硬幣,它會告訴你,成為人類的機率到底有多低。原來能來到這個世界,本身就是一件很幸運的事。出生後,我們開始慢慢變老。戴上這些裝備後,每一步都變得很吃力。手開始發抖,視線也逐漸磨砍。",
+          "speech_source": "asr_assisted_unverified",
+          "on_screen_text_zh": null,
+          "verification": {
+            "visual": "direct_source_midpoint_frame_manually_checked",
+            "audio": "pending_manual_listening",
+            "translation": "not_applicable"
+          },
+          "notes": null,
+          "verification_frame_path": "human-11-02.jpg"
+        },
+        {
+          "order": 3,
+          "start_seconds": 23,
+          "end_seconds": 33,
+          "visual_description_zh": "進入衰老模擬區，主持穿戴限制裝備，手抖、步伐變慢、視線模糊。",
+          "speech_or_narration_zh": "那天我去了一間很奇怪的咖啡廳。想喝到咖啡,你得先把人生走一遍。故事要從你還是一顆金子時說起,你會先進到一片紅色的世界,就像重新回到媽媽的身體裡。這裡有一台機器,投下一枚硬幣,它會告訴你,成為人類的機率到底有多低。原來能來到這個世界,本身就是一件很幸運的事。出生後,我們開始慢慢變老。戴上這些裝備後,每一步都變得很吃力。手開始發抖,視線也逐漸磨砍。 原來這就是我以後的生活嗎?",
+          "speech_source": "asr_assisted_unverified",
+          "on_screen_text_zh": null,
+          "verification": {
+            "visual": "direct_source_midpoint_frame_manually_checked",
+            "audio": "pending_manual_listening",
+            "translation": "not_applicable"
+          },
+          "notes": null,
+          "verification_frame_path": "human-11-03.jpg"
+        },
+        {
+          "order": 4,
+          "start_seconds": 33,
+          "end_seconds": 50,
+          "visual_description_zh": "疾病空間的點滴、聽診器、病人餐及問題字卡；鏡頭放慢。",
+          "speech_or_narration_zh": "第三個房間,是關於病。這裡很安靜,沒有恐怖的畫面,只有心電圖規律的聲音,還有一份份的病人餐。每一份餐盤旁都放著一個問題。",
+          "speech_source": "asr_assisted_unverified",
+          "on_screen_text_zh": null,
+          "verification": {
+            "visual": "direct_source_midpoint_frame_manually_checked",
+            "audio": "pending_manual_listening",
+            "translation": "not_applicable"
+          },
+          "notes": "43.52–50.28 的原聲未有可靠 ASR，保留為待人工聽寫。",
+          "verification_frame_path": "human-11-04.jpg"
+        },
+        {
+          "order": 5,
+          "start_seconds": 50,
+          "end_seconds": 61,
+          "visual_description_zh": "靈堂與棺材；躺入後轉黑畫面並保留安靜停頓。",
+          "speech_or_narration_zh": "最後,是死亡。他們真的在靈堂準備了一口棺材。躺進去的那一剎那,沒有光,沒有聲音。 但那份壓抑,我連一分鐘都撐不住。",
+          "speech_source": "asr_assisted_unverified",
+          "on_screen_text_zh": null,
+          "verification": {
+            "visual": "direct_source_midpoint_frame_manually_checked",
+            "audio": "pending_manual_listening",
+            "translation": "not_applicable"
+          },
+          "notes": null,
+          "verification_frame_path": "human-11-05.jpg"
+        },
+        {
+          "order": 6,
+          "start_seconds": 61,
+          "end_seconds": 70,
+          "visual_description_zh": "主持離開體驗區走進咖啡廳，展示入口與較明亮座位空間。",
+          "speech_or_narration_zh": "直到走完整趟人生,才終於走進了咖啡廳。你可以憑門票兌換一杯飲品,坐在舒服的空間,慢慢消化剛才的一切。",
+          "speech_source": "asr_assisted_unverified",
+          "on_screen_text_zh": null,
+          "verification": {
+            "visual": "direct_source_midpoint_frame_manually_checked",
+            "audio": "pending_manual_listening",
+            "translation": "not_applicable"
+          },
+          "notes": null,
+          "verification_frame_path": "human-11-06.jpg"
+        },
+        {
+          "order": 7,
+          "start_seconds": 70,
+          "end_seconds": 79,
+          "visual_description_zh": "死亡與告別字樣、場內問題燈箱及主持反思畫面。",
+          "speech_or_narration_zh": "在華人文化裡,我們好像花了很多時間,學著怎麼努力生活,總把日子過得更好。 卻很少有人告訴我們,要如何面對告別與死亡。",
+          "speech_source": "asr_assisted_unverified",
+          "on_screen_text_zh": null,
+          "verification": {
+            "visual": "direct_source_midpoint_frame_manually_checked",
+            "audio": "pending_manual_listening",
+            "translation": "not_applicable"
+          },
+          "notes": null,
+          "verification_frame_path": "human-11-07.jpg"
+        },
+        {
+          "order": 8,
+          "start_seconds": 79,
+          "end_seconds": 94,
+          "visual_description_zh": "死亡覺知概念、展品與主持旅途畫面交錯，回到珍惜日常的主題。",
+          "speech_or_narration_zh": "這間店的初衷,其實來自佛教裡的死亡覺知。 它不是為了讓人害怕死亡,而是把生命的終點,暫時放到你眼前,讓你重新審視現在擁有的生活。 也在一切還來得及的時候,更珍惜那些原本習以為常的每一天。",
+          "speech_source": "asr_assisted_unverified",
+          "on_screen_text_zh": null,
+          "verification": {
+            "visual": "direct_source_midpoint_frame_manually_checked",
+            "audio": "pending_manual_listening",
+            "translation": "not_applicable"
+          },
+          "notes": null,
+          "verification_frame_path": "human-11-08.jpg"
+        },
+        {
+          "order": 9,
+          "start_seconds": 94,
+          "end_seconds": 101,
+          "visual_description_zh": "場館外觀與主持提出到訪建議。",
+          "speech_or_narration_zh": "下次來曼谷,喝了美食、按摩和逛街。 如果你也想用一杯咖啡的時間,體驗一次人生,不妨來這裡走走。",
+          "speech_source": "asr_assisted_unverified",
+          "on_screen_text_zh": null,
+          "verification": {
+            "visual": "direct_source_midpoint_frame_manually_checked",
+            "audio": "pending_manual_listening",
+            "translation": "not_applicable"
+          },
+          "notes": null,
+          "verification_frame_path": "human-11-09.jpg"
+        },
+        {
+          "order": 10,
+          "start_seconds": 101,
+          "end_seconds": 108,
+          "visual_description_zh": "另起商業橋段，以東南亞旅遊及機票平台畫面接續。",
+          "speech_or_narration_zh": "最近在東南亞的機票,在Skyscanner都有降價的趨勢,很適合給自己安排一趟放空充電的旅行。",
+          "speech_source": "asr_assisted_unverified",
+          "on_screen_text_zh": null,
+          "verification": {
+            "visual": "direct_source_midpoint_frame_manually_checked",
+            "audio": "pending_manual_listening",
+            "translation": "not_applicable"
+          },
+          "notes": "商業橋段與反思主體分開。",
+          "verification_frame_path": "human-11-10.jpg"
+        },
+        {
+          "order": 11,
+          "start_seconds": 108,
+          "end_seconds": 110.5,
+          "visual_description_zh": "主持署名及下集預告式收尾。",
+          "speech_or_narration_zh": "我是Eden,下週見。",
+          "speech_source": "asr_assisted_unverified",
+          "on_screen_text_zh": null,
+          "verification": {
+            "visual": "direct_source_midpoint_frame_manually_checked",
+            "audio": "pending_manual_listening",
+            "translation": "not_applicable"
+          },
+          "notes": null,
+          "verification_frame_path": "human-11-11.jpg"
+        }
+      ],
+      "unverified": [
+        "33.36–43.52 後至 50.28 有音訊轉錄缺口，該段對白保持待核實。",
+        "場館理念、佛教死亡覺知及文化概括均為原片說法，未外部核實。",
+        "ASR 對白未經人工逐句聆聽。"
+      ],
+      "verification_sheet_path": "human-11-sheet.jpg"
+    },
+    {
+      "reference_key": "human-05",
+      "format": "human",
+      "source_id": "05",
+      "source_filename": "Plan呢個trip嘅第一日，我已經決定好一定要去呢度！(๑ơ ₃ ơ)♥又完成咗個心願list其中一項！✅📍Musée des Arts Forains.mp4",
+      "duration_seconds": 56.38,
+      "selection": "full_representative",
+      "style_code": "first_person_journey_diary",
+      "style_name_zh": "第一身旅程實錄",
+      "role": "existing_direction_supplement_bucket_list_experience",
+      "rights_state": "internal_research_only_rights_unverified",
+      "restoration_scope": "full_timeline_0_to_end",
+      "coverage_seconds": 56.38,
+      "coverage_percent": 100,
+      "audio_transcript_status": "asr_assisted_pending_manual_listening_unless_burned_caption_noted",
+      "visual_status": "direct_source_midpoint_frames_checked_for_every_timeline_segment",
+      "timeline": [
+        {
+          "order": 1,
+          "start_seconds": 0,
+          "end_seconds": 6,
+          "visual_description_zh": "先展示單車旋轉木馬高潮，配合個人願望與反常問題。",
+          "speech_or_narration_zh": "是為了他才來巴黎。你試過在博物館踏單車旋轉木馬嗎? 這裡是世界上最快樂的博物館。 跟一般的博物館不同,這裡沒有說不准觸摸。所有的展品都是八幾年歷史的真古董來的。",
+          "speech_source": "asr_assisted_unverified",
+          "on_screen_text_zh": null,
+          "verification": {
+            "visual": "direct_source_midpoint_frame_manually_checked",
+            "audio": "pending_manual_listening",
+            "translation": "not_applicable"
+          },
+          "notes": null,
+          "verification_frame_path": "human-05-01.jpg"
+        },
+        {
+          "order": 2,
+          "start_seconds": 6,
+          "end_seconds": 12,
+          "visual_description_zh": "可互動古董遊樂設施、機械賽馬與場館裝飾。",
+          "speech_or_narration_zh": "跟一般的博物館不同,這裡沒有說不准觸摸。所有的展品都是八幾年歷史的真古董來的。 由收藏家花盡心去修復,那些展品還可以走走走走,還會唱歌。每一個角落都華麗到嘩一聲的。",
+          "speech_source": "asr_assisted_unverified",
+          "on_screen_text_zh": null,
+          "verification": {
+            "visual": "direct_source_midpoint_frame_manually_checked",
+            "audio": "pending_manual_listening",
+            "translation": "not_applicable"
+          },
+          "notes": null,
+          "verification_frame_path": "human-05-02.jpg"
+        },
+        {
+          "order": 3,
+          "start_seconds": 12,
+          "end_seconds": 22,
+          "visual_description_zh": "活動中的機械人偶、唱歌裝置及可動展品；主持與觀眾參與。",
+          "speech_or_narration_zh": "由收藏家花盡心去修復,那些展品還可以走走走走,還會唱歌。每一個角落都華麗到嘩一聲的。 很多展品都可以讓我們下手玩,真是最簡單的遊戲帶來最原子的快樂啊。",
+          "speech_source": "asr_assisted_unverified",
+          "on_screen_text_zh": null,
+          "verification": {
+            "visual": "direct_source_midpoint_frame_manually_checked",
+            "audio": "pending_manual_listening",
+            "translation": "not_applicable"
+          },
+          "notes": null,
+          "verification_frame_path": "human-05-03.jpg"
+        },
+        {
+          "order": 4,
+          "start_seconds": 22,
+          "end_seconds": 31,
+          "visual_description_zh": "回到鎮館體驗，主持選擇單車旋轉木馬位置並表達期待／顧慮。",
+          "speech_or_narration_zh": "嘩,來到重頭戲啦!我就是為了這個鎮館之寶,單車旋轉木馬而來的。 都是惡作的,因為我真的不知道他叫什麼。以前看人家的片已經覺得很刺激。",
+          "speech_source": "asr_assisted_unverified",
+          "on_screen_text_zh": null,
+          "verification": {
+            "visual": "direct_source_midpoint_frame_manually_checked",
+            "audio": "pending_manual_listening",
+            "translation": "not_applicable"
+          },
+          "notes": null,
+          "verification_frame_path": "human-05-04.jpg"
+        },
+        {
+          "order": 5,
+          "start_seconds": 31,
+          "end_seconds": 39,
+          "visual_description_zh": "旋轉木馬加速，保留主持坐在設備上的連續反應。",
+          "speech_or_narration_zh": "都是惡作的,因為我真的不知道他叫什麼。以前看人家的片已經覺得很刺激。 我就很小膽的。怕踩小腳飛了出去啊。所以我決定只坐VW。 大家真的會越踩越快,真的好玩到瘋了這個。",
+          "speech_source": "asr_assisted_unverified",
+          "on_screen_text_zh": null,
+          "verification": {
+            "visual": "direct_source_midpoint_frame_manually_checked",
+            "audio": "pending_manual_listening",
+            "translation": "not_applicable"
+          },
+          "notes": null,
+          "verification_frame_path": "human-05-05.jpg"
+        },
+        {
+          "order": 6,
+          "start_seconds": 39,
+          "end_seconds": 44,
+          "visual_description_zh": "高速運轉及主持笑聲／感受，完成情緒高潮。",
+          "speech_or_narration_zh": "大家真的會越踩越快,真的好玩到瘋了這個。 聽說最快的紀錄是一班消防員。在這個博物館我沒停止過笑。",
+          "speech_source": "asr_assisted_unverified",
+          "on_screen_text_zh": null,
+          "verification": {
+            "visual": "direct_source_midpoint_frame_manually_checked",
+            "audio": "pending_manual_listening",
+            "translation": "not_applicable"
+          },
+          "notes": null,
+          "verification_frame_path": "human-05-06.jpg"
+        },
+        {
+          "order": 7,
+          "start_seconds": 44,
+          "end_seconds": 48,
+          "visual_description_zh": "場館與主持畫面，轉為收藏／到訪 CTA。",
+          "speech_or_narration_zh": "記得要save daily這個views。下次去巴黎就一定要來這個博物館。 溫馨提示啊!記得要在官網上預約了導覽團才能入場。",
+          "speech_source": "asr_assisted_unverified",
+          "on_screen_text_zh": null,
+          "verification": {
+            "visual": "direct_source_midpoint_frame_manually_checked",
+            "audio": "pending_manual_listening",
+            "translation": "not_applicable"
+          },
+          "notes": null,
+          "verification_frame_path": "human-05-07.jpg"
+        },
+        {
+          "order": 8,
+          "start_seconds": 48,
+          "end_seconds": 56.38,
+          "visual_description_zh": "以預約、導覽語言及提早訂位提示收尾，畫面回到賽馬裝置。",
+          "speech_or_narration_zh": "溫馨提示啊!記得要在官網上預約了導覽團才能入場。 而導覽團則是英文和法文傳。 經常都好苦的,記得早點讀位啦!",
+          "speech_source": "asr_assisted_unverified",
+          "on_screen_text_zh": null,
+          "verification": {
+            "visual": "direct_source_midpoint_frame_manually_checked",
+            "audio": "pending_manual_listening",
+            "translation": "not_applicable"
+          },
+          "notes": null,
+          "verification_frame_path": "human-05-08.jpg"
+        }
+      ],
+      "unverified": [
+        "原片對年代、紀錄、預約及導覽語言的說法未核實。",
+        "ASR 對白未經人工逐句聆聽，個別專名及口語仍待覆核。"
+      ],
+      "verification_sheet_path": "human-05-sheet.jpg"
+    },
+    {
+      "reference_key": "human-08",
+      "format": "human",
+      "source_id": "08",
+      "source_filename": "我在世界上第一間麥當勞🍟🇺🇸86年前麥當勞兄弟在這裡創立了 McDonald’s Bar-B-Q餐廳後來被買下拆除 改建成了全世界唯一一間麥當勞博物館裡面收集了各種穿越時空的兒童餐玩具幾.mp4",
+      "duration_seconds": 30.42,
+      "selection": "full_representative",
+      "style_code": "on_location_fact_sprint",
+      "style_name_zh": "實景冷知識快講",
+      "role": "existing_direction_supplement_voiceover_micro_tour",
+      "rights_state": "internal_research_only_rights_unverified",
+      "restoration_scope": "full_timeline_0_to_end",
+      "coverage_seconds": 30.42,
+      "coverage_percent": 100,
+      "audio_transcript_status": "asr_assisted_pending_manual_listening_unless_burned_caption_noted",
+      "visual_status": "direct_source_midpoint_frames_checked_for_every_timeline_segment",
+      "timeline": [
+        {
+          "order": 1,
+          "start_seconds": 0,
+          "end_seconds": 3,
+          "visual_description_zh": "館外入口及歷史招牌，以問題字卡開場。",
+          "speech_or_narration_zh": "你有想過世界上第一間麥當勞在哪裡嗎? 這裡是加州的San Bernardino,從洛杉磯開車過來只要一個小時。",
+          "speech_source": "asr_assisted_unverified",
+          "on_screen_text_zh": null,
+          "verification": {
+            "visual": "direct_source_midpoint_frame_manually_checked",
+            "audio": "pending_manual_listening",
+            "translation": "not_applicable"
+          },
+          "notes": null,
+          "verification_frame_path": "human-08-01.jpg"
+        },
+        {
+          "order": 2,
+          "start_seconds": 3,
+          "end_seconds": 8,
+          "visual_description_zh": "Ronald McDonald 展品、San Bernardino 地點及路程畫面。",
+          "speech_or_narration_zh": "這裡是加州的San Bernardino,從洛杉磯開車過來只要一個小時。 門口寫著這裡沒有15s的漢堡了,只有免費贈送的無價回憶。",
+          "speech_source": "asr_assisted_unverified",
+          "on_screen_text_zh": null,
+          "verification": {
+            "visual": "direct_source_midpoint_frame_manually_checked",
+            "audio": "pending_manual_listening",
+            "translation": "not_applicable"
+          },
+          "notes": null,
+          "verification_frame_path": "human-08-02.jpg"
+        },
+        {
+          "order": 3,
+          "start_seconds": 8,
+          "end_seconds": 12,
+          "visual_description_zh": "入口貼紙牆與「沒有 15 美仙漢堡、只有免費回憶」招牌。",
+          "speech_or_narration_zh": "門口寫著這裡沒有15s的漢堡了,只有免費贈送的無價回憶。 走進去看餐廳已經拆除,現在改建成麥當勞博物館。",
+          "speech_source": "asr_assisted_unverified",
+          "on_screen_text_zh": null,
+          "verification": {
+            "visual": "direct_source_midpoint_frame_manually_checked",
+            "audio": "pending_manual_listening",
+            "translation": "not_applicable"
+          },
+          "notes": null,
+          "verification_frame_path": "human-08-03.jpg"
+        },
+        {
+          "order": 4,
+          "start_seconds": 12,
+          "end_seconds": 16,
+          "visual_description_zh": "主持在館內，交代原餐廳已拆除並改成博物館。",
+          "speech_or_narration_zh": "走進去看餐廳已經拆除,現在改建成麥當勞博物館。 裡面有好多來自世界各地穿越時空的酷東西,外面還有漢堡、神偷、奶昔大哥、蘋果派出全是童年回憶。",
+          "speech_source": "asr_assisted_unverified",
+          "on_screen_text_zh": null,
+          "verification": {
+            "visual": "direct_source_midpoint_frame_manually_checked",
+            "audio": "pending_manual_listening",
+            "translation": "not_applicable"
+          },
+          "notes": null,
+          "verification_frame_path": "human-08-04.jpg"
+        },
+        {
+          "order": 5,
+          "start_seconds": 16,
+          "end_seconds": 24,
+          "visual_description_zh": "世界各地玩具、舊餐盒、Ronald 角色與戶外童年角色裝置。",
+          "speech_or_narration_zh": "裡面有好多來自世界各地穿越時空的酷東西,外面還有漢堡、神偷、奶昔大哥、蘋果派出全是童年回憶。",
+          "speech_source": "asr_assisted_unverified",
+          "on_screen_text_zh": null,
+          "verification": {
+            "visual": "direct_source_midpoint_frame_manually_checked",
+            "audio": "pending_manual_listening",
+            "translation": "not_applicable"
+          },
+          "notes": null,
+          "verification_frame_path": "human-08-05.jpg"
+        },
+        {
+          "order": 6,
+          "start_seconds": 24,
+          "end_seconds": 26,
+          "visual_description_zh": "戶外展品與懷舊反問，節奏短暫放慢。",
+          "speech_or_narration_zh": "我們怎麼就這樣長大了? 每天都開放給大家免費參觀,把這裡收藏起來,下次來LA找回憶吧!",
+          "speech_source": "asr_assisted_unverified",
+          "on_screen_text_zh": null,
+          "verification": {
+            "visual": "direct_source_midpoint_frame_manually_checked",
+            "audio": "pending_manual_listening",
+            "translation": "not_applicable"
+          },
+          "notes": null,
+          "verification_frame_path": "human-08-06.jpg"
+        },
+        {
+          "order": 7,
+          "start_seconds": 26,
+          "end_seconds": 30.42,
+          "visual_description_zh": "館藏、開放資訊及收藏 CTA 收尾。",
+          "speech_or_narration_zh": "每天都開放給大家免費參觀,把這裡收藏起來,下次來LA找回憶吧!",
+          "speech_source": "asr_assisted_unverified",
+          "on_screen_text_zh": null,
+          "verification": {
+            "visual": "direct_source_midpoint_frame_manually_checked",
+            "audio": "pending_manual_listening",
+            "translation": "not_applicable"
+          },
+          "notes": null,
+          "verification_frame_path": "human-08-07.jpg"
+        }
+      ],
+      "unverified": [
+        "「第一間」、年份、車程、免費、每天開放等均屬原片說法，待外部核實。",
+        "ASR 對白未經人工逐句聆聽。"
+      ],
+      "verification_sheet_path": "human-08-sheet.jpg"
+    },
+    {
+      "reference_key": "human-09",
+      "format": "human",
+      "source_id": "09",
+      "source_filename": "我認真覺得這裡可能是巴黎最快樂的博物館它沒有名畫 卻比不少博物館更讓人難忘如果來過巴黎很多次 我真的很推薦留半天給它EN) This might just be the happiest museum.mp4",
+      "duration_seconds": 20.73,
+      "selection": "full_representative",
+      "style_code": "first_person_journey_diary",
+      "style_name_zh": "第一身旅程實錄",
+      "role": "existing_direction_supplement_caption_led_teaser",
+      "rights_state": "internal_research_only_rights_unverified",
+      "restoration_scope": "full_timeline_0_to_end",
+      "coverage_seconds": 20.73,
+      "coverage_percent": 100,
+      "audio_transcript_status": "asr_assisted_pending_manual_listening_unless_burned_caption_noted",
+      "visual_status": "direct_source_midpoint_frames_checked_for_every_timeline_segment",
+      "timeline": [
+        {
+          "order": 1,
+          "start_seconds": 0,
+          "end_seconds": 2.5,
+          "visual_description_zh": "場內遊樂設施與參觀者互動。",
+          "speech_or_narration_zh": "無旁白；法語歌曲。",
+          "speech_source": "music_only_no_dialogue",
+          "on_screen_text_zh": "「巴黎有一座最不像博物館的博物館。」",
+          "verification": {
+            "visual": "direct_source_midpoint_frame_manually_checked",
+            "audio": "pending_manual_listening",
+            "translation": "not_applicable"
+          },
+          "notes": null,
+          "verification_frame_path": "human-09-01.jpg"
+        },
+        {
+          "order": 2,
+          "start_seconds": 2.5,
+          "end_seconds": 4.5,
+          "visual_description_zh": "旋轉設施及參觀者走入遊樂空間。",
+          "speech_or_narration_zh": "無旁白；法語歌曲。",
+          "speech_source": "music_only_no_dialogue",
+          "on_screen_text_zh": "「一座可以玩進去的博物館。」",
+          "verification": {
+            "visual": "direct_source_midpoint_frame_manually_checked",
+            "audio": "pending_manual_listening",
+            "translation": "not_applicable"
+          },
+          "notes": null,
+          "verification_frame_path": "human-09-02.jpg"
+        },
+        {
+          "order": 3,
+          "start_seconds": 4.5,
+          "end_seconds": 7,
+          "visual_description_zh": "百年旋轉木馬由參加者共同踩動。",
+          "speech_or_narration_zh": "無旁白；法語歌曲。",
+          "speech_source": "music_only_no_dialogue",
+          "on_screen_text_zh": "「百年旋轉木馬可以親自體驗，而且要靠大家一起踩才會動。」",
+          "verification": {
+            "visual": "direct_source_midpoint_frame_manually_checked",
+            "audio": "pending_manual_listening",
+            "translation": "not_applicable"
+          },
+          "notes": null,
+          "verification_frame_path": "human-09-03.jpg"
+        },
+        {
+          "order": 4,
+          "start_seconds": 7,
+          "end_seconds": 9,
+          "visual_description_zh": "成人在機械賽馬前投入遊戲。",
+          "speech_or_narration_zh": "無旁白；法語歌曲。",
+          "speech_source": "music_only_no_dialogue",
+          "on_screen_text_zh": "「來這裡的大人通常比小孩更瘋。」",
+          "verification": {
+            "visual": "direct_source_midpoint_frame_manually_checked",
+            "audio": "pending_manual_listening",
+            "translation": "not_applicable"
+          },
+          "notes": null,
+          "verification_frame_path": "human-09-04.jpg"
+        },
+        {
+          "order": 5,
+          "start_seconds": 9,
+          "end_seconds": 12,
+          "visual_description_zh": "古董裝置與場館裝飾細節。",
+          "speech_or_narration_zh": "無旁白；法語歌曲。",
+          "speech_source": "music_only_no_dialogue",
+          "on_screen_text_zh": "「創辦人花了幾十年收藏及修復這些古老遊樂設施。」",
+          "verification": {
+            "visual": "direct_source_midpoint_frame_manually_checked",
+            "audio": "pending_manual_listening",
+            "translation": "not_applicable"
+          },
+          "notes": null,
+          "verification_frame_path": "human-09-05.jpg"
+        },
+        {
+          "order": 6,
+          "start_seconds": 12,
+          "end_seconds": 14.5,
+          "visual_description_zh": "參觀者操作旋轉木馬。",
+          "speech_or_narration_zh": "無旁白；法語歌曲。",
+          "speech_source": "music_only_no_dialogue",
+          "on_screen_text_zh": "「他的想法很簡單：不是展示，而是讓它們重新活著。」",
+          "verification": {
+            "visual": "direct_source_midpoint_frame_manually_checked",
+            "audio": "pending_manual_listening",
+            "translation": "not_applicable"
+          },
+          "notes": null,
+          "verification_frame_path": "human-09-06.jpg"
+        },
+        {
+          "order": 7,
+          "start_seconds": 14.5,
+          "end_seconds": 17,
+          "visual_description_zh": "華麗旋轉裝置及影視場景式構圖。",
+          "speech_or_narration_zh": "無旁白；法語歌曲。",
+          "speech_source": "music_only_no_dialogue",
+          "on_screen_text_zh": "「《午夜巴黎》與《Emily in Paris》也曾在這裡取景。」",
+          "verification": {
+            "visual": "direct_source_midpoint_frame_manually_checked",
+            "audio": "pending_manual_listening",
+            "translation": "not_applicable"
+          },
+          "notes": null,
+          "verification_frame_path": "human-09-07.jpg"
+        },
+        {
+          "order": 8,
+          "start_seconds": 17,
+          "end_seconds": 19.5,
+          "visual_description_zh": "場館娛樂文化與設施近鏡。",
+          "speech_or_narration_zh": "無旁白；法語歌曲。",
+          "speech_source": "music_only_no_dialogue",
+          "on_screen_text_zh": "「這裡保存的不只是遊樂設施，而是一整個 Belle Époque 的娛樂文化。」",
+          "verification": {
+            "visual": "direct_source_midpoint_frame_manually_checked",
+            "audio": "pending_manual_listening",
+            "translation": "not_applicable"
+          },
+          "notes": null,
+          "verification_frame_path": "human-09-08.jpg"
+        },
+        {
+          "order": 9,
+          "start_seconds": 19.5,
+          "end_seconds": 20.73,
+          "visual_description_zh": "場館外觀、名稱、地址與預約提示作結。",
+          "speech_or_narration_zh": "無旁白；法語歌曲。",
+          "speech_source": "music_only_no_dialogue",
+          "on_screen_text_zh": "Musée des Arts Forains；地址及「Reservation required」。",
+          "verification": {
+            "visual": "direct_source_midpoint_frame_manually_checked",
+            "audio": "pending_manual_listening",
+            "translation": "not_applicable"
+          },
+          "notes": null,
+          "verification_frame_path": "human-09-09.jpg"
+        }
+      ],
+      "unverified": [
+        "歌曲名稱及授權未核實；ASR 只辨識到法語歌詞，未當成旁白。",
+        "所有歷史與取景聲稱均只按燒錄字幕轉錄，待外部事實核實。"
+      ],
+      "verification_sheet_path": "human-09-sheet.jpg"
+    },
+    {
+      "reference_key": "ai-01",
+      "format": "ai",
+      "source_id": "01",
+      "source_filename": "浑身都凉快🤣 #baby #ai.mp4",
+      "duration_seconds": 10.167,
+      "selection": "full_representative",
+      "style_code": "ai_absurd_twist_microdrama",
+      "style_name_zh": "AI 荒誕反轉微劇",
+      "role": "primary_reference_dialogue_misunderstanding",
+      "rights_state": "internal_research_only_rights_unverified",
+      "restoration_scope": "full_timeline_0_to_end",
+      "coverage_seconds": 10.167,
+      "coverage_percent": 100,
+      "audio_transcript_status": "asr_assisted_pending_manual_listening_unless_burned_caption_noted",
+      "visual_status": "direct_source_midpoint_frames_checked_for_every_timeline_segment",
+      "timeline": [
+        {
+          "order": 1,
+          "start_seconds": 0,
+          "end_seconds": 1,
+          "visual_description_zh": "巴士車廂內，成人坐在前方與站立幼兒對話。",
+          "speech_or_narration_zh": "成人：「空調車，兩塊。」",
+          "speech_source": "burned_caption_manually_checked_audio_pending",
+          "on_screen_text_zh": "空調車兩塊",
+          "verification": {
+            "visual": "direct_source_midpoint_frame_manually_checked",
+            "audio": "pending_manual_listening",
+            "translation": "not_applicable"
+          },
+          "notes": null,
+          "verification_frame_path": "ai-01-01.jpg"
+        },
+        {
+          "order": 2,
+          "start_seconds": 1,
+          "end_seconds": 2,
+          "visual_description_zh": "幼兒抬頭回應，成人仍在同一位置。",
+          "speech_or_narration_zh": "幼兒：「是涼快。」",
+          "speech_source": "burned_caption_manually_checked_audio_pending",
+          "on_screen_text_zh": "是涼快",
+          "verification": {
+            "visual": "direct_source_midpoint_frame_manually_checked",
+            "audio": "pending_manual_listening",
+            "translation": "not_applicable"
+          },
+          "notes": null,
+          "verification_frame_path": "ai-01-02.jpg"
+        },
+        {
+          "order": 3,
+          "start_seconds": 2,
+          "end_seconds": 2.8,
+          "visual_description_zh": "成人手勢指向投幣／乘車。",
+          "speech_or_narration_zh": "成人：「投兩塊。」",
+          "speech_source": "burned_caption_manually_checked_audio_pending",
+          "on_screen_text_zh": "投兩塊",
+          "verification": {
+            "visual": "direct_source_midpoint_frame_manually_checked",
+            "audio": "pending_manual_listening",
+            "translation": "not_applicable"
+          },
+          "notes": null,
+          "verification_frame_path": "ai-01-03.jpg"
+        },
+        {
+          "order": 4,
+          "start_seconds": 2.8,
+          "end_seconds": 5.56,
+          "visual_description_zh": "幼兒閉眼笑著延續誤會，鏡頭推近臉部。",
+          "speech_or_narration_zh": "幼兒：「不光頭涼快，渾身都涼快。」",
+          "speech_source": "burned_caption_manually_checked_audio_pending",
+          "on_screen_text_zh": "不光頭涼快／渾身都涼快",
+          "verification": {
+            "visual": "direct_source_midpoint_frame_manually_checked",
+            "audio": "pending_manual_listening",
+            "translation": "not_applicable"
+          },
+          "notes": null,
+          "verification_frame_path": "ai-01-04.jpg"
+        },
+        {
+          "order": 5,
+          "start_seconds": 5.56,
+          "end_seconds": 7.14,
+          "visual_description_zh": "成人再次解釋，舉手強調。",
+          "speech_or_narration_zh": "成人：「我告訴你，錢投兩塊。」",
+          "speech_source": "burned_caption_manually_checked_audio_pending",
+          "on_screen_text_zh": "我告訴你／錢投兩塊",
+          "verification": {
+            "visual": "direct_source_midpoint_frame_manually_checked",
+            "audio": "pending_manual_listening",
+            "translation": "not_applicable"
+          },
+          "notes": null,
+          "verification_frame_path": "ai-01-05.jpg"
+        },
+        {
+          "order": 6,
+          "start_seconds": 7.14,
+          "end_seconds": 10.167,
+          "visual_description_zh": "幼兒轉身走向車廂後方，笑點以空間行動落地。",
+          "speech_or_narration_zh": "幼兒：「我覺得後頭人少，更涼快。」",
+          "speech_source": "burned_caption_manually_checked_audio_pending",
+          "on_screen_text_zh": "我覺得後頭人少更涼快",
+          "verification": {
+            "visual": "direct_source_midpoint_frame_manually_checked",
+            "audio": "pending_manual_listening",
+            "translation": "not_applicable"
+          },
+          "notes": null,
+          "verification_frame_path": "ai-01-06.jpg"
+        }
+      ],
+      "unverified": [
+        "燒錄字幕已逐格核對；說話者與實際音訊仍待人工聆聽。",
+        "片中有幼兒形象；只作內部研究，權利未核實。"
+      ],
+      "verification_sheet_path": "ai-01-sheet.jpg"
+    },
+    {
+      "reference_key": "ai-03",
+      "format": "ai",
+      "source_id": "03",
+      "source_filename": "如果00後成為父母#短劇 #短視頻 #劇情 #ai #hongkong.mp4",
+      "duration_seconds": 169.572,
+      "selection": "full_representative",
+      "style_code": "ai_continuity_ensemble_skit",
+      "style_name_zh": "AI 多角色連續情境短劇",
+      "role": "primary_reference_family_ensemble",
+      "rights_state": "internal_research_only_rights_unverified",
+      "restoration_scope": "full_timeline_0_to_end",
+      "coverage_seconds": 169.572,
+      "coverage_percent": 100,
+      "audio_transcript_status": "asr_assisted_pending_manual_listening_unless_burned_caption_noted",
+      "visual_status": "direct_source_midpoint_frames_checked_for_every_timeline_segment",
+      "timeline": [
+        {
+          "order": 1,
+          "start_seconds": 0,
+          "end_seconds": 5.84,
+          "visual_description_zh": "兒子正面開場；父母追問戀愛資料，兒子旁白建立「不靠譜的 00 後父母」規則。",
+          "speech_or_narration_zh": "听说你恋爱了 怎么不跟我们说 男生女生 有照片吗 快给我们看看 我的爸妈是对不靠谱的零零后",
+          "speech_source": "asr_assisted_unverified",
+          "on_screen_text_zh": null,
+          "verification": {
+            "visual": "direct_source_midpoint_frame_manually_checked",
+            "audio": "pending_manual_listening",
+            "translation": "not_applicable"
+          },
+          "notes": null,
+          "verification_frame_path": "ai-03-01.jpg"
+        },
+        {
+          "order": 2,
+          "start_seconds": 5.84,
+          "end_seconds": 16.22,
+          "visual_description_zh": "清晨房間／家居場景，父母熬夜後反過來催兒子上學。",
+          "speech_or_narration_zh": "都几点了 还不起床上学 妈 现在才六点 我八点上课 妈一不小心熬穿了 现在睡我怕待会儿起不来 那你再熬两手词呗 不行 你再不走 妈就要走了",
+          "speech_source": "asr_assisted_unverified",
+          "on_screen_text_zh": null,
+          "verification": {
+            "visual": "direct_source_midpoint_frame_manually_checked",
+            "audio": "pending_manual_listening",
+            "translation": "not_applicable"
+          },
+          "notes": null,
+          "verification_frame_path": "ai-03-02.jpg"
+        },
+        {
+          "order": 3,
+          "start_seconds": 16.22,
+          "end_seconds": 35.8,
+          "visual_description_zh": "街邊食物攤，兒子偷吃澱粉腸；父母出現後不是責罵，而是一起加單並叫兒子付款。",
+          "speech_or_narration_zh": "太香了 千万别让我妈看见 不然又得说我一对 王子洋 你又背着我偷偷吃这些垃圾食品 妈 妈 你慢点 挺能啊你 自己吃毒食 就是 吃淀粉肠竟然不带我们 哪买的 老板 我们那两根多放辣椒 好嘞 谁付钱 他",
+          "speech_source": "asr_assisted_unverified",
+          "on_screen_text_zh": null,
+          "verification": {
+            "visual": "direct_source_midpoint_frame_manually_checked",
+            "audio": "pending_manual_listening",
+            "translation": "not_applicable"
+          },
+          "notes": null,
+          "verification_frame_path": "ai-03-03.jpg"
+        },
+        {
+          "order": 4,
+          "start_seconds": 35.8,
+          "end_seconds": 43.4,
+          "visual_description_zh": "家中交代家長會，父母把出席家長會說成「炸場子」，討論穿校服或禮服。",
+          "speech_or_narration_zh": "他 爸 妈 今天下午三点 我们学校要开家长会 行 明天我跟你爸去学校 给你炸场子 穿校服还是穿礼服",
+          "speech_source": "asr_assisted_unverified",
+          "on_screen_text_zh": null,
+          "verification": {
+            "visual": "direct_source_midpoint_frame_manually_checked",
+            "audio": "pending_manual_listening",
+            "translation": "not_applicable"
+          },
+          "notes": null,
+          "verification_frame_path": "ai-03-04.jpg"
+        },
+        {
+          "order": 5,
+          "start_seconds": 43.4,
+          "end_seconds": 64.56,
+          "visual_description_zh": "父母先在家庭餐桌把食物讓給兒子，畫面再切到兒子房間／被窩；父母叫他來吃後自己先吃，兒子回來拆穿。",
+          "speech_or_narration_zh": "穿校服还是穿礼服 来 儿子 多吃点 妈 你也吃 妈不爱吃 你吃 爸不饿 你正在长身体得多吃点 小点啥 放在那儿 吃 反正要不叫儿子也来吃点 行啊 儿子 来吃点东西吧 不理人 这就不怪咱们了 就是 你俩不想让我吃直说",
+          "speech_source": "asr_assisted_unverified",
+          "on_screen_text_zh": null,
+          "verification": {
+            "visual": "direct_source_midpoint_frame_manually_checked",
+            "audio": "pending_manual_listening",
+            "translation": "not_applicable"
+          },
+          "notes": null,
+          "verification_frame_path": "ai-03-05.jpg"
+        },
+        {
+          "order": 6,
+          "start_seconds": 64.56,
+          "end_seconds": 81.58,
+          "visual_description_zh": "校園／家長會入口，潮流打扮的父母先自拍，兒子及同學反應。",
+          "speech_or_narration_zh": "我去 这是谁家长啊 这么潮 这俩闲眼包 看镜头 看镜头 哦 哎 不对 我们是家长",
+          "speech_source": "asr_assisted_unverified",
+          "on_screen_text_zh": null,
+          "verification": {
+            "visual": "direct_source_midpoint_frame_manually_checked",
+            "audio": "pending_manual_listening",
+            "translation": "not_applicable"
+          },
+          "notes": null,
+          "verification_frame_path": "ai-03-06.jpg"
+        },
+        {
+          "order": 7,
+          "start_seconds": 81.58,
+          "end_seconds": 92.8,
+          "visual_description_zh": "老師／校方台詞談父母辛勞，鏡頭以父親造型及母親美甲反差製造笑點。",
+          "speech_or_narration_zh": "同学们 当你们赶到学习辛苦时 看看你们爸爸花白的头发 爸今天这造型帅不帅 再看看你们妈妈粗糙的双手 妈新做的美甲 咋样 太不靠谱了",
+          "speech_source": "asr_assisted_unverified",
+          "on_screen_text_zh": null,
+          "verification": {
+            "visual": "direct_source_midpoint_frame_manually_checked",
+            "audio": "pending_manual_listening",
+            "translation": "not_applicable"
+          },
+          "notes": null,
+          "verification_frame_path": "ai-03-07.jpg"
+        },
+        {
+          "order": 8,
+          "start_seconds": 92.8,
+          "end_seconds": 114.18,
+          "visual_description_zh": "老師逐科公布成績；父母對滿分、合格線及零分都以相同誇張方式稱讚並拍照。",
+          "speech_or_narration_zh": "太不靠谱了 不过也不是一点好事没有 珈乐的爸爸妈妈请等一下 珈乐太偏科了 数学考了一百分 牛啊 儿子 竟然考了满分 语文只考了六十分 牛啊 儿子 正好卡线 英语只考了零分 牛啊 儿子 这么小概率的事都碰上了 必须得发个朋友圈 我真的不知道该说什么了",
+          "speech_source": "asr_assisted_unverified",
+          "on_screen_text_zh": null,
+          "verification": {
+            "visual": "direct_source_midpoint_frame_manually_checked",
+            "audio": "pending_manual_listening",
+            "translation": "not_applicable"
+          },
+          "notes": null,
+          "verification_frame_path": "ai-03-08.jpg"
+        },
+        {
+          "order": 9,
+          "start_seconds": 114.18,
+          "end_seconds": 125.42,
+          "visual_description_zh": "兒子問零分為何不生氣；父母先說尊重成績，再提出補習班與帶食物的條件。",
+          "speech_or_narration_zh": "我考零分你们都不生气吗 成绩是你自己的 不过作为你的父母 我们必须要对你负责 对 所以我们决定给你报个英语补习班 你每天得给我们带两根淀粉肠 花你的压岁钱 啊",
+          "speech_source": "asr_assisted_unverified",
+          "on_screen_text_zh": null,
+          "verification": {
+            "visual": "direct_source_midpoint_frame_manually_checked",
+            "audio": "pending_manual_listening",
+            "translation": "not_applicable"
+          },
+          "notes": null,
+          "verification_frame_path": "ai-03-09.jpg"
+        },
+        {
+          "order": 10,
+          "start_seconds": 125.42,
+          "end_seconds": 137.7,
+          "visual_description_zh": "親戚到訪，家長與兒子躲在房間，避開長輩追問工作與成績。",
+          "speech_or_narration_zh": "齐家乐 我平时怎么教你的 长辈都在客厅做半天了 连面都不露 嘘 别动 我也扛不住你二大爷问东问西的 问完我工作肯定得问你成绩 咱俩现在都别出去",
+          "speech_source": "asr_assisted_unverified",
+          "on_screen_text_zh": null,
+          "verification": {
+            "visual": "direct_source_midpoint_frame_manually_checked",
+            "audio": "pending_manual_listening",
+            "translation": "not_applicable"
+          },
+          "notes": null,
+          "verification_frame_path": "ai-03-10.jpg"
+        },
+        {
+          "order": 11,
+          "start_seconds": 137.7,
+          "end_seconds": 148.82,
+          "visual_description_zh": "父親發現兒子躲被窩打機，先接手示範，最後仍提醒暗處玩遊戲傷眼。",
+          "speech_or_narration_zh": "咱俩现在都别出去 你又在被窝里偷偷玩游戏 零杠八 你这也太菜了吧 看爸怎么带你飞 爸 你太厉害了 学着点吧 老弟 打游戏可以 但不能在被窝偷偷玩 光线太暗对眼睛不好 好",
+          "speech_source": "asr_assisted_unverified",
+          "on_screen_text_zh": null,
+          "verification": {
+            "visual": "direct_source_midpoint_frame_manually_checked",
+            "audio": "pending_manual_listening",
+            "translation": "not_applicable"
+          },
+          "notes": null,
+          "verification_frame_path": "ai-03-11.jpg"
+        },
+        {
+          "order": 12,
+          "start_seconds": 148.82,
+          "end_seconds": 163.58,
+          "visual_description_zh": "兒子主動幫忙後失手弄倒食物／西瓜；父母進場先化解尷尬，再要求一起清理。",
+          "speech_or_narration_zh": "妈妈 我来帮你 小心 呀 妈妈 对不起 我不是故意的 没事 正好不用切了 来 儿子 吃西瓜 拎那么多东西正好热了 吃块西瓜解解渴 不过吃完西瓜 我们要把地板擦干净 包在我身上吧 虽然我的零零后爸妈看着不靠谱",
+          "speech_source": "asr_assisted_unverified",
+          "on_screen_text_zh": null,
+          "verification": {
+            "visual": "direct_source_midpoint_frame_manually_checked",
+            "audio": "pending_manual_listening",
+            "translation": "not_applicable"
+          },
+          "notes": null,
+          "verification_frame_path": "ai-03-12.jpg"
+        },
+        {
+          "order": 13,
+          "start_seconds": 163.58,
+          "end_seconds": 169.572,
+          "visual_description_zh": "家庭同框與兒子旁白收束，從「不靠譜」反轉成被尊重與愛護的幸福。",
+          "speech_or_narration_zh": "虽然我的零零后爸妈看着不靠谱 但生活在这样的家庭 真的很幸福",
+          "speech_source": "asr_assisted_unverified",
+          "on_screen_text_zh": null,
+          "verification": {
+            "visual": "direct_source_midpoint_frame_manually_checked",
+            "audio": "pending_manual_listening",
+            "translation": "not_applicable"
+          },
+          "notes": null,
+          "verification_frame_path": "ai-03-13.jpg"
+        }
+      ],
+      "unverified": [
+        "全片 ASR 幾乎覆蓋 0–168.86 秒，但未逐句人工聆聽；個別人名、口語和字幕字詞仍待覆核。",
+        "影像 storyboard 已檢查；跨場細節仍以原片逐鏡再審為準。",
+        "未成年人形象、聲音及來源權利未核實。"
+      ],
+      "verification_sheet_path": "ai-03-sheet.jpg"
+    },
+    {
+      "reference_key": "ai-07",
+      "format": "ai",
+      "source_id": "07",
+      "source_filename": "如果你真的穿越到 1912 年，敢登上鐵達尼號嗎？🚢我真的把自己「送回」了 1912 年。從港口排隊登船開始，一路走進鐵達尼號的甲板、三等艙公共區、擁擠的樓梯和客房走廊……最.mp4",
+      "duration_seconds": 145.812,
+      "selection": "full_representative",
+      "style_code": "ai_host_time_travel_tour",
+      "style_name_zh": "AI 實景主持穿越導覽",
+      "role": "primary_reference_historical_host_tour",
+      "rights_state": "internal_research_only_rights_unverified",
+      "restoration_scope": "full_timeline_0_to_end",
+      "coverage_seconds": 145.812,
+      "coverage_percent": 100,
+      "audio_transcript_status": "asr_assisted_pending_manual_listening_unless_burned_caption_noted",
+      "visual_status": "direct_source_midpoint_frames_checked_for_every_timeline_segment",
+      "timeline": [
+        {
+          "order": 1,
+          "start_seconds": 0,
+          "end_seconds": 8,
+          "visual_description_zh": "主持在港口與巨型船身、1912 年服裝人群同框，自拍宣告穿越設定。",
+          "speech_or_narration_zh": "這次我來體驗1912年英國最豪華的郵輪 有人知道這艘船的英文字怎麼唸嗎",
+          "speech_source": "asr_assisted_unverified",
+          "on_screen_text_zh": null,
+          "verification": {
+            "visual": "direct_source_midpoint_frame_manually_checked",
+            "audio": "pending_manual_listening",
+            "translation": "not_applicable"
+          },
+          "notes": null,
+          "verification_frame_path": "ai-07-01.jpg"
+        },
+        {
+          "order": 2,
+          "start_seconds": 8,
+          "end_seconds": 18,
+          "visual_description_zh": "登船入口及工作人員，主持詢問注意事項；人群與行李作時代背景。",
+          "speech_or_narration_zh": "這裡是登船的入口處 我現在要來登船了 請問登船要注意什麼的嗎",
+          "speech_source": "asr_assisted_unverified",
+          "on_screen_text_zh": null,
+          "verification": {
+            "visual": "direct_source_midpoint_frame_manually_checked",
+            "audio": "pending_manual_listening",
+            "translation": "not_applicable"
+          },
+          "notes": null,
+          "verification_frame_path": "ai-07-02.jpg"
+        },
+        {
+          "order": 3,
+          "start_seconds": 18,
+          "end_seconds": 26,
+          "visual_description_zh": "主持完成登船，穿過人群並預告上船後拍攝。",
+          "speech_or_narration_zh": "現在可以登船了 人真的超多 我等一下上去再拍給你們看",
+          "speech_source": "asr_assisted_unverified",
+          "on_screen_text_zh": null,
+          "verification": {
+            "visual": "direct_source_midpoint_frame_manually_checked",
+            "audio": "pending_manual_listening",
+            "translation": "not_applicable"
+          },
+          "notes": null,
+          "verification_frame_path": "ai-07-03.jpg"
+        },
+        {
+          "order": 4,
+          "start_seconds": 26,
+          "end_seconds": 36,
+          "visual_description_zh": "木飾大廳與忙碌乘客，主持自拍描述剛登船的混亂及狗隻。",
+          "speech_or_narration_zh": "這裡是鐵尼號的大廳 感覺整艘船人都在這邊走來走去 很忙的樣子 應該是因為剛登船所以有點混亂 欸好多狗",
+          "speech_source": "asr_assisted_unverified",
+          "on_screen_text_zh": null,
+          "verification": {
+            "visual": "direct_source_midpoint_frame_manually_checked",
+            "audio": "pending_manual_listening",
+            "translation": "not_applicable"
+          },
+          "notes": null,
+          "verification_frame_path": "ai-07-04.jpg"
+        },
+        {
+          "order": 5,
+          "start_seconds": 36,
+          "end_seconds": 50,
+          "visual_description_zh": "甲板人群、歷史服裝及海面；主持在人群中移動並認出港口人物。",
+          "speech_or_narration_zh": "呃是剛剛在港口跟我肩膀的人嗎",
+          "speech_source": "asr_assisted_unverified",
+          "on_screen_text_zh": null,
+          "verification": {
+            "visual": "direct_source_midpoint_frame_manually_checked",
+            "audio": "pending_manual_listening",
+            "translation": "not_applicable"
+          },
+          "notes": "36–44 秒 ASR 有缺口，保留時間位置。",
+          "verification_frame_path": "ai-07-05.jpg"
+        },
+        {
+          "order": 6,
+          "start_seconds": 50,
+          "end_seconds": 61,
+          "visual_description_zh": "戶外甲板及船長講解；主持轉頭展示群眾並評論正式氣氛。",
+          "speech_or_narration_zh": "哇太陽還真大 船長現在在說明航程中的注意事項 大家都聽得好認真 現場感覺真的很正式 而且我一講話旁邊的人就一直在看我",
+          "speech_source": "asr_assisted_unverified",
+          "on_screen_text_zh": null,
+          "verification": {
+            "visual": "direct_source_midpoint_frame_manually_checked",
+            "audio": "pending_manual_listening",
+            "translation": "not_applicable"
+          },
+          "notes": null,
+          "verification_frame_path": "ai-07-06.jpg"
+        },
+        {
+          "order": 7,
+          "start_seconds": 61,
+          "end_seconds": 76,
+          "visual_description_zh": "三等艙公共區，乘客聊天、唱歌／跳舞；主持與背景角色短暫互動後離開找房。",
+          "speech_or_narration_zh": "這裡是三等長的公共區域 大家會在這邊聊天 有人還會唱歌跳舞 你們是在玩什麼 呃有人聽過這種法嗎 呃有人聽過這種法嗎 你喜歡跟我們一起嗎 沒有謝謝 謝謝 我想要先去找我的房間",
+          "speech_source": "asr_assisted_unverified",
+          "on_screen_text_zh": null,
+          "verification": {
+            "visual": "direct_source_midpoint_frame_manually_checked",
+            "audio": "pending_manual_listening",
+            "translation": "not_applicable"
+          },
+          "notes": null,
+          "verification_frame_path": "ai-07-07.jpg"
+        },
+        {
+          "order": 8,
+          "start_seconds": 76,
+          "end_seconds": 87,
+          "visual_description_zh": "主持在走廊迷路，與工作人員交談，得知不同艙等方向。",
+          "speech_or_narration_zh": "呃我現在應該是迷路了 這裡好特別喔 我對不起先生 不過是部份是第一級的客人 如果你想要到第三級 你必須要去另外一方",
+          "speech_source": "asr_assisted_unverified",
+          "on_screen_text_zh": null,
+          "verification": {
+            "visual": "direct_source_midpoint_frame_manually_checked",
+            "audio": "pending_manual_listening",
+            "translation": "not_applicable"
+          },
+          "notes": null,
+          "verification_frame_path": "ai-07-08.jpg"
+        },
+        {
+          "order": 9,
+          "start_seconds": 87,
+          "end_seconds": 96,
+          "visual_description_zh": "擠迫樓梯與尋房人群，主持沿樓梯上落後找到房間。",
+          "speech_or_narration_zh": "哇這樓梯好擠 好像很多人還在找自己的房間 喔就是這間了",
+          "speech_source": "asr_assisted_unverified",
+          "on_screen_text_zh": null,
+          "verification": {
+            "visual": "direct_source_midpoint_frame_manually_checked",
+            "audio": "pending_manual_listening",
+            "translation": "not_applicable"
+          },
+          "notes": null,
+          "verification_frame_path": "ai-07-09.jpg"
+        },
+        {
+          "order": 10,
+          "start_seconds": 96,
+          "end_seconds": 109,
+          "visual_description_zh": "三等艙房間開箱，展示木牆、床鋪及床頭洗手盆。",
+          "speech_or_narration_zh": "走我們來開箱鐵燈泥號的房間 喔這個房間還不錯 床頭還有附一個洗手的 怎麼樣這個房間還可以吧",
+          "speech_source": "asr_assisted_unverified",
+          "on_screen_text_zh": null,
+          "verification": {
+            "visual": "direct_source_midpoint_frame_manually_checked",
+            "audio": "pending_manual_listening",
+            "translation": "not_applicable"
+          },
+          "notes": null,
+          "verification_frame_path": "ai-07-10.jpg"
+        },
+        {
+          "order": 11,
+          "start_seconds": 109,
+          "end_seconds": 112,
+          "visual_description_zh": "主持說帶了無人機，準備展示船體大小。",
+          "speech_or_narration_zh": "喔這次我有帶無人機過來 等一下我會找個地方飛 給你們看看這艘船有多大",
+          "speech_source": "asr_assisted_unverified",
+          "on_screen_text_zh": null,
+          "verification": {
+            "visual": "direct_source_midpoint_frame_manually_checked",
+            "audio": "pending_manual_listening",
+            "translation": "not_applicable"
+          },
+          "notes": null,
+          "verification_frame_path": "ai-07-11.jpg"
+        },
+        {
+          "order": 12,
+          "start_seconds": 112,
+          "end_seconds": 126,
+          "visual_description_zh": "轉到甲板及船體闊景，主持小窗／環境鏡展示船上全貌。",
+          "speech_or_narration_zh": "音訊待核實；現有 ASR 在此段重複「好」，判定不可靠。",
+          "speech_source": "unreliable_asr_pending_manual_listening",
+          "on_screen_text_zh": null,
+          "verification": {
+            "visual": "direct_source_midpoint_frame_manually_checked",
+            "audio": "pending_manual_listening",
+            "translation": "not_applicable"
+          },
+          "notes": null,
+          "verification_frame_path": "ai-07-12.jpg"
+        },
+        {
+          "order": 13,
+          "start_seconds": 126,
+          "end_seconds": 138,
+          "visual_description_zh": "高位甲板、煙囪、桅杆與人群，鏡頭逐步拉開。",
+          "speech_or_narration_zh": "音訊待核實；現有 ASR 重複單字，未採作對白。",
+          "speech_source": "unreliable_asr_pending_manual_listening",
+          "on_screen_text_zh": null,
+          "verification": {
+            "visual": "direct_source_midpoint_frame_manually_checked",
+            "audio": "pending_manual_listening",
+            "translation": "not_applicable"
+          },
+          "notes": null,
+          "verification_frame_path": "ai-07-13.jpg"
+        },
+        {
+          "order": 14,
+          "start_seconds": 138,
+          "end_seconds": 145.812,
+          "visual_description_zh": "甲板工作人員及船體最後闊景，完成空間導覽。",
+          "speech_or_narration_zh": "無可靠轉錄；待人工聆聽。",
+          "speech_source": "missing_transcript_pending_manual_listening",
+          "on_screen_text_zh": null,
+          "verification": {
+            "visual": "direct_source_midpoint_frame_manually_checked",
+            "audio": "pending_manual_listening",
+            "translation": "not_applicable"
+          },
+          "notes": null,
+          "verification_frame_path": "ai-07-14.jpg"
+        }
+      ],
+      "unverified": [
+        "3–6、14–18、23–26、36–44 等位置沒有可靠 ASR，已保留為待人工聽寫。",
+        "112 秒後 ASR 明顯失真，未冒充原片對白。",
+        "1912 年、船艙、階級動線及「最豪華」等均為原片設定／說法，需史料核實。",
+        "主持與背景人物的肖像、聲音及生成權利未核實。"
+      ],
+      "verification_sheet_path": "ai-07-sheet.jpg"
+    }
+  ],
+  "fragment_supplements": [
+    {
+      "reference_key": "human-02",
+      "format": "human",
+      "source_id": "02",
+      "source_filename": "Flamingo Land火烈鳥樂園位於英國北約克郡，是英國擁有最多過山車的樂園之一。其最刺激過山車「Sik」於2022年7月2日開放，由Intamin製造耗資約1800萬英鎊。這款多重倒轉過.mp4",
+      "duration_seconds": 11.72,
+      "selection": "fragment_supplement",
+      "style_code": "spectacle_first_experience_micro",
+      "role": "one_shot_wait_for_result",
+      "fragment": {
+        "start_seconds": 0,
+        "end_seconds": 11.72,
+        "visual_description_zh": "固定闊鏡由螺旋軌道建立期待，等待列車衝出並近距離通過；保留完整因果。",
+        "speech_status": "not_required_or_pending"
+      },
+      "rights_state": "internal_research_only_rights_unverified",
+      "notes": [
+        "資料字卡聲稱待核實。"
+      ]
+    },
+    {
+      "reference_key": "human-03",
+      "format": "human",
+      "source_id": "03",
+      "source_filename": "I need someone to build that cocktail tube delivery system at my home 😆 📮.Cahoots Postal Offic.mp4",
+      "duration_seconds": 23.1,
+      "selection": "fragment_supplement",
+      "style_code": "spectacle_first_experience_micro",
+      "role": "mechanism_chain_escalation",
+      "fragment": {
+        "start_seconds": 0,
+        "end_seconds": 6,
+        "visual_description_zh": "以「郵局外觀的酒吧＋飲品由郵筒送到」作最怪結果 Hook。",
+        "speech_status": "english_voiceover_translation_pending"
+      },
+      "rights_state": "internal_research_only_rights_unverified",
+      "notes": [
+        "來源權未確認。"
+      ]
+    },
+    {
+      "reference_key": "human-03",
+      "format": "human",
+      "source_id": "03",
+      "source_filename": "I need someone to build that cocktail tube delivery system at my home 😆 📮.Cahoots Postal Offic.mp4",
+      "duration_seconds": 23.1,
+      "selection": "fragment_supplement",
+      "style_code": "spectacle_first_experience_micro",
+      "role": "mechanism_chain_larger_reveal",
+      "fragment": {
+        "start_seconds": 14,
+        "end_seconds": 23.1,
+        "visual_description_zh": "展示飲品機器及隱藏房間，以更大機關作第二次揭示。",
+        "speech_status": "english_voiceover_translation_pending"
+      },
+      "rights_state": "internal_research_only_rights_unverified",
+      "notes": [
+        "來源權未確認。"
+      ]
+    },
+    {
+      "reference_key": "human-04",
+      "format": "human",
+      "source_id": "04",
+      "source_filename": "London’s newest immersive experience 🤯✅ Follow @shweta.wanders for the best London experiences,.mp4",
+      "duration_seconds": 10.93,
+      "selection": "fragment_supplement",
+      "style_code": "spectacle_first_experience_micro",
+      "role": "pov_visual_proof",
+      "fragment": {
+        "start_seconds": 0,
+        "end_seconds": 10.93,
+        "visual_description_zh": "一句承諾後以 POV、側面、跟車及闊景證明真人投影賽車體驗。",
+        "speech_status": "no_verified_dialogue"
+      },
+      "rights_state": "internal_research_only_rights_unverified",
+      "notes": [
+        "來源權未確認；固定英文標題不可照搬。"
+      ]
+    },
+    {
+      "reference_key": "human-06",
+      "format": "human",
+      "source_id": "06",
+      "source_filename": "可以印自己的臉！真的有人想收到嗎😆？最荒謬的日本伴手禮 #🇯🇵哈哈哈現在看還是覺得很荒謬但又捨不得吃完（？快Tag要去日本的朋朋幫你買🫵🏻🙋你們想做做看這個銅鑼燒.mp4",
+      "duration_seconds": 36.89,
+      "selection": "fragment_supplement",
+      "style_code": "human_product_demo_conversion",
+      "role": "personalised_result_to_evidence_to_trial",
+      "fragment": {
+        "start_seconds": 0,
+        "end_seconds": 30,
+        "visual_description_zh": "先揭露人臉銅鑼燒結果，再以訂購／開箱補來源，最後拆開、看餡料及試食。",
+        "speech_status": "asr_assisted_pending_manual_listening"
+      },
+      "rights_state": "internal_research_only_rights_unverified",
+      "notes": [
+        "只作產品方向補充；未拍製作過程，不可聲稱工藝已實測。"
+      ]
+    },
+    {
+      "reference_key": "ai-02",
+      "format": "ai",
+      "source_id": "02",
+      "source_filename": "Tanto esforço pra nada…😂 @syntx_global @syntx_creators Crie videos virais como esse com a plata.mp4",
+      "duration_seconds": 15.16,
+      "selection": "fragment_supplement",
+      "style_code": "ai_absurd_twist_microdrama",
+      "role": "futile_effort_reversal",
+      "fragment": {
+        "start_seconds": 0,
+        "end_seconds": 15.16,
+        "visual_description_zh": "建築闊鏡完整保留多人接力救貓，最後貓自行跳走，直接否定前面努力。",
+        "speech_status": "nonverbal_audio_only"
+      },
+      "rights_state": "internal_research_only_rights_unverified",
+      "notes": [
+        "有創作者水印；不可公開掛片。"
+      ]
+    },
+    {
+      "reference_key": "ai-04",
+      "format": "ai",
+      "source_id": "04",
+      "source_filename": "POV- When you and your friends start discussing art...#art #funny #kitten #ai #plating.mp4",
+      "duration_seconds": 10.167,
+      "selection": "fragment_supplement",
+      "style_code": "ai_absurd_twist_microdrama",
+      "role": "task_sabotage_reversal",
+      "fragment": {
+        "start_seconds": 0,
+        "end_seconds": 10.167,
+        "visual_description_zh": "兩隻貓廚師完成專業擺盤後，由第二角色一次破壞，最後停留反應。",
+        "speech_status": "nonverbal_audio_only"
+      },
+      "rights_state": "internal_research_only_rights_unverified",
+      "notes": []
+    },
+    {
+      "reference_key": "ai-10",
+      "format": "ai",
+      "source_id": "10",
+      "source_filename": "Oscar unlocked tiger mode 🐯 Created in @higgsfield.ai #higgsfield #catvideo #persiancat #funnyc.mp4",
+      "duration_seconds": 10.144,
+      "selection": "fragment_supplement",
+      "style_code": "ai_absurd_twist_microdrama",
+      "role": "material_transformation_reversal",
+      "fragment": {
+        "start_seconds": 0,
+        "end_seconds": 10.144,
+        "visual_description_zh": "白貓跌入橙色油漆後變成橙黑虎紋，前後只改一個核心狀態。",
+        "speech_status": "minimal_dialogue_no_way_unverified"
+      },
+      "rights_state": "internal_research_only_rights_unverified",
+      "notes": [
+        "必須標示 AI／虛構，避免模仿危險行為。"
+      ]
+    },
+    {
+      "reference_key": "ai-11",
+      "format": "ai",
+      "source_id": "11",
+      "source_filename": "Angel is smart 🤭#aicat #siamese #siamesecat#siamesecatsofinstagram #siamesecorner.mp4",
+      "duration_seconds": 8.519,
+      "selection": "fragment_supplement",
+      "style_code": "ai_absurd_twist_microdrama",
+      "role": "taboo_reveal_reversal",
+      "fragment": {
+        "start_seconds": 0,
+        "end_seconds": 8.519,
+        "visual_description_zh": "擬人貓清洗餐碟，最後揭示清洗位置是馬桶。",
+        "speech_status": "no_reliable_dialogue"
+      },
+      "rights_state": "internal_research_only_rights_unverified",
+      "notes": [
+        "不可令人誤認為真實餐飲衛生事件。"
+      ]
+    },
+    {
+      "reference_key": "ai-09",
+      "format": "ai",
+      "source_id": "09",
+      "source_filename": "好有創意嘅AI影片天津市消防救援總隊近來用AI打造的消防宣導影片，靠著黑白無常從「接人」變「救人」的創意，成功讓網友們願意認真觀看，甚至被台灣網民轉貼到其他網上平台.mp4",
+      "duration_seconds": 83.327,
+      "selection": "fragment_supplement",
+      "style_code": "ai_continuity_ensemble_skit",
+      "role": "public_service_folklore_hook",
+      "fragment": {
+        "start_seconds": 0,
+        "end_seconds": 20,
+        "visual_description_zh": "灶火失控後黑白無常由「接人」轉為阻止錯誤行為，示範熟悉文化角色代表後果。",
+        "speech_status": "transcript_incomplete_pending_manual_listening"
+      },
+      "rights_state": "internal_research_only_rights_unverified",
+      "notes": [
+        "只保留結構；新聞轉載、權利及安全指引未核實。"
+      ]
+    },
+    {
+      "reference_key": "ai-05",
+      "format": "ai",
+      "source_id": "05",
+      "source_filename": "The art walk#art #ai #monalisa #vangogh #davinci.mp4",
+      "duration_seconds": 20.175,
+      "selection": "fragment_supplement",
+      "style_code": "ai_artist_reflective_monologue",
+      "role": "artwork_walks_into_reality_module",
+      "fragment": {
+        "start_seconds": 0,
+        "end_seconds": 20.175,
+        "visual_description_zh": "同一背景與運鏡下讓藝術家／作品人物依次走入現實，只作作品意象或轉場。",
+        "speech_status": "music_only_no_reliable_dialogue"
+      },
+      "rights_state": "internal_research_only_rights_unverified",
+      "notes": [
+        "公有領域原作與掃描、演繹、音樂及生成片權利須分開核對。"
+      ]
+    },
+    {
+      "reference_key": "ai-06",
+      "format": "ai",
+      "source_id": "06",
+      "source_filename": "What an incredible effect, totally shocked!This video is made by Dreamina Seedance 2.0. Both 2.0.mp4",
+      "duration_seconds": 15.16,
+      "selection": "fragment_supplement",
+      "style_code": "research_only",
+      "role": "space_boundary_spectacle",
+      "fragment": {
+        "start_seconds": 0,
+        "end_seconds": 15.16,
+        "visual_description_zh": "先建立正常室內，再讓單一元素逐級跨越空間邊界，最後以人物／物件反應提供尺度。",
+        "speech_status": "single_dubious_line_not_used"
+      },
+      "rights_state": "internal_research_only_rights_unverified",
+      "notes": [
+        "效果研究，不屬方向；帶工具宣傳字樣。"
+      ]
+    }
+  ],
+  "excluded_unchanged": [
+    {
+      "reference_key": "human-10",
+      "reason": "2026-09-29 決定不收錄。"
+    },
+    {
+      "reference_key": "ai-08",
+      "reason": "依賴第三方 Harry Potter／Hogwarts IP；維持排除。"
+    }
+  ],
+  "summary": {
+    "full_representative_count": 9,
+    "full_timeline_coverage_count": 9,
+    "fragment_supplement_count": 12,
+    "database_writes": 0,
+    "deployments": 0,
+    "audio_fully_manually_verified_count": 0,
+    "blocking_note": "本輪工具可核對畫面與燒錄字幕，但不能完成真人逐句聆聽。所有 ASR 對白保留 pending_manual_listening；AI-01 燒錄字幕已逐格核對。",
+    "visual_direct_source_segment_check_count": 81,
+    "verification_sheet_count": 9
+  }
+}
