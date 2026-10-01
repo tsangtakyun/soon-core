@@ -487,7 +487,7 @@ export function ContentDirectionLab() {
                 <b>原片還原稿：已入庫</b>
                 <span>風格規格：連結現有 review 版本</span>
                 <span>示範劇本：獨立內容，未混入本稿</span>
-                <span>重建實驗 Prompt：未交付／未啟用</span>
+                <span>重建實驗 Prompt：{registryFormat === "ai_short_video" ? (reconstructionPromptSets.length ? "已獨立入庫／未啟用" : "尚未入庫／未啟用") : "另於 AI 短片分頁／未啟用"}</span>
               </div>
               <div className="restoration-list">
                 {restorations.map((restoration) => (
