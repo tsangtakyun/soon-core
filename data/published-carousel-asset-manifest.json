@@ -1,0 +1,66 @@
+{
+  "styles": [
+    {
+      "code": "immersive_folklore_ritual",
+      "assets": [
+        "/templates/immersive-folklore-ritual-v2/assets/01-elevator-interior.png",
+        "/templates/immersive-folklore-ritual-v2/assets/02-corridor.png",
+        "/templates/immersive-folklore-ritual-v2/assets/03-encounter.png",
+        "/templates/immersive-folklore-ritual-v2/assets/04-cctv.png",
+        "/templates/immersive-folklore-ritual-v2/assets/05-phone.png",
+        "/templates/immersive-folklore-ritual-v2/previews/page-01.png",
+        "/templates/immersive-folklore-ritual-v2/previews/page-02.png",
+        "/templates/immersive-folklore-ritual-v2/previews/page-03.png",
+        "/templates/immersive-folklore-ritual-v2/previews/page-04.png",
+        "/templates/immersive-folklore-ritual-v2/previews/page-05.png",
+        "/templates/immersive-folklore-ritual-v2/previews/page-06.png",
+        "/templates/immersive-folklore-ritual-v2/previews/page-07.png",
+        "/templates/immersive-folklore-ritual-v2/previews/page-08.png"
+      ]
+    },
+    {
+      "code": "architectural_archive_story",
+      "assets": [
+        "/templates/architectural-archive-story-v1/01-cover-hook.jpg",
+        "/templates/architectural-archive-story-v1/02-context-overlay.jpg",
+        "/templates/architectural-archive-story-v1/03-visual-pause.jpg",
+        "/templates/architectural-archive-story-v1/04-history-body.jpg",
+        "/templates/architectural-archive-story-v1/05-before-1895.jpg",
+        "/templates/architectural-archive-story-v1/05-after-1939.jpg",
+        "/templates/architectural-archive-story-v1/06-detail-study-ai.png",
+        "/templates/architectural-archive-story-v1/07-alternate-view.jpg",
+        "/templates/architectural-archive-story-v1/08-environmental-close.jpg"
+      ]
+    },
+    {
+      "code": "premium_product_origin",
+      "assets": [
+        "/templates/premium-product-origin-v1/01-question-cover.png",
+        "/templates/premium-product-origin-v1/02-problem-origin.jpg",
+        "/templates/premium-product-origin-v1/03-material-process.png",
+        "/templates/premium-product-origin-v1/05-mechanism.svg",
+        "/templates/premium-product-origin-v1/06-maker-context.png",
+        "/templates/premium-product-origin-v1/07-production-detail.jpg",
+        "/templates/premium-product-origin-v1/08-misconception.jpg",
+        "/templates/premium-product-origin-v1/09-present-close.jpg"
+      ]
+    },
+    {
+      "code": "reflective_object_essay",
+      "assets": [
+        "/templates/reflective-object-essay-v1/01-chair-hero.png",
+        "/templates/reflective-object-essay-v1/02-repair-detail.png",
+        "/templates/reflective-object-essay-v1/03-entryway.png",
+        "/templates/reflective-object-essay-v1/04-table-objects.png"
+      ]
+    },
+    { "code": "character_emotion_story", "assets": ["/templates/character-emotion-story-v1/approved-preview.jpg"] },
+    { "code": "product_focus", "assets": ["/templates/product-focus-v2/approved-preview.jpg"] },
+    { "code": "editorial_office_flash", "assets": ["/templates/editorial-office-flash-v1/approved-preview.jpg"] },
+    { "code": "ranking_review", "assets": ["/templates/ranking-review-v1/approved-preview.jpg"] },
+    { "code": "classical_culture_remix", "assets": ["/templates/classical-culture-remix-v1/approved-preview.jpg"] },
+    { "code": "quiet_research_editorial", "assets": ["/templates/quiet-research-editorial-v1/approved-preview.jpg"] },
+    { "code": "moody_lifestyle_quiz", "assets": ["/templates/moody-lifestyle-quiz-v1/approved-preview.jpg"] },
+    { "code": "clear_magazine_carousel", "assets": ["/templates/clear-magazine-carousel-v1/approved-preview.jpg"] }
+  ]
+}

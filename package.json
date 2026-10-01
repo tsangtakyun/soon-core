@@ -4,6 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "node node_modules/next/dist/bin/next dev",
+    "verify:template-assets": "node scripts/verify-template-assets.mjs",
+    "verify:deployed-template-assets": "node scripts/verify-deployed-template-assets.mjs",
+    "prebuild": "npm run verify:template-assets",
     "build": "node node_modules/next/dist/bin/next build --webpack",
     "start": "node node_modules/next/dist/bin/next start",
     "lint": "node node_modules/eslint/bin/eslint.js"
@@ -21,6 +24,7 @@
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "resend": "^6.12.3",
+    "sharp": "^0.34.5",
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
