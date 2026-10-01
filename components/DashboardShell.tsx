@@ -64,12 +64,12 @@ type SidebarIconName =
 
 const primaryNav = [
   { href: '/', label: '首頁', icon: 'home', section: 'home' },
-  { href: '/intelligence-inbox', label: 'Intelligence Inbox', icon: 'inbox', section: 'inbox' },
+  { href: '/intelligence-inbox', label: '情報收件箱', icon: 'inbox', section: 'inbox' },
   { href: '/topic-library', label: '題材資料庫', icon: 'topics', section: 'topics' },
-  { href: '/content-directions', label: 'Content Direction Lab', icon: 'directions', section: 'directions' },
-  { href: '/content-methods', label: 'Content Method Intelligence', icon: 'methods', section: 'methods' },
-  { href: '/campaign-experiences', label: 'Campaign Intelligence', icon: 'experiences', section: 'experiences' },
-  { href: '/intelligence', label: 'Performance Intelligence', icon: 'intelligence', section: 'intelligence' },
+  { href: '/content-directions', label: '內容方向研究室', icon: 'directions', section: 'directions' },
+  { href: '/content-methods', label: '內容方法情報', icon: 'methods', section: 'methods' },
+  { href: '/campaign-experiences', label: '宣傳企劃情報', icon: 'experiences', section: 'experiences' },
+  { href: '/intelligence', label: '成效情報', icon: 'intelligence', section: 'intelligence' },
 ] as const satisfies ReadonlyArray<{
   href: string
   label: string
@@ -596,7 +596,7 @@ export function DashboardShell({ activeSection, pipeline, tool, children }: Dash
         </div>
 
         <div className="core-sidebar-scroll">
-          <nav className="core-nav" aria-label="Main navigation">
+          <nav className="core-nav" aria-label="主要導覽">
             {primaryNav.map((item) => (
               <Link
                 key={item.href}
