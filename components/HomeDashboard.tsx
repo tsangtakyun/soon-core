@@ -233,8 +233,8 @@ export function HomeDashboard({ afterHero }: { afterHero?: ReactNode }) {
   );
   const sales = revenue?.value_json ?? {};
   const target = num(sales.target);
-  const signed = data?.clientSummary.signed ?? 0;
-  const pending = data?.clientSummary.contractPending ?? 0;
+  const signed = data?.clientSummary?.signed ?? 0;
+  const pending = data?.clientSummary?.contractPending ?? 0;
   const issues = Object.entries(data?.sources ?? {}).filter(
     ([, source]) => source.status !== "connected",
   );
@@ -318,7 +318,7 @@ export function HomeDashboard({ afterHero }: { afterHero?: ReactNode }) {
             <Metric
               label="已鎖定合約值"
               value={minorMoney(
-                data?.clientSummary.bookedContractValueMinor ?? 0,
+                data?.clientSummary?.bookedContractValueMinor ?? 0,
                 "HKD",
               )}
               note="Roster 已簽客戶合計"
@@ -326,7 +326,7 @@ export function HomeDashboard({ afterHero }: { afterHero?: ReactNode }) {
             <Metric
               label="有效 MRR"
               value={minorMoney(
-                data?.clientSummary.effectiveMrrMinor ?? 0,
+                data?.clientSummary?.effectiveMrrMinor ?? 0,
                 "HKD",
               )}
               note="Roster 有效收入合計"
@@ -347,7 +347,7 @@ export function HomeDashboard({ afterHero }: { afterHero?: ReactNode }) {
         <ClientPanel
           clients={data?.clients ?? []}
           summary={data?.clientSummary}
-          commercial={data?.metrics.commercial}
+          commercial={data?.metrics?.commercial}
           documentAudit={data?.documentAudit}
           onChanged={() => load()}
         />
@@ -399,9 +399,9 @@ export function HomeDashboard({ afterHero }: { afterHero?: ReactNode }) {
             <Heading
               n="05"
               title="Tommy 決策"
-              aside={`${data?.decisions.length ?? 0} 項待決定`}
+              aside={`${data?.decisions?.length ?? 0} 項待決定`}
             />
-            {data?.decisions.length ? (
+            {data?.decisions?.length ? (
               <div className="rows">
                 {data.decisions.map((item) => (
                   <article className="decision" key={item.id}>
@@ -440,24 +440,24 @@ export function HomeDashboard({ afterHero }: { afterHero?: ReactNode }) {
           <div className="pulse-grid">
             <Mini
               label="已發布題材"
-              value={data?.metrics.core.topicsPublished}
+              value={data?.metrics?.core?.topicsPublished}
             />
             <Mini
               label="內容方向"
-              value={data?.metrics.core.contentDirections}
+              value={data?.metrics?.core?.contentDirections}
             />
-            <Mini label="內容方法" value={data?.metrics.core.contentMethods} />
+            <Mini label="內容方法" value={data?.metrics?.core?.contentMethods} />
             <Mini
               label="宣傳企劃經驗"
-              value={data?.metrics.core.campaignLearnings}
+              value={data?.metrics?.core?.campaignLearnings}
             />
-            <Mini label="內容項目" value={data?.metrics.core.projects} />
+            <Mini label="內容項目" value={data?.metrics?.core?.projects} />
             <Mini
               label="未處理情報"
-              value={data?.metrics.core.openIntelligence}
+              value={data?.metrics?.core?.openIntelligence}
             />
-            <Mini label="品牌" value={data?.metrics.brand.brands} />
-            <Mini label="Creators" value={data?.metrics.egg.creators} />
+            <Mini label="品牌" value={data?.metrics?.brand?.brands} />
+            <Mini label="Creators" value={data?.metrics?.egg?.creators} />
           </div>
           <div className="quick-links">
             <Link href="/intelligence-inbox">處理情報 →</Link>
