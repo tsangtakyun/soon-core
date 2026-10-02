@@ -195,12 +195,12 @@ function VideoStyleCover({
   code: string;
   name: string;
   selected: boolean;
-  onOpen: () => void;
+  onOpen: (trigger: HTMLButtonElement) => void;
 }) {
   const fallback = videoStyleFallbacks[code] ?? { icon: "▶", tone: "violet" };
   const cover = videoStyleCover(code);
   return (
-    <button type="button" className={`video-style-cover ${selected ? "selected" : ""}`} onClick={onOpen} aria-label={`查看${name}風格內容`}>
+    <button type="button" className={`video-style-cover ${selected ? "selected" : ""}`} onClick={(event) => onOpen(event.currentTarget)} aria-label={`查看${name}風格內容`}>
       {cover.asset ? <img src={cover.asset} alt={`${name}代表封面`} loading="lazy" style={{ objectPosition: cover.objectPosition }} /> : (
         <span className={`video-cover-fallback ${fallback.tone}`}>
           <b aria-hidden="true">{fallback.icon}</b>
@@ -213,6 +213,242 @@ function VideoStyleCover({
     </button>
   );
 }
+
+const specificationLabels: Record<string, string> = {
+  duration_seconds: "建議片長（秒）",
+  target_seconds: "目標片長（秒）",
+  min: "最短",
+  ideal: "建議",
+  max: "最長",
+  beats: "敘事節奏",
+  role: "段落作用",
+  time: "時間",
+  fields: "每站須交代",
+  capture_required: "必拍畫面",
+  capture_required_per_stop: "每站必拍畫面",
+  capture_required_global: "全片必拍畫面",
+  capture_required_per_stage: "每階段必拍畫面",
+  capture_optional: "可選畫面",
+  host: "主持方式",
+  host_exits: "主持退出方式",
+  narration: "旁白方式",
+  sync_sound: "保留現場聲",
+  sync_sound_priority: "優先保留現場聲",
+  captions: "字幕規格",
+  language: "文字語言",
+  max_lines: "最多行數",
+  position: "字幕位置",
+  protect: "不可遮擋",
+  editing: "剪接原則",
+  missing_assets: "缺少素材時",
+  cta_allowed: "可用行動呼籲",
+  facts_require_source: "必須核實來源",
+  factual_guardrails: "事實核實規則",
+  unverified_source_claims_are_template_facts: "未核實原片說法可否當作模板事實",
+  allowed_labels: "可用標記",
+  source_and_checked_date_required: "是否需要來源及核實日期",
+  output: "輸出格式",
+  width: "寬度",
+  height: "高度",
+  aspect_ratio: "畫面比例",
+  production_variants: "製作變體",
+  production_notes: "製作備註",
+  purpose: "用途",
+  arc: "敘事流程",
+  restriction: "限制",
+  requirements: "必要資料",
+  caption_cards: "字幕卡",
+  one_complete_idea_each: "每張只講一個完整重點",
+  host_to_camera_required: "是否必須主持對鏡",
+  duration: "片長",
+  rights: "權利限制",
+  supporting_analysis: "輔助分析",
+};
+
+const specificationValueLabels: Record<string, string> = {
+  list_promise: "開場承諾會提供完整清單",
+  selection_criteria: "交代選擇準則",
+  repeating_stop_module: "逐站以相同結構介紹",
+  comparison_recap: "比較及總結",
+  cta: "行動呼籲",
+  spectacle_first_frame: "首格先展示奇觀或結果",
+  one_line_rule: "一句交代規則",
+  continuous_core_action: "連續呈現核心動作",
+  result_or_reaction: "展示結果或真實反應",
+  wide_or_cta: "以全景或行動呼籲收結",
+  counterintuitive_rule: "反常識規則",
+  pre_experience_expectation: "體驗前預期",
+  three_to_five_stages: "三至五個體驗階段",
+  emotional_low_point: "情緒低點",
+  concept_and_sources: "概念及資料來源",
+  return_to_ordinary_space: "返回日常空間",
+  personal_reflection: "個人反思",
+  restrained_cta: "克制的行動呼籲",
+  hook_selected_stops_and_close: "主持負責開場、精選站點及收結",
+  entrance_and_reaction_optional: "主持可只在進場及反應時出鏡",
+  interaction_reaction_and_reflection: "主持以互動、反應及反思推進",
+  post_recorded_first_person_after_capture: "拍攝後補錄第一身旁白",
+  optional_max_one_rule_and_one_verified_fact: "旁白可省略；最多加入一條規則及一項已核實資料",
+  post_recorded_first_person_separating_feeling_venue_claim_and_external_fact: "後錄第一身旁白，清楚分開感受、場地說法及外部事實",
+  zh_Hant_written: "書面繁體中文",
+  "zh-Hant-written": "書面繁體中文",
+  adaptive_middle_lower_safe_zone: "按畫面調整於中下方安全區",
+  pending_manual_listening: "待人工逐句聆聽",
+  name_location: "名稱及位置",
+  distinctive_point: "獨特重點",
+  visible_proof: "可見證據",
+  bounded_verdict: "有限度評價",
+  exterior_or_name: "外觀或名稱",
+  environment_wide: "環境全景",
+  hero_subject: "主體特寫",
+  two_or_three_interactions: "兩至三個互動畫面",
+  distinctive_proof: "獨特證據",
+  host_reaction_or_pov: "主持反應或第一身視角",
+  staff_process_with_permission: "經許可拍攝員工流程",
+  relative_location_map: "相對位置地圖",
+  category_card: "分類字卡",
+  same_action_match_cut: "同一動作配對剪接",
+  repeat_same_module_order: "各站沿用相同段落次序",
+  "1-2.5s_information_shots": "每個資訊鏡頭約 1 至 2.5 秒",
+  hold_process_for_visible_causality: "流程鏡頭保留至因果關係清楚可見",
+  transition_by_name_entrance_or_sound: "用名稱、入口或聲音轉場",
+  save_list: "收藏清單",
+  choose_a_stop: "選擇其中一站",
+  share_with_companion: "分享給同行者",
+  next_theme: "預告下一個主題",
+  door_bell: "門鈴聲",
+  packaging: "包裝聲",
+  printing: "打印聲",
+  page_turn: "翻頁聲",
+  craft_action: "製作動作聲",
+  name: "名稱",
+  address: "地址",
+  open_status: "營業狀態",
+  branch_count: "分店數目",
+  customisation: "客製選項",
+  origin: "來源或起源",
+  material: "物料",
+  price: "價錢",
+  celebrity_visit: "名人到訪",
+  superlatives: "最高級或絕對化說法",
+  show_subject_in_first_frame: "首格即展示主體",
+  stable_spectacle_wide: "穩定拍攝奇觀全景",
+  action_start: "動作開始",
+  continuous_core_take: "完整連續核心鏡頭",
+  mechanism_detail: "運作細節",
+  result_or_exit: "結果或離場",
+  stable_360_reframe: "穩定的 360 度重新構圖",
+  preserve_one_continuous_causal_take: "保留一段完整連續因果鏡頭",
+  hold_before_and_after_result: "保留結果前後畫面",
+  hard_or_action_cuts_only: "只用直接剪接或動作剪接",
+  would_you_try: "邀請觀眾回應會否嘗試",
+  save_place: "收藏地點",
+  follow_next_experience: "追看下一次體驗",
+  mechanism: "運作機制",
+  location: "地點",
+  restrictions: "限制",
+  speed: "速度",
+  height: "高度",
+  records: "紀錄",
+  preserve_real_stage_order: "保留真實體驗階段次序",
+  stage_name_or_threshold: "階段名稱或門檻",
+  body_equipment: "身體或裝備狀態",
+  sensory_or_body_proof: "感官或身體證據",
+  first_real_reaction: "第一個真實反應",
+  venue_claim_source: "場地說法來源",
+  venue_entry_or_rules: "場地入口或規則",
+  guide_explanation: "導賞解說",
+  heartbeat_or_device: "心跳或裝置聲",
+  controls: "操作控制",
+  friction: "摩擦聲",
+  footsteps: "腳步聲",
+  breath: "呼吸聲",
+  silence: "靜默",
+  shout: "叫喊聲",
+  laugh: "笑聲",
+  repeat_space_action_feeling: "依次呈現空間、動作及感受",
+  natural_sound_before_and_after_low_point: "情緒低點前後保留自然聲",
+  reduce_music_and_text_at_low_point: "情緒低點減少音樂及文字",
+  separate_experience_from_analysis: "清楚分開親身體驗與分析",
+  derive_reflection_from_seen_events: "反思須源自片中可見事件",
+  missing_name: "缺少名稱",
+  missing_proof: "缺少證據",
+  under_four_required_types: "必拍類型不足四項",
+  no_visit: "未有實地到訪",
+  reshoot_or_licensed_official_asset: "補拍或使用已授權官方素材",
+  remove_claim: "移除相關說法",
+  shorten_or_remove_stop: "縮短或刪除該站",
+  route_to_research_list: "改為研究清單",
+  missing_full_action: "缺少完整動作",
+  missing_reaction: "缺少反應",
+  missing_number_source: "缺少數字來源",
+  do_not_imply_completion: "不可暗示已完成體驗",
+  close_on_result_or_wide: "以結果或全景收結",
+  remove_number: "刪除數字",
+  missing_complete_stage: "缺少完整階段",
+  missing_first_reaction: "缺少第一個真實反應",
+  missing_venue_source: "缺少場地資料來源",
+  describe_only_observed_content: "只描述實際觀察到的內容",
+  label_post_experience_reflection: "標示為體驗後反思",
+  remove_origin_or_causal_claim: "移除起源或因果說法",
+  privacy_restriction: "私隱限制",
+  use_consented_empty_space_or_licensed_diagram: "只用已同意拍攝的空間或已授權圖解",
+  原片說法: "原片說法",
+  待核實: "待核實",
+};
+
+const hiddenSpecificationKeys = new Set([
+  "code",
+  "display_name",
+  "format",
+  "intent",
+  "schema_version",
+  "core_distribution",
+  "reference_classification",
+]);
+
+function readableSpecificationLabel(key: string) {
+  return specificationLabels[key] ?? specificationValueLabels[key] ?? key.replaceAll("_", " ");
+}
+
+function readableSpecificationValue(value: string) {
+  if (specificationValueLabels[value]) return specificationValueLabels[value];
+  if (/^\d+(?:\.\d+)?-\d+(?:\.\d+)?s(?:_each)?$/.test(value)) {
+    return value.replace("_each", "（每段）").replace("s", " 秒");
+  }
+  if (/^last_/.test(value)) return `最後 ${value.slice(5).replace("s", " 秒")}`;
+  return value.replaceAll("_", " ");
+}
+
+function SpecificationValue({ value, path = [] }: { value: unknown; path?: string[] }) {
+  if (value === null || value === undefined || value === "") return <span className="spec-empty">未提供</span>;
+  if (typeof value === "boolean") return <span>{value ? "是" : "否"}</span>;
+  if (typeof value === "number") {
+    const isSeconds = path.some((key) => key === "duration_seconds" || key === "target_seconds");
+    return <span>{value}{isSeconds ? " 秒" : ""}</span>;
+  }
+  if (typeof value === "string") return <span>{readableSpecificationValue(value)}</span>;
+  if (Array.isArray(value)) {
+    if (!value.length) return <span className="spec-empty">未提供</span>;
+    if (value.every((item) => typeof item !== "object" || item === null)) {
+      return <ul className="spec-list">{value.map((item, index) => <li key={`${String(item)}-${index}`}>{readableSpecificationValue(String(item))}</li>)}</ul>;
+    }
+    return <div className="spec-sequence">{value.map((item, index) => <article key={index}><b>第 {index + 1} 段</b><SpecificationValue value={item} path={[...path, String(index)]} /></article>)}</div>;
+  }
+  const entries = Object.entries(value as Record<string, unknown>).filter(([key]) => !hiddenSpecificationKeys.has(key));
+  if (!entries.length) return <span className="spec-empty">未提供</span>;
+  return (
+    <dl className="spec-grid">
+      {entries.map(([key, nestedValue]) => (
+        <div key={key} className="spec-field">
+          <dt>{readableSpecificationLabel(key)}</dt>
+          <dd><SpecificationValue value={nestedValue} path={[...path, key]} /></dd>
+        </div>
+      ))}
+    </dl>
+  );
+}
+
 export function ContentDirectionLab() {
   const [styles, setStyles] = useState<PublishedStyle[]>([]);
   const [masterDrafts, setMasterDrafts] = useState<MasterDraft[]>([]);
@@ -229,6 +465,8 @@ export function ContentDirectionLab() {
   const [registryFormat, setRegistryFormat] =
     useState<RegistryFormat>("instagram_carousel");
   const [selectedVideoStyleCode, setSelectedVideoStyleCode] = useState("");
+  const videoDetailDialogRef = useRef<HTMLDialogElement>(null);
+  const lastVideoStyleTriggerRef = useRef<HTMLButtonElement | null>(null);
 
   const load = useCallback(async () => {
     const sequence = ++loadSequence.current;
@@ -291,8 +529,15 @@ export function ContentDirectionLab() {
     setLoading(false);
   }, [registryFormat]);
   useEffect(() => {
+    // Initial and format-change loading is intentionally coordinated by this effect.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     void load();
   }, [load]);
+  useEffect(() => {
+    const dialog = videoDetailDialogRef.current;
+    if (!selectedVideoStyleCode || !dialog || dialog.open) return;
+    dialog.showModal();
+  }, [selectedVideoStyleCode]);
   const visibleStyles = useMemo(
     () => styles.filter((style) => style.format === registryFormat),
     [registryFormat, styles],
@@ -315,6 +560,18 @@ export function ContentDirectionLab() {
       ? selectedPublishedStyle.version.rules.preview as { video?: unknown }
       : null;
   const selectedPublishedVideo = typeof selectedPublishedPreview?.video === "string" ? selectedPublishedPreview.video : "";
+  const selectedSpecificationRules = selectedInternalSpecification?.rules ?? selectedPublishedStyle?.version.rules ?? null;
+
+  function openVideoStyle(code: string, trigger: HTMLButtonElement) {
+    lastVideoStyleTriggerRef.current = trigger;
+    setSelectedVideoStyleCode(code);
+  }
+
+  function closeVideoStyle() {
+    if (videoDetailDialogRef.current?.open) videoDetailDialogRef.current.close();
+    setSelectedVideoStyleCode("");
+    window.requestAnimationFrame(() => lastVideoStyleTriggerRef.current?.focus());
+  }
   async function editMaster(style: PublishedStyle) {
     setMasterBusy(style.code);
     setMessage("");
@@ -461,7 +718,7 @@ export function ContentDirectionLab() {
                       code={style.code}
                       name={style.name}
                       selected={selectedVideoStyleCode === style.code}
-                      onOpen={() => setSelectedVideoStyleCode(style.code)}
+                      onOpen={(trigger) => openVideoStyle(style.code, trigger)}
                     />
                   )}
                   <div className="style-copy">
@@ -515,7 +772,7 @@ export function ContentDirectionLab() {
                   code={specification.code}
                   name={specification.name}
                   selected={selectedVideoStyleCode === specification.code}
-                  onOpen={() => setSelectedVideoStyleCode(specification.code)}
+                  onOpen={(trigger) => openVideoStyle(specification.code, trigger)}
                 />
                 <div className="style-copy">
                   <small>內容風格 · v{specification.version}</small>
@@ -533,175 +790,179 @@ export function ContentDirectionLab() {
           <p className="empty">未有已發布內容風格。</p>
         )}
       </section>
-      {isVideoRegistry ? (
+      {isVideoRegistry && !internalSpecifications.length ? (
         <section className="published-styles internal-specifications">
-          {!internalSpecifications.length ? (
-            <div className="master-actions">
-              <button type="button" disabled={importingInternalSpecifications} onClick={() => void importInternalVideoSpecifications()}>
-                {importingInternalSpecifications ? "匯入中…" : `匯入已確認${registryFormat === "ai_short_video" ? "AI" : "真人"}短片規格`}
-              </button>
-            </div>
-          ) : null}
-          {selectedVideoStyleCode ? (
-            <section className="selected-video-style-detail">
-              <div>
-                <small>已選風格</small>
-                <h3>{selectedInternalSpecification?.name ?? selectedPublishedStyle?.name ?? selectedVideoStyleCode}</h3>
-                <p>{selectedInternalSpecification?.description ?? selectedPublishedStyle?.description}</p>
-              </div>
-              <div className="selected-style-states">
-                {selectedPublishedStyle ? <b>已發布 v{selectedPublishedStyle.version.number}</b> : <span>Core 內容風格</span>}
-                {selectedInternalSpecification ? <b>規格 v{selectedInternalSpecification.version} · 審閱狀態</b> : null}
-                {selectedInternalSpecification ? <span>尚未接入 Content Studio</span> : null}
-              </div>
-              {internalSpecifications.length ? (
-                <div className="restoration-import-action">
-                  <button type="button" disabled={importingRestorations} onClick={() => void importVideoReferenceRestorations()}>
-                    {importingRestorations ? "同步中…" : restorations.length ? "重新同步原片還原稿" : "匯入原片還原稿"}
-                  </button>
-                </div>
-              ) : null}
-              {selectedPublishedVideo ? (
-                <div className="selected-published-video">
-                  <small>已發布參考影片 · 預設不播放</small>
-                  <video
-                    controls
-                    preload="none"
-                    poster={videoStyleCover(selectedVideoStyleCode).asset ?? undefined}
-                    src={selectedPublishedVideo}
-                    aria-label={`${selectedPublishedStyle?.name ?? selectedVideoStyleCode}已發布參考影片`}
-                  />
-                </div>
-              ) : null}
-              {selectedPublishedReferences.length ? (
-                <div className="published-reference-list">
-                  {selectedPublishedReferences.map((reference) => {
-                    const url = reference.source_url ?? "";
-                    const isDirectVideo = /\.(mp4|webm|mov)(?:\?|$)/i.test(url);
-                    return (
-                      <article key={reference.id}>
-                        <small>已確認參考</small>
-                        <b>{reference.source_account || "公開參考"}</b>
-                        <p>{reference.evidence_summary || "已連結至此發布風格。"}</p>
-                        {isDirectVideo && !selectedPublishedVideo ? <video controls preload="none" src={url} aria-label={`${selectedPublishedStyle?.name ?? selectedVideoStyleCode}參考影片`} /> : null}
-                        {!isDirectVideo && /^https?:\/\//.test(url) ? <a href={url} target="_blank" rel="noreferrer">開啟原有參考連結</a> : null}
-                      </article>
-                    );
-                  })}
-                </div>
-              ) : null}
-            </section>
-          ) : (
-            <p className="select-style-hint">點選上方內容風格卡，查看該風格的參考、原片稿與規格。</p>
-          )}
-          {selectedRestorations.length ? (
-            <section className="restoration-library">
-              <div className="restoration-heading">
-                <div>
-                  <small>原片還原稿</small>
-                  <h3>時間軸與核實狀態</h3>
-                  <p>完整代表片保留 0 秒至結尾；增補只保留指定片段。100% 時間軸覆蓋不代表對白或音訊已核實。</p>
-                </div>
-                <strong>{selectedRestorations.length} 項</strong>
-              </div>
-              <div className="artifact-separation" aria-label="內容類型分隔">
-                <b>原片還原稿：已入庫</b>
-                <span>風格規格：連結現有 review 版本</span>
-                <span>示範劇本：獨立內容，未混入本稿</span>
-                <span>重建實驗 Prompt：{registryFormat === "ai_short_video" ? (reconstructionPromptSets.length ? "已獨立入庫／未啟用" : "尚未入庫／未啟用") : "另於 AI 短片分頁／未啟用"}</span>
-              </div>
-              <div className="restoration-list">
-                {selectedRestorations.map((restoration) => (
-                  <details key={restoration.id} className="restoration-card">
-                    <summary>
-                      <span>
-                        <b>{restoration.referenceKey}</b>
-                        <small>{restoration.selection === "full_representative" ? "完整代表片" : "精選片段"}</small>
-                      </span>
-                      <span>{restoration.styleName} · v{restoration.version} {restoration.status}</span>
-                      <strong>{restoration.coverageSeconds.toFixed(2)}s / {restoration.durationSeconds.toFixed(2)}s · {restoration.coveragePercent}%</strong>
-                    </summary>
-                    <div className="restoration-body">
-                      <p className="source-file">{restoration.sourceFilename}</p>
-                      <div className="status-grid">
-                        <span><b>畫面</b>{restoration.visualStatus}</span>
-                        <span><b>音訊</b>{restoration.audioTranscriptStatus}</span>
-                        <span><b>權利</b>只供內部研究／未核實／不可重傳</span>
-                      </div>
-                      <div className="timeline-list">
-                        {restoration.timeline.map((segment, index) => (
-                          <article key={`${restoration.id}-${segment.order ?? index}`}>
-                            <header>
-                              <b>{Number(segment.start_seconds ?? 0).toFixed(2)}–{Number(segment.end_seconds ?? 0).toFixed(2)}s</b>
-                              <span>畫面：{segment.verification?.visual ?? "待核實"}</span>
-                              <span>音訊：{segment.verification?.audio ?? "待人工聆聽"}</span>
-                              <span>翻譯：{segment.verification?.translation ?? "不適用／待核實"}</span>
-                            </header>
-                            <p><b>畫面：</b>{segment.visual_description_zh || "未提供"}</p>
-                            <p><b>對白／旁白：</b>{segment.speech_or_narration_zh || "未提供；待人工聆聽"}</p>
-                            {segment.on_screen_text_zh ? <p><b>畫面文字：</b>{segment.on_screen_text_zh}</p> : null}
-                            {segment.notes ? <p><b>備註：</b>{segment.notes}</p> : null}
-                          </article>
-                        ))}
-                      </div>
-                      {restoration.unverified.length ? (
-                        <div className="unverified"><b>尚未核實</b><ul>{restoration.unverified.map((item) => <li key={item}>{item}</li>)}</ul></div>
-                      ) : null}
-                    </div>
-                  </details>
-                ))}
-              </div>
-            </section>
-          ) : null}
-          {registryFormat === "ai_short_video" && selectedPromptSets.length ? (
-            <section className="restoration-library prompt-library">
-              <div className="restoration-heading">
-                <div>
-                  <small>重建實驗 Prompt</small>
-                  <h3>模型無關短鏡測試規格</h3>
-                  <p>與原片還原稿、風格規格及示範劇本分開保存；目前未生成、未呼叫 API、未使用 credits。</p>
-                </div>
-                <strong>{selectedPromptSets.reduce((sum, item) => sum + item.shotCount, 0)} 鏡／{selectedPromptSets.length} 組</strong>
-              </div>
-              <div className="restoration-list">
-                {selectedPromptSets.map((promptSet) => (
-                  <details key={promptSet.id} className="restoration-card">
-                    <summary>
-                      <span><b>{promptSet.referenceKey}</b><small>重建 Prompt</small></span>
-                      <span>{promptSet.displayName} · v{promptSet.version} {promptSet.status}</span>
-                      <strong>{promptSet.shotCount} 個短鏡</strong>
-                    </summary>
-                    <div className="restoration-body">
-                      <div className="status-grid">
-                        <span><b>狀態</b>{promptSet.promptStatus}</span>
-                        <span><b>執行</b>生成 0／API 0／credits 0</span>
-                        <span><b>音訊</b>人工逐句核實 0</span>
-                      </div>
-                      <div className="timeline-list">
-                        {promptSet.shots.map((shot, index) => (
-                          <article key={`${promptSet.id}-${shot.shot_id ?? index}`}>
-                            <header>
-                              <b>{shot.shot_id ?? `鏡頭 ${index + 1}`}</b>
-                              <span>來源 {Number(shot.source_time?.start_seconds ?? 0).toFixed(2)}–{Number(shot.source_time?.end_seconds ?? 0).toFixed(2)}s</span>
-                              <span>測試片長 {Number(shot.test_duration_seconds ?? 0).toFixed(2)}s</span>
-                            </header>
-                            <p><b>Prompt：</b>{shot.prompt_zh}</p>
-                            <p><b>構圖／運鏡：</b>{shot.composition}；{shot.camera_motion}</p>
-                            <p><b>動作／表情：</b>{shot.action}；{shot.expression}</p>
-                            <p><b>對白 placeholder：</b>{shot.dialogue_or_narration_placeholder_zh}</p>
-                            <p><b>聲音後期：</b>{shot.audio_post}</p>
-                            {shot.acceptance_checks?.length ? <p><b>QA：</b>{shot.acceptance_checks.join("；")}</p> : null}
-                          </article>
-                        ))}
-                      </div>
-                      {promptSet.unverified.length ? <div className="unverified"><b>尚未核實</b><ul>{promptSet.unverified.map((item) => <li key={item}>{item}</li>)}</ul></div> : null}
-                    </div>
-                  </details>
-                ))}
-              </div>
-            </section>
-          ) : null}
+          <div className="master-actions">
+            <button type="button" disabled={importingInternalSpecifications} onClick={() => void importInternalVideoSpecifications()}>
+              {importingInternalSpecifications ? "匯入中…" : `匯入已確認${registryFormat === "ai_short_video" ? "AI" : "真人"}短片規格`}
+            </button>
+          </div>
         </section>
+      ) : null}
+      {isVideoRegistry && selectedVideoStyleCode ? (
+        <dialog
+          ref={videoDetailDialogRef}
+          className="video-detail-dialog"
+          aria-labelledby="video-detail-title"
+          onCancel={(event) => {
+            event.preventDefault();
+            closeVideoStyle();
+          }}
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) closeVideoStyle();
+          }}
+        >
+          <div className="video-detail-drawer">
+            <header className="video-detail-header">
+              <div>
+                <small>{registryFormat === "ai_short_video" ? "AI 短片風格" : "真人短片風格"}</small>
+                <h2 id="video-detail-title">{selectedInternalSpecification?.name ?? selectedPublishedStyle?.name ?? selectedVideoStyleCode}</h2>
+                <p>{selectedInternalSpecification?.description ?? selectedPublishedStyle?.description}</p>
+                <div className="selected-style-states">
+                  {selectedPublishedStyle ? <b>已發布 v{selectedPublishedStyle.version.number}</b> : <span>Core 內容風格</span>}
+                  {selectedInternalSpecification ? <b>規格 v{selectedInternalSpecification.version} · 審閱狀態</b> : null}
+                  {selectedInternalSpecification ? <span>尚未接入 Content Studio</span> : null}
+                </div>
+              </div>
+              <button type="button" className="video-detail-close" onClick={closeVideoStyle} autoFocus aria-label="關閉風格詳情">返回內容風格</button>
+            </header>
+
+            <div className="video-detail-body">
+              <section className="detail-artifact-section" aria-labelledby="restoration-title">
+                <div className="detail-section-heading">
+                  <div>
+                    <small>原片還原稿</small>
+                    <h3 id="restoration-title">時間軸、鏡頭與對白</h3>
+                    <p>保留原片實際內容及核實狀態；100% 時間軸覆蓋不代表對白、音訊或外部事實已核實。</p>
+                  </div>
+                  <strong>{selectedRestorations.length} 項</strong>
+                </div>
+                {internalSpecifications.length ? (
+                  <div className="restoration-import-action">
+                    <button type="button" disabled={importingRestorations} onClick={() => void importVideoReferenceRestorations()}>
+                      {importingRestorations ? "同步中…" : restorations.length ? "重新同步原片還原稿" : "匯入原片還原稿"}
+                    </button>
+                  </div>
+                ) : null}
+                {selectedPublishedVideo ? (
+                  <div className="selected-published-video">
+                    <small>已發布參考影片 · 預設不播放</small>
+                    <video controls preload="none" poster={videoStyleCover(selectedVideoStyleCode).asset ?? undefined} src={selectedPublishedVideo} aria-label={`${selectedPublishedStyle?.name ?? selectedVideoStyleCode}已發布參考影片`} />
+                  </div>
+                ) : null}
+                {selectedPublishedReferences.length ? (
+                  <div className="published-reference-list">
+                    {selectedPublishedReferences.map((reference) => {
+                      const url = reference.source_url ?? "";
+                      const isDirectVideo = /\.(mp4|webm|mov)(?:\?|$)/i.test(url);
+                      return (
+                        <article key={reference.id}>
+                          <small>已確認參考</small>
+                          <b>{reference.source_account || "公開參考"}</b>
+                          <p>{reference.evidence_summary || "已連結至此發布風格。"}</p>
+                          {isDirectVideo && !selectedPublishedVideo ? <video controls preload="none" src={url} aria-label={`${selectedPublishedStyle?.name ?? selectedVideoStyleCode}參考影片`} /> : null}
+                          {!isDirectVideo && /^https?:\/\//.test(url) ? <a href={url} target="_blank" rel="noreferrer">開啟原有參考連結</a> : null}
+                        </article>
+                      );
+                    })}
+                  </div>
+                ) : null}
+                {selectedRestorations.length ? (
+                  <div className="restoration-list">
+                    {selectedRestorations.map((restoration) => (
+                      <details key={restoration.id} className="restoration-card">
+                        <summary>
+                          <span><b>{restoration.referenceKey}</b><small>{restoration.selection === "full_representative" ? "完整代表片" : "精選片段"}</small></span>
+                          <span>{restoration.styleName} · v{restoration.version} {restoration.status}</span>
+                          <strong>{restoration.coverageSeconds.toFixed(2)}s / {restoration.durationSeconds.toFixed(2)}s · {restoration.coveragePercent}%</strong>
+                        </summary>
+                        <div className="restoration-body">
+                          <p className="source-file">{restoration.sourceFilename}</p>
+                          <div className="status-grid">
+                            <span><b>畫面</b>{restoration.visualStatus}</span>
+                            <span><b>音訊</b>{restoration.audioTranscriptStatus}</span>
+                            <span><b>權利</b>只供內部研究／未核實／不可重傳</span>
+                          </div>
+                          <div className="timeline-list">
+                            {restoration.timeline.map((segment, index) => (
+                              <article key={`${restoration.id}-${segment.order ?? index}`}>
+                                <header>
+                                  <b>{Number(segment.start_seconds ?? 0).toFixed(2)}–{Number(segment.end_seconds ?? 0).toFixed(2)}s</b>
+                                  <span>畫面：{segment.verification?.visual ?? "待核實"}</span>
+                                  <span>音訊：{segment.verification?.audio ?? "待人工聆聽"}</span>
+                                  <span>翻譯：{segment.verification?.translation ?? "不適用／待核實"}</span>
+                                </header>
+                                <p><b>鏡頭描述：</b>{segment.visual_description_zh || "未提供"}</p>
+                                <p><b>對白／旁白：</b>{segment.speech_or_narration_zh || "未提供；待人工聆聽"}</p>
+                                {segment.on_screen_text_zh ? <p><b>畫面文字：</b>{segment.on_screen_text_zh}</p> : null}
+                                {segment.notes ? <p><b>備註：</b>{segment.notes}</p> : null}
+                              </article>
+                            ))}
+                          </div>
+                          {restoration.unverified.length ? <div className="unverified"><b>尚未核實</b><ul>{restoration.unverified.map((item) => <li key={item}>{item}</li>)}</ul></div> : null}
+                        </div>
+                      </details>
+                    ))}
+                  </div>
+                ) : <p className="artifact-empty">此風格未有原片還原稿。</p>}
+              </section>
+
+              <section className="detail-artifact-section" aria-labelledby="specification-title">
+                <div className="detail-section-heading">
+                  <div>
+                    <small>風格規格</small>
+                    <h3 id="specification-title">製作與內容規格</h3>
+                    <p>以繁體中文整理目前版本的敘事、拍攝、字幕、剪接及核實要求。</p>
+                  </div>
+                </div>
+                {selectedSpecificationRules ? <SpecificationValue value={selectedSpecificationRules} /> : <p className="artifact-empty">此風格未有可顯示的規格內容。</p>}
+              </section>
+
+              <section className="detail-artifact-section" aria-labelledby="demo-script-title">
+                <div className="detail-section-heading">
+                  <div>
+                    <small>示範劇本</small>
+                    <h3 id="demo-script-title">未有示範劇本</h3>
+                    <p>目前只有原片還原稿及風格規格，未建立獨立示範劇本。原片內容不會當作示範稿。</p>
+                  </div>
+                </div>
+              </section>
+
+              {registryFormat === "ai_short_video" && selectedPromptSets.length ? (
+                <section className="detail-artifact-section prompt-library" aria-labelledby="prompt-title">
+                  <div className="detail-section-heading">
+                    <div>
+                      <small>重建實驗 Prompt</small>
+                      <h3 id="prompt-title">模型無關短鏡測試規格</h3>
+                      <p>與原片還原稿、風格規格及示範劇本分開保存；目前未生成、未呼叫 API、未使用 credits。</p>
+                    </div>
+                    <strong>{selectedPromptSets.reduce((sum, item) => sum + item.shotCount, 0)} 鏡／{selectedPromptSets.length} 組</strong>
+                  </div>
+                  <div className="restoration-list">
+                    {selectedPromptSets.map((promptSet) => (
+                      <details key={promptSet.id} className="restoration-card">
+                        <summary><span><b>{promptSet.referenceKey}</b><small>重建 Prompt</small></span><span>{promptSet.displayName} · v{promptSet.version} {promptSet.status}</span><strong>{promptSet.shotCount} 個短鏡</strong></summary>
+                        <div className="restoration-body">
+                          <div className="status-grid"><span><b>狀態</b>{promptSet.promptStatus}</span><span><b>執行</b>生成 0／API 0／credits 0</span><span><b>音訊</b>人工逐句核實 0</span></div>
+                          <div className="timeline-list">
+                            {promptSet.shots.map((shot, index) => (
+                              <article key={`${promptSet.id}-${shot.shot_id ?? index}`}>
+                                <header><b>{shot.shot_id ?? `鏡頭 ${index + 1}`}</b><span>來源 {Number(shot.source_time?.start_seconds ?? 0).toFixed(2)}–{Number(shot.source_time?.end_seconds ?? 0).toFixed(2)}s</span><span>測試片長 {Number(shot.test_duration_seconds ?? 0).toFixed(2)}s</span></header>
+                                <p><b>Prompt：</b>{shot.prompt_zh}</p><p><b>構圖／運鏡：</b>{shot.composition}；{shot.camera_motion}</p><p><b>動作／表情：</b>{shot.action}；{shot.expression}</p><p><b>對白 placeholder：</b>{shot.dialogue_or_narration_placeholder_zh}</p><p><b>聲音後期：</b>{shot.audio_post}</p>
+                                {shot.acceptance_checks?.length ? <p><b>QA：</b>{shot.acceptance_checks.join("；")}</p> : null}
+                              </article>
+                            ))}
+                          </div>
+                          {promptSet.unverified.length ? <div className="unverified"><b>尚未核實</b><ul>{promptSet.unverified.map((item) => <li key={item}>{item}</li>)}</ul></div> : null}
+                        </div>
+                      </details>
+                    ))}
+                  </div>
+                </section>
+              ) : null}
+            </div>
+          </div>
+        </dialog>
       ) : null}
       <style jsx>{`
         .lab {
@@ -1469,26 +1730,100 @@ export function ContentDirectionLab() {
         .restoration-import-action button:disabled {
           opacity: 0.5;
         }
-        .select-style-hint {
-          margin: 16px 0 0;
-          border: 1px dashed #3a3152;
-          border-radius: 10px;
-          padding: 16px;
-          color: #8d8991;
+        .video-detail-dialog {
+          width: min(820px, calc(100vw - 20px));
+          max-width: none;
+          height: 100dvh;
+          max-height: 100dvh;
+          margin: 0 0 0 auto;
+          border: 0;
+          background: transparent;
+          color: #f5f5f5;
+          padding: 0;
+        }
+        .video-detail-dialog::backdrop {
+          background: rgba(3, 2, 6, .76);
+          backdrop-filter: blur(4px);
+        }
+        .video-detail-drawer {
+          width: 100%;
+          height: 100%;
+          overflow-y: auto;
+          border-left: 1px solid #4c3768;
+          background: #100d14;
+          box-shadow: -24px 0 60px rgba(0, 0, 0, .45);
+        }
+        .video-detail-header {
+          position: sticky;
+          z-index: 3;
+          top: 0;
+          display: flex;
+          justify-content: space-between;
+          gap: 22px;
+          align-items: flex-start;
+          border-bottom: 1px solid #302747;
+          background: rgba(16, 13, 20, .96);
+          padding: 24px 26px 20px;
+          backdrop-filter: blur(12px);
+        }
+        .video-detail-header h2 {
+          margin: 6px 0;
+          font-size: 25px;
+        }
+        .video-detail-header p {
+          max-width: 590px;
+          margin: 0;
+          color: #a39da8;
           font-size: 11px;
-          text-align: center;
+          line-height: 1.6;
         }
-        .selected-video-style-detail {
+        .video-detail-close {
+          flex: none;
+          border: 1px solid #644985;
+          border-radius: 9px;
+          background: #2a1b3d;
+          color: #f3e8ff;
+          padding: 9px 12px;
+          font-size: 10px;
+          font-weight: 800;
+          cursor: pointer;
+        }
+        .video-detail-close:focus-visible {
+          outline: 2px solid #c4b5fd;
+          outline-offset: 3px;
+        }
+        .video-detail-body {
           display: grid;
-          gap: 12px;
-          margin-top: 18px;
-          border: 1px solid #4c3768;
-          border-radius: 12px;
-          background: #18131f;
-          padding: 16px;
+          gap: 18px;
+          padding: 20px 26px 42px;
         }
-        .selected-video-style-detail h3 { margin: 5px 0; }
-        .selected-video-style-detail p { margin: 0; color: #999; font-size: 10px; line-height: 1.5; }
+        .detail-artifact-section {
+          border: 1px solid #302b37;
+          border-radius: 14px;
+          background: #17131b;
+          padding: 18px;
+        }
+        .detail-section-heading {
+          display: flex;
+          justify-content: space-between;
+          gap: 16px;
+          align-items: end;
+          margin-bottom: 14px;
+        }
+        .detail-section-heading h3 {
+          margin: 5px 0;
+          font-size: 18px;
+        }
+        .detail-section-heading p {
+          margin: 0;
+          color: #999;
+          font-size: 10px;
+          line-height: 1.55;
+        }
+        .detail-section-heading > strong {
+          color: #c4b5fd;
+          font-size: 12px;
+        }
         .selected-style-states { display: flex; flex-wrap: wrap; gap: 7px; }
         .selected-style-states > * {
           border-radius: 999px;
@@ -1498,6 +1833,66 @@ export function ContentDirectionLab() {
           font-size: 9px;
         }
         .selected-style-states b { color: #d8b4fe; }
+        .video-detail-header .selected-style-states { margin-top: 12px; }
+        .artifact-empty {
+          margin: 0;
+          border: 1px dashed #3a3152;
+          border-radius: 10px;
+          color: #8d8991;
+          padding: 18px;
+          font-size: 11px;
+          text-align: center;
+        }
+        :global(.spec-grid) {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 10px;
+          margin: 0;
+        }
+        :global(.spec-field) {
+          min-width: 0;
+          border: 1px solid #302b37;
+          border-radius: 10px;
+          background: #111014;
+          padding: 11px;
+        }
+        :global(.spec-field > dt) {
+          margin-bottom: 7px;
+          color: #c4b5fd;
+          font-size: 10px;
+          font-weight: 800;
+        }
+        :global(.spec-field > dd) {
+          margin: 0;
+          color: #cbc6cf;
+          font-size: 10px;
+          line-height: 1.55;
+          overflow-wrap: anywhere;
+        }
+        :global(.spec-field .spec-grid) {
+          grid-template-columns: 1fr;
+        }
+        :global(.spec-list) {
+          display: grid;
+          gap: 5px;
+          margin: 0;
+          padding-left: 17px;
+        }
+        :global(.spec-sequence) {
+          display: grid;
+          gap: 8px;
+        }
+        :global(.spec-sequence > article) {
+          border-left: 2px solid #6d28d9;
+          background: #1c1920;
+          padding: 9px;
+        }
+        :global(.spec-sequence > article > b) {
+          display: block;
+          margin-bottom: 7px;
+          color: #e9d5ff;
+        }
+        :global(.spec-empty) { color: #77717d; }
         .selected-published-video {
           display: grid;
           gap: 7px;
@@ -1729,8 +2124,24 @@ export function ContentDirectionLab() {
           }
           .restoration-card summary,
           .status-grid,
-          .published-reference-list {
+          .published-reference-list,
+          :global(.spec-grid) {
             grid-template-columns: 1fr;
+          }
+          .video-detail-dialog {
+            width: 100vw;
+          }
+          .video-detail-header {
+            align-items: stretch;
+            flex-direction: column;
+            padding: 20px;
+          }
+          .video-detail-close { width: 100%; }
+          .video-detail-body { padding: 16px 14px 32px; }
+          .detail-artifact-section { padding: 14px; }
+          .detail-section-heading {
+            align-items: flex-start;
+            flex-direction: column;
           }
         }
         @media (max-width: 560px) {
