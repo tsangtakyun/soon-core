@@ -263,6 +263,31 @@ const specificationLabels: Record<string, string> = {
   duration: "片長",
   rights: "權利限制",
   supporting_analysis: "輔助分析",
+  script: "腳本規格",
+  avoid: "禁止事項",
+  voice: "主持語氣",
+  delivery: "表達方式",
+  must_include: "必須包括",
+  narrative_logic: "敘事邏輯",
+  visual: "畫面規格",
+  music: "音樂",
+  shot_mix: "鏡頭組合",
+  first_frame: "首格畫面",
+  average_shot_seconds: "平均鏡頭長度",
+  human_review_required: "是否需要人工審閱",
+  research: "資料核實",
+  sources: "資料來源",
+  checked: "已核實",
+  pending: "待核實",
+  source_errors: "原片錯誤",
+  checked_at: "核實日期",
+  style_distinction: "與其他風格的區分",
+  source_completeness: "原片完整性",
+  story_arc: "段落結構",
+  suitable_for: "適合題材",
+  not_suitable_for: "不適合題材",
+  reference_id: "參考編號",
+  facts_require_source_and_date: "必須附來源及核實日期",
 };
 
 const specificationValueLabels: Record<string, string> = {
@@ -393,6 +418,23 @@ const specificationValueLabels: Record<string, string> = {
   remove_origin_or_causal_claim: "移除起源或因果說法",
   privacy_restriction: "私隱限制",
   use_consented_empty_space_or_licensed_diagram: "只用已同意拍攝的空間或已授權圖解",
+  question: "提出問題",
+  place_or_name: "交代地點或名稱",
+  one_change_or_origin: "一項變化或起源",
+  two_to_four_visible_artefacts: "二至四項可見實物證據",
+  current_state: "現況",
+  callback_or_save: "回扣開場或收藏提示",
+  entrance_name: "入口及名稱",
+  address_or_location_evidence: "地址或位置證據",
+  wide: "全景",
+  three_details: "三個細節",
+  host_visit_evidence_or_original_pov: "主持到訪證據或原創第一身視角",
+  first_claim: "首個核心說法",
+  year: "年份",
+  founder: "創辦人",
+  free_claim: "免費相關說法",
+  opening_hours: "開放時間",
+  travel_time: "交通時間",
   原片說法: "原片說法",
   待核實: "待核實",
 };
@@ -405,6 +447,7 @@ const hiddenSpecificationKeys = new Set([
   "schema_version",
   "core_distribution",
   "reference_classification",
+  "preview",
 ]);
 
 function readableSpecificationLabel(key: string) {
@@ -466,6 +509,7 @@ export function ContentDirectionLab() {
     useState<RegistryFormat>("instagram_carousel");
   const [selectedVideoStyleCode, setSelectedVideoStyleCode] = useState("");
   const videoDetailDialogRef = useRef<HTMLDialogElement>(null);
+  const videoDetailCloseRef = useRef<HTMLButtonElement>(null);
   const lastVideoStyleTriggerRef = useRef<HTMLButtonElement | null>(null);
 
   const load = useCallback(async () => {
@@ -537,6 +581,7 @@ export function ContentDirectionLab() {
     const dialog = videoDetailDialogRef.current;
     if (!selectedVideoStyleCode || !dialog || dialog.open) return;
     dialog.showModal();
+    videoDetailCloseRef.current?.focus();
   }, [selectedVideoStyleCode]);
   const visibleStyles = useMemo(
     () => styles.filter((style) => style.format === registryFormat),
@@ -824,7 +869,7 @@ export function ContentDirectionLab() {
                   {selectedInternalSpecification ? <span>尚未接入 Content Studio</span> : null}
                 </div>
               </div>
-              <button type="button" className="video-detail-close" onClick={closeVideoStyle} autoFocus aria-label="關閉風格詳情">返回內容風格</button>
+              <button ref={videoDetailCloseRef} type="button" className="video-detail-close" onClick={closeVideoStyle} aria-label="關閉風格詳情">返回內容風格</button>
             </header>
 
             <div className="video-detail-body">
