@@ -77,6 +77,9 @@ type RestorationSegment = {
   end_seconds?: number;
   visual_description_zh?: string;
   speech_or_narration_zh?: string | null;
+  speech_original?: string | null;
+  speech_translation_zh_hant?: string | null;
+  speech_raw_asr?: string | null;
   speech_source?: string;
   on_screen_text_zh?: string | null;
   notes?: string | null;
@@ -938,7 +941,14 @@ export function ContentDirectionLab() {
                                   <span>翻譯：{segment.verification?.translation ?? "不適用／待核實"}</span>
                                 </header>
                                 <p><b>鏡頭描述：</b>{segment.visual_description_zh || "未提供"}</p>
-                                <p><b>對白／旁白：</b>{segment.speech_or_narration_zh || "未提供；待人工聆聽"}</p>
+                                <p><b>{segment.speech_original ? "繁體中文翻譯（待核對）：" : "對白／旁白："}</b>{segment.speech_or_narration_zh || "未提供；待人工聆聽"}</p>
+                                {segment.speech_original ? <p><b>原文：</b>{segment.speech_original}</p> : null}
+                                {segment.speech_raw_asr ? (
+                                  <details className="raw-asr">
+                                    <summary>查看 raw ASR（未核聽）</summary>
+                                    <p>{segment.speech_raw_asr}</p>
+                                  </details>
+                                ) : null}
                                 {segment.on_screen_text_zh ? <p><b>畫面文字：</b>{segment.on_screen_text_zh}</p> : null}
                                 {segment.notes ? <p><b>備註：</b>{segment.notes}</p> : null}
                               </article>

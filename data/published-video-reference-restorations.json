@@ -6,7 +6,7 @@
   },
   "quality_policy": {
     "timeline_coverage": "Every entry covers 0 seconds through the source duration without gaps.",
-    "audio": "ASR-assisted and pending manual listening unless a burned caption is explicitly noted.",
+    "audio": "Raw ASR is preserved per segment. Display text is cleaned for readability; low-confidence speech is marked for manual listening instead of guessed.",
     "facts": "External claims remain unverified and are recorded only as claims made by the source video."
   },
   "published_representatives": [
@@ -32,132 +32,140 @@
           "start_seconds": 0,
           "end_seconds": 19,
           "visual_description_zh": "咖啡店牆上的《向日葵》與日常物件開場，建立梵高在當代無處不在、在生前卻未獲承認的反差。",
-          "speech_or_narration_zh": "我叫文森特方高今天你在博物馆课本甚至咖啡馆的墙上都能看见我的名字可我活着的时候几乎无法靠画画养活自己我直到27岁才决定成为一名画家",
-          "speech_source": "asr_assisted_unverified",
+          "speech_or_narration_zh": "我叫文森特・梵高。今天，你在博物館、課本，甚至咖啡館的牆上，都能看見我的名字。可我活著的時候，幾乎無法靠畫畫養活自己。",
+          "speech_source": "asr_assisted_display_cleaned_raw_preserved",
           "on_screen_text_zh": null,
           "verification": {
             "visual": "direct_source_sample_frame_manually_checked",
             "audio": "pending_manual_listening",
-            "translation": "pending_when_applicable"
+            "translation": "不適用；中文原聲整理"
           },
           "notes": "片中涉及的品牌、歷史、價格、認證或功效均只屬原片說法，尚未外部事實核實。",
-          "verification_frame_path": "ai_artist_reflective_monologue-sheet.jpg"
+          "verification_frame_path": "ai_artist_reflective_monologue-sheet.jpg",
+          "speech_raw_asr": "我叫文森特方高 今天你在博物馆 课本 甚至咖啡馆的墙上 都能看见我的名字 可我活着的时候 几乎无法靠画画养活自己 我直到27岁 才决定成为一名画家"
         },
         {
           "order": 2,
           "start_seconds": 19,
           "end_seconds": 39,
           "visual_description_zh": "人工智能生成的年輕梵高在窗邊及畫架前作畫，配合他到二十七歲才立志成為畫家的自述。",
-          "speech_or_narration_zh": "此前我做过画商教师和传教师却一直找不到自己的位置后来我想也许绘画能替我说出那些说不出口的话我画农民画自己的脸",
-          "speech_source": "asr_assisted_unverified",
+          "speech_or_narration_zh": "我直到二十七歲才決定成為一名畫家。此前我做過畫商、教師和傳教士，卻一直找不到自己的位置。",
+          "speech_source": "asr_assisted_display_cleaned_raw_preserved",
           "on_screen_text_zh": null,
           "verification": {
             "visual": "direct_source_sample_frame_manually_checked",
             "audio": "pending_manual_listening",
-            "translation": "pending_when_applicable"
+            "translation": "不適用；中文原聲整理"
           },
           "notes": "片中涉及的品牌、歷史、價格、認證或功效均只屬原片說法，尚未外部事實核實。",
-          "verification_frame_path": "ai_artist_reflective_monologue-sheet.jpg"
+          "verification_frame_path": "ai_artist_reflective_monologue-sheet.jpg",
+          "speech_raw_asr": "此前 我做过画商 教师和传教师 却一直找不到自己的位置 后来我想 也许绘画能替我说出 那些说不出口的话 我画农民 画自己的脸"
         },
         {
           "order": 3,
           "start_seconds": 39,
           "end_seconds": 58,
           "visual_description_zh": "墨跡、素描、農民與自畫像意象交替，將早年工作與以繪畫代替言語的動機視覺化。",
-          "speech_or_narration_zh": "画阿尔勒的卧室向日葵麦田和夜空十年间我不停地画却始终没有得到广泛认可连颜料和生活费也常常要依靠我的弟弟提奥1888年",
-          "speech_source": "asr_assisted_unverified",
+          "speech_or_narration_zh": "後來我想，也許繪畫能替我說出那些說不出口的話。我畫農民，畫自己的臉，畫阿爾勒的臥室、向日葵、麥田和夜空。",
+          "speech_source": "asr_assisted_display_cleaned_raw_preserved",
           "on_screen_text_zh": null,
           "verification": {
             "visual": "direct_source_sample_frame_manually_checked",
             "audio": "pending_manual_listening",
-            "translation": "pending_when_applicable"
+            "translation": "不適用；中文原聲整理"
           },
           "notes": "片中涉及的品牌、歷史、價格、認證或功效均只屬原片說法，尚未外部事實核實。",
-          "verification_frame_path": "ai_artist_reflective_monologue-sheet.jpg"
+          "verification_frame_path": "ai_artist_reflective_monologue-sheet.jpg",
+          "speech_raw_asr": "画阿尔勒的卧室 向日葵 麦田 和夜空 十年间 我不停地画 却始终没有得到广泛认可 连颜料和生活费 也常常要依靠我的弟弟提奥 1888年"
         },
         {
           "order": 4,
           "start_seconds": 58,
           "end_seconds": 78,
           "visual_description_zh": "向日葵、麥田、夜空與寫信畫面快切，交代十年間持續創作及依靠弟弟 Theo 支持。",
-          "speech_or_narration_zh": "可靠五更争吵以后我割下了左耳的一部分后来我住进了圣雷米的疗养院精神最混乱的日子里我依然望着窗外画下了那片旋转的新月夜野人看到的",
-          "speech_source": "asr_assisted_unverified",
+          "speech_or_narration_zh": "十年間，我不停地畫，卻始終沒有得到廣泛認可。連顏料和生活費，也常常要依靠我的弟弟提奧。1888 年，在與高更爭吵以後，我割下了左耳的一部分。",
+          "speech_source": "asr_assisted_display_cleaned_raw_preserved",
           "on_screen_text_zh": null,
           "verification": {
             "visual": "direct_source_sample_frame_manually_checked",
             "audio": "pending_manual_listening",
-            "translation": "pending_when_applicable"
+            "translation": "不適用；中文原聲整理"
           },
           "notes": "片中涉及的品牌、歷史、價格、認證或功效均只屬原片說法，尚未外部事實核實。",
-          "verification_frame_path": "ai_artist_reflective_monologue-sheet.jpg"
+          "verification_frame_path": "ai_artist_reflective_monologue-sheet.jpg",
+          "speech_raw_asr": "可靠五更争吵以后 我割下了左耳的一部分 后来 我住进了圣雷米的疗养院 精神最混乱的日子里 我依然望着窗外 画下了那片旋转的新月夜 野人看到的"
         },
         {
           "order": 5,
           "start_seconds": 78,
           "end_seconds": 98,
           "visual_description_zh": "夜色窗景、孤獨人物與療養院意象，對應割耳事件、住院及《星夜》的創作背景。",
-          "speech_or_narration_zh": "是一个古怪贫穷不断失控的人而我想留下的却是光是颜色是我对这个世界还没有熄灭的爱37岁那年我离开了这个世界六个月后",
-          "speech_source": "asr_assisted_unverified",
+          "speech_or_narration_zh": "後來我住進聖雷米的療養院。精神最混亂的日子裡，我依然望著窗外，畫下那片旋轉的《星夜》。別人看到的是一個古怪、貧窮、不斷失控的人；而我想留下的，卻是光、是顏色、是我對這個世界還沒有熄滅的愛。",
+          "speech_source": "asr_assisted_display_cleaned_raw_preserved",
           "on_screen_text_zh": null,
           "verification": {
             "visual": "direct_source_sample_frame_manually_checked",
             "audio": "pending_manual_listening",
-            "translation": "pending_when_applicable"
+            "translation": "不適用；中文原聲整理"
           },
           "notes": "片中涉及的品牌、歷史、價格、認證或功效均只屬原片說法，尚未外部事實核實。",
-          "verification_frame_path": "ai_artist_reflective_monologue-sheet.jpg"
+          "verification_frame_path": "ai_artist_reflective_monologue-sheet.jpg",
+          "speech_raw_asr": "是一个古怪 贫穷 不断失控的人 而我想留下的 却是光 是颜色 是我对这个世界 还没有熄灭的爱 37岁那年 我离开了这个世界 六个月后"
         },
         {
           "order": 6,
           "start_seconds": 98,
           "end_seconds": 118,
           "visual_description_zh": "人群疏離、空房與畫架意象，描述外界眼中的貧窮與失控，以及三十七歲離世。",
-          "speech_or_narration_zh": "提奥也去世了后来是他的妻子乔安娜保存展出我的画整理并出版我们的书信世界才慢慢看见那些灼热的向日葵旋转的星空和不安的比触不只是疯狂",
-          "speech_source": "asr_assisted_unverified",
+          "speech_or_narration_zh": "三十七歲那年，我離開了這個世界。六個月後，提奧也去世了。後來，是他的妻子喬安娜保存、展出我的畫，整理並出版我們的書信。",
+          "speech_source": "asr_assisted_display_cleaned_raw_preserved",
           "on_screen_text_zh": null,
           "verification": {
             "visual": "direct_source_sample_frame_manually_checked",
             "audio": "pending_manual_listening",
-            "translation": "pending_when_applicable"
+            "translation": "不適用；中文原聲整理"
           },
           "notes": "片中涉及的品牌、歷史、價格、認證或功效均只屬原片說法，尚未外部事實核實。",
-          "verification_frame_path": "ai_artist_reflective_monologue-sheet.jpg"
+          "verification_frame_path": "ai_artist_reflective_monologue-sheet.jpg",
+          "speech_raw_asr": "提奥也去世了 后来是他的妻子 乔安娜 保存 展出我的画 整理 并出版我们的书信 世界才慢慢看见 那些灼热的向日葵 旋转的星空 和不安的比触 不只是疯狂"
         },
         {
           "order": 7,
           "start_seconds": 118,
           "end_seconds": 137,
           "visual_description_zh": "女性整理畫作及書信、展覽牆與觀眾近鏡，交代 Jo 保存、展出作品並出版書信。",
-          "speech_or_narration_zh": "他们是一个人竭尽全力活过的证据所以没人看见的时候坚持还有意义吗我不知道坚持是否一定会等来掌声",
-          "speech_source": "asr_assisted_unverified",
+          "speech_or_narration_zh": "世界才慢慢看見，那些灼熱的向日葵、旋轉的星空和不安的筆觸，不只是瘋狂；它們是一個人竭盡全力活過的證據。所以，沒人看見的時候，堅持還有意義嗎？",
+          "speech_source": "asr_assisted_display_cleaned_raw_preserved",
           "on_screen_text_zh": null,
           "verification": {
             "visual": "direct_source_sample_frame_manually_checked",
             "audio": "pending_manual_listening",
-            "translation": "pending_when_applicable"
+            "translation": "不適用；中文原聲整理"
           },
           "notes": "片中涉及的品牌、歷史、價格、認證或功效均只屬原片說法，尚未外部事實核實。",
-          "verification_frame_path": "ai_artist_reflective_monologue-sheet.jpg"
+          "verification_frame_path": "ai_artist_reflective_monologue-sheet.jpg",
+          "speech_raw_asr": "他们是一个人 竭尽全力 活过的证据 所以 没人看见的时候 坚持 还有意义吗 我不知道 坚持是否一定会 等来掌声"
         },
         {
           "order": 8,
           "start_seconds": 137,
           "end_seconds": 151.716,
           "visual_description_zh": "手接近畫作、星空與孤立畫家意象收束，提出無人看見時仍要不要堅持的問題。",
-          "speech_or_narration_zh": "但没有那些无人问津的日子就不会有后来照亮世界的新月夜有些光来得很晚但它不是没来过",
-          "speech_source": "asr_assisted_unverified",
+          "speech_or_narration_zh": "我不知道堅持是否一定會等來掌聲，但沒有那些無人問津的日子，就不會有後來照亮世界的《星夜》。有些光來得很晚，但它不是沒有來過。",
+          "speech_source": "asr_assisted_display_cleaned_raw_preserved",
           "on_screen_text_zh": null,
           "verification": {
             "visual": "direct_source_sample_frame_manually_checked",
             "audio": "pending_manual_listening",
-            "translation": "pending_when_applicable"
+            "translation": "不適用；中文原聲整理"
           },
           "notes": "片中涉及的品牌、歷史、價格、認證或功效均只屬原片說法，尚未外部事實核實。",
-          "verification_frame_path": "ai_artist_reflective_monologue-sheet.jpg"
+          "verification_frame_path": "ai_artist_reflective_monologue-sheet.jpg",
+          "speech_raw_asr": "但没有那些 无人问津的日子 就不会有后来 照亮世界的 新月夜 有些光来得很晚 但它不是没来过"
         }
       ],
       "unverified": [
-        "語音內容由 ASR、燒錄字幕及抽查畫面輔助還原，尚未完成人工逐句聆聽。",
+        "顯示欄已轉為繁體中文並清除可辨識的 ASR 重複幻覺；raw ASR 另欄保留供追溯。未標示人工核聽通過的段落仍須逐句核聽。",
         "片中品牌、人物、歷史、地點、數字、價格、認證及功效只記錄原片說法，尚未外部事實核實。",
         "來源只供現有內容方向研究庫內部研究及原片還原；不代表取得素材所有權或外部再授權。"
       ],
@@ -185,116 +193,137 @@
           "start_seconds": 0,
           "end_seconds": 18,
           "visual_description_zh": "人工智能重建十九世紀法國山村、童年 Louis Vuitton 與家庭環境，從出生及喪母開場。",
-          "speech_or_narration_zh": "ThisisLouisVuitton.Hewasbornin1821inatinyvillageintheFrenchmountains.Hismotherdiedwhenhewasten.Hisfatherremarried,andthestepmothermadehislifemiserable.Soatthirteen,heranawayandwalkednearlythreehundredmilestoParis,onfoot.",
-          "speech_source": "asr_assisted_unverified",
+          "speech_or_narration_zh": "這是 Louis Vuitton。他於 1821 年出生在法國山區的一個小村莊。十歲時母親去世；父親再婚後，他與繼母相處得很不愉快。",
+          "speech_source": "asr_assisted_display_cleaned_raw_preserved",
           "on_screen_text_zh": null,
           "verification": {
             "visual": "direct_source_sample_frame_manually_checked",
             "audio": "pending_manual_listening",
-            "translation": "pending_when_applicable"
+            "translation": "待人工核對的繁體中文翻譯"
           },
           "notes": "片中涉及的品牌、歷史、價格、認證或功效均只屬原片說法，尚未外部事實核實。",
-          "verification_frame_path": "ai_cinematic_founder_biography-sheet.jpg"
+          "verification_frame_path": "ai_cinematic_founder_biography-sheet.jpg",
+          "speech_raw_asr": "This is Louis Vuitton. He was born in 1821 in a tiny village in the French mountains. His mother died when he was ten. His father remarried, and the stepmother made his life miserable. So at thirteen, he ran away and walked nearly three hundred miles to Paris, on foot.",
+          "speech_original": "This is Louis Vuitton. He was born in 1821 in a tiny village in the French mountains. His mother died when he was ten. His father remarried, and the stepmother made his life miserable.",
+          "speech_translation_zh_hant": "這是 Louis Vuitton。他於 1821 年出生在法國山區的一個小村莊。十歲時母親去世；父親再婚後，他與繼母相處得很不愉快。"
         },
         {
           "order": 2,
           "start_seconds": 18,
           "end_seconds": 34,
           "visual_description_zh": "少年離家、步行與在穀倉借宿的電影感畫面，交代十三歲徒步前往巴黎。",
-          "speech_or_narration_zh": "Ittookhimtwoyears.Hepaidhiswaywithoddjobs,sleepingwhereverworkputaroofoverhim.HearrivedinParisatsixteenandbecameanapprenticeboxmaker,",
-          "speech_source": "asr_assisted_unverified",
+          "speech_or_narration_zh": "十三歲時，他離家出走，徒步近三百英里前往巴黎。旅程花了兩年；他靠零工支付旅費，工作在哪裡提供棲身之所，他便睡在哪裡。",
+          "speech_source": "asr_assisted_display_cleaned_raw_preserved",
           "on_screen_text_zh": null,
           "verification": {
             "visual": "direct_source_sample_frame_manually_checked",
             "audio": "pending_manual_listening",
-            "translation": "pending_when_applicable"
+            "translation": "待人工核對的繁體中文翻譯"
           },
           "notes": "片中涉及的品牌、歷史、價格、認證或功效均只屬原片說法，尚未外部事實核實。",
-          "verification_frame_path": "ai_cinematic_founder_biography-sheet.jpg"
+          "verification_frame_path": "ai_cinematic_founder_biography-sheet.jpg",
+          "speech_raw_asr": "It took him two years. He paid his way with odd jobs, sleeping wherever work put a roof over him. He arrived in Paris at sixteen and became an apprentice boxmaker,",
+          "speech_original": "So at thirteen, he ran away and walked nearly three hundred miles to Paris, on foot. It took him two years. He paid his way with odd jobs, sleeping wherever work put a roof over him.",
+          "speech_translation_zh_hant": "十三歲時，他離家出走，徒步近三百英里前往巴黎。旅程花了兩年；他靠零工支付旅費，工作在哪裡提供棲身之所，他便睡在哪裡。"
         },
         {
           "order": 3,
           "start_seconds": 34,
           "end_seconds": 49,
           "visual_description_zh": "巴黎街道、馬車、蒸汽船及行李包裝工作，交代抵達巴黎後成為箱匠學徒。",
-          "speech_or_narration_zh": "packingthebelongingsofwealthytravelersintheageofcarriagesandsteamships.HebecamesoskilledthattheEmpressofFrancechosehimpersonallytopackhergowns.Then,atthirty-three,heopenedhisownworkshopandchangedtravelforever.",
-          "speech_source": "asr_assisted_unverified",
+          "speech_or_narration_zh": "十六歲抵達巴黎後，他成為製箱學徒。在馬車與蒸汽船旅行的年代，他負責替富裕旅客打包行李；其技術後來獲法國皇后親自選中，替她收拾禮服。",
+          "speech_source": "asr_assisted_display_cleaned_raw_preserved",
           "on_screen_text_zh": null,
           "verification": {
             "visual": "direct_source_sample_frame_manually_checked",
             "audio": "pending_manual_listening",
-            "translation": "pending_when_applicable"
+            "translation": "待人工核對的繁體中文翻譯"
           },
           "notes": "片中涉及的品牌、歷史、價格、認證或功效均只屬原片說法，尚未外部事實核實。",
-          "verification_frame_path": "ai_cinematic_founder_biography-sheet.jpg"
+          "verification_frame_path": "ai_cinematic_founder_biography-sheet.jpg",
+          "speech_raw_asr": "packing the belongings of wealthy travelers in the age of carriages and steamships. He became so skilled that the Empress of France chose him personally to pack her gowns. Then, at thirty-three, he opened his own workshop and changed travel forever.",
+          "speech_original": "He arrived in Paris at sixteen and became an apprentice boxmaker, packing the belongings of wealthy travelers in the age of carriages and steamships. He became so skilled that the Empress of France chose him personally to pack her gowns.",
+          "speech_translation_zh_hant": "十六歲抵達巴黎後，他成為製箱學徒。在馬車與蒸汽船旅行的年代，他負責替富裕旅客打包行李；其技術後來獲法國皇后親自選中，替她收拾禮服。"
         },
         {
           "order": 4,
           "start_seconds": 49,
           "end_seconds": 64,
           "visual_description_zh": "皇室服裝、工坊與旅行場景，描述他獲法國皇后選中並在三十三歲自立門戶。",
-          "speech_or_narration_zh": "Everytrunkintheworldhadaroundedtopsorainwouldrunoff.Vuittonbuiltaflat,stackable,waterprooftrunk.Elegant.Practical.Copiedinstantly.",
-          "speech_source": "asr_assisted_unverified",
+          "speech_or_narration_zh": "三十三歲時，他開設自己的工坊。當時旅行箱普遍採用圓頂以排走雨水；Vuitton 則製作出平頂、可堆疊並具防水功能的旅行箱。",
+          "speech_source": "asr_assisted_display_cleaned_raw_preserved",
           "on_screen_text_zh": null,
           "verification": {
             "visual": "direct_source_sample_frame_manually_checked",
             "audio": "pending_manual_listening",
-            "translation": "pending_when_applicable"
+            "translation": "待人工核對的繁體中文翻譯"
           },
           "notes": "片中涉及的品牌、歷史、價格、認證或功效均只屬原片說法，尚未外部事實核實。",
-          "verification_frame_path": "ai_cinematic_founder_biography-sheet.jpg"
+          "verification_frame_path": "ai_cinematic_founder_biography-sheet.jpg",
+          "speech_raw_asr": "Every trunk in the world had a rounded top so rain would run off. Vuitton built a flat, stackable, waterproof trunk. Elegant. Practical. Copied instantly.",
+          "speech_original": "Then, at thirty-three, he opened his own workshop and changed travel forever. Every trunk in the world had a rounded top so rain would run off. Vuitton built a flat, stackable, waterproof trunk.",
+          "speech_translation_zh_hant": "三十三歲時，他開設自己的工坊。當時旅行箱普遍採用圓頂以排走雨水；Vuitton 則製作出平頂、可堆疊並具防水功能的旅行箱。"
         },
         {
           "order": 5,
           "start_seconds": 64,
           "end_seconds": 78,
           "visual_description_zh": "圓頂箱與平頂防水旅行箱並列，近鏡展示可堆疊設計帶來的產品突破。",
-          "speech_or_narration_zh": "Sohefoughtthecounterfeiterswithdesignitself,newlocks,andeventuallythemonogramcanvashissoncreated.Today,thatrunaway'sinitialsarethemostvaluableluxurybrandonearth,worthmorethanentireindustries.",
-          "speech_source": "asr_assisted_unverified",
+          "speech_or_narration_zh": "設計優雅、實用，亦很快被仿製。他於是以新設計和新鎖具回應仿冒；後來，他的兒子再創作出 Monogram 帆布。",
+          "speech_source": "asr_assisted_display_cleaned_raw_preserved",
           "on_screen_text_zh": null,
           "verification": {
             "visual": "direct_source_sample_frame_manually_checked",
             "audio": "pending_manual_listening",
-            "translation": "pending_when_applicable"
+            "translation": "待人工核對的繁體中文翻譯"
           },
           "notes": "片中涉及的品牌、歷史、價格、認證或功效均只屬原片說法，尚未外部事實核實。",
-          "verification_frame_path": "ai_cinematic_founder_biography-sheet.jpg"
+          "verification_frame_path": "ai_cinematic_founder_biography-sheet.jpg",
+          "speech_raw_asr": "So he fought the counterfeiters with design itself, new locks, and eventually the monogram canvas his son created. Today, that runaway's initials are the most valuable luxury brand on earth, worth more than entire industries.",
+          "speech_original": "Elegant. Practical. Copied instantly. So he fought the counterfeiters with design itself, new locks, and eventually the monogram canvas his son created.",
+          "speech_translation_zh_hant": "設計優雅、實用，亦很快被仿製。他於是以新設計和新鎖具回應仿冒；後來，他的兒子再創作出 Monogram 帆布。"
         },
         {
           "order": 6,
           "start_seconds": 78,
           "end_seconds": 91,
           "visual_description_zh": "工坊、鎖具與 Monogram 帆布製作畫面，描述以新設計回應仿冒。",
-          "speech_or_narration_zh": "Theboywhoownednothingbuiltthenamethatmeansowningthefinestthings.Everyempirestartswithawalknobodysaw.",
-          "speech_source": "asr_assisted_unverified",
+          "speech_or_narration_zh": "片中稱，這名離家少年的縮寫，如今成為全球最具價值的奢侈品牌之一。那個曾經一無所有的男孩，建立了象徵頂級物品的名字。",
+          "speech_source": "asr_assisted_display_cleaned_raw_preserved",
           "on_screen_text_zh": null,
           "verification": {
             "visual": "direct_source_sample_frame_manually_checked",
             "audio": "pending_manual_listening",
-            "translation": "pending_when_applicable"
+            "translation": "待人工核對的繁體中文翻譯"
           },
           "notes": "片中涉及的品牌、歷史、價格、認證或功效均只屬原片說法，尚未外部事實核實。",
-          "verification_frame_path": "ai_cinematic_founder_biography-sheet.jpg"
+          "verification_frame_path": "ai_cinematic_founder_biography-sheet.jpg",
+          "speech_raw_asr": "The boy who owned nothing built the name that means owning the finest things. Every empire starts with a walk nobody saw.",
+          "speech_original": "Today, that runaway's initials are the most valuable luxury brand on earth, worth more than entire industries. The boy who owned nothing built the name that means owning the finest things.",
+          "speech_translation_zh_hant": "片中稱，這名離家少年的縮寫，如今成為全球最具價值的奢侈品牌之一。那個曾經一無所有的男孩，建立了象徵頂級物品的名字。"
         },
         {
           "order": 7,
           "start_seconds": 91,
           "end_seconds": 98.984,
           "visual_description_zh": "創辦人站在現代 Louis Vuitton 標誌前，手持旅行袋，以品牌價值與反問作結。",
-          "speech_or_narration_zh": "Whatwasyours,andwho'stellingit?FollowOtois.Somestoriesneedabetterframe.Fromtimetotimetotimetotimetotimetotimetotimetotimetotimetotimetotimetotimetotimetotimetotimetotimetotimetotimetotimetotimetotimetotimetotimetotimetotimetotimetotimetotimetotimetotimetotimetotimetotimetotimetotimetotimetotimetotimetotimetotimetotimetotimetotimetotimetotimetotimetotimetotimetotimetotimetotimetotimetotimetotimetotimetotimetotimetotimetotimetotimetotimetotimetotimetotimetotimetotimetotimetotimetotimetotimetotimetotimetotimetotimetotimetotimetotimetotimetotimetotimetotimetotimetotimetotimetotimetotimetotimetotimetotimetotimetotimetotimetotimetotimetotimetotimetotimetotimetotimetotimetotimetotimetotimetotimetotimetotimetotimetotimetotimetotimeto",
-          "speech_source": "asr_assisted_unverified",
+          "speech_or_narration_zh": "每個帝國，都由一段無人看見的路開始。你的那一步是甚麼？又由誰替你說出來？片末邀請觀眾追蹤 Otois，並以「有些故事需要更好的畫框」收結。",
+          "speech_source": "asr_assisted_display_cleaned_raw_preserved",
           "on_screen_text_zh": null,
           "verification": {
             "visual": "direct_source_sample_frame_manually_checked",
             "audio": "pending_manual_listening",
-            "translation": "pending_when_applicable"
+            "translation": "待人工核對的繁體中文翻譯"
           },
           "notes": "片中涉及的品牌、歷史、價格、認證或功效均只屬原片說法，尚未外部事實核實。",
-          "verification_frame_path": "ai_cinematic_founder_biography-sheet.jpg"
+          "verification_frame_path": "ai_cinematic_founder_biography-sheet.jpg",
+          "speech_raw_asr": "What was yours, and who's telling it? Follow Otois. Some stories need a better frame.",
+          "speech_original": "Every empire starts with a walk nobody saw. What was yours, and who is telling it? Follow Otois. Some stories need a better frame.",
+          "speech_translation_zh_hant": "每個帝國，都由一段無人看見的路開始。你的那一步是甚麼？又由誰替你說出來？片末邀請觀眾追蹤 Otois，並以「有些故事需要更好的畫框」收結。"
         }
       ],
       "unverified": [
-        "語音內容由 ASR、燒錄字幕及抽查畫面輔助還原，尚未完成人工逐句聆聽。",
+        "顯示欄已轉為繁體中文並清除可辨識的 ASR 重複幻覺；raw ASR 另欄保留供追溯。未標示人工核聽通過的段落仍須逐句核聽。",
         "片中品牌、人物、歷史、地點、數字、價格、認證及功效只記錄原片說法，尚未外部事實核實。",
         "來源只供現有內容方向研究庫內部研究及原片還原；不代表取得素材所有權或外部再授權。"
       ],
@@ -322,8 +351,8 @@
           "start_seconds": 0,
           "end_seconds": 7,
           "visual_description_zh": "松露奄列近鏡作食物鉤子，字幕稱為東京神級奄列。",
-          "speech_or_narration_zh": "今天跟你們分享一間東京超強神級歐姆蛋晚來還有可能吃不到就隱藏在東京香弄裡面的鐵皮屋二樓",
-          "speech_source": "asr_assisted_unverified",
+          "speech_or_narration_zh": "語音未能可靠辨識，待人工核聽。",
+          "speech_source": "asr_assisted_display_cleaned_raw_preserved",
           "on_screen_text_zh": null,
           "verification": {
             "visual": "direct_source_sample_frame_manually_checked",
@@ -331,15 +360,16 @@
             "translation": "pending_when_applicable"
           },
           "notes": "片中涉及的品牌、歷史、價格、認證或功效均只屬原片說法，尚未外部事實核實。",
-          "verification_frame_path": "faceless_sensory_food_discovery-sheet.jpg"
+          "verification_frame_path": "faceless_sensory_food_discovery-sheet.jpg",
+          "speech_raw_asr": "今天跟你們分享一間 東京超強神級歐姆蛋 晚來還有可能吃不到 就隱藏在東京香弄裡面的鐵皮屋二樓"
         },
         {
           "order": 2,
           "start_seconds": 7,
           "end_seconds": 14,
           "visual_description_zh": "第一身走入巷內鐵皮建築、上樓及查看無招牌入口，交代隱蔽位置。",
-          "speech_or_narration_zh": "幾乎沒有觀光客也沒有招牌從週末車站走路8分鐘的這間Bistro你們不要嚇我",
-          "speech_source": "asr_assisted_unverified",
+          "speech_or_narration_zh": "語音未能可靠辨識，待人工核聽。",
+          "speech_source": "asr_assisted_display_cleaned_raw_preserved",
           "on_screen_text_zh": null,
           "verification": {
             "visual": "direct_source_sample_frame_manually_checked",
@@ -347,15 +377,16 @@
             "translation": "pending_when_applicable"
           },
           "notes": "片中涉及的品牌、歷史、價格、認證或功效均只屬原片說法，尚未外部事實核實。",
-          "verification_frame_path": "faceless_sensory_food_discovery-sheet.jpg"
+          "verification_frame_path": "faceless_sensory_food_discovery-sheet.jpg",
+          "speech_raw_asr": "幾乎沒有觀光客也沒有招牌 從週末車站走路8分鐘的這間Bistro 你們不要嚇我"
         },
         {
           "order": 3,
           "start_seconds": 14,
           "end_seconds": 22,
           "visual_description_zh": "開放式廚房即場煮食及客人試食紅蘿蔔，集中食物質感與反應。",
-          "speech_or_narration_zh": "我真的沒吃過那麼好吃的紅蘿蔔我一個人直接嗑掉一盤難怪這間還融獲法國美食指南上排黑蒜油水餃賣得超好",
-          "speech_source": "asr_assisted_unverified",
+          "speech_or_narration_zh": "語音未能可靠辨識，待人工核聽。",
+          "speech_source": "asr_assisted_display_cleaned_raw_preserved",
           "on_screen_text_zh": null,
           "verification": {
             "visual": "direct_source_sample_frame_manually_checked",
@@ -363,15 +394,16 @@
             "translation": "pending_when_applicable"
           },
           "notes": "片中涉及的品牌、歷史、價格、認證或功效均只屬原片說法，尚未外部事實核實。",
-          "verification_frame_path": "faceless_sensory_food_discovery-sheet.jpg"
+          "verification_frame_path": "faceless_sensory_food_discovery-sheet.jpg",
+          "speech_raw_asr": "我真的沒吃過那麼好吃的紅蘿蔔 我一個人直接嗑掉一盤 難怪這間還融獲法國美食指南 上排黑蒜油水餃賣得超好"
         },
         {
           "order": 4,
           "start_seconds": 22,
           "end_seconds": 30,
           "visual_description_zh": "黑蒜油水餃製作及上碟近鏡，展示豬肉、醬汁與冒煙效果。",
-          "speech_or_narration_zh": "用頂級的豬肉再淋上黑蒜油真的好好吃這盤雲多等級的歐姆蛋",
-          "speech_source": "asr_assisted_unverified",
+          "speech_or_narration_zh": "語音未能可靠辨識，待人工核聽。",
+          "speech_source": "asr_assisted_display_cleaned_raw_preserved",
           "on_screen_text_zh": null,
           "verification": {
             "visual": "direct_source_sample_frame_manually_checked",
@@ -379,15 +411,16 @@
             "translation": "pending_when_applicable"
           },
           "notes": "片中涉及的品牌、歷史、價格、認證或功效均只屬原片說法，尚未外部事實核實。",
-          "verification_frame_path": "faceless_sensory_food_discovery-sheet.jpg"
+          "verification_frame_path": "faceless_sensory_food_discovery-sheet.jpg",
+          "speech_raw_asr": "用頂級的豬肉再淋上黑蒜油 真的好好吃 這盤雲多等級的歐姆蛋"
         },
         {
           "order": 5,
           "start_seconds": 30,
           "end_seconds": 37,
           "visual_description_zh": "刨白松露到奄列、切開流心內部並試食，形成全片主菜高潮。",
-          "speech_or_narration_zh": "可以刨上白松露咬下去直接在嘴裡融化超好吃超好吃還有燉到非常軟的豬肉排",
-          "speech_source": "asr_assisted_unverified",
+          "speech_or_narration_zh": "語音未能可靠辨識，待人工核聽。",
+          "speech_source": "asr_assisted_display_cleaned_raw_preserved",
           "on_screen_text_zh": null,
           "verification": {
             "visual": "direct_source_sample_frame_manually_checked",
@@ -395,15 +428,16 @@
             "translation": "pending_when_applicable"
           },
           "notes": "片中涉及的品牌、歷史、價格、認證或功效均只屬原片說法，尚未外部事實核實。",
-          "verification_frame_path": "faceless_sensory_food_discovery-sheet.jpg"
+          "verification_frame_path": "faceless_sensory_food_discovery-sheet.jpg",
+          "speech_raw_asr": "可以刨上白松露 咬下去直接在嘴裡融化 超好吃 超好吃 還有燉到非常軟的豬肉排"
         },
         {
           "order": 6,
           "start_seconds": 37,
           "end_seconds": 43.326,
           "visual_description_zh": "燉豬肉及意粉近鏡，最後顯示店名、地址、營業時間與預約提示。",
-          "speech_or_narration_zh": "跟義大利麵都非常驚豔這件事才完全預約制的定位資訊在這裡拜拜",
-          "speech_source": "asr_assisted_unverified",
+          "speech_or_narration_zh": "語音未能可靠辨識，待人工核聽。",
+          "speech_source": "asr_assisted_display_cleaned_raw_preserved",
           "on_screen_text_zh": null,
           "verification": {
             "visual": "direct_source_sample_frame_manually_checked",
@@ -411,11 +445,12 @@
             "translation": "pending_when_applicable"
           },
           "notes": "片中涉及的品牌、歷史、價格、認證或功效均只屬原片說法，尚未外部事實核實。",
-          "verification_frame_path": "faceless_sensory_food_discovery-sheet.jpg"
+          "verification_frame_path": "faceless_sensory_food_discovery-sheet.jpg",
+          "speech_raw_asr": "跟義大利麵都非常驚豔 這件事才完全預約制的 定位資訊在這裡 拜拜"
         }
       ],
       "unverified": [
-        "語音內容由 ASR、燒錄字幕及抽查畫面輔助還原，尚未完成人工逐句聆聽。",
+        "顯示欄已轉為繁體中文並清除可辨識的 ASR 重複幻覺；raw ASR 另欄保留供追溯。未標示人工核聽通過的段落仍須逐句核聽。",
         "片中品牌、人物、歷史、地點、數字、價格、認證及功效只記錄原片說法，尚未外部事實核實。",
         "來源只供現有內容方向研究庫內部研究及原片還原；不代表取得素材所有權或外部再授權。"
       ],
@@ -443,132 +478,140 @@
           "start_seconds": 0,
           "end_seconds": 11,
           "visual_description_zh": "飛機窗外及主持自拍開場，宣布以蒙古呼倫貝爾騎馬團作生日禮物。",
-          "speech_or_narration_zh": "這個應該是我目前見過最多的歡迎意識今年生日我決定送自己一份特別的生日禮物就是報了一個在蒙古庫倫貝爾草原的騎馬團體驗七日六夜的草原生活和馬隊制服前這一天才飛到海拉爾市區住一晚",
-          "speech_source": "asr_assisted_unverified",
+          "speech_or_narration_zh": "語音未能可靠辨識，待人工核聽。",
+          "speech_source": "asr_assisted_display_cleaned_raw_preserved",
           "on_screen_text_zh": null,
           "verification": {
             "visual": "direct_source_sample_frame_manually_checked",
-            "audio": "pending_manual_listening",
+            "audio": "ASR 可信度不足；待人工核聽",
             "translation": "pending_when_applicable"
           },
           "notes": "片中涉及的品牌、歷史、價格、認證或功效均只屬原片說法，尚未外部事實核實。",
-          "verification_frame_path": "first_person_journey_diary-sheet.jpg"
+          "verification_frame_path": "first_person_journey_diary-sheet.jpg",
+          "speech_raw_asr": "這個應該是我目前見過最多的歡迎意識 今年新日我決定送自己一份特別的新日禮物 就是佈了一個在蒙古庫倫貝爾草原的騎馬團 體驗七日六夜的草原生活 和馬隊制服前這一天才飛到海拉爾市區住一晚"
         },
         {
           "order": 2,
           "start_seconds": 11,
           "end_seconds": 22,
           "visual_description_zh": "旅遊巴前往牧場，主持在車內交代七日六夜行程及集合方式。",
-          "speech_or_narration_zh": "第二天一早做馬隊的旅遊大巴就會在酒店門口接所有的團友去到牧場去到牧場門口的那一刻我就知道我沒來錯地方在赤網上看到的是教練",
-          "speech_source": "asr_assisted_unverified",
+          "speech_or_narration_zh": "語音未能可靠辨識，待人工核聽。",
+          "speech_source": "asr_assisted_display_cleaned_raw_preserved",
           "on_screen_text_zh": null,
           "verification": {
             "visual": "direct_source_sample_frame_manually_checked",
-            "audio": "pending_manual_listening",
+            "audio": "ASR 可信度不足；待人工核聽",
             "translation": "pending_when_applicable"
           },
           "notes": "片中涉及的品牌、歷史、價格、認證或功效均只屬原片說法，尚未外部事實核實。",
-          "verification_frame_path": "first_person_journey_diary-sheet.jpg"
+          "verification_frame_path": "first_person_journey_diary-sheet.jpg",
+          "speech_raw_asr": "第二天一早做馬隊的旅遊大巴 就會在酒店門口接所有的團友去到牧場 去到牧場門口的那一刻 我就知道我沒來錯地方 在赤網上看到的是教練"
         },
         {
           "order": 3,
           "start_seconds": 22,
           "end_seconds": 34,
           "visual_description_zh": "教練騎馬迎接旅遊巴、車隊駛入草原，主持以第一身拍下抵達反應。",
-          "speech_or_narration_zh": "和令隊全部都站在馬背上面然後我們的旅遊大巴一起跑入牧場那一刻直接激動到覺得身體裡面有些東西在那裡翻滾到了啦我已經上去了但是在其馬之前有一件更重要的事",
-          "speech_source": "asr_assisted_unverified",
+          "speech_or_narration_zh": "語音未能可靠辨識，待人工核聽。",
+          "speech_source": "asr_assisted_display_cleaned_raw_preserved",
           "on_screen_text_zh": null,
           "verification": {
             "visual": "direct_source_sample_frame_manually_checked",
-            "audio": "pending_manual_listening",
+            "audio": "ASR 可信度不足；待人工核聽",
             "translation": "pending_when_applicable"
           },
           "notes": "片中涉及的品牌、歷史、價格、認證或功效均只屬原片說法，尚未外部事實核實。",
-          "verification_frame_path": "first_person_journey_diary-sheet.jpg"
+          "verification_frame_path": "first_person_journey_diary-sheet.jpg",
+          "speech_raw_asr": "和令隊全部都站在馬背上面 然後我們的旅遊大巴一起跑入牧場 那一刻直接激動到 覺得身體裡面有些東西在那裡翻滾 到了啦 我已經上去了 但是在其馬之前有一件更重要的事"
         },
         {
           "order": 4,
           "start_seconds": 34,
           "end_seconds": 45,
           "visual_description_zh": "草原設施、石頭烤肉午餐及團友用餐，交代正式騎馬前的安排。",
-          "speech_or_narration_zh": "就是先把肚子衣飽了多佛的時候廚房已經準備好了蒙古的傳統石頭烤肉給我們做午餐之後就到分房時間這些小木屋就是我們草原的第一個家兩個人一間房有獨立的廁所和沖",
-          "speech_source": "asr_assisted_unverified",
+          "speech_or_narration_zh": "語音未能可靠辨識，待人工核聽。",
+          "speech_source": "asr_assisted_display_cleaned_raw_preserved",
           "on_screen_text_zh": null,
           "verification": {
             "visual": "direct_source_sample_frame_manually_checked",
-            "audio": "pending_manual_listening",
+            "audio": "ASR 可信度不足；待人工核聽",
             "translation": "pending_when_applicable"
           },
           "notes": "片中涉及的品牌、歷史、價格、認證或功效均只屬原片說法，尚未外部事實核實。",
-          "verification_frame_path": "first_person_journey_diary-sheet.jpg"
+          "verification_frame_path": "first_person_journey_diary-sheet.jpg",
+          "speech_raw_asr": "就是先把肚子衣飽了 多佛的時候廚房已經準備好了 蒙古的傳統石頭烤肉給我們做午餐 之後就到分房時間 這些小木屋就是我們草原的第一個家 兩個人一間房有獨立的廁所和沖"
         },
         {
           "order": 5,
           "start_seconds": 45,
           "end_seconds": 57,
           "visual_description_zh": "主持介紹雙人木屋、獨立浴室、行李接送及住宿環境。",
-          "speech_or_narration_zh": "先別著我們的行李呢不用擔心他們會有專車逐間房子送還有專人幫你抬上房按燉圖之後換完裝備就可以上馬了馬長是有提供頭盔護甲護腿和手套",
-          "speech_source": "asr_assisted_unverified",
+          "speech_or_narration_zh": "語音未能可靠辨識，待人工核聽。",
+          "speech_source": "asr_assisted_display_cleaned_raw_preserved",
           "on_screen_text_zh": null,
           "verification": {
             "visual": "direct_source_sample_frame_manually_checked",
-            "audio": "pending_manual_listening",
+            "audio": "ASR 可信度不足；待人工核聽",
             "translation": "pending_when_applicable"
           },
           "notes": "片中涉及的品牌、歷史、價格、認證或功效均只屬原片說法，尚未外部事實核實。",
-          "verification_frame_path": "first_person_journey_diary-sheet.jpg"
+          "verification_frame_path": "first_person_journey_diary-sheet.jpg",
+          "speech_raw_asr": "先別著 我們的行李呢 不用擔心他們會有專車逐間房子送 還有專人幫你抬上房 按燉圖之後 換完裝備就可以上馬了 馬長是有提供頭盔 護甲 護腿 和手套"
         },
         {
           "order": 6,
           "start_seconds": 57,
           "end_seconds": 69,
           "visual_description_zh": "頭盔、護甲、護腿、手套等裝備展示，團員聽理論課及前往見馬。",
-          "speech_or_narration_zh": "然後馬堂裡面的主教練就會跟我們上一堂不簡單的理論課然後我們就會去見預先按照我們身高體重和馬術程度而分配給我們的馬仔然後就出發去場地訓練其實所謂的場地訓練都是在大草原上的今天的訓練內容其實很Chill的",
-          "speech_source": "asr_assisted_unverified",
+          "speech_or_narration_zh": "語音未能可靠辨識，待人工核聽。",
+          "speech_source": "asr_assisted_display_cleaned_raw_preserved",
           "on_screen_text_zh": null,
           "verification": {
             "visual": "direct_source_sample_frame_manually_checked",
-            "audio": "pending_manual_listening",
+            "audio": "ASR 可信度不足；待人工核聽",
             "translation": "pending_when_applicable"
           },
           "notes": "片中涉及的品牌、歷史、價格、認證或功效均只屬原片說法，尚未外部事實核實。",
-          "verification_frame_path": "first_person_journey_diary-sheet.jpg"
+          "verification_frame_path": "first_person_journey_diary-sheet.jpg",
+          "speech_raw_asr": "然後馬堂裡面的主教練就會跟我們上一堂不簡單的理論課 然後我們就會去見 預先按照我們身高體重和馬縮程度 而分配給我們的馬仔 然後就出發去場地訓練 其實所謂的場地訓練都是在大草原上的 今天的訓練內容其實很Chill的"
         },
         {
           "order": 7,
           "start_seconds": 69,
           "end_seconds": 79,
           "visual_description_zh": "按身高、體重及騎術分配馬匹，團員在草原場地開始訓練。",
-          "speech_or_narration_zh": "因為最主要都是想聽一下大家的程度讓大家分成慢隊和快隊可以更好按照自己的程度在接下來的日子去探索草原第一日的活動還未完我們下條片繼續",
-          "speech_source": "asr_assisted_unverified",
+          "speech_or_narration_zh": "語音未能可靠辨識，待人工核聽。",
+          "speech_source": "asr_assisted_display_cleaned_raw_preserved",
           "on_screen_text_zh": null,
           "verification": {
             "visual": "direct_source_sample_frame_manually_checked",
-            "audio": "pending_manual_listening",
+            "audio": "ASR 可信度不足；待人工核聽",
             "translation": "pending_when_applicable"
           },
           "notes": "片中涉及的品牌、歷史、價格、認證或功效均只屬原片說法，尚未外部事實核實。",
-          "verification_frame_path": "first_person_journey_diary-sheet.jpg"
+          "verification_frame_path": "first_person_journey_diary-sheet.jpg",
+          "speech_raw_asr": "因為最主要都是想聽一下大家的程度 讓大家分成萬隊和快隊 可以更好按照自己的程度 在接下來的日子去探索草原 第一日的活動還未完 我們下條片繼續"
         },
         {
           "order": 8,
           "start_seconds": 79,
           "end_seconds": 82.687,
           "visual_description_zh": "草原遠景、隊伍活動及烤肉畫面收尾，預告下一段旅程並邀請留言索取資料。",
-          "speech_or_narration_zh": "但是如果你心急想知道更多詳情和報名資料可以留言我會DM你",
-          "speech_source": "asr_assisted_unverified",
+          "speech_or_narration_zh": "語音未能可靠辨識，待人工核聽。",
+          "speech_source": "asr_assisted_display_cleaned_raw_preserved",
           "on_screen_text_zh": null,
           "verification": {
             "visual": "direct_source_sample_frame_manually_checked",
-            "audio": "pending_manual_listening",
+            "audio": "ASR 可信度不足；待人工核聽",
             "translation": "pending_when_applicable"
           },
           "notes": "片中涉及的品牌、歷史、價格、認證或功效均只屬原片說法，尚未外部事實核實。",
-          "verification_frame_path": "first_person_journey_diary-sheet.jpg"
+          "verification_frame_path": "first_person_journey_diary-sheet.jpg",
+          "speech_raw_asr": "但是如果你心急想知道更多詳情和報名資料 可以留言 我會DM你 你在一起 你在一起 你在一起"
         }
       ],
       "unverified": [
-        "語音內容由 ASR、燒錄字幕及抽查畫面輔助還原，尚未完成人工逐句聆聽。",
+        "顯示欄已轉為繁體中文並清除可辨識的 ASR 重複幻覺；raw ASR 另欄保留供追溯。未標示人工核聽通過的段落仍須逐句核聽。",
         "片中品牌、人物、歷史、地點、數字、價格、認證及功效只記錄原片說法，尚未外部事實核實。",
         "來源只供現有內容方向研究庫內部研究及原片還原；不代表取得素材所有權或外部再授權。"
       ],
@@ -596,8 +639,8 @@
           "start_seconds": 0,
           "end_seconds": 12,
           "visual_description_zh": "主持在河內街頭及餐桌出鏡，以不是河粉或 bánh mì 而是 bún chả 作開場反差。",
-          "speech_or_narration_zh": "我來到河內第一樣要吃的東西不是河粉，不是bánhmì是享受了一些外國的美食試了一些BunChaBunChaBunCha河內炭燒豬肉米粉",
-          "speech_source": "asr_assisted_unverified",
+          "speech_or_narration_zh": "語音未能可靠辨識，待人工核聽。",
+          "speech_source": "asr_assisted_display_cleaned_raw_preserved",
           "on_screen_text_zh": null,
           "verification": {
             "visual": "direct_source_sample_frame_manually_checked",
@@ -605,15 +648,16 @@
             "translation": "pending_when_applicable"
           },
           "notes": "片中涉及的品牌、歷史、價格、認證或功效均只屬原片說法，尚未外部事實核實。",
-          "verification_frame_path": "host_led_food_culture_tasting-sheet.jpg"
+          "verification_frame_path": "host_led_food_culture_tasting-sheet.jpg",
+          "speech_raw_asr": "我來到河內第一樣要吃的東西 不是火 不是巴咪 是 享受了一些外國的美食 試了一些 Bun Cha Bun Cha Bun Cha 河內炭燒豬肉米粉"
         },
         {
           "order": 2,
           "start_seconds": 12,
           "end_seconds": 23,
           "visual_description_zh": "Barack Obama 演說及與 Anthony Bourdain 用餐的歷史片段，建立菜式的國際話題背景。",
-          "speech_or_narration_zh": "十年前因為這樣徹底在國際上出名你想想一個美國總統來到Local一間小店跟你坐著膠椅吹著風扇一邊喝啤酒吃的就是這碗粉他們當時去的這間餐廳",
-          "speech_source": "asr_assisted_unverified",
+          "speech_or_narration_zh": "語音未能可靠辨識，待人工核聽。",
+          "speech_source": "asr_assisted_display_cleaned_raw_preserved",
           "on_screen_text_zh": null,
           "verification": {
             "visual": "direct_source_sample_frame_manually_checked",
@@ -621,15 +665,16 @@
             "translation": "pending_when_applicable"
           },
           "notes": "片中涉及的品牌、歷史、價格、認證或功效均只屬原片說法，尚未外部事實核實。",
-          "verification_frame_path": "host_led_food_culture_tasting-sheet.jpg"
+          "verification_frame_path": "host_led_food_culture_tasting-sheet.jpg",
+          "speech_raw_asr": "十年前因為這樣 徹底在國際上出名 你想想一個美國總統來到 Local一間小店 跟你坐著膠椅 吹著風扇 一邊喝啤酒 吃的就是這碗粉 他們當時去的這間餐廳"
         },
         {
           "order": 3,
           "start_seconds": 23,
           "end_seconds": 34,
           "visual_description_zh": "原餐廳外觀及室內環境，主持到訪並點一份經典 bún chả。",
-          "speech_or_narration_zh": "我這次都去了一份classic的BunCha一共會有幾樣東西用炭火燒到焦的五花腩和肉餅浸入常溫調配酸酸甜甜的魚露汁",
-          "speech_source": "asr_assisted_unverified",
+          "speech_or_narration_zh": "語音未能可靠辨識，待人工核聽。",
+          "speech_source": "asr_assisted_display_cleaned_raw_preserved",
           "on_screen_text_zh": null,
           "verification": {
             "visual": "direct_source_sample_frame_manually_checked",
@@ -637,15 +682,16 @@
             "translation": "pending_when_applicable"
           },
           "notes": "片中涉及的品牌、歷史、價格、認證或功效均只屬原片說法，尚未外部事實核實。",
-          "verification_frame_path": "host_led_food_culture_tasting-sheet.jpg"
+          "verification_frame_path": "host_led_food_culture_tasting-sheet.jpg",
+          "speech_raw_asr": "我這次都去了 一份classic的Bun Cha 一共會有幾樣東西 用炭火燒到焦的五花腩和肉餅 浸入常溫調配酸酸甜甜的魚露汁"
         },
         {
           "order": 4,
           "start_seconds": 34,
           "end_seconds": 46,
           "visual_description_zh": "五花腩、肉餅、魚露汁、米粉及生菜逐項近鏡，解釋組成及吃法。",
-          "speech_or_narration_zh": "旁邊會上一份新鮮很細滑的米粉和一份生菜西薄荷葉和生菜我吃法是越南的沾麵入口有肉的炭香",
-          "speech_source": "asr_assisted_unverified",
+          "speech_or_narration_zh": "語音未能可靠辨識，待人工核聽。",
+          "speech_source": "asr_assisted_display_cleaned_raw_preserved",
           "on_screen_text_zh": null,
           "verification": {
             "visual": "direct_source_sample_frame_manually_checked",
@@ -653,15 +699,16 @@
             "translation": "pending_when_applicable"
           },
           "notes": "片中涉及的品牌、歷史、價格、認證或功效均只屬原片說法，尚未外部事實核實。",
-          "verification_frame_path": "host_led_food_culture_tasting-sheet.jpg"
+          "verification_frame_path": "host_led_food_culture_tasting-sheet.jpg",
+          "speech_raw_asr": "旁邊會上一份新鮮很細滑的米粉 和一份生菜 西薄荷葉和生菜 我吃法是越南的煎麵 入口有肉的炭香"
         },
         {
           "order": 5,
           "start_seconds": 46,
           "end_seconds": 58,
           "visual_description_zh": "主持把米粉、肉及香草放入醬汁試食，以同步反應描述炭香、酸甜、蒜香及辣味。",
-          "speech_or_narration_zh": "然後醬酸甜甜的蒜香的辛辣然後又有不同菜的清爽口感味道也是非常豐富平衡的一道菜難怪不得BunCha是河內代表性的食物",
-          "speech_source": "asr_assisted_unverified",
+          "speech_or_narration_zh": "語音未能可靠辨識，待人工核聽。",
+          "speech_source": "asr_assisted_display_cleaned_raw_preserved",
           "on_screen_text_zh": null,
           "verification": {
             "visual": "direct_source_sample_frame_manually_checked",
@@ -669,15 +716,16 @@
             "translation": "pending_when_applicable"
           },
           "notes": "片中涉及的品牌、歷史、價格、認證或功效均只屬原片說法，尚未外部事實核實。",
-          "verification_frame_path": "host_led_food_culture_tasting-sheet.jpg"
+          "verification_frame_path": "host_led_food_culture_tasting-sheet.jpg",
+          "speech_raw_asr": "然後醬酸甜甜的蒜香的辛辣 然後又有不同菜的清爽 口感味道也是非常豐富平衡的一道菜 難怪不得Bun Cha是河內代表性的食物"
         },
         {
           "order": 6,
           "start_seconds": 58,
           "end_seconds": 70,
           "visual_description_zh": "街頭食店、食客及歷史照片交替，補充 bún chả 的河內代表性與 Anthony Bourdain 關聯。",
-          "speech_or_narration_zh": "也是美國名廚AnthonyBourdain很喜歡的一道菜所以奧巴馬2016年去越南的時候只有一頓飯的時間Anthony也是帶他去吃BunCha河內的Surcher一定會吃到奧巴馬那一道菜",
-          "speech_source": "asr_assisted_unverified",
+          "speech_or_narration_zh": "語音未能可靠辨識，待人工核聽。",
+          "speech_source": "asr_assisted_display_cleaned_raw_preserved",
           "on_screen_text_zh": null,
           "verification": {
             "visual": "direct_source_sample_frame_manually_checked",
@@ -685,27 +733,29 @@
             "translation": "pending_when_applicable"
           },
           "notes": "片中涉及的品牌、歷史、價格、認證或功效均只屬原片說法，尚未外部事實核實。",
-          "verification_frame_path": "host_led_food_culture_tasting-sheet.jpg"
+          "verification_frame_path": "host_led_food_culture_tasting-sheet.jpg",
+          "speech_raw_asr": "也是美國名廚Anthony Bourdain很喜歡的一道菜 所以奧巴馬2016年去越南的時候 只有一頓飯的時間 Anthony也是帶他去吃Bun Cha 河內的Surcher 一定會吃到奧巴馬那一道菜"
         },
         {
           "order": 7,
           "start_seconds": 70,
           "end_seconds": 81.778,
           "visual_description_zh": "主持回到街頭及爐火畫面，建議旅客亦可找路邊炭爐小店品嘗。",
-          "speech_or_narration_zh": "這間就是最旅遊的因為前兩天走進路邊那些嘔嘔嘔嘔然後你看到一些火候塑膠叔叔在蹲在那裡燒的應該是最好吃的",
-          "speech_source": "asr_assisted_unverified",
+          "speech_or_narration_zh": "語音未能可靠辨識，待人工核聽。",
+          "speech_source": "asr_assisted_display_cleaned_raw_preserved",
           "on_screen_text_zh": null,
           "verification": {
             "visual": "direct_source_sample_frame_manually_checked",
-            "audio": "pending_manual_listening",
+            "audio": "ASR 可信度不足；待人工核聽",
             "translation": "pending_when_applicable"
           },
           "notes": "片中涉及的品牌、歷史、價格、認證或功效均只屬原片說法，尚未外部事實核實。",
-          "verification_frame_path": "host_led_food_culture_tasting-sheet.jpg"
+          "verification_frame_path": "host_led_food_culture_tasting-sheet.jpg",
+          "speech_raw_asr": "這間就是最旅遊的 因為前兩天走進路邊 那些嘔嘔嘔嘔 然後你看到一些火候 塑膠 叔叔在蹲在那裡燒的 應該是最好吃的"
         }
       ],
       "unverified": [
-        "語音內容由 ASR、燒錄字幕及抽查畫面輔助還原，尚未完成人工逐句聆聽。",
+        "顯示欄已轉為繁體中文並清除可辨識的 ASR 重複幻覺；raw ASR 另欄保留供追溯。未標示人工核聽通過的段落仍須逐句核聽。",
         "片中品牌、人物、歷史、地點、數字、價格、認證及功效只記錄原片說法，尚未外部事實核實。",
         "來源只供現有內容方向研究庫內部研究及原片還原；不代表取得素材所有權或外部再授權。"
       ],
@@ -733,8 +783,8 @@
           "start_seconds": 0,
           "end_seconds": 6,
           "visual_description_zh": "第一身展示已滿垃圾桶，直接下壓後騰出約半桶空間，以前後差異作鉤子。",
-          "speech_or_narration_zh": "垃圾桶滿了先不要拿去到你看這樣直接多出半桶空間這是晚安雜貨店獨家代理的",
-          "speech_source": "asr_assisted_unverified",
+          "speech_or_narration_zh": "語音未能可靠辨識，待人工核聽。",
+          "speech_source": "asr_assisted_display_cleaned_raw_preserved",
           "on_screen_text_zh": null,
           "verification": {
             "visual": "direct_source_sample_frame_manually_checked",
@@ -742,15 +792,16 @@
             "translation": "pending_when_applicable"
           },
           "notes": "片中涉及的品牌、歷史、價格、認證或功效均只屬原片說法，尚未外部事實核實。",
-          "verification_frame_path": "human_product_demo_conversion-sheet.jpg"
+          "verification_frame_path": "human_product_demo_conversion-sheet.jpg",
+          "speech_raw_asr": "垃圾桶滿了 先不要拿去到 你看 這樣直接多出半桶空間 這是晚安雜豆店獨家代理的"
         },
         {
           "order": 2,
           "start_seconds": 6,
           "end_seconds": 15,
           "visual_description_zh": "主持坐定介紹韓國 ProMate 壓縮垃圾桶，切入蓋子兼作壓縮器的設計。",
-          "speech_or_narration_zh": "韓國ProMate壓縮垃圾桶它的蓋子本身就是一個壓縮器垃圾快滿的時候往下一壓體積直接縮小",
-          "speech_source": "asr_assisted_unverified",
+          "speech_or_narration_zh": "語音未能可靠辨識，待人工核聽。",
+          "speech_source": "asr_assisted_display_cleaned_raw_preserved",
           "on_screen_text_zh": null,
           "verification": {
             "visual": "direct_source_sample_frame_manually_checked",
@@ -758,15 +809,16 @@
             "translation": "pending_when_applicable"
           },
           "notes": "片中涉及的品牌、歷史、價格、認證或功效均只屬原片說法，尚未外部事實核實。",
-          "verification_frame_path": "human_product_demo_conversion-sheet.jpg"
+          "verification_frame_path": "human_product_demo_conversion-sheet.jpg",
+          "speech_raw_asr": "韓國ProMate壓縮垃圾桶 它的蓋子本身就是一個壓縮器 垃圾快滿的時候 往下一壓 體積直接縮小"
         },
         {
           "order": 3,
           "start_seconds": 15,
           "end_seconds": 24,
           "visual_description_zh": "把垃圾袋放入並向下壓縮，展示雙手不用接觸垃圾及減少換袋的使用情境。",
-          "speech_or_narration_zh": "這代表什麼換垃圾袋的次數減少下樓追垃圾車的次數也變少而這整個過程你的手完全不用碰到垃圾桶蓋有一定的密合度",
-          "speech_source": "asr_assisted_unverified",
+          "speech_or_narration_zh": "語音未能可靠辨識，待人工核聽。",
+          "speech_source": "asr_assisted_display_cleaned_raw_preserved",
           "on_screen_text_zh": null,
           "verification": {
             "visual": "direct_source_sample_frame_manually_checked",
@@ -774,15 +826,16 @@
             "translation": "pending_when_applicable"
           },
           "notes": "片中涉及的品牌、歷史、價格、認證或功效均只屬原片說法，尚未外部事實核實。",
-          "verification_frame_path": "human_product_demo_conversion-sheet.jpg"
+          "verification_frame_path": "human_product_demo_conversion-sheet.jpg",
+          "speech_raw_asr": "這代表什麼 混垃圾袋的次數減少 下樓追垃圾車的次數也變少 而這整個過程 你的手完全不用碰到垃圾 桶蓋有一定的密合度"
         },
         {
           "order": 4,
           "start_seconds": 24,
           "end_seconds": 34,
           "visual_description_zh": "兩款不同尺寸垃圾桶並排，打開雙開門款並比較一般單向桶蓋。",
-          "speech_or_narration_zh": "能夠減少味道飄出來同一個牌子我還帶來這款雙開門的一般單心蓋的垃圾桶蓋子只能朝同一個方向開放的位置就被綁死了",
-          "speech_source": "asr_assisted_unverified",
+          "speech_or_narration_zh": "語音未能可靠辨識，待人工核聽。",
+          "speech_source": "asr_assisted_display_cleaned_raw_preserved",
           "on_screen_text_zh": null,
           "verification": {
             "visual": "direct_source_sample_frame_manually_checked",
@@ -790,15 +843,16 @@
             "translation": "pending_when_applicable"
           },
           "notes": "片中涉及的品牌、歷史、價格、認證或功效均只屬原片說法，尚未外部事實核實。",
-          "verification_frame_path": "human_product_demo_conversion-sheet.jpg"
+          "verification_frame_path": "human_product_demo_conversion-sheet.jpg",
+          "speech_raw_asr": "能夠減少味道飄出來 同一個牌子我還帶來這款雙開門的 一般單心蓋的垃圾桶 蓋子只能朝同一個方向開 放的位置就被綁死了"
         },
         {
           "order": 5,
           "start_seconds": 34,
           "end_seconds": 43,
           "visual_description_zh": "近鏡展示雙片門、較大投入口、緩衝閉合及桶蓋密合度。",
-          "speech_or_narration_zh": "但這款是兩片門往上開投入口更大以外還是緩衝安靜無聲的這兩款都有一個共同點垃圾袋套好之後外面一點塑膠袋都看不到",
-          "speech_source": "asr_assisted_unverified",
+          "speech_or_narration_zh": "語音未能可靠辨識，待人工核聽。",
+          "speech_source": "asr_assisted_display_cleaned_raw_preserved",
           "on_screen_text_zh": null,
           "verification": {
             "visual": "direct_source_sample_frame_manually_checked",
@@ -806,15 +860,16 @@
             "translation": "pending_when_applicable"
           },
           "notes": "片中涉及的品牌、歷史、價格、認證或功效均只屬原片說法，尚未外部事實核實。",
-          "verification_frame_path": "human_product_demo_conversion-sheet.jpg"
+          "verification_frame_path": "human_product_demo_conversion-sheet.jpg",
+          "speech_raw_asr": "但這款是兩片門往上開 投入口更大以外 還是緩衝安靜無聲的 這兩款都有一個共同點 垃圾袋套好之後 外面一點塑膠袋都看不到"
         },
         {
           "order": 6,
           "start_seconds": 43,
           "end_seconds": 54.657,
           "visual_description_zh": "示範隱藏垃圾袋邊緣及實際棄置垃圾，主持最後給出折扣與留言取連結 CTA。",
-          "speech_or_narration_zh": "在居家用品上你真的可以永遠相信韓國人的審美照顧我的連結購買還有現實的88折優惠底下留言拿連結它是我挑的你可以放心下單",
-          "speech_source": "asr_assisted_unverified",
+          "speech_or_narration_zh": "語音未能可靠辨識，待人工核聽。",
+          "speech_source": "asr_assisted_display_cleaned_raw_preserved",
           "on_screen_text_zh": null,
           "verification": {
             "visual": "direct_source_sample_frame_manually_checked",
@@ -822,11 +877,12 @@
             "translation": "pending_when_applicable"
           },
           "notes": "片中涉及的品牌、歷史、價格、認證或功效均只屬原片說法，尚未外部事實核實。",
-          "verification_frame_path": "human_product_demo_conversion-sheet.jpg"
+          "verification_frame_path": "human_product_demo_conversion-sheet.jpg",
+          "speech_raw_asr": "在居家用品上 你真的可以永遠相信韓國人的審美 照顧我的連結購買 還有現實的88折優惠 底下留言拿連結 它是我挑的 你可以放心下單"
         }
       ],
       "unverified": [
-        "語音內容由 ASR、燒錄字幕及抽查畫面輔助還原，尚未完成人工逐句聆聽。",
+        "顯示欄已轉為繁體中文並清除可辨識的 ASR 重複幻覺；raw ASR 另欄保留供追溯。未標示人工核聽通過的段落仍須逐句核聽。",
         "片中品牌、人物、歷史、地點、數字、價格、認證及功效只記錄原片說法，尚未外部事實核實。",
         "來源只供現有內容方向研究庫內部研究及原片還原；不代表取得素材所有權或外部再授權。"
       ],
@@ -854,8 +910,8 @@
           "start_seconds": 0,
           "end_seconds": 8,
           "visual_description_zh": "主持站在香港電車旁，以健力士世界紀錄圖示及問題開場。",
-          "speech_or_narration_zh": "你知不知道香港是全世界最多的兩層電車歡迎來到FUNFACT星期一我是你的主持Hana",
-          "speech_source": "asr_assisted_unverified",
+          "speech_or_narration_zh": "語音未能可靠辨識，待人工核聽。",
+          "speech_source": "asr_assisted_display_cleaned_raw_preserved",
           "on_screen_text_zh": null,
           "verification": {
             "visual": "direct_source_sample_frame_manually_checked",
@@ -863,15 +919,16 @@
             "translation": "pending_when_applicable"
           },
           "notes": "片中涉及的品牌、歷史、價格、認證或功效均只屬原片說法，尚未外部事實核實。",
-          "verification_frame_path": "on_location_fact_sprint-sheet.jpg"
+          "verification_frame_path": "on_location_fact_sprint-sheet.jpg",
+          "speech_raw_asr": "你知不知道香港是全世界最多的兩層電車 歡迎來到FUN FACT星期一 我是你的主持Hana"
         },
         {
           "order": 2,
           "start_seconds": 8,
           "end_seconds": 18,
           "visual_description_zh": "主持走入電車上層，介紹節目及香港電車由 1904 年開始的歷史。",
-          "speech_or_narration_zh": "今天我就介紹FUNFACT關於香港的丁丁在1904年香港就開始有丁丁意思是他們有122年的歷史他們以前是這樣的樣子",
-          "speech_source": "asr_assisted_unverified",
+          "speech_or_narration_zh": "語音未能可靠辨識，待人工核聽。",
+          "speech_source": "asr_assisted_display_cleaned_raw_preserved",
           "on_screen_text_zh": null,
           "verification": {
             "visual": "direct_source_sample_frame_manually_checked",
@@ -879,15 +936,16 @@
             "translation": "pending_when_applicable"
           },
           "notes": "片中涉及的品牌、歷史、價格、認證或功效均只屬原片說法，尚未外部事實核實。",
-          "verification_frame_path": "on_location_fact_sprint-sheet.jpg"
+          "verification_frame_path": "on_location_fact_sprint-sheet.jpg",
+          "speech_raw_asr": "今天我就介紹FUN FACT關於香港的丁丁 在1904年香港就開始有丁丁 意思是他們有122年的歷史 他們以前是這樣的樣子"
         },
         {
           "order": 3,
           "start_seconds": 18,
           "end_seconds": 28,
           "visual_description_zh": "歷代電車圖片疊加在實景車廂，說明早期木製、單層及車輛數量。",
-          "speech_or_narration_zh": "他們是木的還有只有一層那時候只有26個車10個是給firstclass還有以前好像日本一樣有個Ladiesonlysection所以是分女生和男生",
-          "speech_source": "asr_assisted_unverified",
+          "speech_or_narration_zh": "語音未能可靠辨識，待人工核聽。",
+          "speech_source": "asr_assisted_display_cleaned_raw_preserved",
           "on_screen_text_zh": null,
           "verification": {
             "visual": "direct_source_sample_frame_manually_checked",
@@ -895,15 +953,16 @@
             "translation": "pending_when_applicable"
           },
           "notes": "片中涉及的品牌、歷史、價格、認證或功效均只屬原片說法，尚未外部事實核實。",
-          "verification_frame_path": "on_location_fact_sprint-sheet.jpg"
+          "verification_frame_path": "on_location_fact_sprint-sheet.jpg",
+          "speech_raw_asr": "他們是木的 還有只有一層 那時候只有26個車 10個是給first class 還有以前好像日本一樣有個Ladies only section 所以是分女生和男生"
         },
         {
           "order": 4,
           "start_seconds": 28,
           "end_seconds": 38,
           "visual_description_zh": "主持以手勢及大字卡交代頭等車、女士專區及現有雙層電車數量。",
-          "speech_or_narration_zh": "現在香港有多過165個電車打破了GuinnessWorldRecord因為香港是全世界最多的兩層電車現在我就會快速地說一些搞笑FUNFACT",
-          "speech_source": "asr_assisted_unverified",
+          "speech_or_narration_zh": "語音未能可靠辨識，待人工核聽。",
+          "speech_source": "asr_assisted_display_cleaned_raw_preserved",
           "on_screen_text_zh": null,
           "verification": {
             "visual": "direct_source_sample_frame_manually_checked",
@@ -911,15 +970,16 @@
             "translation": "pending_when_applicable"
           },
           "notes": "片中涉及的品牌、歷史、價格、認證或功效均只屬原片說法，尚未外部事實核實。",
-          "verification_frame_path": "on_location_fact_sprint-sheet.jpg"
+          "verification_frame_path": "on_location_fact_sprint-sheet.jpg",
+          "speech_raw_asr": "現在香港有多過165個電車 打破了Guinness World Record 因為香港是全世界最多的兩層電車 現在我就會快速地說一些搞笑FUN FACT"
         },
         {
           "order": 5,
           "start_seconds": 38,
           "end_seconds": 48,
           "visual_description_zh": "主持坐在車廂快講綠色車身由來，以舊照片和綠色圖形輔助。",
-          "speech_or_narration_zh": "你們有沒有想過為什麼丁丁是這隻綠色呢40年代打仗之後他們就用了很多這個綠色所以他們不想浪費所以他們就用這隻顏色來畫丁丁還有你知道嗎香港是1971年才開始有女生丁丁司機",
-          "speech_source": "asr_assisted_unverified",
+          "speech_or_narration_zh": "語音未能可靠辨識，待人工核聽。",
+          "speech_source": "asr_assisted_display_cleaned_raw_preserved",
           "on_screen_text_zh": null,
           "verification": {
             "visual": "direct_source_sample_frame_manually_checked",
@@ -927,15 +987,16 @@
             "translation": "pending_when_applicable"
           },
           "notes": "片中涉及的品牌、歷史、價格、認證或功效均只屬原片說法，尚未外部事實核實。",
-          "verification_frame_path": "on_location_fact_sprint-sheet.jpg"
+          "verification_frame_path": "on_location_fact_sprint-sheet.jpg",
+          "speech_raw_asr": "你們有沒有想過為什麼丁丁是這隻綠色呢 40年代打仗之後 他們就用了很多這個綠色 所以他們不想浪費 所以他們就用這隻顏色來畫丁丁 還有你知道嗎 香港是1971年才開始有女生丁丁司機"
         },
         {
           "order": 6,
           "start_seconds": 48,
           "end_seconds": 58.281,
           "visual_description_zh": "司機位置、車外倒後鏡及街景快切，補充女車長及曾討論取消電車的說法。",
-          "speech_or_narration_zh": "還有2015年他們有想過其實cancel電車因為他們覺得地鐵是太方便而且快很多你下次踏電車你可以問人",
-          "speech_source": "asr_assisted_unverified",
+          "speech_or_narration_zh": "語音未能可靠辨識，待人工核聽。",
+          "speech_source": "asr_assisted_display_cleaned_raw_preserved",
           "on_screen_text_zh": null,
           "verification": {
             "visual": "direct_source_sample_frame_manually_checked",
@@ -943,11 +1004,12 @@
             "translation": "pending_when_applicable"
           },
           "notes": "片中涉及的品牌、歷史、價格、認證或功效均只屬原片說法，尚未外部事實核實。",
-          "verification_frame_path": "on_location_fact_sprint-sheet.jpg"
+          "verification_frame_path": "on_location_fact_sprint-sheet.jpg",
+          "speech_raw_asr": "還有2015年他們有想過其實cancel電車 因為他們覺得地鐵是太方便 而且快很多 你下次踏電車你可以問人"
         }
       ],
       "unverified": [
-        "語音內容由 ASR、燒錄字幕及抽查畫面輔助還原，尚未完成人工逐句聆聽。",
+        "顯示欄已轉為繁體中文並清除可辨識的 ASR 重複幻覺；raw ASR 另欄保留供追溯。未標示人工核聽通過的段落仍須逐句核聽。",
         "片中品牌、人物、歷史、地點、數字、價格、認證及功效只記錄原片說法，尚未外部事實核實。",
         "來源只供現有內容方向研究庫內部研究及原片還原；不代表取得素材所有權或外部再授權。"
       ],
@@ -976,7 +1038,7 @@
           "end_seconds": 6.06,
           "visual_description_zh": "日本街頭及行人撐傘，標題寫上「日本潛規則被我征服了」，建立濕傘進室內的生活情境。",
           "speech_or_narration_zh": "你們知道嗎？在日本這麼［講究／待人工聆聽］的國家，雨傘進到室內，滴到地板、沾到別人都很沒禮貌，所以他們超愛用長傘。",
-          "speech_source": "asr_assisted_unverified",
+          "speech_source": "asr_assisted_display_cleaned_raw_preserved",
           "on_screen_text_zh": null,
           "verification": {
             "visual": "direct_source_sample_frame_manually_checked",
@@ -984,7 +1046,8 @@
             "translation": "pending_when_applicable"
           },
           "notes": "片中涉及的品牌、歷史、價格、認證或功效均只屬原片說法，尚未外部事實核實。",
-          "verification_frame_path": "problem_first_lifestyle_product-sheet.jpg"
+          "verification_frame_path": "problem_first_lifestyle_product-sheet.jpg",
+          "speech_raw_asr": "你們知道嗎?在日本這麼乾爽的國家,雨傘進到室內、滴到地板、站到別人都很沒禮貌,所以他們超愛用長傘。"
         },
         {
           "order": 2,
@@ -992,7 +1055,7 @@
           "end_seconds": 9.36,
           "visual_description_zh": "車站及行人雨天畫面，展示長傘在交通及室內環境中不便攜帶。",
           "speech_or_narration_zh": "因為總是要在地鐵口把它收乾淨，但長傘不好帶。",
-          "speech_source": "asr_assisted_unverified",
+          "speech_source": "asr_assisted_display_cleaned_raw_preserved",
           "on_screen_text_zh": null,
           "verification": {
             "visual": "direct_source_sample_frame_manually_checked",
@@ -1000,7 +1063,8 @@
             "translation": "pending_when_applicable"
           },
           "notes": "片中涉及的品牌、歷史、價格、認證或功效均只屬原片說法，尚未外部事實核實。",
-          "verification_frame_path": "problem_first_lifestyle_product-sheet.jpg"
+          "verification_frame_path": "problem_first_lifestyle_product-sheet.jpg",
+          "speech_raw_asr": "因為總是要在地鐵口把它收乾淨,但長傘不好帶。"
         },
         {
           "order": 3,
@@ -1008,7 +1072,7 @@
           "end_seconds": 15.24,
           "visual_description_zh": "第一身嘗試整理普通縮骨傘，傘布凌亂、難以束好，放大收傘痛點。",
           "speech_or_narration_zh": "短傘呢，收起來我又覺得……啊，這哪裡舒服啦！但沒有更好的方法嗎？有！",
-          "speech_source": "asr_assisted_unverified",
+          "speech_source": "asr_assisted_display_cleaned_raw_preserved",
           "on_screen_text_zh": null,
           "verification": {
             "visual": "direct_source_sample_frame_manually_checked",
@@ -1016,15 +1080,16 @@
             "translation": "pending_when_applicable"
           },
           "notes": "片中涉及的品牌、歷史、價格、認證或功效均只屬原片說法，尚未外部事實核實。",
-          "verification_frame_path": "problem_first_lifestyle_product-sheet.jpg"
+          "verification_frame_path": "problem_first_lifestyle_product-sheet.jpg",
+          "speech_raw_asr": "短傘呢,收起來我又覺得...啊...這是哪裡不舒服啦! 但沒有更好的方法嗎?有!"
         },
         {
           "order": 4,
           "start_seconds": 15.24,
           "end_seconds": 20.82,
           "visual_description_zh": "俐落轉場至已收整齊的淺綠色縮骨傘，字幕寫上「完美收放的雨傘」。",
-          "speech_or_narration_zh": "一秒就可以完美收起的雨傘。Munich 完美收收傘，整齊到爆。",
-          "speech_source": "asr_assisted_unverified",
+          "speech_or_narration_zh": "一秒就可以完美收起的雨傘。Munich完美收收傘，整齊到爆。",
+          "speech_source": "asr_assisted_display_cleaned_raw_preserved",
           "on_screen_text_zh": null,
           "verification": {
             "visual": "direct_source_sample_frame_manually_checked",
@@ -1032,7 +1097,8 @@
             "translation": "pending_when_applicable"
           },
           "notes": "片中涉及的品牌、歷史、價格、認證或功效均只屬原片說法，尚未外部事實核實。",
-          "verification_frame_path": "problem_first_lifestyle_product-sheet.jpg"
+          "verification_frame_path": "problem_first_lifestyle_product-sheet.jpg",
+          "speech_raw_asr": "一秒就可以完美收起的雨傘。 Punichi完美收收傘,整齊到爆。"
         },
         {
           "order": 5,
@@ -1040,7 +1106,7 @@
           "end_seconds": 29.56,
           "visual_description_zh": "展示開收產品及傘布內部的記憶快捲片、手柄按鍵與結構。",
           "speech_or_narration_zh": "它就是一把好帶的短傘，又可以一秒收整齊。傘片裡面有記憶快捲片，還有一鍵開收。捲片不會太明顯或者笨重。有看到嗎？在這。",
-          "speech_source": "asr_assisted_unverified",
+          "speech_source": "asr_assisted_display_cleaned_raw_preserved",
           "on_screen_text_zh": null,
           "verification": {
             "visual": "direct_source_sample_frame_manually_checked",
@@ -1048,15 +1114,16 @@
             "translation": "pending_when_applicable"
           },
           "notes": "片中涉及的品牌、歷史、價格、認證或功效均只屬原片說法，尚未外部事實核實。",
-          "verification_frame_path": "problem_first_lifestyle_product-sheet.jpg"
+          "verification_frame_path": "problem_first_lifestyle_product-sheet.jpg",
+          "speech_raw_asr": "它就是一把好帶的短傘,又可以一秒收整齊。 傘片裡面有記一塊捲片,還有一鍵開收。 捲片不會太明顯或者笨重。 有看到嗎?在這。"
         },
         {
           "order": 6,
           "start_seconds": 29.56,
           "end_seconds": 37.22,
           "visual_description_zh": "仰拍傘面並潑水測試，水珠滑走後立即示範快速收傘。",
-          "speech_or_narration_zh": "面料做了防潑水，特別加強到 5 級。5 級是什麼概念呢？我原本是想說甩個水會比較乾，結果目前就是水根本沾不上去。",
-          "speech_source": "asr_assisted_unverified",
+          "speech_or_narration_zh": "面料做了防潑水，特別加強到5級。5級是什麼概念呢？我原本是想說甩個水會比較乾，結果目前就是水根本沾不上去。",
+          "speech_source": "asr_assisted_display_cleaned_raw_preserved",
           "on_screen_text_zh": null,
           "verification": {
             "visual": "direct_source_sample_frame_manually_checked",
@@ -1064,15 +1131,16 @@
             "translation": "pending_when_applicable"
           },
           "notes": "片中涉及的品牌、歷史、價格、認證或功效均只屬原片說法，尚未外部事實核實。",
-          "verification_frame_path": "problem_first_lifestyle_product-sheet.jpg"
+          "verification_frame_path": "problem_first_lifestyle_product-sheet.jpg",
+          "speech_raw_asr": "面料座的防潑水特別加強到5級。 5級是什麼概念呢?我原本是想說甩給水會比別人乾,結果目前就是水根本沾不上去。"
         },
         {
           "order": 7,
           "start_seconds": 37.22,
           "end_seconds": 49.44,
           "visual_description_zh": "主持在公園把產品當陽傘使用，低角度展示傘下陰影及覆蓋範圍。",
-          "speech_or_narration_zh": "它也可以當陽傘，它有抗 UV 功能，官方說可以降低 8 度。8 度我不知道怎麼測，但那天我在公園坐了一個下午。",
-          "speech_source": "asr_assisted_unverified",
+          "speech_or_narration_zh": "它也可以當陽傘，它有抗UV功能，官方說可以降低8度。8度我不知道怎麼測，但那天我在公園坐了一個下午。",
+          "speech_source": "asr_assisted_display_cleaned_raw_preserved",
           "on_screen_text_zh": null,
           "verification": {
             "visual": "direct_source_sample_frame_manually_checked",
@@ -1080,15 +1148,16 @@
             "translation": "pending_when_applicable"
           },
           "notes": "片中涉及的品牌、歷史、價格、認證或功效均只屬原片說法，尚未外部事實核實。",
-          "verification_frame_path": "problem_first_lifestyle_product-sheet.jpg"
+          "verification_frame_path": "problem_first_lifestyle_product-sheet.jpg",
+          "speech_raw_asr": "它也可以當陽閃,它有抗UV功能,官方說可以降低8度。 8度我不知道怎麼測,但那天我在公園做了一個下午。 體感有涼,抗UV認證也有幫大家確認可以安心使用。"
         },
         {
           "order": 8,
           "start_seconds": 49.44,
           "end_seconds": 58.62,
           "visual_description_zh": "展示 UV 檢測資料、完整傘面、傘骨及成人男性實際使用比例。",
-          "speech_or_narration_zh": "體感有涼，抗 UV 認證也有幫大家確認，可以安心使用。它的傘面也夠大，我一個男生用起來也是舒服的。",
-          "speech_source": "asr_assisted_unverified",
+          "speech_or_narration_zh": "體感有涼，抗UV認證也有幫大家確認，可以安心使用。它的傘面也夠大，我一個男生用起來也是舒服的。",
+          "speech_source": "asr_assisted_display_cleaned_raw_preserved",
           "on_screen_text_zh": null,
           "verification": {
             "visual": "direct_source_sample_frame_manually_checked",
@@ -1096,15 +1165,16 @@
             "translation": "pending_when_applicable"
           },
           "notes": "片中涉及的品牌、歷史、價格、認證或功效均只屬原片說法，尚未外部事實核實。",
-          "verification_frame_path": "problem_first_lifestyle_product-sheet.jpg"
+          "verification_frame_path": "problem_first_lifestyle_product-sheet.jpg",
+          "speech_raw_asr": "它的閃面也夠大,我一個男生用起來也是舒服的。 它還有抗風閃骨跟快收的特性,所以總合起來我覺得它是一支千元以內的好閃。"
         },
         {
           "order": 9,
           "start_seconds": 58.62,
           "end_seconds": 64.224,
           "visual_description_zh": "收合後單手拿取，最後以高角度拍主持撐傘過斑馬線並配樂收尾。",
-          "speech_or_narration_zh": "它還有抗風傘骨跟快收的特性，所以綜合起來，我覺得它是一支千元以內的好傘。推薦給跟我一樣有收傘強迫症的人。片尾只有音樂，沒有可確認的新對白。",
-          "speech_source": "asr_assisted_unverified",
+          "speech_or_narration_zh": "它，還有抗風傘骨跟快收的特性，所以綜合起來，我覺得它是一支千元以內的好傘。推薦給跟我一樣有收傘強迫症的人。片尾只有音樂，沒有可確認的新對白。",
+          "speech_source": "asr_assisted_display_cleaned_raw_preserved",
           "on_screen_text_zh": null,
           "verification": {
             "visual": "direct_source_sample_frame_manually_checked",
@@ -1112,11 +1182,12 @@
             "translation": "pending_when_applicable"
           },
           "notes": "片中涉及的品牌、歷史、價格、認證或功效均只屬原片說法，尚未外部事實核實。",
-          "verification_frame_path": "problem_first_lifestyle_product-sheet.jpg"
+          "verification_frame_path": "problem_first_lifestyle_product-sheet.jpg",
+          "speech_raw_asr": "推薦給跟我一樣有收閃強迫症的人。"
         }
       ],
       "unverified": [
-        "語音內容由 ASR、燒錄字幕及抽查畫面輔助還原，尚未完成人工逐句聆聽。",
+        "顯示欄已轉為繁體中文並清除可辨識的 ASR 重複幻覺；raw ASR 另欄保留供追溯。未標示人工核聽通過的段落仍須逐句核聽。",
         "片中品牌、人物、歷史、地點、數字、價格、認證及功效只記錄原片說法，尚未外部事實核實。",
         "來源只供現有內容方向研究庫內部研究及原片還原；不代表取得素材所有權或外部再授權。"
       ],
@@ -1144,100 +1215,118 @@
           "start_seconds": 0,
           "end_seconds": 8,
           "visual_description_zh": "俯拍地圖並以手指標示布達佩斯 2 號電車路線，建立路線導覽主題。",
-          "speech_or_narration_zh": "ThisisthenumbertwotramIt'sconsideredoneofthemostbeautifultramroutesintheworldItrunsalongtheDanube",
-          "speech_source": "asr_assisted_unverified",
+          "speech_or_narration_zh": "這是 2 號電車。片中稱它為世界上最美麗的電車路線之一；它沿多瑙河行駛，途經多個著名城市地標。",
+          "speech_source": "asr_assisted_display_cleaned_raw_preserved",
           "on_screen_text_zh": null,
           "verification": {
             "visual": "direct_source_sample_frame_manually_checked",
             "audio": "pending_manual_listening",
-            "translation": "pending_when_applicable"
+            "translation": "待人工核對的繁體中文翻譯"
           },
           "notes": "片中涉及的品牌、歷史、價格、認證或功效均只屬原片說法，尚未外部事實核實。",
-          "verification_frame_path": "route_led_city_portrait-sheet.jpg"
+          "verification_frame_path": "route_led_city_portrait-sheet.jpg",
+          "speech_raw_asr": "This is the number two tram It's considered one of the most beautiful tram routes in the world It runs along the Danube",
+          "speech_original": "This is the number two tram. It is considered one of the most beautiful tram routes in the world. It runs along the Danube and passes by some of the city’s most famous landmarks.",
+          "speech_translation_zh_hant": "這是 2 號電車。片中稱它為世界上最美麗的電車路線之一；它沿多瑙河行駛，途經多個著名城市地標。"
         },
         {
           "order": 2,
           "start_seconds": 8,
           "end_seconds": 17,
           "visual_description_zh": "黃色電車沿多瑙河行駛，國會大廈及城市地標穿插，稱其為世界最美電車路線之一。",
-          "speech_or_narration_zh": "andpassesbysomeofthecity'smostfamouslandmarksBudapestisoneofmyfavoritecitiesinEuropeIlovethearchitecture,thefood,thebathsandtheHungarians",
-          "speech_source": "asr_assisted_unverified",
+          "speech_or_narration_zh": "布達佩斯是旁白者在歐洲最喜歡的城市之一。他喜歡這裡的建築、食物、浴場和居民，並形容它已成為自己的第二個家。",
+          "speech_source": "asr_assisted_display_cleaned_raw_preserved",
           "on_screen_text_zh": null,
           "verification": {
             "visual": "direct_source_sample_frame_manually_checked",
             "audio": "pending_manual_listening",
-            "translation": "pending_when_applicable"
+            "translation": "待人工核對的繁體中文翻譯"
           },
           "notes": "片中涉及的品牌、歷史、價格、認證或功效均只屬原片說法，尚未外部事實核實。",
-          "verification_frame_path": "route_led_city_portrait-sheet.jpg"
+          "verification_frame_path": "route_led_city_portrait-sheet.jpg",
+          "speech_raw_asr": "and passes by some of the city's most famous landmarks Budapest is one of my favorite cities in Europe I love the architecture, the food, the baths and the Hungarians",
+          "speech_original": "Budapest is one of my favorite cities in Europe. I love the architecture, the food, the baths and the Hungarians. It has become a home away from home.",
+          "speech_translation_zh_hant": "布達佩斯是旁白者在歐洲最喜歡的城市之一。他喜歡這裡的建築、食物、浴場和居民，並形容它已成為自己的第二個家。"
         },
         {
           "order": 3,
           "start_seconds": 17,
           "end_seconds": 27,
           "visual_description_zh": "主持在地標前吃東西及體驗浴場，交代自己對布達佩斯的個人情感。",
-          "speech_or_narration_zh": "It'sbecomeahomeawayfromhomebutofallthereistodoaroundthecitygoingforarideonthetramjustmighttopthelistIamapassenger",
-          "speech_source": "asr_assisted_unverified",
+          "speech_or_narration_zh": "在城市眾多活動之中，乘搭電車可能排在最前。旁白以「我是一名乘客」帶入路線旅程。",
+          "speech_source": "asr_assisted_display_cleaned_raw_preserved",
           "on_screen_text_zh": null,
           "verification": {
             "visual": "direct_source_sample_frame_manually_checked",
             "audio": "pending_manual_listening",
-            "translation": "pending_when_applicable"
+            "translation": "待人工核對的繁體中文翻譯"
           },
           "notes": "片中涉及的品牌、歷史、價格、認證或功效均只屬原片說法，尚未外部事實核實。",
-          "verification_frame_path": "route_led_city_portrait-sheet.jpg"
+          "verification_frame_path": "route_led_city_portrait-sheet.jpg",
+          "speech_raw_asr": "It's become a home away from home but of all there is to do around the city going for a ride on the tram just might top the list I am a passenger",
+          "speech_original": "But of all there is to do around the city, going for a ride on the tram just might top the list. I am a passenger.",
+          "speech_translation_zh_hant": "在城市眾多活動之中，乘搭電車可能排在最前。旁白以「我是一名乘客」帶入路線旅程。"
         },
         {
           "order": 4,
           "start_seconds": 27,
           "end_seconds": 37,
           "visual_description_zh": "室內、街道及手繪章節卡轉場，將城市分成 Buda 與 Pest 兩側。",
-          "speech_or_narration_zh": "Budapestisdividedintotwosides,separatedbytheriver.Budahishilly,Pestisflat.Tram2runsalongthePestsidewithviewsoftheParliament,",
-          "speech_source": "asr_assisted_unverified",
+          "speech_or_narration_zh": "布達佩斯由河流分成兩側：Buda 地勢多山，Pest 較為平坦。2 號電車沿 Pest 一側行駛。",
+          "speech_source": "asr_assisted_display_cleaned_raw_preserved",
           "on_screen_text_zh": null,
           "verification": {
             "visual": "direct_source_sample_frame_manually_checked",
             "audio": "pending_manual_listening",
-            "translation": "pending_when_applicable"
+            "translation": "待人工核對的繁體中文翻譯"
           },
           "notes": "片中涉及的品牌、歷史、價格、認證或功效均只屬原片說法，尚未外部事實核實。",
-          "verification_frame_path": "route_led_city_portrait-sheet.jpg"
+          "verification_frame_path": "route_led_city_portrait-sheet.jpg",
+          "speech_raw_asr": "Budapest is divided into two sides, separated by the river. Budah is hilly,Pest is flat. Tram 2 runs along the Pest side with views of the Parliament,",
+          "speech_original": "Budapest is divided into two sides, separated by the river. Buda is hilly; Pest is flat. Tram 2 runs along the Pest side.",
+          "speech_translation_zh_hant": "布達佩斯由河流分成兩側：Buda 地勢多山，Pest 較為平坦。2 號電車沿 Pest 一側行駛。"
         },
         {
           "order": 5,
           "start_seconds": 37,
           "end_seconds": 47,
           "visual_description_zh": "沿 Pest 河岸拍攝國會大廈、Buda Castle、橋、Gellért Hill 與自由女神像。",
-          "speech_or_narration_zh": "BuddhaCastle,TheBridges,GellartHillandtheLibertyStatue.There'ssomethingworthseeingatjustabouteverystop.",
-          "speech_source": "asr_assisted_unverified",
+          "speech_or_narration_zh": "沿途可看到國會大廈、Buda Castle、多座橋樑、Gellért Hill 及自由女神像；幾乎每一站都有值得觀看的景物。",
+          "speech_source": "asr_assisted_display_cleaned_raw_preserved",
           "on_screen_text_zh": null,
           "verification": {
             "visual": "direct_source_sample_frame_manually_checked",
             "audio": "pending_manual_listening",
-            "translation": "pending_when_applicable"
+            "translation": "待人工核對的繁體中文翻譯"
           },
           "notes": "片中涉及的品牌、歷史、價格、認證或功效均只屬原片說法，尚未外部事實核實。",
-          "verification_frame_path": "route_led_city_portrait-sheet.jpg"
+          "verification_frame_path": "route_led_city_portrait-sheet.jpg",
+          "speech_raw_asr": "Buddha Castle,The Bridges,Gellart Hill and the Liberty Statue. There's something worth seeing at just about every stop.",
+          "speech_original": "It has views of the Parliament, Buda Castle, the bridges, Gellért Hill and the Liberty Statue. There is something worth seeing at just about every stop.",
+          "speech_translation_zh_hant": "沿途可看到國會大廈、Buda Castle、多座橋樑、Gellért Hill 及自由女神像；幾乎每一站都有值得觀看的景物。"
         },
         {
           "order": 6,
           "start_seconds": 47,
           "end_seconds": 55.725,
           "visual_description_zh": "日景轉夜景及主持坐在電車內，以「Buy the ticket, take the ride」作結。",
-          "speech_or_narration_zh": "Andwhatlooksbeautifulintheday,atnightisevenmoremagical.SoasHunterThompsonsays,Buytheticket,taketheride.",
-          "speech_source": "asr_assisted_unverified",
+          "speech_or_narration_zh": "白天已經美麗的景色，到了晚上更具魔力。片末引用 Hunter S. Thompson 的話：「買下車票，踏上旅程。」",
+          "speech_source": "asr_assisted_display_cleaned_raw_preserved",
           "on_screen_text_zh": null,
           "verification": {
             "visual": "direct_source_sample_frame_manually_checked",
             "audio": "pending_manual_listening",
-            "translation": "pending_when_applicable"
+            "translation": "待人工核對的繁體中文翻譯"
           },
           "notes": "片中涉及的品牌、歷史、價格、認證或功效均只屬原片說法，尚未外部事實核實。",
-          "verification_frame_path": "route_led_city_portrait-sheet.jpg"
+          "verification_frame_path": "route_led_city_portrait-sheet.jpg",
+          "speech_raw_asr": "And what looks beautiful in the day,at night is even more magical. So as Hunter Thompson says,Buy the ticket, take the ride.",
+          "speech_original": "What looks beautiful in the day is even more magical at night. As Hunter S. Thompson says: “Buy the ticket, take the ride.”",
+          "speech_translation_zh_hant": "白天已經美麗的景色，到了晚上更具魔力。片末引用 Hunter S. Thompson 的話：「買下車票，踏上旅程。」"
         }
       ],
       "unverified": [
-        "語音內容由 ASR、燒錄字幕及抽查畫面輔助還原，尚未完成人工逐句聆聽。",
+        "顯示欄已轉為繁體中文並清除可辨識的 ASR 重複幻覺；raw ASR 另欄保留供追溯。未標示人工核聽通過的段落仍須逐句核聽。",
         "片中品牌、人物、歷史、地點、數字、價格、認證及功效只記錄原片說法，尚未外部事實核實。",
         "來源只供現有內容方向研究庫內部研究及原片還原；不代表取得素材所有權或外部再授權。"
       ],
@@ -1265,148 +1354,157 @@
           "start_seconds": 0,
           "end_seconds": 18,
           "visual_description_zh": "街拍表參道及坐定主持交替，以三分鐘認識表參道 Hills 作鉤子和收藏提示。",
-          "speech_or_narration_zh": "OK3分钟但也认识表参道Hills如果你也好奇为什么日本一堆地方都叫做什么什么的Hills不妨可以把这篇储存起来或者是分享给最近也想要去日本旅游的朋友先讲Hills这件事情例如之前介绍过的虎之门之Hills这个字在日本不是通称它是森大楼这个品牌的建筑",
-          "speech_source": "asr_assisted_unverified",
+          "speech_or_narration_zh": "語音未能可靠辨識，待人工核聽。",
+          "speech_source": "asr_assisted_display_cleaned_raw_preserved",
           "on_screen_text_zh": null,
           "verification": {
             "visual": "direct_source_sample_frame_manually_checked",
-            "audio": "pending_manual_listening",
+            "audio": "ASR 可信度不足；待人工核聽",
             "translation": "pending_when_applicable"
           },
           "notes": "片中涉及的品牌、歷史、價格、認證或功效均只屬原片說法，尚未外部事實核實。",
-          "verification_frame_path": "seated_host_research_explainer-sheet.jpg"
+          "verification_frame_path": "seated_host_research_explainer-sheet.jpg",
+          "speech_raw_asr": "OK 3分钟但也认识表参道之秋 如果你也好奇为什么日本一堆地方都叫做什么什么的之秋 不妨可以把这篇储存起来或者是分享给 最近也想要去日本旅游的朋友 先讲之秋这件事情 例如之前介绍过的虎之门之秋 Heels这个字在日本不是通称 它是森大楼这个品牌的建筑"
         },
         {
           "order": 2,
           "start_seconds": 18,
           "end_seconds": 40,
           "visual_description_zh": "主持配合地圖、舊照片及 ARK HILLS 標誌，追溯森大樓由 1967 年取得土地至 1986 年完成項目。",
-          "speech_or_narration_zh": "故事要从1967年说起森大楼先在赤坂跟六本木中间买下了第一块地1986年那组建筑终于完成占地5.6公顷里面有办公大楼也有饭店跟音乐厅这是日本民间主导的第一件大规模的再开发案也就是第一个秋方舟HillsA是指刺板R是指六本木K是节点合起来Ark就是方舟",
-          "speech_source": "asr_assisted_unverified",
+          "speech_or_narration_zh": "語音未能可靠辨識，待人工核聽。",
+          "speech_source": "asr_assisted_display_cleaned_raw_preserved",
           "on_screen_text_zh": null,
           "verification": {
             "visual": "direct_source_sample_frame_manually_checked",
-            "audio": "pending_manual_listening",
+            "audio": "ASR 可信度不足；待人工核聽",
             "translation": "pending_when_applicable"
           },
           "notes": "片中涉及的品牌、歷史、價格、認證或功效均只屬原片說法，尚未外部事實核實。",
-          "verification_frame_path": "seated_host_research_explainer-sheet.jpg"
+          "verification_frame_path": "seated_host_research_explainer-sheet.jpg",
+          "speech_raw_asr": "故事要从1967年说起 森大楼先在翅板跟六本木中间买下了第一块地 1986年那组建筑终于完成 占地5.6公顷 里面有办公大楼也有饭店跟音乐厅 这是日本民间主导的第一件大规模的再开发案 也就是第一个秋 方舟之秋 A是指刺板 R是指六本木 K是节点 合起来Ark就是方舟"
         },
         {
           "order": 3,
           "start_seconds": 40,
           "end_seconds": 60,
           "visual_description_zh": "城市模型、綠化建築及主持手勢解說，介紹「立體綠園都市」及森大樓往高處發展的公式。",
-          "speech_or_narration_zh": "等方舟Hills盖好之后这个做法就变成森大楼的公式官方名称叫做立体绿园都市简单来说就是能够把基因人尽量往上叠把地面空间空出来种树人就住在附近把通勤的时间换成生活的时间所以后来的六本木Hills古之门Hills马步台Hills全部都是往高处盖的",
-          "speech_source": "asr_assisted_unverified",
+          "speech_or_narration_zh": "語音未能可靠辨識，待人工核聽。",
+          "speech_source": "asr_assisted_display_cleaned_raw_preserved",
           "on_screen_text_zh": null,
           "verification": {
             "visual": "direct_source_sample_frame_manually_checked",
-            "audio": "pending_manual_listening",
+            "audio": "ASR 可信度不足；待人工核聽",
             "translation": "pending_when_applicable"
           },
           "notes": "片中涉及的品牌、歷史、價格、認證或功效均只屬原片說法，尚未外部事實核實。",
-          "verification_frame_path": "seated_host_research_explainer-sheet.jpg"
+          "verification_frame_path": "seated_host_research_explainer-sheet.jpg",
+          "speech_raw_asr": "等方舟之秋盖好之后 这个做法就变成森大楼的公式 官方名称叫做立体绿园都市 简单来说就是能够把基因人尽量往上叠 把地面空间空出来种树 人就住在附近 把通勤的时间换成生活的时间 所以后来的六本木之秋 古之门之秋 马步台之秋全部都是往高处盖的"
         },
         {
           "order": 4,
           "start_seconds": 60,
           "end_seconds": 80,
           "visual_description_zh": "表參道現場及 1920 年代黑白照片，轉入同潤會復興住宅的歷史。",
-          "speech_or_narration_zh": "但今天要介绍的这个表参道Hills是这个系统里面唯一一个反过来往下挖的最早表参道这块地跟时尚其实没有什么关系1923年关东大地震之后日本成立同潤會同潤會盖的建筑不止一处东京跟横滨各地都有它的复兴住宅如果你有看过我假天空塞Terence那一只应该会有印象",
-          "speech_source": "asr_assisted_unverified",
+          "speech_or_narration_zh": "語音未能可靠辨識，待人工核聽。",
+          "speech_source": "asr_assisted_display_cleaned_raw_preserved",
           "on_screen_text_zh": null,
           "verification": {
             "visual": "direct_source_sample_frame_manually_checked",
-            "audio": "pending_manual_listening",
+            "audio": "ASR 可信度不足；待人工核聽",
             "translation": "pending_when_applicable"
           },
           "notes": "片中涉及的品牌、歷史、價格、認證或功效均只屬原片說法，尚未外部事實核實。",
-          "verification_frame_path": "seated_host_research_explainer-sheet.jpg"
+          "verification_frame_path": "seated_host_research_explainer-sheet.jpg",
+          "speech_raw_asr": "但今天要介绍的这个表参道之秋 是这个系统里面唯一一个反过来往下挖的 最早表参道这块地跟时尚其实没有什么关系 1923年关东大地震之后 日本成立同论会 同论会盖的建筑不止一处 东京跟横滨各地都有它的复兴住宅 如果你有看过我假天空塞 Terence 那一只 应该会有印象"
         },
         {
           "order": 5,
           "start_seconds": 80,
           "end_seconds": 100,
           "visual_description_zh": "舊公寓、街景與主持出鏡，說明住戶背景、店舖化及表參道變成時尚街道。",
-          "speech_or_narration_zh": "而表参道这一处是从1925年同潤會从前野家买下了这块地沿着表参道的坡排开十栋三层楼的钢筋混凝土公寓在那个时代能够住进来的不是一般的人而是军人跟官员简单来说这批房子从一开始它并不是用来盖给寻常老百姓住的后来这些大人物陆续搬走",
-          "speech_source": "asr_assisted_unverified",
+          "speech_or_narration_zh": "語音未能可靠辨識，待人工核聽。",
+          "speech_source": "asr_assisted_display_cleaned_raw_preserved",
           "on_screen_text_zh": null,
           "verification": {
             "visual": "direct_source_sample_frame_manually_checked",
-            "audio": "pending_manual_listening",
+            "audio": "ASR 可信度不足；待人工核聽",
             "translation": "pending_when_applicable"
           },
           "notes": "片中涉及的品牌、歷史、價格、認證或功效均只屬原片說法，尚未外部事實核實。",
-          "verification_frame_path": "seated_host_research_explainer-sheet.jpg"
+          "verification_frame_path": "seated_host_research_explainer-sheet.jpg",
+          "speech_raw_asr": "而表参道这一处是从1925年 同论会从前野家买下了这块地 沿着表参道的坡排开十栋三层楼的钢筋混泥土公寓 在那个时代能够住进来的不是一般的人 而是军人跟官员 简单来说这批房子从一开始 它并不是用来盖给寻常老百姓住的 后来这些大人物陆续搬走"
         },
         {
           "order": 6,
           "start_seconds": 100,
           "end_seconds": 122,
           "visual_description_zh": "長春藤外牆、老建築和保育影像，交代 1968 年起的重建與保留爭議。",
-          "speech_or_narration_zh": "剩下的住户把自己的家改成了小店铺跟画廊外墙也开始爬满了长春藤门口那条路也从明治神宫的参道慢慢的变成一条石庄大道但那十栋旧公寓就这样子越来越老旧也越来越像这条时尚大街的台记1968年住户提出改建的讨论但建筑业强烈的保留结果这件事情一拖又过了30年后来改建的重则大任交到了安藤忠雄手上",
-          "speech_source": "asr_assisted_unverified",
+          "speech_or_narration_zh": "語音未能可靠辨識，待人工核聽。",
+          "speech_source": "asr_assisted_display_cleaned_raw_preserved",
           "on_screen_text_zh": null,
           "verification": {
             "visual": "direct_source_sample_frame_manually_checked",
-            "audio": "pending_manual_listening",
+            "audio": "ASR 可信度不足；待人工核聽",
             "translation": "pending_when_applicable"
           },
           "notes": "片中涉及的品牌、歷史、價格、認證或功效均只屬原片說法，尚未外部事實核實。",
-          "verification_frame_path": "seated_host_research_explainer-sheet.jpg"
+          "verification_frame_path": "seated_host_research_explainer-sheet.jpg",
+          "speech_raw_asr": "剩下的住户把自己的家改成了小店铺跟画廊 外墙也开始爬满了长春藤 门口那条路也从明治神宫的参道 慢慢的变成一条石庄大道 但那十栋旧公寓就这样子越来越老旧 也越来越像这条时尚大街的台记 1968年住户提出改建的讨论 但建筑业强烈的保留 结果这件事情一拖又过了30年 后来改建的重则大任交到了安藤忠雄手上"
         },
         {
           "order": 7,
           "start_seconds": 122,
           "end_seconds": 145,
           "visual_description_zh": "主持講解安藤忠雄設計理念，配合高度、坡度及建築剖面畫面。",
-          "speech_or_narration_zh": "他说原本的公寓是一个非常优秀的集合住宅但他认为这批公寓长久造出来的风景才是比建筑更重要的而这片所谓的风景到底是什么他给出了两个答案一个是高度一个是坡度所以他把新设计的建筑物过半体积埋进地底地上只留三层跟举木行道数一样高接着他把表參道那段坡",
-          "speech_source": "asr_assisted_unverified",
+          "speech_or_narration_zh": "語音未能可靠辨識，待人工核聽。",
+          "speech_source": "asr_assisted_display_cleaned_raw_preserved",
           "on_screen_text_zh": null,
           "verification": {
             "visual": "direct_source_sample_frame_manually_checked",
-            "audio": "pending_manual_listening",
+            "audio": "ASR 可信度不足；待人工核聽",
             "translation": "pending_when_applicable"
           },
           "notes": "片中涉及的品牌、歷史、價格、認證或功效均只屬原片說法，尚未外部事實核實。",
-          "verification_frame_path": "seated_host_research_explainer-sheet.jpg"
+          "verification_frame_path": "seated_host_research_explainer-sheet.jpg",
+          "speech_raw_asr": "他说原本的公寓是一个非常优秀的集合住宅 但他认为这批公寓长久造出来的风景 才是比建筑更重要的 而这片所谓的风景到底是什么 他给出了两个答案 一个是高度 一个是坡度 所以他把新设计的建筑物过半体积 埋进地底 地上只留三层跟举木行道数一样高 接着他把表参到那段坡"
         },
         {
           "order": 8,
           "start_seconds": 145,
           "end_seconds": 160,
           "visual_description_zh": "表參道 Hills 內部斜坡、挑高空間及螺旋動線實拍，展示把街道坡度帶入建築。",
-          "speech_or_narration_zh": "原封不动的搬进建筑里面推开门走进去之后你第一个看到的不是店而是一道长长的坡中间是六层楼的挑高四周绕着一个螺旋状的斜坡全长大概700公尺走到建筑的东端风格会突然变成一个爬满长春藤的老房子",
-          "speech_source": "asr_assisted_unverified",
+          "speech_or_narration_zh": "語音未能可靠辨識，待人工核聽。",
+          "speech_source": "asr_assisted_display_cleaned_raw_preserved",
           "on_screen_text_zh": null,
           "verification": {
             "visual": "direct_source_sample_frame_manually_checked",
-            "audio": "pending_manual_listening",
+            "audio": "ASR 可信度不足；待人工核聽",
             "translation": "pending_when_applicable"
           },
           "notes": "片中涉及的品牌、歷史、價格、認證或功效均只屬原片說法，尚未外部事實核實。",
-          "verification_frame_path": "seated_host_research_explainer-sheet.jpg"
+          "verification_frame_path": "seated_host_research_explainer-sheet.jpg",
+          "speech_raw_asr": "原封不动的搬进建筑里面 推开门走进去之后 你第一个看到的不是墊 而是一道长长的坡 中间是六层楼的挑高 四周绕着一个螺旋状的斜坡 全长大概700公尺 走到建筑的东端 风格会突然变成一个爬满长春藤的老房子"
         },
         {
           "order": 9,
           "start_seconds": 160,
           "end_seconds": 176.701,
           "visual_description_zh": "同潤館外觀及主持收尾，說明以部分舊建材重建並推薦作東京建築行程。",
-          "speech_or_narration_zh": "这栋房子叫做同潤馆但这个同潤馆并不是当时同潤会盖的旧房子而是用部分建材重新盖起来的复古公寓如果下次来东京想要来找一栋不用进去买东西也值得走一趟的建筑不妨表參道知秋也可以排进你的行程里面哦",
-          "speech_source": "asr_assisted_unverified",
+          "speech_or_narration_zh": "語音未能可靠辨識，待人工核聽。",
+          "speech_source": "asr_assisted_display_cleaned_raw_preserved",
           "on_screen_text_zh": null,
           "verification": {
             "visual": "direct_source_sample_frame_manually_checked",
-            "audio": "pending_manual_listening",
+            "audio": "ASR 可信度不足；待人工核聽",
             "translation": "pending_when_applicable"
           },
           "notes": "片中涉及的品牌、歷史、價格、認證或功效均只屬原片說法，尚未外部事實核實。",
-          "verification_frame_path": "seated_host_research_explainer-sheet.jpg"
+          "verification_frame_path": "seated_host_research_explainer-sheet.jpg",
+          "speech_raw_asr": "这栋房子叫做统论馆 但这个统论馆并不是当时统论会盖的旧房子 而是用部分建材重新盖起来的复古公寓 如果下次来东京想要来找一栋不用进去买东西 也值得走一趟的建筑 不妨表参到知秋也可以排进你的行程里面哦"
         }
       ],
       "unverified": [
-        "語音內容由 ASR、燒錄字幕及抽查畫面輔助還原，尚未完成人工逐句聆聽。",
+        "顯示欄已轉為繁體中文並清除可辨識的 ASR 重複幻覺；raw ASR 另欄保留供追溯。未標示人工核聽通過的段落仍須逐句核聽。",
         "片中品牌、人物、歷史、地點、數字、價格、認證及功效只記錄原片說法，尚未外部事實核實。",
         "來源只供現有內容方向研究庫內部研究及原片還原；不代表取得素材所有權或外部再授權。"
       ],
@@ -1434,8 +1532,8 @@
           "start_seconds": 0,
           "end_seconds": 18,
           "visual_description_zh": "凌晨大雨，主持在台北萬華巷內排隊，以二時半為一碗滷肉飯等候作情境鉤子。",
-          "speech_or_narration_zh": "凌晨2點半你們會否為了一碗滷肉飯特意走入這條黑汗呢我不知道你們會否但我已經在排隊了最勁大雨這裡是台北萬華橫南市場附近有一間深夜才出現的小攤三條路由飯排骨酥湯",
-          "speech_source": "asr_assisted_unverified",
+          "speech_or_narration_zh": "語音未能可靠辨識，待人工核聽。",
+          "speech_source": "asr_assisted_display_cleaned_raw_preserved",
           "on_screen_text_zh": null,
           "verification": {
             "visual": "direct_source_sample_frame_manually_checked",
@@ -1443,15 +1541,16 @@
             "translation": "pending_when_applicable"
           },
           "notes": "片中涉及的品牌、歷史、價格、認證或功效均只屬原片說法，尚未外部事實核實。",
-          "verification_frame_path": "situational_multi_dish_tasting-sheet.jpg"
+          "verification_frame_path": "situational_multi_dish_tasting-sheet.jpg",
+          "speech_raw_asr": "凌晨2點半 你們會否為了一碗烏肉飯 特意走入這條黑汗呢 我不知道你們會否 但我已經在排隊了 最勁大雨 這裡是台北萬華橫南市場附近 有一間深夜才出現的小攤 三條路由飯排骨酥湯"
         },
         {
           "order": 2,
           "start_seconds": 18,
           "end_seconds": 38,
           "visual_description_zh": "無招牌攤檔開燈、排隊人龍及市場街景，交代深夜營業與現場氣氛。",
-          "speech_or_narration_zh": "我多吃點了謝謝凌晨2點半才開門港口無招牌但一開燈人們便自然出現有人說這裡是台北深夜最溫柔的地方現在是凌晨3點我們就終於入座了你看到除了我們之外其實周圍的桌子已經坐不動人",
-          "speech_source": "asr_assisted_unverified",
+          "speech_or_narration_zh": "語音未能可靠辨識，待人工核聽。",
+          "speech_source": "asr_assisted_display_cleaned_raw_preserved",
           "on_screen_text_zh": null,
           "verification": {
             "visual": "direct_source_sample_frame_manually_checked",
@@ -1459,15 +1558,16 @@
             "translation": "pending_when_applicable"
           },
           "notes": "片中涉及的品牌、歷史、價格、認證或功效均只屬原片說法，尚未外部事實核實。",
-          "verification_frame_path": "situational_multi_dish_tasting-sheet.jpg"
+          "verification_frame_path": "situational_multi_dish_tasting-sheet.jpg",
+          "speech_raw_asr": "我多吃點了 謝謝 凌晨2點半才開門 港口無招牌 但一開燈 人們便自然出現 有人說這裡是台北深夜最溫柔的地方 現在是凌晨3點 我們就終於入座了 你看到除了我們之外 其實周圍的桌子已經坐不動人"
         },
         {
           "order": 3,
           "start_seconds": 38,
           "end_seconds": 58,
           "visual_description_zh": "入座後展示滷肉飯、半熟蛋及油飯，主持即場拌蛋和試食。",
-          "speech_or_narration_zh": "嘩嗯是流的嘩蘸蛋嗯吃鹿肉的比例其實是肥肉偏多所以聖誕飯咬下去它是很香油香味很好吃",
-          "speech_source": "asr_assisted_unverified",
+          "speech_or_narration_zh": "語音未能可靠辨識，待人工核聽。",
+          "speech_source": "asr_assisted_display_cleaned_raw_preserved",
           "on_screen_text_zh": null,
           "verification": {
             "visual": "direct_source_sample_frame_manually_checked",
@@ -1475,15 +1575,16 @@
             "translation": "pending_when_applicable"
           },
           "notes": "片中涉及的品牌、歷史、價格、認證或功效均只屬原片說法，尚未外部事實核實。",
-          "verification_frame_path": "situational_multi_dish_tasting-sheet.jpg"
+          "verification_frame_path": "situational_multi_dish_tasting-sheet.jpg",
+          "speech_raw_asr": "嘩 嗯 是流的 嘩 蘸蛋 嗯 吃鹿肉的比例其實是肥肉偏多 所以聖誕飯咬下去 它是很香油香味 很好吃"
         },
         {
           "order": 4,
           "start_seconds": 58,
           "end_seconds": 78,
           "visual_description_zh": "滷肉飯近鏡及主持反應，描述肥肉比例、油香、甜度與不過鹹的調味。",
-          "speech_or_narration_zh": "調味方面看起來好像很多醬但其實一點都不是很鹹然後再拌上蛋漿甚至是有點偏甜所以很容易入口很好吃另外就試這個貼著油飯的物體上面的醬汁很吸引剛才看到它這樣拌的時候都很好奇究竟它是什麼醬汁試試看",
-          "speech_source": "asr_assisted_unverified",
+          "speech_or_narration_zh": "語音未能可靠辨識，待人工核聽。",
+          "speech_source": "asr_assisted_display_cleaned_raw_preserved",
           "on_screen_text_zh": null,
           "verification": {
             "visual": "direct_source_sample_frame_manually_checked",
@@ -1491,15 +1592,16 @@
             "translation": "pending_when_applicable"
           },
           "notes": "片中涉及的品牌、歷史、價格、認證或功效均只屬原片說法，尚未外部事實核實。",
-          "verification_frame_path": "situational_multi_dish_tasting-sheet.jpg"
+          "verification_frame_path": "situational_multi_dish_tasting-sheet.jpg",
+          "speech_raw_asr": "調味方面看起來好像很多醬 但其實一點都不是很鹹 然後再拌上蛋漿 甚至是有點偏甜 所以很容易入口 很好吃 另外就試這個貼著油飯的物體 上面的醬汁很吸引 剛才看到它這樣拌的時候 都很好奇究竟它是什麼醬汁 試試看"
         },
         {
           "order": 5,
           "start_seconds": 78,
           "end_seconds": 100,
           "visual_description_zh": "油飯淋上酸甜醬汁，兩名主持試食並向觀眾詢問醬汁成分。",
-          "speech_or_narration_zh": "嗯嗯其實它的飯是糯米飯它的醬汁是酸酸甜甜的是什麼醬汁呢是什麼味道呢有沒有吃過的觀眾知道其實這是什麼醬汁",
-          "speech_source": "asr_assisted_unverified",
+          "speech_or_narration_zh": "語音未能可靠辨識，待人工核聽。",
+          "speech_source": "asr_assisted_display_cleaned_raw_preserved",
           "on_screen_text_zh": null,
           "verification": {
             "visual": "direct_source_sample_frame_manually_checked",
@@ -1507,47 +1609,50 @@
             "translation": "pending_when_applicable"
           },
           "notes": "片中涉及的品牌、歷史、價格、認證或功效均只屬原片說法，尚未外部事實核實。",
-          "verification_frame_path": "situational_multi_dish_tasting-sheet.jpg"
+          "verification_frame_path": "situational_multi_dish_tasting-sheet.jpg",
+          "speech_raw_asr": "嗯 嗯 其實它的飯是糯米飯 它的醬汁是酸酸甜甜的 是什麼醬汁呢 是什麼味道呢 有沒有吃過的觀眾知道 其實這是什麼醬汁"
         },
         {
           "order": 6,
           "start_seconds": 100,
           "end_seconds": 122,
           "visual_description_zh": "排骨酥湯整碗近鏡，逐項展示排骨、蘿蔔、丸類及帶胡椒味的湯底。",
-          "speech_or_narration_zh": "因為我們吃也吃不出它是什麼醬汁但好吃的排骨酥湯好像很好喝它有很多料有排骨有豬紅蘿蔔還有不同的丸讓我先試這個湯有一點胡椒味就不是味精湯那種所以也很好喝它真的是蘿蔔",
-          "speech_source": "asr_assisted_unverified",
+          "speech_or_narration_zh": "語音未能可靠辨識，待人工核聽。",
+          "speech_source": "asr_assisted_display_cleaned_raw_preserved",
           "on_screen_text_zh": null,
           "verification": {
             "visual": "direct_source_sample_frame_manually_checked",
-            "audio": "pending_manual_listening",
+            "audio": "ASR 可信度不足；待人工核聽",
             "translation": "pending_when_applicable"
           },
           "notes": "片中涉及的品牌、歷史、價格、認證或功效均只屬原片說法，尚未外部事實核實。",
-          "verification_frame_path": "situational_multi_dish_tasting-sheet.jpg"
+          "verification_frame_path": "situational_multi_dish_tasting-sheet.jpg",
+          "speech_raw_asr": "因為我們吃也吃不出它是什麼醬汁 但好吃的 焦排湯好像很好喝 它有很多料 有排骨 有豬紅 蘿蔔 還有不同的丸 讓我先試這個湯 有一點胡椒味 就不是味精湯那種 所以也很好喝 它真的是蘿蔔"
         },
         {
           "order": 7,
           "start_seconds": 122,
           "end_seconds": 145,
           "visual_description_zh": "夾起蘿蔔及有餡丸子試食，主持以即時反應比較口感。",
-          "speech_or_narration_zh": "它沒有注射任何糖水我先試試吃我先試試吃等一下不是正確是香港的蘿蔔很甜裡面有些糖水但這個是真的一塊你感覺到它是咬出來的蘿蔔我剛才本身以為這粒是普通的貢丸誰知道咬下去原來是有餡它應該有些豬肉還有馬蹄嗯嗯",
-          "speech_source": "asr_assisted_unverified",
+          "speech_or_narration_zh": "語音未能可靠辨識，待人工核聽。",
+          "speech_source": "asr_assisted_display_cleaned_raw_preserved",
           "on_screen_text_zh": null,
           "verification": {
             "visual": "direct_source_sample_frame_manually_checked",
-            "audio": "pending_manual_listening",
+            "audio": "ASR 可信度不足；待人工核聽",
             "translation": "pending_when_applicable"
           },
           "notes": "片中涉及的品牌、歷史、價格、認證或功效均只屬原片說法，尚未外部事實核實。",
-          "verification_frame_path": "situational_multi_dish_tasting-sheet.jpg"
+          "verification_frame_path": "situational_multi_dish_tasting-sheet.jpg",
+          "speech_raw_asr": "它沒有注射任何糖水 我先試試吃 我先試試吃 等一下 不是 正確是香港的蘿蔔很甜 裡面有些糖水 但這個是真的一塊 你感覺到它是 咬出來的蘿蔔 我剛才本身以為這粒是普通的蜜魚丸 誰知道咬下去原來是有餡 它應該有些豬肉 還有馬蹄 嗯 嗯"
         },
         {
           "order": 8,
           "start_seconds": 145,
           "end_seconds": 162,
           "visual_description_zh": "店舖人龍持續，主持總結食品並討論二時半屬早餐、宵夜或晚餐。",
-          "speech_or_narration_zh": "我聽到這一點好吃我們在吃這九個節這隊沒有停過一直在排隊生意興隆這裡兩點半才開究竟是早開還是夜開",
-          "speech_source": "asr_assisted_unverified",
+          "speech_or_narration_zh": "語音未能可靠辨識，待人工核聽。",
+          "speech_source": "asr_assisted_display_cleaned_raw_preserved",
           "on_screen_text_zh": null,
           "verification": {
             "visual": "direct_source_sample_frame_manually_checked",
@@ -1555,15 +1660,16 @@
             "translation": "pending_when_applicable"
           },
           "notes": "片中涉及的品牌、歷史、價格、認證或功效均只屬原片說法，尚未外部事實核實。",
-          "verification_frame_path": "situational_multi_dish_tasting-sheet.jpg"
+          "verification_frame_path": "situational_multi_dish_tasting-sheet.jpg",
+          "speech_raw_asr": "我聽到這一點 好吃 我們在吃這九個節 這隊沒有停過 一直在排隊 生意興隆 這裡兩點半才開 究竟是早開還是夜開"
         },
         {
           "order": 9,
           "start_seconds": 162,
           "end_seconds": 180.045,
           "visual_description_zh": "雨中市場與兩名主持離開，總結整餐具台灣風味並以避雨動作收尾。",
-          "speech_or_narration_zh": "我們三點多才來吃飯究竟是吃晚餐宵夜還是早餐不過怎樣也好這餐真的很有台灣風味臨著魚坐在街上吃吃飽了好大雨快點走吧",
-          "speech_source": "asr_assisted_unverified",
+          "speech_or_narration_zh": "語音未能可靠辨識，待人工核聽。",
+          "speech_source": "asr_assisted_display_cleaned_raw_preserved",
           "on_screen_text_zh": null,
           "verification": {
             "visual": "direct_source_sample_frame_manually_checked",
@@ -1571,11 +1677,12 @@
             "translation": "pending_when_applicable"
           },
           "notes": "片中涉及的品牌、歷史、價格、認證或功效均只屬原片說法，尚未外部事實核實。",
-          "verification_frame_path": "situational_multi_dish_tasting-sheet.jpg"
+          "verification_frame_path": "situational_multi_dish_tasting-sheet.jpg",
+          "speech_raw_asr": "我們三點多才來吃飯 究竟是吃晚餐 宵夜還是早餐 不過怎樣也好 這餐真的很有台灣風味 臨著魚 坐在街上吃 吃飽了 好大雨 快點走吧"
         }
       ],
       "unverified": [
-        "語音內容由 ASR、燒錄字幕及抽查畫面輔助還原，尚未完成人工逐句聆聽。",
+        "顯示欄已轉為繁體中文並清除可辨識的 ASR 重複幻覺；raw ASR 另欄保留供追溯。未標示人工核聽通過的段落仍須逐句核聽。",
         "片中品牌、人物、歷史、地點、數字、價格、認證及功效只記錄原片說法，尚未外部事實核實。",
         "來源只供現有內容方向研究庫內部研究及原片還原；不代表取得素材所有權或外部再授權。"
       ],
@@ -1603,8 +1710,8 @@
           "start_seconds": 0,
           "end_seconds": 15,
           "visual_description_zh": "女子回家，男子迎接並說替她收拾；女子在房內發現一條不屬於自己的內褲。",
-          "speech_or_narration_zh": "我好累啊,終於回來了辛苦了,先洗澡,我可以收拾東西",
-          "speech_source": "asr_assisted_unverified",
+          "speech_or_narration_zh": "語音未能可靠辨識，待人工核聽。",
+          "speech_source": "asr_assisted_display_cleaned_raw_preserved",
           "on_screen_text_zh": null,
           "verification": {
             "visual": "direct_source_sample_frame_manually_checked",
@@ -1612,15 +1719,16 @@
             "translation": "pending_when_applicable"
           },
           "notes": "片中涉及的品牌、歷史、價格、認證或功效均只屬原片說法，尚未外部事實核實。",
-          "verification_frame_path": "two_person_misunderstanding_twist-sheet.jpg"
+          "verification_frame_path": "two_person_misunderstanding_twist-sheet.jpg",
+          "speech_raw_asr": "我好累啊,終於回來了 辛苦了,先洗澡,我可以收拾東西"
         },
         {
           "order": 2,
           "start_seconds": 15,
           "end_seconds": 32,
           "visual_description_zh": "兩人在客廳對質，女子拿着內褲追問是否有其他人到過家中。",
-          "speech_or_narration_zh": "這是什麼?什麼?你的內褲,是不是我擺錯位了?這不是我的,自己說,帶了什麼人來?不可能,我沒有帶人來",
-          "speech_source": "asr_assisted_unverified",
+          "speech_or_narration_zh": "語音未能可靠辨識，待人工核聽。",
+          "speech_source": "asr_assisted_display_cleaned_raw_preserved",
           "on_screen_text_zh": null,
           "verification": {
             "visual": "direct_source_sample_frame_manually_checked",
@@ -1628,15 +1736,16 @@
             "translation": "pending_when_applicable"
           },
           "notes": "片中涉及的品牌、歷史、價格、認證或功效均只屬原片說法，尚未外部事實核實。",
-          "verification_frame_path": "two_person_misunderstanding_twist-sheet.jpg"
+          "verification_frame_path": "two_person_misunderstanding_twist-sheet.jpg",
+          "speech_raw_asr": "這是什麼? 什麼?你的內褲,是不是我擺錯位了? 這不是我的,自己說,帶了什麼人來? 不可能,我沒有帶人來"
         },
         {
           "order": 3,
           "start_seconds": 32,
           "end_seconds": 50,
           "visual_description_zh": "男子否認並嘗試解釋，女子逐步質疑他的下班時間與聯絡紀錄。",
-          "speech_or_narration_zh": "是不是你自己的內褲,你忘了嗎?我會不會認得自己的內褲再給你一次機會,帶了什麼人來?我真的沒有帶過人來你的內褲怎麼解釋?還出來的?我也不知道,但我真的沒有做對不起你我每天都上班,下班就馬上回家打給你",
-          "speech_source": "asr_assisted_unverified",
+          "speech_or_narration_zh": "語音未能可靠辨識，待人工核聽。",
+          "speech_source": "asr_assisted_display_cleaned_raw_preserved",
           "on_screen_text_zh": null,
           "verification": {
             "visual": "direct_source_sample_frame_manually_checked",
@@ -1644,15 +1753,16 @@
             "translation": "pending_when_applicable"
           },
           "notes": "片中涉及的品牌、歷史、價格、認證或功效均只屬原片說法，尚未外部事實核實。",
-          "verification_frame_path": "two_person_misunderstanding_twist-sheet.jpg"
+          "verification_frame_path": "two_person_misunderstanding_twist-sheet.jpg",
+          "speech_raw_asr": "是不是你自己的內褲,你忘了嗎? 我會不會認得自己的內褲 再給你一次機會,帶了什麼人來? 我真的沒有帶過人來 你的內褲怎麼解釋?還出來的? 我也不知道,但我真的沒有做對不起你 我每天都上班,下班就馬上回家打給你"
         },
         {
           "order": 4,
           "start_seconds": 50,
           "end_seconds": 70,
           "visual_description_zh": "雙方站在同一空間來回對話，男子以加班及與朋友外出解釋可疑時段。",
-          "speech_or_narration_zh": "我真的沒有給你偷吃你怎麼立即下班打給我?我明明就六點下班,到星期三、九點才打給我你去哪裡?OT,我這個月也是這樣你又不是不知道,我那晚都有跟你說那星期五晚呢?你說跟朋友去班我面對你又不聽,之後才打給我還不是騙我?",
-          "speech_source": "asr_assisted_unverified",
+          "speech_or_narration_zh": "語音未能可靠辨識，待人工核聽。",
+          "speech_source": "asr_assisted_display_cleaned_raw_preserved",
           "on_screen_text_zh": null,
           "verification": {
             "visual": "direct_source_sample_frame_manually_checked",
@@ -1660,15 +1770,16 @@
             "translation": "pending_when_applicable"
           },
           "notes": "片中涉及的品牌、歷史、價格、認證或功效均只屬原片說法，尚未外部事實核實。",
-          "verification_frame_path": "two_person_misunderstanding_twist-sheet.jpg"
+          "verification_frame_path": "two_person_misunderstanding_twist-sheet.jpg",
+          "speech_raw_asr": "我真的沒有給你偷吃 你怎麼立即下班打給我? 我明明就六點下班,到星期三、九點才打給我 你去哪裡? OT,我這個月也是這樣 你又不是不知道,我那晚都有跟你說 那星期五晚呢?你說跟朋友去班 我面對你又不聽,之後才打給我 還不是騙我?"
         },
         {
           "order": 5,
           "start_seconds": 70,
           "end_seconds": 90,
           "visual_description_zh": "女子逼問如何證明沒有人上來；男子重申除她以外沒有其他女人到訪。",
-          "speech_or_narration_zh": "大哥,我那時候在街上還有一群朋友在這裡怎樣跟你面對我我之後也馬上打電話給你回家衝突再打給你那你怎麼證明沒有人上來?這裡就是證據,你還跟我爭我沒有做過就是沒有做過我也不知道為什麼這裡有一條內褲",
-          "speech_source": "asr_assisted_unverified",
+          "speech_or_narration_zh": "語音未能可靠辨識，待人工核聽。",
+          "speech_source": "asr_assisted_display_cleaned_raw_preserved",
           "on_screen_text_zh": null,
           "verification": {
             "visual": "direct_source_sample_frame_manually_checked",
@@ -1676,15 +1787,16 @@
             "translation": "pending_when_applicable"
           },
           "notes": "片中涉及的品牌、歷史、價格、認證或功效均只屬原片說法，尚未外部事實核實。",
-          "verification_frame_path": "two_person_misunderstanding_twist-sheet.jpg"
+          "verification_frame_path": "two_person_misunderstanding_twist-sheet.jpg",
+          "speech_raw_asr": "大哥,我那時候在街上 還有一群朋友在這裡 怎樣跟你面對我 我之後也馬上打電話給你 回家衝突再打給你 那你怎麼證明沒有人上來? 這裡就是證據,你還跟我爭 我沒有做過就是沒有做過 我也不知道為什麼這裡有一條內褲"
         },
         {
           "order": 6,
           "start_seconds": 90,
           "end_seconds": 110,
           "visual_description_zh": "男子提出安裝攝影機並發誓沒有做對不起她的事，衝突升至高點。",
-          "speech_or_narration_zh": "但除了你之外,我真的沒有另一個女人上來你不相信我吧?以後家裡裝攝影機吧我發誓啊我真的沒有做過對不起你的事情否則又不得好死",
-          "speech_source": "asr_assisted_unverified",
+          "speech_or_narration_zh": "語音未能可靠辨識，待人工核聽。",
+          "speech_source": "asr_assisted_display_cleaned_raw_preserved",
           "on_screen_text_zh": null,
           "verification": {
             "visual": "direct_source_sample_frame_manually_checked",
@@ -1692,15 +1804,16 @@
             "translation": "pending_when_applicable"
           },
           "notes": "片中涉及的品牌、歷史、價格、認證或功效均只屬原片說法，尚未外部事實核實。",
-          "verification_frame_path": "two_person_misunderstanding_twist-sheet.jpg"
+          "verification_frame_path": "two_person_misunderstanding_twist-sheet.jpg",
+          "speech_raw_asr": "但除了你之外,我真的沒有另一個女人上來 你不相信我吧? 以後家裡裝攝影機吧 我發誓啊 我真的沒有做過對不起你的事情 否則又不得好死"
         },
         {
           "order": 7,
           "start_seconds": 110,
           "end_seconds": 128,
           "visual_description_zh": "女子揭示內褲是測試，表示想確認男子會否心虛；男子錯愕。",
-          "speech_or_narration_zh": "你不就很乖你合格啦我想測試一下你有沒有心虛好吧,我現在相信你沒有在我去旅行的時候交交針了",
-          "speech_source": "asr_assisted_unverified",
+          "speech_or_narration_zh": "語音未能可靠辨識，待人工核聽。",
+          "speech_source": "asr_assisted_display_cleaned_raw_preserved",
           "on_screen_text_zh": null,
           "verification": {
             "visual": "direct_source_sample_frame_manually_checked",
@@ -1708,15 +1821,16 @@
             "translation": "pending_when_applicable"
           },
           "notes": "片中涉及的品牌、歷史、價格、認證或功效均只屬原片說法，尚未外部事實核實。",
-          "verification_frame_path": "two_person_misunderstanding_twist-sheet.jpg"
+          "verification_frame_path": "two_person_misunderstanding_twist-sheet.jpg",
+          "speech_raw_asr": "你不就很乖 你合格啦 我想測試一下你有沒有心虛 好吧,我現在相信你沒有在我去旅行的時候交交針了"
         },
         {
           "order": 8,
           "start_seconds": 128,
           "end_seconds": 147.56,
           "visual_description_zh": "女子離開、男子留在原地，最後出現「感情經不起試探」主題字卡及劇名。",
-          "speech_or_narration_zh": null,
-          "speech_source": "asr_assisted_unverified",
+          "speech_or_narration_zh": "語音未能可靠辨識，待人工核聽。",
+          "speech_source": "asr_assisted_display_cleaned_raw_preserved",
           "on_screen_text_zh": null,
           "verification": {
             "visual": "direct_source_sample_frame_manually_checked",
@@ -1724,11 +1838,12 @@
             "translation": "pending_when_applicable"
           },
           "notes": "片中涉及的品牌、歷史、價格、認證或功效均只屬原片說法，尚未外部事實核實。",
-          "verification_frame_path": "two_person_misunderstanding_twist-sheet.jpg"
+          "verification_frame_path": "two_person_misunderstanding_twist-sheet.jpg",
+          "speech_raw_asr": "你在一起 doe doe 你在一起 doe 你在一起 doe 你在一起 doe 你在一起 doe 你在一起 doe 你在一起 doe 你在一起 你在一起 你在一起 你在一起"
         }
       ],
       "unverified": [
-        "語音內容由 ASR、燒錄字幕及抽查畫面輔助還原，尚未完成人工逐句聆聽。",
+        "顯示欄已轉為繁體中文並清除可辨識的 ASR 重複幻覺；raw ASR 另欄保留供追溯。未標示人工核聽通過的段落仍須逐句核聽。",
         "片中品牌、人物、歷史、地點、數字、價格、認證及功效只記錄原片說法，尚未外部事實核實。",
         "來源只供現有內容方向研究庫內部研究及原片還原；不代表取得素材所有權或外部再授權。"
       ],
