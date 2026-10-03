@@ -1,0 +1,1989 @@
+{
+  "schema_version": 1,
+  "package_id": "content-direction-original-demo-scripts-2026-10-03",
+  "created_at": "2026-10-03",
+  "scope": {
+    "style_count": 18,
+    "human_count": 13,
+    "ai_count": 5,
+    "excluded": [
+      "excluded references",
+      "research_only",
+      "fragment supplements as standalone styles"
+    ]
+  },
+  "separation": {
+    "original_video_restoration": "separate data and UI section",
+    "style_specification": "separate published/review rules",
+    "demonstration_script": "stored in this package",
+    "reconstruction_prompt": "separate research artifact"
+  },
+  "scripts": [
+    {
+      "style_code": "on_location_fact_sprint",
+      "style_name_zh": "實景冷知識快講",
+      "format": "human_short_video",
+      "script_title_zh": "一個街角，點樣量出「舒服」？",
+      "status": "original_demonstration",
+      "originality_notice_zh": "原創示範題目；數字必須以現場量度結果填入，未量度前不得當成事實。",
+      "duration_seconds": 60,
+      "segment_count": 6,
+      "timeline": [
+        {
+          "order": 1,
+          "role": "question_hook",
+          "start_seconds": 0,
+          "end_seconds": 5,
+          "visual_description_zh": "主持站在同一街角的日照與樹蔭交界，手持兩支溫度計。",
+          "dialogue_or_narration_zh": "同一個街角，行前兩步，體感真係可以差咁遠？",
+          "on_screen_text_zh": "現場實測：結果待拍攝",
+          "material_requirements": [
+            "主持實拍",
+            "兩支已校準溫度計"
+          ]
+        },
+        {
+          "order": 2,
+          "role": "topic_setup",
+          "start_seconds": 5,
+          "end_seconds": 12,
+          "visual_description_zh": "廣角交代樹冠、牆面、行人與量度位置。",
+          "dialogue_or_narration_zh": "今日唔靠感覺，我哋用同一時間、同一高度，量三個位置。",
+          "on_screen_text_zh": "三點量度｜同時開始",
+          "material_requirements": [
+            "街角廣角",
+            "位置標記"
+          ]
+        },
+        {
+          "order": 3,
+          "role": "fact",
+          "start_seconds": 12,
+          "end_seconds": 24,
+          "visual_description_zh": "近鏡同時放置三支探頭並拍到讀數穩定。",
+          "dialogue_or_narration_zh": "第一點係直曬位置；讀數要等穩定先記錄。",
+          "on_screen_text_zh": "A 直曬｜實測值待填",
+          "material_requirements": [
+            "讀數連續鏡頭",
+            "時間碼"
+          ]
+        },
+        {
+          "order": 4,
+          "role": "fact",
+          "start_seconds": 24,
+          "end_seconds": 36,
+          "visual_description_zh": "移到樹蔭，保持器材高度和等待時間一致。",
+          "dialogue_or_narration_zh": "第二點係樹蔭。拍完之後先將真實差值寫落字幕。",
+          "on_screen_text_zh": "B 樹蔭｜差值待填",
+          "material_requirements": [
+            "樹蔭位置",
+            "同款儀器"
+          ]
+        },
+        {
+          "order": 5,
+          "role": "fact",
+          "start_seconds": 36,
+          "end_seconds": 48,
+          "visual_description_zh": "量度有風的騎樓位置，紙帶顯示氣流。",
+          "dialogue_or_narration_zh": "第三點加埋風。呢度比較係一次現場示範，唔代表所有日子。",
+          "on_screen_text_zh": "C 騎樓｜當日條件",
+          "material_requirements": [
+            "紙帶",
+            "環境聲"
+          ]
+        },
+        {
+          "order": 6,
+          "role": "close",
+          "start_seconds": 48,
+          "end_seconds": 60,
+          "visual_description_zh": "主持回到開場分界，一腳站日照、一腳站樹蔭。",
+          "dialogue_or_narration_zh": "所以「舒服」唔只睇溫度。保存低三個讀數同拍攝時間，先至有得比較。",
+          "on_screen_text_zh": "讀數＋日期＋時間＋天氣",
+          "material_requirements": [
+            "三組實測數據",
+            "拍攝日期"
+          ]
+        }
+      ],
+      "project_material_requirements": [
+        "拍攝許可",
+        "已校準溫度計三支",
+        "同時段連續實拍",
+        "當日天氣紀錄"
+      ],
+      "evidence_requirements": [
+        "每個數值附原始讀數畫面、日期、時間和量度高度"
+      ],
+      "continuity_requirements": [],
+      "generation": {
+        "enabled": false,
+        "runs": 0,
+        "paid_api_calls": 0,
+        "credits_used": 0
+      }
+    },
+    {
+      "style_code": "two_person_misunderstanding_twist",
+      "style_name_zh": "雙人誤會反轉短劇",
+      "format": "human_short_video",
+      "script_title_zh": "雪櫃入面嗰盒蛋糕係邊個？",
+      "status": "original_demonstration",
+      "originality_notice_zh": "原創虛構短劇；人物、對白及事件均非真實個案。",
+      "duration_seconds": 90,
+      "segment_count": 6,
+      "timeline": [
+        {
+          "order": 1,
+          "role": "setup",
+          "start_seconds": 0,
+          "end_seconds": 10,
+          "visual_description_zh": "室友甲回家打開雪櫃，發現貼着「勿動」的蛋糕只剩空盒。",
+          "dialogue_or_narration_zh": "甲：你返嚟得啱，嗰盒蛋糕去咗邊？",
+          "on_screen_text_zh": "原創虛構示範",
+          "material_requirements": [
+            "兩位演員",
+            "雪櫃",
+            "空蛋糕盒"
+          ]
+        },
+        {
+          "order": 2,
+          "role": "accusation",
+          "start_seconds": 10,
+          "end_seconds": 28,
+          "visual_description_zh": "乙放低購物袋，困惑望向空盒。",
+          "dialogue_or_narration_zh": "乙：唔係我食。甲：屋企得我同你，唔通蛋糕識行？",
+          "on_screen_text_zh": "嫌疑：室友乙",
+          "material_requirements": [
+            "雙人中景",
+            "反應近鏡"
+          ]
+        },
+        {
+          "order": 3,
+          "role": "escalation",
+          "start_seconds": 28,
+          "end_seconds": 48,
+          "visual_description_zh": "甲逐項展示「證據」：叉、紙巾、雪櫃門未關好。",
+          "dialogue_or_narration_zh": "甲：叉喺你枱面，紙巾又係你買嗰款。乙：呢啲全屋都用㗎。",
+          "on_screen_text_zh": "三項「證據」",
+          "material_requirements": [
+            "道具特寫",
+            "節奏切鏡"
+          ]
+        },
+        {
+          "order": 4,
+          "role": "reveal",
+          "start_seconds": 48,
+          "end_seconds": 66,
+          "visual_description_zh": "門鈴響，鄰居拿着完整蛋糕和便條出現。",
+          "dialogue_or_narration_zh": "鄰居：你琴晚叫我幫手雪住，啱啱先攞返上嚟。空盒係你自己留低做記號。",
+          "on_screen_text_zh": "誤會揭曉",
+          "material_requirements": [
+            "第三位演員或只拍手部",
+            "完整蛋糕"
+          ]
+        },
+        {
+          "order": 5,
+          "role": "reaction",
+          "start_seconds": 66,
+          "end_seconds": 80,
+          "visual_description_zh": "甲沉默把叉收回；乙慢慢推空盒到甲面前。",
+          "dialogue_or_narration_zh": "乙：蛋糕未食，友情就差啲俾你食咗。",
+          "on_screen_text_zh": "先查清楚，再開審",
+          "material_requirements": [
+            "停頓反應",
+            "收尾定鏡"
+          ]
+        },
+        {
+          "order": 6,
+          "role": "close",
+          "start_seconds": 80,
+          "end_seconds": 90,
+          "visual_description_zh": "兩人坐低分蛋糕，甲把「勿動」貼紙貼到自己額頭。",
+          "dialogue_or_narration_zh": "甲：我認錯。乙：咁第一件你負責洗。",
+          "on_screen_text_zh": "原創短劇｜完",
+          "material_requirements": [
+            "分蛋糕畫面",
+            "片尾字卡"
+          ]
+        }
+      ],
+      "project_material_requirements": [
+        "三位演員授權或第三人只拍手部",
+        "住宅場地許可",
+        "自有食物與道具"
+      ],
+      "evidence_requirements": [],
+      "continuity_requirements": [],
+      "generation": {
+        "enabled": false,
+        "runs": 0,
+        "paid_api_calls": 0,
+        "credits_used": 0
+      }
+    },
+    {
+      "style_code": "situational_multi_dish_tasting",
+      "style_name_zh": "情境探店逐款試食",
+      "format": "human_short_video",
+      "script_title_zh": "收工後只剩四十分鐘：三款熱食逐樣試",
+      "status": "original_demonstration",
+      "originality_notice_zh": "原創拍攝示範；味道、價格及店舖資料必須拍攝後按真實體驗填寫。",
+      "duration_seconds": 120,
+      "segment_count": 6,
+      "timeline": [
+        {
+          "order": 1,
+          "role": "situational_hook",
+          "start_seconds": 0,
+          "end_seconds": 10,
+          "visual_description_zh": "夜雨街頭，主持看時間並走向已獲拍攝許可的店。",
+          "dialogue_or_narration_zh": "收工後得四十分鐘，今晚只試三款熱食；好唔好食，入口之後先講。",
+          "on_screen_text_zh": "真實試食｜反應不預寫",
+          "material_requirements": [
+            "主持",
+            "店外實拍",
+            "時間畫面"
+          ]
+        },
+        {
+          "order": 2,
+          "role": "arrival",
+          "start_seconds": 10,
+          "end_seconds": 25,
+          "visual_description_zh": "入店、餐牌、下單及三款食物全桌。",
+          "dialogue_or_narration_zh": "店名、地址同當日價格會按現場資料上字幕；未確認嘅配方唔會估。",
+          "on_screen_text_zh": "資料拍攝後填寫",
+          "material_requirements": [
+            "餐牌授權畫面",
+            "收據",
+            "全桌鏡頭"
+          ]
+        },
+        {
+          "order": 3,
+          "role": "dish_tasting",
+          "start_seconds": 25,
+          "end_seconds": 50,
+          "visual_description_zh": "第一款完整上桌、切開、入口及停頓。",
+          "dialogue_or_narration_zh": "［拍攝後填寫：實際味道、口感及一項有限度評價］",
+          "on_screen_text_zh": "第一款｜名稱及價格待填",
+          "material_requirements": [
+            "完整菜式",
+            "切開近鏡",
+            "真實第一口"
+          ]
+        },
+        {
+          "order": 4,
+          "role": "dish_tasting",
+          "start_seconds": 50,
+          "end_seconds": 75,
+          "visual_description_zh": "第二款展示製作動作、蘸醬及主持反應。",
+          "dialogue_or_narration_zh": "［拍攝後填寫：只描述親自觀察到的質感；配方要向店方確認］",
+          "on_screen_text_zh": "第二款｜配方未確認勿寫",
+          "material_requirements": [
+            "製作 B-roll",
+            "蘸醬動作",
+            "店方確認"
+          ]
+        },
+        {
+          "order": 5,
+          "role": "dish_tasting",
+          "start_seconds": 75,
+          "end_seconds": 100,
+          "visual_description_zh": "第三款分食，拍同行者自然反應。",
+          "dialogue_or_narration_zh": "［拍攝後填寫：主持與同行者各一句真實反應］",
+          "on_screen_text_zh": "第三款｜兩人真實反應",
+          "material_requirements": [
+            "第三款全貌",
+            "同行者肖像授權"
+          ]
+        },
+        {
+          "order": 6,
+          "role": "close",
+          "start_seconds": 100,
+          "end_seconds": 120,
+          "visual_description_zh": "三個空盤與雨勢回扣，主持離店。",
+          "dialogue_or_narration_zh": "三款入面，我會按實拍結果揀一款再叫；如果未有明確答案，就如實講未有。",
+          "on_screen_text_zh": "當晚結論｜拍後填寫",
+          "material_requirements": [
+            "空盤",
+            "離店鏡頭",
+            "付款憑證"
+          ]
+        }
+      ],
+      "project_material_requirements": [
+        "店舖拍攝同意",
+        "主持及同行者授權",
+        "收據與餐牌",
+        "三款真實菜式"
+      ],
+      "evidence_requirements": [
+        "店名、地址、價格、營業資料附來源與核對日期",
+        "所有味覺句拍攝後才填寫"
+      ],
+      "continuity_requirements": [],
+      "generation": {
+        "enabled": false,
+        "runs": 0,
+        "paid_api_calls": 0,
+        "credits_used": 0
+      }
+    },
+    {
+      "style_code": "route_led_city_portrait",
+      "style_name_zh": "城市路線敘事",
+      "format": "human_short_video",
+      "script_title_zh": "由碼頭行到山腰：一條看見城市高度的路",
+      "status": "original_demonstration",
+      "originality_notice_zh": "原創示範路線；地點名稱、開放時間及交通資料在拍攝前核對。",
+      "duration_seconds": 70,
+      "segment_count": 6,
+      "timeline": [
+        {
+          "order": 1,
+          "role": "route_hook",
+          "start_seconds": 0,
+          "end_seconds": 8,
+          "visual_description_zh": "主持在碼頭指向山腰終點，地圖線由下而上亮起。",
+          "dialogue_or_narration_zh": "今日唔逐個景點打卡，我哋沿一條上斜路，睇城市點樣一層層升高。",
+          "on_screen_text_zh": "碼頭 → 山腰｜路線示範",
+          "material_requirements": [
+            "主持",
+            "路線地圖",
+            "起點實拍"
+          ]
+        },
+        {
+          "order": 2,
+          "role": "start",
+          "start_seconds": 8,
+          "end_seconds": 20,
+          "visual_description_zh": "渡輪靠岸、人流離開、路牌與海面。",
+          "dialogue_or_narration_zh": "第一段先沿水邊行，保留城市最開揚嘅視線。",
+          "on_screen_text_zh": "第 1 段｜水邊",
+          "material_requirements": [
+            "沿途步行素材",
+            "環境聲"
+          ]
+        },
+        {
+          "order": 3,
+          "role": "transition",
+          "start_seconds": 20,
+          "end_seconds": 35,
+          "visual_description_zh": "穿過街市窄巷，鏡頭由廣角轉手持近景。",
+          "dialogue_or_narration_zh": "離開海邊之後，路突然收窄；聲音、光線同步變近。",
+          "on_screen_text_zh": "第 2 段｜街市巷",
+          "material_requirements": [
+            "街市拍攝許可",
+            "攤檔細節"
+          ]
+        },
+        {
+          "order": 4,
+          "role": "climb",
+          "start_seconds": 35,
+          "end_seconds": 50,
+          "visual_description_zh": "樓梯、扶手、鞋步與高度變化，插入簡單海拔線。",
+          "dialogue_or_narration_zh": "第三段係真正上斜。高度數字只用現場 GPS 紀錄，未量度前唔落實。",
+          "on_screen_text_zh": "高度待現場記錄",
+          "material_requirements": [
+            "樓梯連續鏡頭",
+            "GPS 軌跡"
+          ]
+        },
+        {
+          "order": 5,
+          "role": "payoff",
+          "start_seconds": 50,
+          "end_seconds": 62,
+          "visual_description_zh": "山腰觀景位回望碼頭，前三段位置逐一標記。",
+          "dialogue_or_narration_zh": "去到終點先明白：同一座城市，可以由海面、街巷同屋頂三個高度去讀。",
+          "on_screen_text_zh": "三個高度，一條路",
+          "material_requirements": [
+            "終點廣角",
+            "路線疊圖"
+          ]
+        },
+        {
+          "order": 6,
+          "role": "close",
+          "start_seconds": 62,
+          "end_seconds": 70,
+          "visual_description_zh": "主持收起地圖，鏡頭慢慢拉遠。",
+          "dialogue_or_narration_zh": "完整路線、坡度同交通安排，確認後放描述欄。",
+          "on_screen_text_zh": "資料核對後發布",
+          "material_requirements": [
+            "收尾長鏡",
+            "核對後資料卡"
+          ]
+        }
+      ],
+      "project_material_requirements": [
+        "沿線公共空間拍攝許可",
+        "主持",
+        "GPS 軌跡",
+        "自製地圖"
+      ],
+      "evidence_requirements": [
+        "路線、開放時間、交通與坡度附核對日期"
+      ],
+      "continuity_requirements": [],
+      "generation": {
+        "enabled": false,
+        "runs": 0,
+        "paid_api_calls": 0,
+        "credits_used": 0
+      }
+    },
+    {
+      "style_code": "faceless_sensory_food_discovery",
+      "style_name_zh": "無需出鏡沉浸式探店",
+      "format": "human_short_video",
+      "script_title_zh": "清晨第一籠：不露面看一間包店醒來",
+      "status": "original_demonstration",
+      "originality_notice_zh": "原創示範；店舖、製作程序及味道描述須取得拍攝許可並按現場紀錄。",
+      "duration_seconds": 45,
+      "segment_count": 6,
+      "timeline": [
+        {
+          "order": 1,
+          "role": "mystery_hook",
+          "start_seconds": 0,
+          "end_seconds": 5,
+          "visual_description_zh": "蒸籠開蓋，蒸氣遮滿鏡頭，只見手取出一個包。",
+          "dialogue_or_narration_zh": "清晨六點，第一籠啱啱出爐。",
+          "on_screen_text_zh": "第一籠出爐",
+          "material_requirements": [
+            "蒸籠近鏡",
+            "自然蒸氣聲"
+          ]
+        },
+        {
+          "order": 2,
+          "role": "arrival",
+          "start_seconds": 5,
+          "end_seconds": 13,
+          "visual_description_zh": "第一身推門、掛牌、麵粉腳印與空桌。",
+          "dialogue_or_narration_zh": "店名同地址拍攝後確認；而家先跟住聲音入去。",
+          "on_screen_text_zh": "位置資料待核對",
+          "material_requirements": [
+            "入口 POV",
+            "招牌授權"
+          ]
+        },
+        {
+          "order": 3,
+          "role": "craft",
+          "start_seconds": 13,
+          "end_seconds": 23,
+          "visual_description_zh": "揉麵、分劑、包餡、收口，每個動作一鏡。",
+          "dialogue_or_narration_zh": "麵糰比例同餡料來源只用店方確認資料，唔由畫面猜。",
+          "on_screen_text_zh": "程序：揉／分／包／蒸",
+          "material_requirements": [
+            "師傅手部",
+            "工序連續鏡頭"
+          ]
+        },
+        {
+          "order": 4,
+          "role": "sensory",
+          "start_seconds": 23,
+          "end_seconds": 33,
+          "visual_description_zh": "包子掰開，熱氣、餡料與外皮紋理。",
+          "dialogue_or_narration_zh": "［拍攝後按真實入口感受填寫，不預寫「最好食」］",
+          "on_screen_text_zh": "真實口感｜拍後填寫",
+          "material_requirements": [
+            "掰開近鏡",
+            "收音咪"
+          ]
+        },
+        {
+          "order": 5,
+          "role": "detail",
+          "start_seconds": 33,
+          "end_seconds": 40,
+          "visual_description_zh": "桌上醬料、紙袋與客人帶走食物，只拍獲同意範圍。",
+          "dialogue_or_narration_zh": "最值得記住嘅細節，留到拍完先揀一個。",
+          "on_screen_text_zh": "一個具體細節",
+          "material_requirements": [
+            "醬料與包裝",
+            "顧客避樣或授權"
+          ]
+        },
+        {
+          "order": 6,
+          "role": "verdict",
+          "start_seconds": 40,
+          "end_seconds": 45,
+          "visual_description_zh": "紙袋帶離店外，蒸氣聲淡出。",
+          "dialogue_or_narration_zh": "有限度評價會按實際體驗寫；營業時間以當日資料為準。",
+          "on_screen_text_zh": "資料與體驗均待確認",
+          "material_requirements": [
+            "離店 POV",
+            "資料卡"
+          ]
+        }
+      ],
+      "project_material_requirements": [
+        "店舖拍攝許可",
+        "食物製作實拍",
+        "自然聲",
+        "餐牌與營業資料"
+      ],
+      "evidence_requirements": [
+        "配方與食材來源由店方確認",
+        "味覺拍攝後填寫"
+      ],
+      "continuity_requirements": [],
+      "generation": {
+        "enabled": false,
+        "runs": 0,
+        "paid_api_calls": 0,
+        "credits_used": 0
+      }
+    },
+    {
+      "style_code": "problem_first_lifestyle_product",
+      "style_name_zh": "生活痛點解法型產品片",
+      "format": "human_short_video",
+      "script_title_zh": "充電線每晚都跌落床底，點樣一次解決？",
+      "status": "original_demonstration",
+      "originality_notice_zh": "原創產品示範；只展示可見操作，不宣稱未測試的耐用度、物料或功效。",
+      "duration_seconds": 60,
+      "segment_count": 6,
+      "timeline": [
+        {
+          "order": 1,
+          "role": "problem_hook",
+          "start_seconds": 0,
+          "end_seconds": 8,
+          "visual_description_zh": "三晚重演充電線跌到床底，人物摸黑尋找。",
+          "dialogue_or_narration_zh": "又跌。每晚臨瞓都要跪低搵線，最煩唔係一次，係日日重複。",
+          "on_screen_text_zh": "同一個麻煩，第 3 晚",
+          "material_requirements": [
+            "床邊實景",
+            "同一條充電線"
+          ]
+        },
+        {
+          "order": 2,
+          "role": "pain_cost",
+          "start_seconds": 8,
+          "end_seconds": 15,
+          "visual_description_zh": "手機低電提示、手摸床底、灰塵近鏡。",
+          "dialogue_or_narration_zh": "舊方法係用膠紙，但甩一次就黐塵，位置又固定唔到。",
+          "on_screen_text_zh": "舊方法：膠紙",
+          "material_requirements": [
+            "低電畫面",
+            "膠紙實測"
+          ]
+        },
+        {
+          "order": 3,
+          "role": "solution_reveal",
+          "start_seconds": 15,
+          "end_seconds": 22,
+          "visual_description_zh": "才拿出無品牌磁吸理線座，展示所有部件。",
+          "dialogue_or_narration_zh": "我試一個磁吸理線座。先講清楚：黏力同耐用度要實測，唔靠包裝估。",
+          "on_screen_text_zh": "解法出場｜磁吸理線座",
+          "material_requirements": [
+            "無品牌產品",
+            "包裝資料"
+          ]
+        },
+        {
+          "order": 4,
+          "role": "mechanism",
+          "start_seconds": 22,
+          "end_seconds": 35,
+          "visual_description_zh": "一鏡完成清潔桌面、貼座、扣線、拉取、放回。",
+          "dialogue_or_narration_zh": "底座固定，線頭靠磁件回到同一位置。由貼上到放回，全程一鏡睇清楚。",
+          "on_screen_text_zh": "一鏡完成操作",
+          "material_requirements": [
+            "連續操作鏡頭",
+            "清潔用品"
+          ]
+        },
+        {
+          "order": 5,
+          "role": "retest",
+          "start_seconds": 35,
+          "end_seconds": 50,
+          "visual_description_zh": "連續三次從床上取線、充電、放回；加一次拉扯失敗測試。",
+          "dialogue_or_narration_zh": "三次都接得到；但大力拉扯會移位，所以只適合固定線頭，唔係承重用途。",
+          "on_screen_text_zh": "3 次日常重試｜1 個限制",
+          "material_requirements": [
+            "三次完整實測",
+            "失敗鏡頭保留"
+          ]
+        },
+        {
+          "order": 6,
+          "role": "verdict",
+          "start_seconds": 50,
+          "end_seconds": 60,
+          "visual_description_zh": "翌晚燈熄，手直接拿到線；產品與限制字卡同框。",
+          "dialogue_or_narration_zh": "如果你嘅問題係線頭成日跌，呢個方法有用；桌面材質唔啱，就唔好勉強貼。",
+          "on_screen_text_zh": "適合：固定線頭｜限制：視乎表面",
+          "material_requirements": [
+            "夜間重測",
+            "結論字卡"
+          ]
+        }
+      ],
+      "project_material_requirements": [
+        "產品實物",
+        "床邊真實場景",
+        "三次連續實測",
+        "表面材質紀錄"
+      ],
+      "evidence_requirements": [
+        "任何黏力、耐用度或材質聲稱須附來源或測試"
+      ],
+      "continuity_requirements": [],
+      "generation": {
+        "enabled": false,
+        "runs": 0,
+        "paid_api_calls": 0,
+        "credits_used": 0
+      }
+    },
+    {
+      "style_code": "host_led_food_culture_tasting",
+      "style_name_zh": "主持試食文化快解",
+      "format": "human_short_video",
+      "script_title_zh": "一碗白粥點解可以有三種口感？",
+      "status": "original_demonstration",
+      "originality_notice_zh": "原創示範；米種、熬煮方法及文化背景必須由店方或可靠資料確認，味覺拍攝後填寫。",
+      "duration_seconds": 75,
+      "segment_count": 6,
+      "timeline": [
+        {
+          "order": 1,
+          "role": "hook",
+          "start_seconds": 0,
+          "end_seconds": 8,
+          "visual_description_zh": "主持與三碗不同稠度的白粥同框。",
+          "dialogue_or_narration_zh": "都叫白粥，點解一碗見到米粒，一碗綿，一碗似米湯？",
+          "on_screen_text_zh": "三碗白粥｜口感不同",
+          "material_requirements": [
+            "主持",
+            "三碗實物"
+          ]
+        },
+        {
+          "order": 2,
+          "role": "context",
+          "start_seconds": 8,
+          "end_seconds": 20,
+          "visual_description_zh": "店方示範米、水與鍋，畫面標示「店方提供資料」。",
+          "dialogue_or_narration_zh": "先唔估配方。米種、水量同時間，只按店方確認內容講。",
+          "on_screen_text_zh": "資料來源：店方確認",
+          "material_requirements": [
+            "店方訪問",
+            "材料實拍"
+          ]
+        },
+        {
+          "order": 3,
+          "role": "method",
+          "start_seconds": 20,
+          "end_seconds": 35,
+          "visual_description_zh": "三個鍋的翻滾程度與攪拌動作並列。",
+          "dialogue_or_narration_zh": "第一個差別係煮法；鏡頭只比較今次三鍋見到嘅狀態。",
+          "on_screen_text_zh": "同場比較｜非普遍定律",
+          "material_requirements": [
+            "三鍋過程",
+            "時間記錄"
+          ]
+        },
+        {
+          "order": 4,
+          "role": "taste",
+          "start_seconds": 35,
+          "end_seconds": 50,
+          "visual_description_zh": "主持依次入口，每口保留停頓。",
+          "dialogue_or_narration_zh": "［拍攝後填寫三句真實口感；不把口感反推成配方］",
+          "on_screen_text_zh": "真實試食｜拍後填寫",
+          "material_requirements": [
+            "入口近鏡",
+            "自然反應"
+          ]
+        },
+        {
+          "order": 5,
+          "role": "culture",
+          "start_seconds": 50,
+          "end_seconds": 65,
+          "visual_description_zh": "舊餐牌或店方提供照片，清楚標來源。",
+          "dialogue_or_narration_zh": "文化背景只放已核實的一項資料，來源同日期會留喺畫面。",
+          "on_screen_text_zh": "歷史資料待核實",
+          "material_requirements": [
+            "獲授權資料圖",
+            "來源字卡"
+          ]
+        },
+        {
+          "order": 6,
+          "role": "close",
+          "start_seconds": 65,
+          "end_seconds": 75,
+          "visual_description_zh": "主持把三碗排成由稀到稠。",
+          "dialogue_or_narration_zh": "下次叫粥，唔只問有咩料；你可以先問自己想要米粒感、綿滑，定係清爽。",
+          "on_screen_text_zh": "由稀到稠｜按真實結果排序",
+          "material_requirements": [
+            "三碗收尾",
+            "排序字卡"
+          ]
+        }
+      ],
+      "project_material_requirements": [
+        "店舖拍攝許可",
+        "店方訪問",
+        "三款粥",
+        "資料圖授權"
+      ],
+      "evidence_requirements": [
+        "配方、歷史及文化說法逐項附來源",
+        "味覺拍攝後填寫"
+      ],
+      "continuity_requirements": [],
+      "generation": {
+        "enabled": false,
+        "runs": 0,
+        "paid_api_calls": 0,
+        "credits_used": 0
+      }
+    },
+    {
+      "style_code": "human_product_demo_conversion",
+      "style_name_zh": "真人產品實測導購",
+      "format": "human_short_video",
+      "script_title_zh": "細單位收納盒：摺起來真係省位嗎？",
+      "status": "original_demonstration",
+      "originality_notice_zh": "原創實測示範；尺寸、價格、承重與優惠只可使用已核實資料。",
+      "duration_seconds": 50,
+      "segment_count": 6,
+      "timeline": [
+        {
+          "order": 1,
+          "role": "result_hook",
+          "start_seconds": 0,
+          "end_seconds": 6,
+          "visual_description_zh": "主持把摺疊盒由扁平打開，再放進櫃內。",
+          "dialogue_or_narration_zh": "十秒由一塊板變成收納盒；但省唔省位，要量過先知。",
+          "on_screen_text_zh": "可見結果先行",
+          "material_requirements": [
+            "主持手部",
+            "產品實物"
+          ]
+        },
+        {
+          "order": 2,
+          "role": "problem",
+          "start_seconds": 6,
+          "end_seconds": 14,
+          "visual_description_zh": "普通硬盒佔滿空櫃，尺量高度。",
+          "dialogue_or_narration_zh": "我平時最困擾係空盒都要霸位。先記低舊盒尺寸。",
+          "on_screen_text_zh": "舊盒尺寸：待實測",
+          "material_requirements": [
+            "舊盒",
+            "捲尺"
+          ]
+        },
+        {
+          "order": 3,
+          "role": "demo",
+          "start_seconds": 14,
+          "end_seconds": 26,
+          "visual_description_zh": "一鏡示範打開、扣合、上蓋。",
+          "dialogue_or_narration_zh": "打開、扣兩邊、蓋上。中間唔剪走卡住或者重做嘅部分。",
+          "on_screen_text_zh": "完整操作一鏡過",
+          "material_requirements": [
+            "固定機位",
+            "計時器"
+          ]
+        },
+        {
+          "order": 4,
+          "role": "comparison",
+          "start_seconds": 26,
+          "end_seconds": 36,
+          "visual_description_zh": "兩個盒並排量外尺寸與摺起厚度。",
+          "dialogue_or_narration_zh": "只比較手上兩個盒；數字由尺面直接讀，唔推廣到其他型號。",
+          "on_screen_text_zh": "尺寸實測｜同場比較",
+          "material_requirements": [
+            "捲尺讀數",
+            "兩款盒"
+          ]
+        },
+        {
+          "order": 5,
+          "role": "limit",
+          "start_seconds": 36,
+          "end_seconds": 44,
+          "visual_description_zh": "裝入日用品，再示範側壁受壓。",
+          "dialogue_or_narration_zh": "佢適合輕量雜物；承重未有可靠資料，所以唔示範坐上去或者堆重物。",
+          "on_screen_text_zh": "限制：承重未核實",
+          "material_requirements": [
+            "輕量物品",
+            "限制字卡"
+          ]
+        },
+        {
+          "order": 6,
+          "role": "cta",
+          "start_seconds": 44,
+          "end_seconds": 50,
+          "visual_description_zh": "主持把盒摺平放入櫃側。",
+          "dialogue_or_narration_zh": "如果你需要空盒都可收起，先量櫃位再揀尺寸。連結同合作披露放描述欄。",
+          "on_screen_text_zh": "先量尺寸｜合作須披露",
+          "material_requirements": [
+            "櫃內實景",
+            "披露字卡"
+          ]
+        }
+      ],
+      "project_material_requirements": [
+        "產品與包裝",
+        "主持",
+        "捲尺",
+        "舊盒對照"
+      ],
+      "evidence_requirements": [
+        "尺寸由實測讀數支持",
+        "承重、價格、優惠與合作關係須核實及披露"
+      ],
+      "continuity_requirements": [],
+      "generation": {
+        "enabled": false,
+        "runs": 0,
+        "paid_api_calls": 0,
+        "credits_used": 0
+      }
+    },
+    {
+      "style_code": "seated_host_research_explainer",
+      "style_name_zh": "坐定主持考據式解說",
+      "format": "human_short_video",
+      "script_title_zh": "一張舊戲票，可以證明甚麼？",
+      "status": "original_demonstration",
+      "originality_notice_zh": "原創考據示範；所有年份、人物與場館資料必須以可查來源替換占位，不用 AI 重現冒充史料。",
+      "duration_seconds": 150,
+      "segment_count": 7,
+      "timeline": [
+        {
+          "order": 1,
+          "role": "question",
+          "start_seconds": 0,
+          "end_seconds": 12,
+          "visual_description_zh": "坐定主持把一張自製道具戲票放到鏡頭前。",
+          "dialogue_or_narration_zh": "一張舊戲票，最可靠嘅資訊可能唔係戲名，而係印喺角落嗰幾個字。",
+          "on_screen_text_zh": "原創道具｜非真實文物",
+          "material_requirements": [
+            "主持",
+            "自製戲票道具"
+          ]
+        },
+        {
+          "order": 2,
+          "role": "object_read",
+          "start_seconds": 12,
+          "end_seconds": 32,
+          "visual_description_zh": "桌面俯拍，依次圈出票價、日期、場次、座位。",
+          "dialogue_or_narration_zh": "先讀物件本身：日期、場次、座位同印刷方式。讀到先講，讀唔到就留白。",
+          "on_screen_text_zh": "第一層：物件可見資料",
+          "material_requirements": [
+            "微距鏡頭",
+            "掃描檔"
+          ]
+        },
+        {
+          "order": 3,
+          "role": "source_compare",
+          "start_seconds": 32,
+          "end_seconds": 57,
+          "visual_description_zh": "左側道具票，右側三個資料來源卡位。",
+          "dialogue_or_narration_zh": "第二層先比較外部資料。每項主張要配來源、頁碼或者館藏編號。",
+          "on_screen_text_zh": "第二層：來源交叉核對",
+          "material_requirements": [
+            "三項可靠來源占位",
+            "來源清單"
+          ]
+        },
+        {
+          "order": 4,
+          "role": "causal_chain",
+          "start_seconds": 57,
+          "end_seconds": 87,
+          "visual_description_zh": "主持用三張卡排出「票面→場館→城市生活」。",
+          "dialogue_or_narration_zh": "有資料先可以講因果。冇證據，就只說「可能」並列出仲欠邊一份資料。",
+          "on_screen_text_zh": "證據不足＝保留未知",
+          "material_requirements": [
+            "因果卡片",
+            "未知清單"
+          ]
+        },
+        {
+          "order": 5,
+          "role": "field_check",
+          "start_seconds": 87,
+          "end_seconds": 115,
+          "visual_description_zh": "插入現址實景、舊圖對位與門牌細節。",
+          "dialogue_or_narration_zh": "第三層返現場。現址畫面只能證明今日所見，唔可以代替當年歷史。",
+          "on_screen_text_zh": "今日實景 ≠ 歷史證據",
+          "material_requirements": [
+            "現址拍攝",
+            "授權歷史圖"
+          ]
+        },
+        {
+          "order": 6,
+          "role": "conclusion",
+          "start_seconds": 115,
+          "end_seconds": 135,
+          "visual_description_zh": "主持收回卡片，只留下票面四個欄位。",
+          "dialogue_or_narration_zh": "所以一張票可以打開一條研究路線，但唔會自動講完整個故事。",
+          "on_screen_text_zh": "結論：由物件出發，不越過證據",
+          "material_requirements": [
+            "收尾桌面鏡頭",
+            "參考資料頁"
+          ]
+        },
+        {
+          "order": 7,
+          "role": "sources",
+          "start_seconds": 135,
+          "end_seconds": 150,
+          "visual_description_zh": "全屏列出資料來源格式示例。",
+          "dialogue_or_narration_zh": "正式版本會列作者、標題、機構、連結或館藏號，以及核對日期。",
+          "on_screen_text_zh": "資料來源｜示範格式",
+          "material_requirements": [
+            "來源頁模板"
+          ]
+        }
+      ],
+      "project_material_requirements": [
+        "主持與桌面場景",
+        "自製道具",
+        "至少三個可靠來源",
+        "現址拍攝及歷史圖授權"
+      ],
+      "evidence_requirements": [
+        "每項歷史、日期及人物主張附來源",
+        "道具清楚標示為原創示範"
+      ],
+      "continuity_requirements": [],
+      "generation": {
+        "enabled": false,
+        "runs": 0,
+        "paid_api_calls": 0,
+        "credits_used": 0
+      }
+    },
+    {
+      "style_code": "first_person_journey_diary",
+      "style_name_zh": "第一身旅程實錄",
+      "format": "human_short_video",
+      "script_title_zh": "第一次在海邊過夜：由出發到日出",
+      "status": "original_demonstration",
+      "originality_notice_zh": "原創行程示範；旁白分為出發前計劃與拍攝後真實感受，不能預寫未發生的體驗。",
+      "duration_seconds": 75,
+      "segment_count": 7,
+      "timeline": [
+        {
+          "order": 1,
+          "role": "cold_open",
+          "start_seconds": 0,
+          "end_seconds": 7,
+          "visual_description_zh": "先放日出前帳篷剪影，但不預寫情緒反應。",
+          "dialogue_or_narration_zh": "［拍攝後填寫：當刻一句真實感受］",
+          "on_screen_text_zh": "第一次海邊過夜",
+          "material_requirements": [
+            "日出實拍",
+            "第一身鏡頭"
+          ]
+        },
+        {
+          "order": 2,
+          "role": "departure",
+          "start_seconds": 7,
+          "end_seconds": 19,
+          "visual_description_zh": "第一身整理背包、查看交通與天氣。",
+          "dialogue_or_narration_zh": "出發前，我只確定三件事：合法營地、回程交通，同埋惡劣天氣撤退方案。",
+          "on_screen_text_zh": "計劃：營地／交通／撤退",
+          "material_requirements": [
+            "背包清單",
+            "官方天氣資料"
+          ]
+        },
+        {
+          "order": 3,
+          "role": "arrival",
+          "start_seconds": 19,
+          "end_seconds": 34,
+          "visual_description_zh": "沿路、到達、營地標示與搭帳篷。",
+          "dialogue_or_narration_zh": "到場先拍規則牌，再按現場指示搭營；未確認可生火，就唔拍生火。",
+          "on_screen_text_zh": "按現場規則行動",
+          "material_requirements": [
+            "營地許可",
+            "規則牌"
+          ]
+        },
+        {
+          "order": 4,
+          "role": "evening",
+          "start_seconds": 34,
+          "end_seconds": 49,
+          "visual_description_zh": "煮食、收拾、天色變化及環境聲。",
+          "dialogue_or_narration_zh": "［拍攝後填寫：實際遇到的一個困難與處理方法］",
+          "on_screen_text_zh": "真實困難｜拍後填寫",
+          "material_requirements": [
+            "夜間照明",
+            "收音"
+          ]
+        },
+        {
+          "order": 5,
+          "role": "night",
+          "start_seconds": 49,
+          "end_seconds": 61,
+          "visual_description_zh": "帳篷內第一身、風聲與時間字卡。",
+          "dialogue_or_narration_zh": "而家係［實際時間］。如果風雨超過安全安排，我會立即撤退。",
+          "on_screen_text_zh": "安全優先",
+          "material_requirements": [
+            "時間畫面",
+            "安全裝備"
+          ]
+        },
+        {
+          "order": 6,
+          "role": "sunrise",
+          "start_seconds": 61,
+          "end_seconds": 70,
+          "visual_description_zh": "拉開帳篷看到日出，保持自然聲。",
+          "dialogue_or_narration_zh": "［拍攝後填寫：與開場相呼應的真實感受］",
+          "on_screen_text_zh": "日出｜實拍",
+          "material_requirements": [
+            "日出連續鏡頭"
+          ]
+        },
+        {
+          "order": 7,
+          "role": "close",
+          "start_seconds": 70,
+          "end_seconds": 75,
+          "visual_description_zh": "收好所有裝備，地面恢復原狀。",
+          "dialogue_or_narration_zh": "帶走所有垃圾，行程資料同核對日期放描述欄。",
+          "on_screen_text_zh": "Leave no trace",
+          "material_requirements": [
+            "離場前後對照"
+          ]
+        }
+      ],
+      "project_material_requirements": [
+        "合法營地確認",
+        "交通與天氣資料",
+        "安全裝備",
+        "第一身拍攝器材"
+      ],
+      "evidence_requirements": [
+        "營地規則、交通及天氣附來源日期",
+        "感受只於拍攝後填寫"
+      ],
+      "continuity_requirements": [],
+      "generation": {
+        "enabled": false,
+        "runs": 0,
+        "paid_api_calls": 0,
+        "credits_used": 0
+      }
+    },
+    {
+      "style_code": "multi_stop_city_curation",
+      "style_name_zh": "多站清單式城市精選",
+      "format": "human_short_video",
+      "script_title_zh": "雨天半日：三個不用趕路的室內停靠點",
+      "status": "original_demonstration",
+      "originality_notice_zh": "原創清單示範；三個地點須實際到訪，開放時間、費用和拍攝政策發布前核對。",
+      "duration_seconds": 70,
+      "segment_count": 6,
+      "timeline": [
+        {
+          "order": 1,
+          "role": "criteria",
+          "start_seconds": 0,
+          "end_seconds": 8,
+          "visual_description_zh": "雨景下打開地圖，三個點按步行次序亮起。",
+          "dialogue_or_narration_zh": "今次唔排「最好」，只揀三個雨天可停留、彼此步行可達嘅室內點。",
+          "on_screen_text_zh": "準則：室內／步行可達／可停留",
+          "material_requirements": [
+            "自製地圖",
+            "雨天實拍"
+          ]
+        },
+        {
+          "order": 2,
+          "role": "stop_1",
+          "start_seconds": 8,
+          "end_seconds": 24,
+          "visual_description_zh": "第一站入口、室內全景、一個可見特色。",
+          "dialogue_or_narration_zh": "第一站：［核實名稱］。我揀佢，因為現場可確認有座位同遮雨入口。",
+          "on_screen_text_zh": "1｜名稱、時間待核對",
+          "material_requirements": [
+            "第一站實訪",
+            "場地拍攝許可"
+          ]
+        },
+        {
+          "order": 3,
+          "role": "stop_2",
+          "start_seconds": 24,
+          "end_seconds": 40,
+          "visual_description_zh": "步行轉場、第二站入口及安靜角落。",
+          "dialogue_or_narration_zh": "第二站重點唔同：適合安靜停留。實際限制同消費要求照現場資料講。",
+          "on_screen_text_zh": "2｜限制清楚列出",
+          "material_requirements": [
+            "步行路線",
+            "第二站實訪"
+          ]
+        },
+        {
+          "order": 4,
+          "role": "stop_3",
+          "start_seconds": 40,
+          "end_seconds": 56,
+          "visual_description_zh": "第三站展示活動區或窗景，不拍未授權人物。",
+          "dialogue_or_narration_zh": "第三站適合想睇一樣具體內容嘅人；展覽或活動名稱要用當日資料。",
+          "on_screen_text_zh": "3｜活動內容待核對",
+          "material_requirements": [
+            "第三站實訪",
+            "活動資料"
+          ]
+        },
+        {
+          "order": 5,
+          "role": "compare",
+          "start_seconds": 56,
+          "end_seconds": 65,
+          "visual_description_zh": "三站卡片並排，比較停留時間、費用、安靜程度。",
+          "dialogue_or_narration_zh": "三個點唔用同一把尺排名；你按時間、預算同想做嘅事揀。",
+          "on_screen_text_zh": "比較：時間／費用／用途",
+          "material_requirements": [
+            "比較表",
+            "實際數據"
+          ]
+        },
+        {
+          "order": 6,
+          "role": "route_close",
+          "start_seconds": 65,
+          "end_seconds": 70,
+          "visual_description_zh": "地圖連起三站，主持收傘離開。",
+          "dialogue_or_narration_zh": "完整路線同核對日期放描述欄，臨出發前再查一次。",
+          "on_screen_text_zh": "雨天半日路線",
+          "material_requirements": [
+            "路線總覽"
+          ]
+        }
+      ],
+      "project_material_requirements": [
+        "三個地點實訪",
+        "拍攝許可",
+        "自製地圖",
+        "開放時間及費用資料"
+      ],
+      "evidence_requirements": [
+        "每站名稱、開放時間、費用、拍攝政策附核對日期"
+      ],
+      "continuity_requirements": [],
+      "generation": {
+        "enabled": false,
+        "runs": 0,
+        "paid_api_calls": 0,
+        "credits_used": 0
+      }
+    },
+    {
+      "style_code": "spectacle_first_experience_micro",
+      "style_name_zh": "超短奇觀體驗快拍",
+      "format": "human_short_video",
+      "script_title_zh": "門一開，整個房間開始下雪",
+      "status": "original_demonstration",
+      "originality_notice_zh": "原創虛構體驗示範；特效場景須標示為舞台效果，速度與規模不使用未核實數字。",
+      "duration_seconds": 20,
+      "segment_count": 5,
+      "timeline": [
+        {
+          "order": 1,
+          "role": "result_first",
+          "start_seconds": 0,
+          "end_seconds": 4,
+          "visual_description_zh": "門打開，安全紙雪迎面湧出，人物停住。",
+          "dialogue_or_narration_zh": "原來開門嗰一秒，成間房會落雪。",
+          "on_screen_text_zh": "舞台紙雪效果",
+          "material_requirements": [
+            "紙雪機",
+            "演員",
+            "安全測試"
+          ]
+        },
+        {
+          "order": 2,
+          "role": "enter",
+          "start_seconds": 4,
+          "end_seconds": 9,
+          "visual_description_zh": "單一廣角跟人物走入房間，展示空間全貌。",
+          "dialogue_or_narration_zh": "我只做一件事：行到房中間，抬頭。",
+          "on_screen_text_zh": "一個動作看完整體驗",
+          "material_requirements": [
+            "廣角穩定器",
+            "場地全景"
+          ]
+        },
+        {
+          "order": 3,
+          "role": "reaction",
+          "start_seconds": 9,
+          "end_seconds": 14,
+          "visual_description_zh": "紙雪落下，人物自然伸手接住，保留同步聲。",
+          "dialogue_or_narration_zh": "［拍攝時保留真實反應，不預寫尖叫或感動］",
+          "on_screen_text_zh": "真實反應",
+          "material_requirements": [
+            "同步收音",
+            "安全紙材"
+          ]
+        },
+        {
+          "order": 4,
+          "role": "reveal",
+          "start_seconds": 14,
+          "end_seconds": 18,
+          "visual_description_zh": "鏡頭轉身揭示紙雪機與工作人員。",
+          "dialogue_or_narration_zh": "呢個係舞台效果，唔係真雪。",
+          "on_screen_text_zh": "效果揭示",
+          "material_requirements": [
+            "幕後機器",
+            "工作人員授權"
+          ]
+        },
+        {
+          "order": 5,
+          "role": "close",
+          "start_seconds": 18,
+          "end_seconds": 20,
+          "visual_description_zh": "人物吹走手上紙雪，硬切黑。",
+          "dialogue_or_narration_zh": "兩秒之後，我仲喺度搵返方向。",
+          "on_screen_text_zh": "原創體驗示範",
+          "material_requirements": [
+            "收尾近鏡"
+          ]
+        }
+      ],
+      "project_material_requirements": [
+        "安全紙雪設備",
+        "場地批准",
+        "演員及工作人員授權",
+        "防滑安排"
+      ],
+      "evidence_requirements": [],
+      "continuity_requirements": [],
+      "generation": {
+        "enabled": false,
+        "runs": 0,
+        "paid_api_calls": 0,
+        "credits_used": 0
+      }
+    },
+    {
+      "style_code": "immersive_experience_reflection",
+      "style_name_zh": "沉浸式體驗反思敘事",
+      "format": "human_short_video",
+      "script_title_zh": "兩小時無通知：走進一個收起手機的空間",
+      "status": "original_demonstration",
+      "originality_notice_zh": "原創虛構體驗示範；場館規則、心理影響及參與者感受均不可預先杜撰。",
+      "duration_seconds": 90,
+      "segment_count": 6,
+      "timeline": [
+        {
+          "order": 1,
+          "role": "entry",
+          "start_seconds": 0,
+          "end_seconds": 10,
+          "visual_description_zh": "參與者在入口把手機放入封袋，規則卡同框。",
+          "dialogue_or_narration_zh": "入場前，工作人員請我把手機封起兩小時。呢個設定係原創示範，正式拍攝要按真實場館規則。",
+          "on_screen_text_zh": "原創沉浸體驗示範",
+          "material_requirements": [
+            "入口場景",
+            "封袋道具",
+            "工作人員授權"
+          ]
+        },
+        {
+          "order": 2,
+          "role": "stage_1",
+          "start_seconds": 10,
+          "end_seconds": 25,
+          "visual_description_zh": "第一空間只有時鐘聲與一張椅，鏡頭觀察手部。",
+          "dialogue_or_narration_zh": "頭十分鐘，我只能記錄可見行為；感受留到離場後由本人補寫。",
+          "on_screen_text_zh": "階段一｜等待",
+          "material_requirements": [
+            "極簡房間",
+            "時鐘聲"
+          ]
+        },
+        {
+          "order": 3,
+          "role": "stage_2",
+          "start_seconds": 25,
+          "end_seconds": 43,
+          "visual_description_zh": "第二空間讓參與者用紙筆畫出剛才想查看的通知。",
+          "dialogue_or_narration_zh": "第二階段唔問你有幾焦慮，只請你畫低剛才最想打開嘅一個畫面。",
+          "on_screen_text_zh": "階段二｜把衝動畫出來",
+          "material_requirements": [
+            "紙筆",
+            "俯拍"
+          ]
+        },
+        {
+          "order": 4,
+          "role": "stage_3",
+          "start_seconds": 43,
+          "end_seconds": 61,
+          "visual_description_zh": "第三空間兩人交換畫紙，只讀不評論。",
+          "dialogue_or_narration_zh": "第三階段交換紙張。唔評論，只睇另一個人原來都被某件事拉住。",
+          "on_screen_text_zh": "階段三｜交換",
+          "material_requirements": [
+            "兩位參與者授權",
+            "畫紙"
+          ]
+        },
+        {
+          "order": 5,
+          "role": "exit",
+          "start_seconds": 61,
+          "end_seconds": 77,
+          "visual_description_zh": "拆封手機，但參與者先填離場卡。",
+          "dialogue_or_narration_zh": "離場先記錄實際感受，再打開手機；唔用「治癒」或者「戒癮」形容一次體驗。",
+          "on_screen_text_zh": "感受 ≠ 醫療效果",
+          "material_requirements": [
+            "離場問卷",
+            "手機封袋"
+          ]
+        },
+        {
+          "order": 6,
+          "role": "reflection",
+          "start_seconds": 77,
+          "end_seconds": 90,
+          "visual_description_zh": "參與者在場外讀自己的離場卡，保留停頓。",
+          "dialogue_or_narration_zh": "［拍攝後填寫本人原話；若不願公開，保留沉默］",
+          "on_screen_text_zh": "反思由參與者本人確認",
+          "material_requirements": [
+            "本人同意的原話",
+            "撤回機制"
+          ]
+        }
+      ],
+      "project_material_requirements": [
+        "場館與參與者書面同意",
+        "封袋及紙筆",
+        "離場問卷",
+        "私隱與撤回安排"
+      ],
+      "evidence_requirements": [
+        "不作心理或醫療功效聲稱",
+        "感受由參與者拍攝後確認"
+      ],
+      "continuity_requirements": [],
+      "generation": {
+        "enabled": false,
+        "runs": 0,
+        "paid_api_calls": 0,
+        "credits_used": 0
+      }
+    },
+    {
+      "style_code": "ai_artist_reflective_monologue",
+      "style_name_zh": "藝術家第一身情感獨白",
+      "format": "ai_short_video",
+      "script_title_zh": "我把裂痕留在每一隻杯上",
+      "status": "original_demonstration",
+      "originality_notice_zh": "原創虛構 AI 示範；所有人物、品牌與情節均為虛構，畫面須標示 AI 生成。",
+      "duration_seconds": 96,
+      "segment_count": 6,
+      "timeline": [
+        {
+          "order": 1,
+          "role": "identity",
+          "start_seconds": 0,
+          "end_seconds": 12,
+          "visual_description_zh": "虛構陶藝家在昏暗工作室拿起有裂紋的杯。",
+          "dialogue_or_narration_zh": "我叫林澄。人哋教我，裂咗就係失敗；但我第一次覺得作品似自己，正正係嗰條裂痕出現之後。",
+          "on_screen_text_zh": "原創虛構人物｜AI 生成",
+          "material_requirements": [
+            "角色設定圖",
+            "陶藝工作室設定"
+          ],
+          "ai_prompt_zh": "固定三十歲亞洲陶藝家林澄，短髮、灰藍工衣；中景，暖色窯火，手持有裂紋白杯，慢慢望向裂痕，電影感但不模仿真人。"
+        },
+        {
+          "order": 2,
+          "role": "origin",
+          "start_seconds": 12,
+          "end_seconds": 26,
+          "visual_description_zh": "少年時的虛構回憶：反覆丟棄不完美泥坯。",
+          "dialogue_or_narration_zh": "細個我以為，做得好就係唔畀人睇到錯。於是每一件唔完美嘅作品，我都收埋。",
+          "on_screen_text_zh": "怕被看見的錯",
+          "material_requirements": [
+            "少年角色設定",
+            "泥坯道具"
+          ],
+          "ai_prompt_zh": "同一角色少年版本，輪廓與眼神一致；工作桌堆滿被遮住的泥坯，鏡頭緩慢橫移，無品牌。"
+        },
+        {
+          "order": 3,
+          "role": "turn",
+          "start_seconds": 26,
+          "end_seconds": 42,
+          "visual_description_zh": "成年後窯門打開，杯身裂開；她沒有丟棄。",
+          "dialogue_or_narration_zh": "直到有一日，窯門打開，成批杯都裂咗。我冇再遮，反而沿住裂紋上色。",
+          "on_screen_text_zh": "轉捩：不再遮掩",
+          "material_requirements": [
+            "窯爐設定",
+            "裂紋連續性"
+          ],
+          "ai_prompt_zh": "成年林澄打開窯門，白杯同一條斜裂紋貫穿後續鏡頭；近鏡手指沿裂紋上深藍釉，動作自然。"
+        },
+        {
+          "order": 4,
+          "role": "practice",
+          "start_seconds": 42,
+          "end_seconds": 60,
+          "visual_description_zh": "多件不同裂紋作品排列，日夜創作蒙太奇。",
+          "dialogue_or_narration_zh": "我開始記低每一次溫度、濕度同結果。裂痕唔再係藉口，而係提醒：我仲有嘢未學識。",
+          "on_screen_text_zh": "裂痕不是答案，是紀錄",
+          "material_requirements": [
+            "作品連續性表",
+            "日夜光線版本"
+          ],
+          "ai_prompt_zh": "同一工作室與服裝；桌上五件杯形狀一致、裂紋各異，日夜光線交替，手部不變形，避免神化。"
+        },
+        {
+          "order": 5,
+          "role": "meaning",
+          "start_seconds": 60,
+          "end_seconds": 76,
+          "visual_description_zh": "展覽中觀眾近看裂紋，藝術家站遠處。",
+          "dialogue_or_narration_zh": "有人話嗰啲線好靚。只有我知道，靚唔係因為壞過，而係我終於肯面對點樣壞。",
+          "on_screen_text_zh": "面對，而不是美化傷痕",
+          "material_requirements": [
+            "虛構展覽設定",
+            "觀眾肖像避免特定真人"
+          ],
+          "ai_prompt_zh": "白色虛構展覽空間，作品與前鏡一致；觀眾只拍背影，林澄在遠處，克制表情，緩慢推近。"
+        },
+        {
+          "order": 6,
+          "role": "question",
+          "start_seconds": 76,
+          "end_seconds": 96,
+          "visual_description_zh": "她把第一隻裂杯放回桌上，窯火熄暗。",
+          "dialogue_or_narration_zh": "如果完整先值得被看見，我哋要收埋幾多自己？我唔知道裂痕會唔會變好，但我會繼續記住佢點樣出現。",
+          "on_screen_text_zh": "你會收埋，還是留下？",
+          "material_requirements": [
+            "首尾同一杯",
+            "原創旁白"
+          ],
+          "ai_prompt_zh": "回到第一鏡同一杯、同一裂紋、同一工衣；窯火由亮變暗，鏡頭停在手放開杯的一刻，無文字由模型生成。"
+        }
+      ],
+      "project_material_requirements": [
+        "固定角色三視圖",
+        "工作室與杯子連續性表",
+        "後期繁中字幕",
+        "AI 生成標示"
+      ],
+      "evidence_requirements": [],
+      "continuity_requirements": [
+        "角色髮型、工衣與年齡階段固定",
+        "第一隻杯裂紋方向每鏡一致",
+        "字幕由後期加入"
+      ],
+      "generation": {
+        "enabled": false,
+        "runs": 0,
+        "paid_api_calls": 0,
+        "credits_used": 0
+      }
+    },
+    {
+      "style_code": "ai_cinematic_founder_biography",
+      "style_name_zh": "電影感創辦人傳記",
+      "format": "ai_short_video",
+      "script_title_zh": "一把修了四十年的傘：木生傘房",
+      "status": "original_demonstration",
+      "originality_notice_zh": "原創虛構 AI 示範；所有人物、品牌與情節均為虛構，畫面須標示 AI 生成。「梁木生」與「木生傘房」均為虛構，不可當成真實品牌史。",
+      "duration_seconds": 90,
+      "segment_count": 6,
+      "timeline": [
+        {
+          "order": 1,
+          "role": "person",
+          "start_seconds": 0,
+          "end_seconds": 10,
+          "visual_description_zh": "1950年代風格的虛構南方街巷，少年梁木生在傘舖門外。",
+          "dialogue_or_narration_zh": "梁木生十三歲入傘舖，第一份工作唔係整傘，而係把每一條斷骨分類。",
+          "on_screen_text_zh": "虛構品牌史｜AI 生成",
+          "material_requirements": [
+            "三年齡角色設定",
+            "年代場景設定"
+          ],
+          "ai_prompt_zh": "1950年代虛構南方城市，十三歲梁木生，瘦削、左眉小痣、深藍短衫；雨中傘舖外，中景，歷史重現風格並標示AI。"
+        },
+        {
+          "order": 2,
+          "role": "problem",
+          "start_seconds": 10,
+          "end_seconds": 25,
+          "visual_description_zh": "颱風後滿地壞傘，少年逐支拆解。",
+          "dialogue_or_narration_zh": "佢發現最多人掉低嘅，唔係完全爛嘅傘，而係只斷一節、冇人願意修嘅傘。",
+          "on_screen_text_zh": "問題：小故障變成整把丟棄",
+          "material_requirements": [
+            "壞傘道具設定"
+          ],
+          "ai_prompt_zh": "同一少年與街巷；颱風後濕地，成排斷一節的黑傘，手部拆解金屬傘骨，無現代物件。"
+        },
+        {
+          "order": 3,
+          "role": "craft",
+          "start_seconds": 25,
+          "end_seconds": 43,
+          "visual_description_zh": "青年版本在工坊畫出可換傘骨結構。",
+          "dialogue_or_narration_zh": "二十五歲，佢設計一個可以單獨換骨嘅接位。示範故事只講可見結構，不聲稱真實專利。",
+          "on_screen_text_zh": "虛構設計｜非真實專利",
+          "material_requirements": [
+            "青年角色圖",
+            "結構草圖"
+          ],
+          "ai_prompt_zh": "二十五歲梁木生，保留左眉小痣；木工坊俯拍，自製可換傘骨接位，圖紙文字留白供後期，機械接觸合理。"
+        },
+        {
+          "order": 4,
+          "role": "shop",
+          "start_seconds": 43,
+          "end_seconds": 60,
+          "visual_description_zh": "成年梁木生開設小舖，牆上掛着修好的舊傘。",
+          "dialogue_or_narration_zh": "佢冇叫間舖做「百年老店」，只寫一句：修得到，就唔使急住換。",
+          "on_screen_text_zh": "木生傘房｜虛構",
+          "material_requirements": [
+            "成年角色圖",
+            "虛構招牌後製"
+          ],
+          "ai_prompt_zh": "四十歲梁木生，同一輪廓與小痣；小店掛滿修好舊傘，招牌位置留白，雨光從門外照入。"
+        },
+        {
+          "order": 5,
+          "role": "legacy",
+          "start_seconds": 60,
+          "end_seconds": 75,
+          "visual_description_zh": "女兒接手，用平板記錄零件但保留舊工具。",
+          "dialogue_or_narration_zh": "下一代改用數碼記錄零件，舊鉗就繼續留喺枱面。傳承唔係複製做法，而係保留點解要修。",
+          "on_screen_text_zh": "工具改變，理由留下",
+          "material_requirements": [
+            "第二代角色設定",
+            "舊鉗連續性"
+          ],
+          "ai_prompt_zh": "成年女兒與年老梁木生同框，舊鉗位置固定，平板無可讀文字，溫暖自然光，角色比例穩定。"
+        },
+        {
+          "order": 6,
+          "role": "close",
+          "start_seconds": 75,
+          "end_seconds": 90,
+          "visual_description_zh": "雨街上不同年代的人撐着修好的傘，最後回到空工坊。",
+          "dialogue_or_narration_zh": "一間虛構小店嘅價值，唔在於講到幾傳奇，而係每一把被留下來嘅傘，都有可見理由。",
+          "on_screen_text_zh": "原創虛構示範",
+          "material_requirements": [
+            "年代連續鏡頭",
+            "AI標示"
+          ],
+          "ai_prompt_zh": "同一虛構街道跨三個年代匹配轉場，傘形一致、服裝年代正確，最後空工坊與舊鉗近鏡。"
+        }
+      ],
+      "project_material_requirements": [
+        "人物三階段角色表",
+        "年代與工坊設定",
+        "傘骨結構設定",
+        "後期來源與AI標示"
+      ],
+      "evidence_requirements": [],
+      "continuity_requirements": [
+        "左眉小痣與輪廓跨年齡一致",
+        "舊鉗及可換傘骨位置一致",
+        "不生成可讀品牌字，由後期排版"
+      ],
+      "generation": {
+        "enabled": false,
+        "runs": 0,
+        "paid_api_calls": 0,
+        "credits_used": 0
+      }
+    },
+    {
+      "style_code": "ai_absurd_twist_microdrama",
+      "style_name_zh": "AI 荒誕反轉微劇",
+      "format": "ai_short_video",
+      "script_title_zh": "隻貓偷咗廚師帽，然後開始點餐",
+      "status": "original_demonstration",
+      "originality_notice_zh": "原創虛構 AI 示範；所有人物、品牌與情節均為虛構，畫面須標示 AI 生成。",
+      "duration_seconds": 12,
+      "segment_count": 5,
+      "timeline": [
+        {
+          "order": 1,
+          "role": "setup",
+          "start_seconds": 0,
+          "end_seconds": 3,
+          "visual_description_zh": "空餐廳廚房，廚師把帽放在桌上轉身。",
+          "dialogue_or_narration_zh": "旁白：佢只係離開咗三秒。",
+          "on_screen_text_zh": "AI 原創微劇",
+          "material_requirements": [
+            "廚師角色圖",
+            "橘貓角色圖"
+          ],
+          "ai_prompt_zh": "固定白制服廚師與肥橘貓；廚房廣角，廚師放下高帽轉身，帽與貓比例穩定。"
+        },
+        {
+          "order": 2,
+          "role": "action",
+          "start_seconds": 3,
+          "end_seconds": 6,
+          "visual_description_zh": "橘貓跳上桌，把帽套到頭上。",
+          "dialogue_or_narration_zh": "廚師：喂——",
+          "on_screen_text_zh": "帽子被偷",
+          "material_requirements": [
+            "帽子物理互動"
+          ],
+          "ai_prompt_zh": "同一機位，橘貓單一跳躍動作後戴上帽，帽不穿模，廚師在背景轉身。"
+        },
+        {
+          "order": 3,
+          "role": "expectation",
+          "start_seconds": 6,
+          "end_seconds": 9,
+          "visual_description_zh": "廚師追上前，貓抬爪指向餐牌。",
+          "dialogue_or_narration_zh": "旁白：大家都以為佢想逃走。",
+          "on_screen_text_zh": "預期：逃走",
+          "material_requirements": [
+            "餐牌留白"
+          ],
+          "ai_prompt_zh": "中近景，橘貓戴同一頂帽，抬右爪指向牆上留白餐牌，廚師停步。"
+        },
+        {
+          "order": 4,
+          "role": "twist",
+          "start_seconds": 9,
+          "end_seconds": 11,
+          "visual_description_zh": "三隻老鼠排隊坐到吧枱，貓敲一下小鈴。",
+          "dialogue_or_narration_zh": "叮。",
+          "on_screen_text_zh": "反轉：今晚由貓主理",
+          "material_requirements": [
+            "老鼠角色設定",
+            "小鈴"
+          ],
+          "ai_prompt_zh": "吧枱正面，三隻卡通化老鼠整齊坐好，橘貓敲鈴一次，保持寫實喜劇比例。"
+        },
+        {
+          "order": 5,
+          "role": "tag",
+          "start_seconds": 11,
+          "end_seconds": 12,
+          "visual_description_zh": "廚師默默遞上點餐簿。",
+          "dialogue_or_narration_zh": "廚師：咁……主廚請。",
+          "on_screen_text_zh": "原創虛構｜AI 生成",
+          "material_requirements": [
+            "收尾反應"
+          ],
+          "ai_prompt_zh": "廚師雙手遞空白點餐簿，橘貓嚴肅點頭，硬切黑。"
+        }
+      ],
+      "project_material_requirements": [
+        "固定廚師與橘貓角色圖",
+        "廚房場景圖",
+        "帽子與鈴道具表",
+        "後期字幕"
+      ],
+      "evidence_requirements": [],
+      "continuity_requirements": [
+        "貓全片戴同一頂帽",
+        "左右方向不跳軸",
+        "每鏡只安排一個主要動作"
+      ],
+      "generation": {
+        "enabled": false,
+        "runs": 0,
+        "paid_api_calls": 0,
+        "credits_used": 0
+      }
+    },
+    {
+      "style_code": "ai_continuity_ensemble_skit",
+      "style_name_zh": "AI 多角色連續情境短劇",
+      "format": "ai_short_video",
+      "script_title_zh": "三個室友，只有一個人記得交電費",
+      "status": "original_demonstration",
+      "originality_notice_zh": "原創虛構 AI 示範；所有人物、品牌與情節均為虛構，畫面須標示 AI 生成。",
+      "duration_seconds": 90,
+      "segment_count": 6,
+      "timeline": [
+        {
+          "order": 1,
+          "role": "ensemble_setup",
+          "start_seconds": 0,
+          "end_seconds": 12,
+          "visual_description_zh": "固定三位虛構室友在客廳，燈突然熄滅。",
+          "dialogue_or_narration_zh": "阿澄：又停電？米米：今次邊個話自己交咗？浩然默默放低遊戲手掣。",
+          "on_screen_text_zh": "原創虛構室友組",
+          "material_requirements": [
+            "三角色設定",
+            "客廳設定"
+          ],
+          "ai_prompt_zh": "三名固定角色：短髮阿澄、紅眼鏡米米、捲髮浩然；同一客廳沙發位置固定，燈熄後月光照明。"
+        },
+        {
+          "order": 2,
+          "role": "scene_1",
+          "start_seconds": 12,
+          "end_seconds": 27,
+          "visual_description_zh": "廚房只剩雪櫃小燈，三人用手機照明找單據。",
+          "dialogue_or_narration_zh": "浩然：我記得撳過付款。米米：你撳嗰個係「稍後提醒」。",
+          "on_screen_text_zh": "線索一：稍後提醒",
+          "material_requirements": [
+            "廚房布局",
+            "手機畫面後期"
+          ],
+          "ai_prompt_zh": "三角色服裝不變，廚房雪櫃在畫面右側；手機螢幕留白後期加字，避免模型生成文字。"
+        },
+        {
+          "order": 3,
+          "role": "scene_2",
+          "start_seconds": 27,
+          "end_seconds": 42,
+          "visual_description_zh": "走廊配電箱前，阿澄查看而不觸碰危險部件。",
+          "dialogue_or_narration_zh": "阿澄：先唔好亂掂。停電原因未確認，搵管理處。",
+          "on_screen_text_zh": "安全：不自行拆電箱",
+          "material_requirements": [
+            "走廊設定",
+            "配電箱安全標示"
+          ],
+          "ai_prompt_zh": "同一公寓走廊，三人站位固定；阿澄只用手電照標籤，不打開配電箱，保持安全。"
+        },
+        {
+          "order": 4,
+          "role": "scene_3",
+          "start_seconds": 42,
+          "end_seconds": 60,
+          "visual_description_zh": "管理處回覆後，三人發現只是智能燈泡離線，其他電器仍運作。",
+          "dialogue_or_narration_zh": "米米：雪櫃有電。阿澄：所以唔係停電。浩然：即係我……仍然要交電費？",
+          "on_screen_text_zh": "誤會：只有智能燈離線",
+          "material_requirements": [
+            "智能燈道具",
+            "管理處回覆後期卡"
+          ],
+          "ai_prompt_zh": "回到客廳，同一沙發與燈具；雪櫃遠處亮着，智能燈紅色離線指示，三人反應連續。"
+        },
+        {
+          "order": 5,
+          "role": "running_gag",
+          "start_seconds": 60,
+          "end_seconds": 75,
+          "visual_description_zh": "浩然嘗試重連燈泡，語音助手把燈轉成派對模式。",
+          "dialogue_or_narration_zh": "語音助手：已播放「交電費提醒」歌單。三人：唔好呀！",
+          "on_screen_text_zh": "角色習慣回收",
+          "material_requirements": [
+            "派對燈光",
+            "原創提示音"
+          ],
+          "ai_prompt_zh": "同一客廳，浩然拿手機，燈光依次轉紫藍，不改角色服裝與位置，鏡頭緩慢拉遠。"
+        },
+        {
+          "order": 6,
+          "role": "resolution",
+          "start_seconds": 75,
+          "end_seconds": 90,
+          "visual_description_zh": "三人把繳費與家電維護分成兩張清單。",
+          "dialogue_or_narration_zh": "阿澄：一張真繳費，一張智能家居。米米：最重要係，唔好再由浩然負責提醒。",
+          "on_screen_text_zh": "兩張清單｜後期排版",
+          "material_requirements": [
+            "清單道具",
+            "餐桌場景"
+          ],
+          "ai_prompt_zh": "三人坐同一餐桌，兩張空白清單由後期加入繁中，角色手部自然，每人一個反應。"
+        }
+      ],
+      "project_material_requirements": [
+        "三角色 turnaround",
+        "客廳、廚房、走廊連續性圖",
+        "服裝與道具表",
+        "後期字幕及手機畫面"
+      ],
+      "evidence_requirements": [],
+      "continuity_requirements": [
+        "三角色面貌、身高、服裝全片固定",
+        "客廳與廚房左右關係一致",
+        "手機及燈光文字後期製作",
+        "不示範危險電力操作"
+      ],
+      "generation": {
+        "enabled": false,
+        "runs": 0,
+        "paid_api_calls": 0,
+        "credits_used": 0
+      }
+    },
+    {
+      "style_code": "ai_host_time_travel_tour",
+      "style_name_zh": "AI 實景主持穿越導覽",
+      "format": "ai_short_video",
+      "script_title_zh": "如果我去到 2099 年的海上街市",
+      "status": "original_demonstration",
+      "originality_notice_zh": "原創虛構未來導覽；不是歷史或科學預測，所有場景均須標示 AI 生成。",
+      "duration_seconds": 90,
+      "segment_count": 7,
+      "timeline": [
+        {
+          "order": 1,
+          "role": "portal",
+          "start_seconds": 0,
+          "end_seconds": 10,
+          "visual_description_zh": "真人主持在現代碼頭踏入發光門框，轉到虛構海上街市。",
+          "dialogue_or_narration_zh": "我設定嘅目的地唔係過去，係一個完全虛構嘅 2099 年海上街市。",
+          "on_screen_text_zh": "原創未來設定｜AI 生成",
+          "material_requirements": [
+            "主持授權影像",
+            "角色 reference",
+            "現代碼頭plate"
+          ],
+          "ai_prompt_zh": "保留真人主持面貌、身形、灰色外套與手持相機；現代碼頭一鏡穿越到虛構2099海上街市，門框作匹配轉場。"
+        },
+        {
+          "order": 2,
+          "role": "arrival",
+          "start_seconds": 10,
+          "end_seconds": 25,
+          "visual_description_zh": "主持沿浮橋前行，兩側模組攤檔隨浪輕動。",
+          "dialogue_or_narration_zh": "第一站係浮橋。呢度嘅結構只係世界觀設計，唔當工程可行性結論。",
+          "on_screen_text_zh": "第 1 站｜浮橋街市",
+          "material_requirements": [
+            "浮橋設定圖",
+            "主持走路 reference"
+          ],
+          "ai_prompt_zh": "同一主持與鏡頭高度；廣角跟拍浮橋，模組攤檔小幅上下，腳與橋面接觸穩定，避免危險巨浪。"
+        },
+        {
+          "order": 3,
+          "role": "stall",
+          "start_seconds": 25,
+          "end_seconds": 40,
+          "visual_description_zh": "虛構攤主展示會變色的透明菜葉，主持不入口。",
+          "dialogue_or_narration_zh": "第二站賣嘅係虛構「潮汐菜」。我哋只介紹設定，唔聲稱可以食或者有營養功效。",
+          "on_screen_text_zh": "虛構食材｜不可食用聲稱",
+          "material_requirements": [
+            "攤主角色圖",
+            "虛構食材設定"
+          ],
+          "ai_prompt_zh": "固定攤主、透明藍綠葉片在盒內變色；主持只觀察不進食，近鏡材質一致，文字後期加入。"
+        },
+        {
+          "order": 4,
+          "role": "transport",
+          "start_seconds": 40,
+          "end_seconds": 55,
+          "visual_description_zh": "小型無人運輸艇把箱子送到下一區，主持在安全線後。",
+          "dialogue_or_narration_zh": "貨物唔經人手搬，而係由虛構運輸艇接走。速度同能源都唔落實數字。",
+          "on_screen_text_zh": "第 3 站｜運輸區",
+          "material_requirements": [
+            "艇與箱設定",
+            "安全線"
+          ],
+          "ai_prompt_zh": "同一浮橋世界，方形運輸艇慢速靠岸，箱子單一機械臂搬運，主持站在黃線後，物理接觸清楚。"
+        },
+        {
+          "order": 5,
+          "role": "social_detail",
+          "start_seconds": 55,
+          "end_seconds": 70,
+          "visual_description_zh": "居民用可重用容器交換物品，主持展示空容器。",
+          "dialogue_or_narration_zh": "我最鍾意嘅唔係科技，而係一個設定：每個容器都有下一個主人。",
+          "on_screen_text_zh": "世界觀細節｜非真實政策",
+          "material_requirements": [
+            "居民群像設定",
+            "容器設計"
+          ],
+          "ai_prompt_zh": "三位固定背景居民交換同款六角容器；主持手持空容器，群像不變形，柔和黃昏光。"
+        },
+        {
+          "order": 6,
+          "role": "return",
+          "start_seconds": 70,
+          "end_seconds": 82,
+          "visual_description_zh": "天色變暗，發光門框再次出現，主持回到現代碼頭。",
+          "dialogue_or_narration_zh": "如果未來真係要住喺海上，我想帶走嘅唔係答案，而係今日應該問清楚嘅問題。",
+          "on_screen_text_zh": "虛構導覽結束",
+          "material_requirements": [
+            "返回轉場",
+            "同一碼頭plate"
+          ],
+          "ai_prompt_zh": "主持外套與相機不變，未來黃昏門框匹配切回現代碼頭藍調，步伐連續，無模型文字。"
+        },
+        {
+          "order": 7,
+          "role": "close",
+          "start_seconds": 82,
+          "end_seconds": 90,
+          "visual_description_zh": "主持對鏡，身後只剩普通海面。",
+          "dialogue_or_narration_zh": "以上全部係原創未來世界，不是預測。下一站，你想我去邊？",
+          "on_screen_text_zh": "原創虛構｜非預測",
+          "material_requirements": [
+            "主持收尾",
+            "AI標示"
+          ],
+          "ai_prompt_zh": "現代碼頭中景，主持直視鏡頭，海面自然，右下留空供後期AI生成標示與提問字卡。"
+        }
+      ],
+      "project_material_requirements": [
+        "主持身份授權 reference",
+        "未來街市場景 bible",
+        "角色與道具連續性表",
+        "後期字幕及AI標示"
+      ],
+      "evidence_requirements": [],
+      "continuity_requirements": [
+        "主持面貌、外套、相機與聲音一致",
+        "浮橋、攤檔、艇與容器共用世界觀尺度",
+        "所有可讀文字後期製作",
+        "每鏡最多一個主要動作"
+      ],
+      "generation": {
+        "enabled": false,
+        "runs": 0,
+        "paid_api_calls": 0,
+        "credits_used": 0
+      }
+    }
+  ]
+}

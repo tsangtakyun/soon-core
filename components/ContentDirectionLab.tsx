@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { TemplateCanvasPreview } from "@/components/TemplateCanvasPreview";
+import demoScriptPackage from "@/data/content-direction-demo-scripts.json";
 import { approvedStylePreview } from "@/lib/approved-style-previews";
 import { videoStyleCover } from "@/lib/video-style-covers";
 
@@ -107,6 +108,32 @@ type VideoReferenceRestoration = {
   rightsState: string;
   timeline: RestorationSegment[];
   unverified: string[];
+};
+type DemoScriptBeat = {
+  order: number;
+  role: string;
+  start_seconds: number;
+  end_seconds: number;
+  visual_description_zh: string;
+  dialogue_or_narration_zh: string;
+  on_screen_text_zh: string;
+  material_requirements: string[];
+  ai_prompt_zh?: string;
+};
+type DemoScript = {
+  style_code: string;
+  style_name_zh: string;
+  format: "human_short_video" | "ai_short_video";
+  script_title_zh: string;
+  status: "original_demonstration";
+  originality_notice_zh: string;
+  duration_seconds: number;
+  segment_count: number;
+  timeline: DemoScriptBeat[];
+  project_material_requirements: string[];
+  evidence_requirements: string[];
+  continuity_requirements: string[];
+  generation: { enabled: boolean; runs: number; paid_api_calls: number; credits_used: number };
 };
 type ReconstructionShot = {
   shot_id?: string;
@@ -610,6 +637,9 @@ export function ContentDirectionLab() {
       : null;
   const selectedPublishedVideo = typeof selectedPublishedPreview?.video === "string" ? selectedPublishedPreview.video : "";
   const selectedSpecificationRules = selectedInternalSpecification?.rules ?? selectedPublishedStyle?.version.rules ?? null;
+  const selectedDemoScript = (demoScriptPackage.scripts as DemoScript[]).find(
+    (script) => script.style_code === selectedVideoStyleCode,
+  ) ?? null;
 
   function openVideoStyle(code: string, trigger: HTMLButtonElement) {
     lastVideoStyleTriggerRef.current = trigger;
@@ -977,11 +1007,49 @@ export function ContentDirectionLab() {
               <section className="detail-artifact-section" aria-labelledby="demo-script-title">
                 <div className="detail-section-heading">
                   <div>
-                    <small>示範劇本</small>
-                    <h3 id="demo-script-title">未有示範劇本</h3>
-                    <p>目前只有原片還原稿及風格規格，未建立獨立示範劇本。原片內容不會當作示範稿。</p>
+                    <small>獨立原創示範劇本</small>
+                    <h3 id="demo-script-title">{selectedDemoScript?.script_title_zh ?? "未有示範劇本"}</h3>
+                    <p>{selectedDemoScript?.originality_notice_zh ?? "此風格尚未建立獨立示範劇本。原片內容不會當作示範稿。"}</p>
                   </div>
+                  {selectedDemoScript ? <strong>{selectedDemoScript.duration_seconds}s／{selectedDemoScript.segment_count} 段</strong> : null}
                 </div>
+                {selectedDemoScript ? (
+                  <details className="restoration-card" open>
+                    <summary>
+                      <span><b>{selectedDemoScript.style_name_zh}</b><small>原創示範</small></span>
+                      <span>{selectedDemoScript.format === "ai_short_video" ? "AI 短片" : "真人短片"} · 完整連續時間軸</span>
+                      <strong>{selectedDemoScript.duration_seconds}s</strong>
+                    </summary>
+                    <div className="restoration-body">
+                      <div className="status-grid">
+                        <span><b>內容狀態</b>獨立原創示範</span>
+                        <span><b>製作狀態</b>未拍攝／未生成</span>
+                        <span><b>生成用量</b>API {selectedDemoScript.generation.paid_api_calls}／credits {selectedDemoScript.generation.credits_used}</span>
+                      </div>
+                      <div className="timeline-list">
+                        {selectedDemoScript.timeline.map((beat) => (
+                          <article key={`${selectedDemoScript.style_code}-${beat.order}`}>
+                            <header>
+                              <b>{beat.start_seconds.toFixed(2)}–{beat.end_seconds.toFixed(2)}s</b>
+                              <span>段落 {beat.order}</span>
+                              <span>{beat.role}</span>
+                            </header>
+                            <p><b>畫面：</b>{beat.visual_description_zh}</p>
+                            <p><b>對白／旁白：</b>{beat.dialogue_or_narration_zh}</p>
+                            <p><b>畫面文字：</b>{beat.on_screen_text_zh}</p>
+                            <p><b>本段素材：</b>{beat.material_requirements.join("；")}</p>
+                            {beat.ai_prompt_zh ? <p><b>AI 鏡頭 Prompt：</b>{beat.ai_prompt_zh}</p> : null}
+                          </article>
+                        ))}
+                      </div>
+                      <div className="demo-requirements">
+                        <div><b>項目素材</b><ul>{selectedDemoScript.project_material_requirements.map((item) => <li key={item}>{item}</li>)}</ul></div>
+                        {selectedDemoScript.evidence_requirements.length ? <div><b>核實要求</b><ul>{selectedDemoScript.evidence_requirements.map((item) => <li key={item}>{item}</li>)}</ul></div> : null}
+                        {selectedDemoScript.continuity_requirements.length ? <div><b>連續性要求</b><ul>{selectedDemoScript.continuity_requirements.map((item) => <li key={item}>{item}</li>)}</ul></div> : null}
+                      </div>
+                    </div>
+                  </details>
+                ) : null}
               </section>
 
               {registryFormat === "ai_short_video" && selectedPromptSets.length ? (
@@ -2104,6 +2172,23 @@ export function ContentDirectionLab() {
           line-height: 1.5;
         }
         .timeline-list p b { color: #ddd; }
+        .demo-requirements {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+          gap: 8px;
+          margin-top: 12px;
+        }
+        .demo-requirements > div {
+          border: 1px solid #302b37;
+          border-radius: 8px;
+          background: #1c1920;
+          padding: 10px;
+          color: #aaa;
+          font-size: 10px;
+        }
+        .demo-requirements b { color: #ddd; }
+        .demo-requirements ul { margin: 7px 0 0; padding-left: 17px; }
+        .demo-requirements li { margin: 4px 0; line-height: 1.45; }
         .unverified {
           margin-top: 11px;
           border: 1px solid #713f12;

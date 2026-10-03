@@ -61,6 +61,16 @@ const founder = entries.find((entry) => entry.style_code === 'ai_cinematic_found
 if (!founder?.timeline.some((segment) => /From time to time to time/i.test(segment.speech_raw_asr))) {
   throw new Error('Founder raw ASR must preserve the original repeated hallucination for provenance')
 }
+
+const artist = entries.find((entry) => entry.style_code === 'ai_artist_reflective_monologue')
+const expectedArtistCuts = [0, 19.16, 34.22, 55.82, 75.64, 90.96, 108.12, 136.44, 151.716]
+if (!artist || artist.timeline.some((segment, index) => segment.start_seconds !== expectedArtistCuts[index] || segment.end_seconds !== expectedArtistCuts[index + 1])) {
+  throw new Error('Artist restoration timeline no longer follows the verified ASR sentence boundaries')
+}
+if (!artist.timeline[0].speech_or_narration_zh.includes('我直到二十七歲才決定成為一名畫家')
+  || artist.timeline[7].speech_or_narration_zh.includes('我不知道堅持是否一定會等來掌聲')) {
+  throw new Error('Artist display transcript has a missing or cross-segment sentence')
+}
 if (founder.timeline.some((segment) => /From time to time to time/i.test(segment.speech_or_narration_zh))) {
   throw new Error('Founder display transcript exposes a raw ASR hallucination')
 }
