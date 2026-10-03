@@ -229,7 +229,7 @@ async function applyPublishedVideoReferenceRestorations(actorId: string | null) 
 
   const inserted: string[] = []
   const updated: string[] = []
-  for (const entry of entries) {
+  await Promise.all(entries.map(async (entry) => {
     const style = styleByCode.get(entry.style_code)
     if (!style) throw new Error(`Published target style missing for ${entry.style_code}`)
     const version = (versions ?? [])
@@ -264,7 +264,7 @@ async function applyPublishedVideoReferenceRestorations(actorId: string | null) 
       if (insertError) throw insertError
       inserted.push(url)
     }
-  }
+  }))
   return { inserted, updated }
 }
 
@@ -318,7 +318,7 @@ async function applyAiReconstructionPromptSets(actorId: string | null) {
   if (versionError) throw versionError
   const inserted: string[] = []
   const updated: string[] = []
-  for (const entry of reconstructionPackage.styles) {
+  await Promise.all(reconstructionPackage.styles.map(async (entry) => {
     const style = styleByCode.get(entry.style_code)
     if (!style) throw new Error(`Target style missing for ${entry.style_code}`)
     const version = (versions ?? [])
@@ -388,7 +388,7 @@ async function applyAiReconstructionPromptSets(actorId: string | null) {
       if (insertError) throw insertError
       inserted.push(url)
     }
-  }
+  }))
   return { inserted, updated }
 }
 
@@ -406,7 +406,7 @@ export async function applyVideoReferenceRestorations(actorId: string | null) {
 
   const inserted: string[] = []
   const updated: string[] = []
-  for (const entry of entries) {
+  await Promise.all(entries.map(async (entry) => {
     const code = targetStyleCode(entry)
     const style = styleByCode.get(code)
     if (!style) throw new Error(`Target style missing for ${code}`)
@@ -445,9 +445,11 @@ export async function applyVideoReferenceRestorations(actorId: string | null) {
       if (insertError) throw insertError
       inserted.push(url)
     }
-  }
-  const publishedRestorations = await applyPublishedVideoReferenceRestorations(actorId)
-  const promptSets = await applyAiReconstructionPromptSets(actorId)
+  }))
+  const [publishedRestorations, promptSets] = await Promise.all([
+    applyPublishedVideoReferenceRestorations(actorId),
+    applyAiReconstructionPromptSets(actorId),
+  ])
   return {
     source: SOURCE_PREFIX,
     publishedSource: PUBLISHED_SOURCE_PREFIX,
