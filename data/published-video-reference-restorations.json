@@ -32,9 +32,9 @@
         {
           "order": 1,
           "start_seconds": 0,
-          "end_seconds": 19,
-          "visual_description_zh": "咖啡店牆上的《向日葵》與日常物件開場，建立梵高在當代無處不在、在生前卻未獲承認的反差。",
-          "speech_or_narration_zh": "我叫文森特・梵高。今天，你在博物館、課本，甚至咖啡館的牆上，都能看見我的名字。可我活著的時候，幾乎無法靠畫畫養活自己。",
+          "end_seconds": 19.16,
+          "visual_description_zh": "咖啡店牆上的《向日葵》與日常物件開場，建立梵高在當代無處不在、在生前卻未獲承認的反差，並帶到二十七歲才決定成為畫家。",
+          "speech_or_narration_zh": "我叫文森特・梵高。今天，你在博物館、課本，甚至咖啡館的牆上，都能看見我的名字。可我活著的時候，幾乎無法靠畫畫養活自己。我直到二十七歲才決定成為一名畫家。",
           "speech_source": "asr_assisted_display_cleaned_raw_preserved",
           "on_screen_text_zh": null,
           "verification": {
@@ -119,16 +119,16 @@
               "no_speech_probability": 1.5037263101369547e-11
             }
           ],
-          "speech_asr_cleaned": "我叫文森特・梵高。今天，你在博物館、課本，甚至咖啡館的牆上，都能看見我的名字。可我活著的時候，幾乎無法靠畫畫養活自己。",
+          "speech_asr_cleaned": "我叫文森特・梵高。今天，你在博物館、課本，甚至咖啡館的牆上，都能看見我的名字。可我活著的時候，幾乎無法靠畫畫養活自己。我直到二十七歲才決定成為一名畫家。",
           "raw_asr_provenance": "verbatim_from_/tmp/published-reference-restorations/<style_code>.transcript.json",
           "display_transcript_status": "usable_pending_manual_audio_verification"
         },
         {
           "order": 2,
-          "start_seconds": 19,
-          "end_seconds": 39,
-          "visual_description_zh": "人工智能生成的年輕梵高在窗邊及畫架前作畫，配合他到二十七歲才立志成為畫家的自述。",
-          "speech_or_narration_zh": "我直到二十七歲才決定成為一名畫家。此前我做過畫商、教師和傳教士，卻一直找不到自己的位置。",
+          "start_seconds": 19.16,
+          "end_seconds": 34.22,
+          "visual_description_zh": "人工智能生成的年輕梵高在窗邊及畫架前作畫，交代他做過畫商、教師和傳教士，以及以繪畫代替言語的動機。",
+          "speech_or_narration_zh": "此前我做過畫商、教師和傳教士，卻一直找不到自己的位置。後來我想，也許繪畫能替我說出那些說不出口的話。",
           "speech_source": "asr_assisted_display_cleaned_raw_preserved",
           "on_screen_text_zh": null,
           "verification": {
@@ -138,16 +138,8 @@
           },
           "notes": "片中涉及的品牌、歷史、價格、認證或功效均只屬原片說法，尚未外部事實核實。",
           "verification_frame_path": "ai_artist_reflective_monologue-sheet.jpg",
-          "speech_raw_asr": "才决定成为一名画家此前我做过画商教师和传教师却一直找不到自己的位置后来我想也许绘画能替我说出那些说不出口的话我画农民画自己的脸画阿尔勒的卧室",
+          "speech_raw_asr": "此前我做过画商教师和传教师却一直找不到自己的位置后来我想也许绘画能替我说出那些说不出口的话",
           "speech_raw_asr_segments": [
-            {
-              "start_seconds": 17.04,
-              "end_seconds": 19.16,
-              "text": "才决定成为一名画家",
-              "temperature": 0.0,
-              "compression_ratio": 1.1956521739130435,
-              "no_speech_probability": 1.5037263101369547e-11
-            },
             {
               "start_seconds": 20.06,
               "end_seconds": 20.84,
@@ -203,7 +195,29 @@
               "temperature": 0.0,
               "compression_ratio": 1.1730769230769231,
               "no_speech_probability": 1.0581679629750873e-11
-            },
+            }
+          ],
+          "speech_asr_cleaned": "此前我做過畫商、教師和傳教士，卻一直找不到自己的位置。後來我想，也許繪畫能替我說出那些說不出口的話。",
+          "raw_asr_provenance": "verbatim_from_/tmp/published-reference-restorations/<style_code>.transcript.json",
+          "display_transcript_status": "usable_pending_manual_audio_verification"
+        },
+        {
+          "order": 3,
+          "start_seconds": 34.22,
+          "end_seconds": 55.82,
+          "visual_description_zh": "墨跡、素描、農民、自畫像、臥室、向日葵、麥田及夜空意象交替，接到十年創作與弟弟提奧的支持。",
+          "speech_or_narration_zh": "我畫農民，畫自己的臉，畫阿爾勒的臥室、向日葵、麥田和夜空。十年間，我不停地畫，卻始終沒有得到廣泛認可。連顏料和生活費，也常常要依靠我的弟弟提奧。",
+          "speech_source": "asr_assisted_display_cleaned_raw_preserved",
+          "on_screen_text_zh": null,
+          "verification": {
+            "visual": "direct_source_sample_frame_manually_checked",
+            "audio": "pending_manual_listening",
+            "translation": "不適用；中文原聲整理"
+          },
+          "notes": "片中涉及的品牌、歷史、價格、認證或功效均只屬原片說法，尚未外部事實核實。",
+          "verification_frame_path": "ai_artist_reflective_monologue-sheet.jpg",
+          "speech_raw_asr": "我画农民画自己的脸画阿尔勒的卧室向日葵麦田和夜空十年间我不停地画却始终没有得到广泛认可连颜料和生活费也常常要依靠我的弟弟提奥",
+          "speech_raw_asr_segments": [
             {
               "start_seconds": 35.42,
               "end_seconds": 36.58,
@@ -220,36 +234,6 @@
               "compression_ratio": 1.1730769230769231,
               "no_speech_probability": 1.0581679629750873e-11
             },
-            {
-              "start_seconds": 38.04,
-              "end_seconds": 40.08,
-              "text": "画阿尔勒的卧室",
-              "temperature": 0.0,
-              "compression_ratio": 1.1730769230769231,
-              "no_speech_probability": 1.0581679629750873e-11
-            }
-          ],
-          "speech_asr_cleaned": "我直到二十七歲才決定成為一名畫家。此前我做過畫商、教師和傳教士，卻一直找不到自己的位置。",
-          "raw_asr_provenance": "verbatim_from_/tmp/published-reference-restorations/<style_code>.transcript.json",
-          "display_transcript_status": "usable_pending_manual_audio_verification"
-        },
-        {
-          "order": 3,
-          "start_seconds": 39,
-          "end_seconds": 58,
-          "visual_description_zh": "墨跡、素描、農民與自畫像意象交替，將早年工作與以繪畫代替言語的動機視覺化。",
-          "speech_or_narration_zh": "後來我想，也許繪畫能替我說出那些說不出口的話。我畫農民，畫自己的臉，畫阿爾勒的臥室、向日葵、麥田和夜空。",
-          "speech_source": "asr_assisted_display_cleaned_raw_preserved",
-          "on_screen_text_zh": null,
-          "verification": {
-            "visual": "direct_source_sample_frame_manually_checked",
-            "audio": "pending_manual_listening",
-            "translation": "不適用；中文原聲整理"
-          },
-          "notes": "片中涉及的品牌、歷史、價格、認證或功效均只屬原片說法，尚未外部事實核實。",
-          "verification_frame_path": "ai_artist_reflective_monologue-sheet.jpg",
-          "speech_raw_asr": "画阿尔勒的卧室向日葵麦田和夜空十年间我不停地画却始终没有得到广泛认可连颜料和生活费也常常要依靠我的弟弟提奥1888年",
-          "speech_raw_asr_segments": [
             {
               "start_seconds": 38.04,
               "end_seconds": 40.08,
@@ -321,26 +305,18 @@
               "temperature": 0.0,
               "compression_ratio": 1.1730769230769231,
               "no_speech_probability": 1.0581679629750873e-11
-            },
-            {
-              "start_seconds": 57.14,
-              "end_seconds": 58.28,
-              "text": "1888年",
-              "temperature": 0.0,
-              "compression_ratio": 1.1730769230769231,
-              "no_speech_probability": 1.0581679629750873e-11
             }
           ],
-          "speech_asr_cleaned": "後來我想，也許繪畫能替我說出那些說不出口的話。我畫農民，畫自己的臉，畫阿爾勒的臥室、向日葵、麥田和夜空。",
+          "speech_asr_cleaned": "我畫農民，畫自己的臉，畫阿爾勒的臥室、向日葵、麥田和夜空。十年間，我不停地畫，卻始終沒有得到廣泛認可。連顏料和生活費，也常常要依靠我的弟弟提奧。",
           "raw_asr_provenance": "verbatim_from_/tmp/published-reference-restorations/<style_code>.transcript.json",
           "display_transcript_status": "usable_pending_manual_audio_verification"
         },
         {
           "order": 4,
-          "start_seconds": 58,
-          "end_seconds": 78,
-          "visual_description_zh": "向日葵、麥田、夜空與寫信畫面快切，交代十年間持續創作及依靠弟弟 Theo 支持。",
-          "speech_or_narration_zh": "十年間，我不停地畫，卻始終沒有得到廣泛認可。連顏料和生活費，也常常要依靠我的弟弟提奧。1888 年，在與高更爭吵以後，我割下了左耳的一部分。",
+          "start_seconds": 55.82,
+          "end_seconds": 75.64,
+          "visual_description_zh": "寫信、爭吵、割耳、療養院及夜色窗景意象，對應高更事件、入住聖雷米及《星夜》的創作背景。",
+          "speech_or_narration_zh": "1888 年，在與高更爭吵以後，我割下了左耳的一部分。後來我住進聖雷米的療養院。精神最混亂的日子裡，我依然望著窗外，畫下那片旋轉的《星夜》。",
           "speech_source": "asr_assisted_display_cleaned_raw_preserved",
           "on_screen_text_zh": null,
           "verification": {
@@ -350,8 +326,16 @@
           },
           "notes": "片中涉及的品牌、歷史、價格、認證或功效均只屬原片說法，尚未外部事實核實。",
           "verification_frame_path": "ai_artist_reflective_monologue-sheet.jpg",
-          "speech_raw_asr": "1888年可靠五更争吵以后我割下了左耳的一部分后来我住进了圣雷米的疗养院精神最混乱的日子里我依然望着窗外画下了那片旋转的新月夜野人看到的是一个古怪",
+          "speech_raw_asr": "也常常要依靠我的弟弟提奥1888年可靠五更争吵以后我割下了左耳的一部分后来我住进了圣雷米的疗养院精神最混乱的日子里我依然望着窗外画下了那片旋转的新月夜",
           "speech_raw_asr_segments": [
+            {
+              "start_seconds": 52.8,
+              "end_seconds": 55.82000000000001,
+              "text": "也常常要依靠我的弟弟提奥",
+              "temperature": 0.0,
+              "compression_ratio": 1.1730769230769231,
+              "no_speech_probability": 1.0581679629750873e-11
+            },
             {
               "start_seconds": 57.14,
               "end_seconds": 58.28,
@@ -415,34 +399,18 @@
               "temperature": 0.0,
               "compression_ratio": 1.1153846153846154,
               "no_speech_probability": 2.643484389719397e-11
-            },
-            {
-              "start_seconds": 76.46000000000001,
-              "end_seconds": 77.82,
-              "text": "野人看到的",
-              "temperature": 0.0,
-              "compression_ratio": 0.8307692307692308,
-              "no_speech_probability": 3.160024672488326e-11
-            },
-            {
-              "start_seconds": 77.82,
-              "end_seconds": 79.3,
-              "text": "是一个古怪",
-              "temperature": 0.0,
-              "compression_ratio": 0.8307692307692308,
-              "no_speech_probability": 3.160024672488326e-11
             }
           ],
-          "speech_asr_cleaned": "十年間，我不停地畫，卻始終沒有得到廣泛認可。連顏料和生活費，也常常要依靠我的弟弟提奧。1888 年，在與高更爭吵以後，我割下了左耳的一部分。",
+          "speech_asr_cleaned": "1888 年，在與高更爭吵以後，我割下了左耳的一部分。後來我住進聖雷米的療養院。精神最混亂的日子裡，我依然望著窗外，畫下那片旋轉的《星夜》。",
           "raw_asr_provenance": "verbatim_from_/tmp/published-reference-restorations/<style_code>.transcript.json",
           "display_transcript_status": "usable_pending_manual_audio_verification"
         },
         {
           "order": 5,
-          "start_seconds": 78,
-          "end_seconds": 98,
-          "visual_description_zh": "夜色窗景、孤獨人物與療養院意象，對應割耳事件、住院及《星夜》的創作背景。",
-          "speech_or_narration_zh": "後來我住進聖雷米的療養院。精神最混亂的日子裡，我依然望著窗外，畫下那片旋轉的《星夜》。別人看到的是一個古怪、貧窮、不斷失控的人；而我想留下的，卻是光、是顏色、是我對這個世界還沒有熄滅的愛。",
+          "start_seconds": 75.64,
+          "end_seconds": 90.96,
+          "visual_description_zh": "孤獨人物、空房與強烈色彩意象，對比外界眼中的古怪與失控，以及他想留下的光、顏色與愛。",
+          "speech_or_narration_zh": "別人看到的是一個古怪、貧窮、不斷失控的人；而我想留下的，卻是光、是顏色、是我對這個世界還沒有熄滅的愛。",
           "speech_source": "asr_assisted_display_cleaned_raw_preserved",
           "on_screen_text_zh": null,
           "verification": {
@@ -452,8 +420,16 @@
           },
           "notes": "片中涉及的品牌、歷史、價格、認證或功效均只屬原片說法，尚未外部事實核實。",
           "verification_frame_path": "ai_artist_reflective_monologue-sheet.jpg",
-          "speech_raw_asr": "是一个古怪贫穷不断失控的人而我想留下的却是光是颜色是我对这个世界还没有熄灭的爱37岁那年我离开了这个世界六个月后提奥也去世了",
+          "speech_raw_asr": "野人看到的是一个古怪贫穷不断失控的人而我想留下的却是光是颜色是我对这个世界还没有熄灭的爱",
           "speech_raw_asr_segments": [
+            {
+              "start_seconds": 76.46000000000001,
+              "end_seconds": 77.82,
+              "text": "野人看到的",
+              "temperature": 0.0,
+              "compression_ratio": 0.8307692307692308,
+              "no_speech_probability": 3.160024672488326e-11
+            },
             {
               "start_seconds": 77.82,
               "end_seconds": 79.3,
@@ -517,7 +493,29 @@
               "temperature": 0.0,
               "compression_ratio": 1.0330578512396693,
               "no_speech_probability": 2.8745743632652143e-11
-            },
+            }
+          ],
+          "speech_asr_cleaned": "別人看到的是一個古怪、貧窮、不斷失控的人；而我想留下的，卻是光、是顏色、是我對這個世界還沒有熄滅的愛。",
+          "raw_asr_provenance": "verbatim_from_/tmp/published-reference-restorations/<style_code>.transcript.json",
+          "display_transcript_status": "usable_pending_manual_audio_verification"
+        },
+        {
+          "order": 6,
+          "start_seconds": 90.96,
+          "end_seconds": 108.12,
+          "visual_description_zh": "人物離世、提奧、喬安娜整理畫作及書信的畫面，交代作品保存及出版。",
+          "speech_or_narration_zh": "三十七歲那年，我離開了這個世界。六個月後，提奧也去世了。後來，是他的妻子喬安娜保存、展出我的畫，整理並出版我們的書信。",
+          "speech_source": "asr_assisted_display_cleaned_raw_preserved",
+          "on_screen_text_zh": null,
+          "verification": {
+            "visual": "direct_source_sample_frame_manually_checked",
+            "audio": "pending_manual_listening",
+            "translation": "不適用；中文原聲整理"
+          },
+          "notes": "片中涉及的品牌、歷史、價格、認證或功效均只屬原片說法，尚未外部事實核實。",
+          "verification_frame_path": "ai_artist_reflective_monologue-sheet.jpg",
+          "speech_raw_asr": "37岁那年我离开了这个世界六个月后提奥也去世了后来是他的妻子乔安娜保存展出我的画整理并出版我们的书信",
+          "speech_raw_asr_segments": [
             {
               "start_seconds": 92.22,
               "end_seconds": 93.7,
@@ -542,36 +540,6 @@
               "compression_ratio": 1.0330578512396693,
               "no_speech_probability": 2.8745743632652143e-11
             },
-            {
-              "start_seconds": 97.62,
-              "end_seconds": 99.66,
-              "text": "提奥也去世了",
-              "temperature": 0.0,
-              "compression_ratio": 0.78,
-              "no_speech_probability": 2.964639991831497e-11
-            }
-          ],
-          "speech_asr_cleaned": "後來我住進聖雷米的療養院。精神最混亂的日子裡，我依然望著窗外，畫下那片旋轉的《星夜》。別人看到的是一個古怪、貧窮、不斷失控的人；而我想留下的，卻是光、是顏色、是我對這個世界還沒有熄滅的愛。",
-          "raw_asr_provenance": "verbatim_from_/tmp/published-reference-restorations/<style_code>.transcript.json",
-          "display_transcript_status": "usable_pending_manual_audio_verification"
-        },
-        {
-          "order": 6,
-          "start_seconds": 98,
-          "end_seconds": 118,
-          "visual_description_zh": "人群疏離、空房與畫架意象，描述外界眼中的貧窮與失控，以及三十七歲離世。",
-          "speech_or_narration_zh": "三十七歲那年，我離開了這個世界。六個月後，提奧也去世了。後來，是他的妻子喬安娜保存、展出我的畫，整理並出版我們的書信。",
-          "speech_source": "asr_assisted_display_cleaned_raw_preserved",
-          "on_screen_text_zh": null,
-          "verification": {
-            "visual": "direct_source_sample_frame_manually_checked",
-            "audio": "pending_manual_listening",
-            "translation": "不適用；中文原聲整理"
-          },
-          "notes": "片中涉及的品牌、歷史、價格、認證或功效均只屬原片說法，尚未外部事實核實。",
-          "verification_frame_path": "ai_artist_reflective_monologue-sheet.jpg",
-          "speech_raw_asr": "提奥也去世了后来是他的妻子乔安娜保存展出我的画整理并出版我们的书信世界才慢慢看见那些灼热的向日葵旋转的星空和不安的比触不只是疯狂",
-          "speech_raw_asr_segments": [
             {
               "start_seconds": 97.62,
               "end_seconds": 99.66,
@@ -627,7 +595,29 @@
               "temperature": 0.0,
               "compression_ratio": 1.0454545454545454,
               "no_speech_probability": 2.9604835943830565e-11
-            },
+            }
+          ],
+          "speech_asr_cleaned": "三十七歲那年，我離開了這個世界。六個月後，提奧也去世了。後來，是他的妻子喬安娜保存、展出我的畫，整理並出版我們的書信。",
+          "raw_asr_provenance": "verbatim_from_/tmp/published-reference-restorations/<style_code>.transcript.json",
+          "display_transcript_status": "usable_pending_manual_audio_verification"
+        },
+        {
+          "order": 7,
+          "start_seconds": 108.12,
+          "end_seconds": 136.44,
+          "visual_description_zh": "展覽牆、觀眾、向日葵與星空近鏡，說明世界後來看見作品，並提出在無人看見時堅持是否有意義。",
+          "speech_or_narration_zh": "世界才慢慢看見，那些灼熱的向日葵、旋轉的星空和不安的筆觸，不只是瘋狂；它們是一個人竭盡全力活過的證據。所以，沒人看見的時候，堅持還有意義嗎？我不知道堅持是否一定會等來掌聲。",
+          "speech_source": "asr_assisted_display_cleaned_raw_preserved",
+          "on_screen_text_zh": null,
+          "verification": {
+            "visual": "direct_source_sample_frame_manually_checked",
+            "audio": "pending_manual_listening",
+            "translation": "不適用；中文原聲整理"
+          },
+          "notes": "片中涉及的品牌、歷史、價格、認證或功效均只屬原片說法，尚未外部事實核實。",
+          "verification_frame_path": "ai_artist_reflective_monologue-sheet.jpg",
+          "speech_raw_asr": "世界才慢慢看见那些灼热的向日葵旋转的星空和不安的比触不只是疯狂他们是一个人竭尽全力活过的证据所以没人看见的时候坚持还有意义吗我不知道坚持是否一定会等来掌声",
+          "speech_raw_asr_segments": [
             {
               "start_seconds": 109.30000000000001,
               "end_seconds": 110.8,
@@ -660,36 +650,6 @@
               "compression_ratio": 1.0454545454545454,
               "no_speech_probability": 2.9604835943830565e-11
             },
-            {
-              "start_seconds": 116.1,
-              "end_seconds": 118.08,
-              "text": "不只是疯狂",
-              "temperature": 0.0,
-              "compression_ratio": 1.203125,
-              "no_speech_probability": 2.231107833206014e-11
-            }
-          ],
-          "speech_asr_cleaned": "三十七歲那年，我離開了這個世界。六個月後，提奧也去世了。後來，是他的妻子喬安娜保存、展出我的畫，整理並出版我們的書信。",
-          "raw_asr_provenance": "verbatim_from_/tmp/published-reference-restorations/<style_code>.transcript.json",
-          "display_transcript_status": "usable_pending_manual_audio_verification"
-        },
-        {
-          "order": 7,
-          "start_seconds": 118,
-          "end_seconds": 137,
-          "visual_description_zh": "女性整理畫作及書信、展覽牆與觀眾近鏡，交代 Jo 保存、展出作品並出版書信。",
-          "speech_or_narration_zh": "世界才慢慢看見，那些灼熱的向日葵、旋轉的星空和不安的筆觸，不只是瘋狂；它們是一個人竭盡全力活過的證據。所以，沒人看見的時候，堅持還有意義嗎？",
-          "speech_source": "asr_assisted_display_cleaned_raw_preserved",
-          "on_screen_text_zh": null,
-          "verification": {
-            "visual": "direct_source_sample_frame_manually_checked",
-            "audio": "pending_manual_listening",
-            "translation": "不適用；中文原聲整理"
-          },
-          "notes": "片中涉及的品牌、歷史、價格、認證或功效均只屬原片說法，尚未外部事實核實。",
-          "verification_frame_path": "ai_artist_reflective_monologue-sheet.jpg",
-          "speech_raw_asr": "不只是疯狂他们是一个人竭尽全力活过的证据所以没人看见的时候坚持还有意义吗我不知道坚持是否一定会等来掌声",
-          "speech_raw_asr_segments": [
             {
               "start_seconds": 116.1,
               "end_seconds": 118.08,
@@ -779,16 +739,16 @@
               "no_speech_probability": 2.231107833206014e-11
             }
           ],
-          "speech_asr_cleaned": "世界才慢慢看見，那些灼熱的向日葵、旋轉的星空和不安的筆觸，不只是瘋狂；它們是一個人竭盡全力活過的證據。所以，沒人看見的時候，堅持還有意義嗎？",
+          "speech_asr_cleaned": "世界才慢慢看見，那些灼熱的向日葵、旋轉的星空和不安的筆觸，不只是瘋狂；它們是一個人竭盡全力活過的證據。所以，沒人看見的時候，堅持還有意義嗎？我不知道堅持是否一定會等來掌聲。",
           "raw_asr_provenance": "verbatim_from_/tmp/published-reference-restorations/<style_code>.transcript.json",
           "display_transcript_status": "usable_pending_manual_audio_verification"
         },
         {
           "order": 8,
-          "start_seconds": 137,
+          "start_seconds": 136.44,
           "end_seconds": 151.716,
-          "visual_description_zh": "手接近畫作、星空與孤立畫家意象收束，提出無人看見時仍要不要堅持的問題。",
-          "speech_or_narration_zh": "我不知道堅持是否一定會等來掌聲，但沒有那些無人問津的日子，就不會有後來照亮世界的《星夜》。有些光來得很晚，但它不是沒有來過。",
+          "visual_description_zh": "手接近畫作、星空與孤立畫家意象收束，回答堅持未必等來掌聲，但那些日子仍留下遲來的光。",
+          "speech_or_narration_zh": "但沒有那些無人問津的日子，就不會有後來照亮世界的《星夜》。有些光來得很晚，但它不是沒有來過。",
           "speech_source": "asr_assisted_display_cleaned_raw_preserved",
           "on_screen_text_zh": null,
           "verification": {
@@ -857,7 +817,7 @@
               "no_speech_probability": 2.5333455819231965e-11
             }
           ],
-          "speech_asr_cleaned": "我不知道堅持是否一定會等來掌聲，但沒有那些無人問津的日子，就不會有後來照亮世界的《星夜》。有些光來得很晚，但它不是沒有來過。",
+          "speech_asr_cleaned": "但沒有那些無人問津的日子，就不會有後來照亮世界的《星夜》。有些光來得很晚，但它不是沒有來過。",
           "raw_asr_provenance": "verbatim_from_/tmp/published-reference-restorations/<style_code>.transcript.json",
           "display_transcript_status": "usable_pending_manual_audio_verification"
         }

@@ -9,8 +9,9 @@
     "verify:published-video-restorations": "node scripts/verify-published-video-reference-restorations.mjs",
     "verify:approved-single-feed-covers": "node scripts/verify-approved-single-feed-covers.mjs",
     "verify:human-video-script-pilots": "node scripts/verify-human-video-script-pilots.mjs",
+    "verify:content-direction-demo-scripts": "node scripts/verify-content-direction-demo-scripts.mjs",
     "verify:deployed-template-assets": "node scripts/verify-deployed-template-assets.mjs",
-    "prebuild": "npm run verify:template-assets && npm run verify:video-style-covers && npm run verify:published-video-restorations && npm run verify:approved-single-feed-covers && npm run verify:human-video-script-pilots",
+    "prebuild": "npm run verify:template-assets && npm run verify:video-style-covers && npm run verify:published-video-restorations && npm run verify:approved-single-feed-covers && npm run verify:human-video-script-pilots && npm run verify:content-direction-demo-scripts",
     "build": "node node_modules/next/dist/bin/next build --webpack",
     "start": "node node_modules/next/dist/bin/next start",
     "lint": "node node_modules/eslint/bin/eslint.js"
