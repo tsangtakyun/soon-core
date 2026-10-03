@@ -27,6 +27,10 @@ for (const entry of entries) {
     if (segment.end_seconds <= segment.start_seconds) throw new Error(`${entry.style_code} has an invalid segment ending at ${segment.end_seconds}`)
     if (!segment.visual_description_zh) throw new Error(`${entry.style_code} has a segment without a visual description`)
     if (!Object.hasOwn(segment, 'speech_raw_asr')) throw new Error(`${entry.style_code} does not preserve raw ASR for every segment`)
+    if (!Array.isArray(segment.speech_raw_asr_segments)) throw new Error(`${entry.style_code} does not preserve timestamped raw ASR segments`)
+    const reconstructedRaw = segment.speech_raw_asr_segments.map((item) => String(item.text ?? '')).join('').trim()
+    if (reconstructedRaw !== String(segment.speech_raw_asr ?? '')) throw new Error(`${entry.style_code} raw ASR no longer matches its immutable source segments`)
+    if (!segment.speech_asr_cleaned) throw new Error(`${entry.style_code} has no separate cleaned transcript field`)
     const displayedSpeech = String(segment.speech_or_narration_zh ?? '')
     if (/(Fromtimetotime){2,}|(朋友){4,}|(你在一起){3,}/i.test(displayedSpeech.replaceAll(' ', ''))) {
       throw new Error(`${entry.style_code} exposes repeated ASR hallucination in display text`)
@@ -39,6 +43,26 @@ for (const entry of entries) {
   if (entry.coverage_percent !== 100 || Math.abs(entry.coverage_seconds - entry.duration_seconds) > 0.001) {
     throw new Error(`${entry.style_code} is not marked as full coverage`)
   }
+}
+
+const allSegments = entries.flatMap((entry) => entry.timeline)
+const unusableMarker = '語音未能可靠辨識，待人工核聽。'
+const calculatedSummary = {
+  timeline_segment_count: allSegments.length,
+  usable_dialogue_or_caption_segment_count: allSegments.filter((segment) => segment.speech_or_narration_zh && segment.speech_or_narration_zh !== unusableMarker).length,
+  pending_manual_audio_verification_segment_count: allSegments.filter((segment) => segment.verification?.audio !== 'manually_verified').length,
+  unrecognizable_display_segment_count: allSegments.filter((segment) => segment.speech_or_narration_zh === unusableMarker).length,
+}
+for (const [key, value] of Object.entries(calculatedSummary)) {
+  if (restorations.summary[key] !== value) throw new Error(`Summary ${key} is ${restorations.summary[key]}, expected ${value}`)
+}
+
+const founder = entries.find((entry) => entry.style_code === 'ai_cinematic_founder_biography')
+if (!founder?.timeline.some((segment) => /From time to time to time/i.test(segment.speech_raw_asr))) {
+  throw new Error('Founder raw ASR must preserve the original repeated hallucination for provenance')
+}
+if (founder.timeline.some((segment) => /From time to time to time/i.test(segment.speech_or_narration_zh))) {
+  throw new Error('Founder display transcript exposes a raw ASR hallucination')
 }
 
 for (const code of ['ai_cinematic_founder_biography', 'route_led_city_portrait']) {
