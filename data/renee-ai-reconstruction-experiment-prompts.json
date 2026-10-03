@@ -1,0 +1,2466 @@
+{
+  "schema_version": "1.0",
+  "created_at": "2026-10-01",
+  "purpose": "AI short-video reconstruction experiment prompts",
+  "common": {
+    "provenance": "根據來源影片畫面、時間軸及已標示核實狀態推導的重建實驗稿；不是原作者 prompt，也不是已驗證配方。",
+    "target_model": "Seedance 2.5（使用者指定的候選測試模型；本交付沒有確認可用性、能力或參數）",
+    "model_specific_parameters": {
+      "status": "pending_official_documentation_verification",
+      "values": null
+    },
+    "execution": "planning_only_no_generation_no_api_transaction",
+    "dialogue_policy": "未經人工聆聽的內容只可保留待核實 placeholder；不得把 ASR 當最終配音稿。",
+    "rights_policy": "只建立原創角色與通用場景；不複製可識別真人、創作者品牌、水印、第三方角色、特定電影美術或未授權聲線。"
+  },
+  "source_restoration_path": "reference-restoration.json",
+  "styles": [
+    {
+      "reference_key": "ai-01",
+      "style_code": "ai_absurd_twist_microdrama",
+      "display_name_zh": "AI 荒誕反轉微劇／對白誤會變體",
+      "source_duration_seconds": 10.167,
+      "prompt_status": "inferred_reconstruction_experiment_unvalidated",
+      "story_rule": "單一巴士場景、同一雙關逐句升級，最後以走向車尾的動作完成誤會。",
+      "global_visual_prompt": "原創虛構角色、自然日光城市巴士、寫實但明確為 AI 虛構的輕喜劇、真實人體比例、克制表演、乾淨藍白色調、背景乘客低動作。",
+      "character_bible": [
+        {
+          "id": "child",
+          "rules": [
+            "虛構幼兒，不對應真實人物",
+            "米白短袖上衣",
+            "淺藍斜背小袋",
+            "短黑髮",
+            "身高及面部比例全片固定"
+          ]
+        },
+        {
+          "id": "adult",
+          "rules": [
+            "虛構成年男性",
+            "藍色短袖制服",
+            "坐在同一前排座位",
+            "髮型、臉及袖口全片固定"
+          ]
+        }
+      ],
+      "scene_bible": [
+        "日間巴士",
+        "藍色塑膠座椅",
+        "銀色扶手",
+        "投幣區在成人附近",
+        "車尾方向固定",
+        "背景乘客不得換位"
+      ],
+      "reference_image_requirements": [
+        "角色正面、側面、全身",
+        "成人與幼兒同框比例圖",
+        "巴士平面方向圖",
+        "投幣手勢關鍵幀",
+        "幼兒轉身前後關鍵幀"
+      ],
+      "stitching": [
+        "S01–S05 固定 180 度視線軸",
+        "S05 手指方向接 S06 幼兒轉身",
+        "字幕全部後期加入",
+        "每鏡先無聲驗證動作，再配音"
+      ],
+      "shots": [
+        {
+          "shot_id": "A01-S01",
+          "source_time": {
+            "start_seconds": 0,
+            "end_seconds": 1
+          },
+          "test_duration_seconds": 1.2,
+          "prompt_zh": "原創喜劇短片；日間城市巴士內，一名穿藍色短袖制服的成年男乘客坐在前排，一名穿米白上衣、背淺藍小袋的虛構幼兒站在扶手旁；成人以平靜語氣說明車費。",
+          "composition": "9:16，中近景雙人構圖，成人左、幼兒右，藍色座椅與銀色扶手清楚",
+          "camera_motion": "輕微手持，固定視線軸",
+          "action": "成人微抬手指向投幣區，幼兒專心望著成人",
+          "expression": "成人認真；幼兒疑惑",
+          "dialogue_or_narration_placeholder_zh": "成人：「空調車，兩塊。」（燒錄字幕已核對；聲音仍待聆聽）",
+          "audio_post": "巴士低頻環境聲、引擎聲；對白與字幕後期處理",
+          "reference_assets": [
+            "adult_front",
+            "child_front",
+            "bus_layout",
+            "blue_seats",
+            "farebox"
+          ],
+          "transition_out": "direct_cut",
+          "acceptance_checks": [
+            "人物身份與服裝不漂移",
+            "肢體與接觸點自然",
+            "背景方向及道具數量連續",
+            "畫面不生成可讀文字；字幕後期加入"
+          ]
+        },
+        {
+          "shot_id": "A01-S02",
+          "source_time": {
+            "start_seconds": 1,
+            "end_seconds": 2
+          },
+          "test_duration_seconds": 1,
+          "prompt_zh": "同一巴士、同一角色、同一站位；幼兒把「兩塊」誤聽成「涼快」，抬頭回應。",
+          "composition": "幼兒臉部近鏡，成人肩膀留在左側前景",
+          "camera_motion": "慢速微推近",
+          "action": "幼兒張口回答，眼神保持對成人",
+          "expression": "天真、自信",
+          "dialogue_or_narration_placeholder_zh": "幼兒：「是涼快。」（燒錄字幕已核對；聲音仍待聆聽）",
+          "audio_post": "延續巴士環境聲；幼兒對白後配",
+          "reference_assets": [
+            "child_front",
+            "adult_shoulder",
+            "bus_layout"
+          ],
+          "transition_out": "direct_cut",
+          "acceptance_checks": [
+            "人物身份與服裝不漂移",
+            "肢體與接觸點自然",
+            "背景方向及道具數量連續",
+            "畫面不生成可讀文字；字幕後期加入"
+          ]
+        },
+        {
+          "shot_id": "A01-S03",
+          "source_time": {
+            "start_seconds": 2,
+            "end_seconds": 2.8
+          },
+          "test_duration_seconds": 0.9,
+          "prompt_zh": "成人耐心糾正，手指清楚模擬投幣動作；角色與背景完全延續。",
+          "composition": "雙人中近景，投幣手勢位於畫面中央",
+          "camera_motion": "固定鏡頭",
+          "action": "成人做一次投幣手勢，不重複多餘動作",
+          "expression": "成人稍加重語氣；幼兒仍不明白",
+          "dialogue_or_narration_placeholder_zh": "成人：「投兩塊。」（燒錄字幕已核對；聲音仍待聆聽）",
+          "audio_post": "單一手勢聲效可選；對白後配",
+          "reference_assets": [
+            "adult_front",
+            "child_front",
+            "farebox"
+          ],
+          "transition_out": "direct_cut",
+          "acceptance_checks": [
+            "人物身份與服裝不漂移",
+            "肢體與接觸點自然",
+            "背景方向及道具數量連續",
+            "畫面不生成可讀文字；字幕後期加入"
+          ]
+        },
+        {
+          "shot_id": "A01-S04",
+          "source_time": {
+            "start_seconds": 2.8,
+            "end_seconds": 5.56
+          },
+          "test_duration_seconds": 2.6,
+          "prompt_zh": "幼兒延續雙關誤會，閉眼笑著說不只頭部、全身都很涼快；保持真實幼兒比例及自然嘴形，不誇張變形。",
+          "composition": "幼兒近鏡，淺景深，巴士藍椅仍可辨認",
+          "camera_motion": "緩慢推近",
+          "action": "幼兒先指頭部，再輕拍身體，只做兩個清楚動作",
+          "expression": "得意、享受涼風",
+          "dialogue_or_narration_placeholder_zh": "幼兒：「不光頭涼快，渾身都涼快。」（燒錄字幕已核對；聲音仍待聆聽）",
+          "audio_post": "輕風及巴士聲；對白後配",
+          "reference_assets": [
+            "child_front",
+            "child_gesture",
+            "bus_layout"
+          ],
+          "transition_out": "direct_cut",
+          "acceptance_checks": [
+            "人物身份與服裝不漂移",
+            "肢體與接觸點自然",
+            "背景方向及道具數量連續",
+            "畫面不生成可讀文字；字幕後期加入"
+          ]
+        },
+        {
+          "shot_id": "A01-S05",
+          "source_time": {
+            "start_seconds": 5.56,
+            "end_seconds": 7.14
+          },
+          "test_duration_seconds": 1.6,
+          "prompt_zh": "成人最後一次解釋車費，指向錢幣與投幣處；不要改變左右位置。",
+          "composition": "雙人中景，手與投幣方向同時入鏡",
+          "camera_motion": "微小橫移跟手",
+          "action": "成人展示兩枚硬幣或用兩指表示數量，再指投幣處",
+          "expression": "無奈但克制",
+          "dialogue_or_narration_placeholder_zh": "成人：「我告訴你，錢投兩塊。」（燒錄字幕已核對；聲音仍待聆聽）",
+          "audio_post": "硬幣輕碰聲後期；對白後配",
+          "reference_assets": [
+            "adult_hand",
+            "two_coins",
+            "farebox",
+            "child_front"
+          ],
+          "transition_out": "direct_cut",
+          "acceptance_checks": [
+            "人物身份與服裝不漂移",
+            "肢體與接觸點自然",
+            "背景方向及道具數量連續",
+            "畫面不生成可讀文字；字幕後期加入"
+          ]
+        },
+        {
+          "shot_id": "A01-S06",
+          "source_time": {
+            "start_seconds": 7.14,
+            "end_seconds": 10.167
+          },
+          "test_duration_seconds": 2.8,
+          "prompt_zh": "幼兒把「後面人少」理解成更涼快，轉身沿巴士走道向後走；成人留在前排看著，笑點用行動落地。",
+          "composition": "由雙人中景轉為幼兒背面全身，走道形成引導線",
+          "camera_motion": "平順小幅跟拍後退",
+          "action": "幼兒轉身走三至四步，成人沒有追上",
+          "expression": "幼兒確信；成人錯愕",
+          "dialogue_or_narration_placeholder_zh": "幼兒：「我覺得後頭人少，更涼快。」（燒錄字幕已核對；聲音仍待聆聽）",
+          "audio_post": "腳步、巴士環境聲；最後保留 0.6 秒反應",
+          "reference_assets": [
+            "child_back",
+            "adult_front",
+            "bus_aisle",
+            "blue_seats"
+          ],
+          "transition_out": "direct_cut",
+          "acceptance_checks": [
+            "幼兒外形、米白上衣與淺藍小袋全片一致",
+            "成人制服與座位固定",
+            "走道方向及背景乘客不跳位",
+            "嘴形只作概念測試；最終對白後期配音",
+            "明確標示 AI／虛構，不宣稱真實幼兒對話"
+          ]
+        }
+      ],
+      "test_order": [
+        "先測 S04 幼兒表情與嘴形",
+        "再測 S05→S06 動作接鏡",
+        "最後組合全 10 秒"
+      ],
+      "pass_criteria": [
+        "靜音時仍看得出成人糾正、幼兒誤解、最後走向後方",
+        "六句只服務同一雙關",
+        "角色、座位、袋子及空間方向連續",
+        "無多餘文字、水印或真人身份"
+      ]
+    },
+    {
+      "reference_key": "ai-03",
+      "style_code": "ai_continuity_ensemble_skit",
+      "display_name_zh": "AI 多角色連續情境短劇／家庭群像",
+      "source_duration_seconds": 169.572,
+      "prompt_status": "inferred_reconstruction_experiment_unvalidated",
+      "story_rule": "每場用一個日常衝突重複證明「父母看似不靠譜，實際尊重及愛孩子」，最後才交代價值。",
+      "global_visual_prompt": "原創虛構亞洲家庭，橫向 16:9 電影感家庭喜劇，暖色自然光、淺景深、克制寫實表演、清楚反應鏡、跨場保持三名角色身份及比例。",
+      "character_bible": [
+        {
+          "id": "son",
+          "rules": [
+            "虛構青少年",
+            "白色校服上衣配藍色領口",
+            "短黑髮",
+            "全片年齡、臉及身高固定"
+          ]
+        },
+        {
+          "id": "mother",
+          "rules": [
+            "虛構年輕母親",
+            "長黑髮",
+            "家居、街頭、學校三套服裝先行鎖定",
+            "聲線及說話節奏固定"
+          ]
+        },
+        {
+          "id": "father",
+          "rules": [
+            "虛構年輕父親",
+            "短黑髮",
+            "家居、街頭、學校三套服裝先行鎖定",
+            "身高比例固定"
+          ]
+        }
+      ],
+      "scene_bible": [
+        "家庭入口與臥室平面圖",
+        "街邊食物攤左右位置",
+        "餐桌與少年房間關係",
+        "學校入口、教室及老師辦公室",
+        "家居搬運區與地板道具狀態"
+      ],
+      "reference_image_requirements": [
+        "三角色正面／側面／全身／表情組",
+        "三人同框身高比例",
+        "每套服裝 turn-around",
+        "每場建立鏡",
+        "對話視線軸圖",
+        "食物、手機、成績單、西瓜開始／結果狀態"
+      ],
+      "stitching": [
+        "每場獨立生成 2–4 個短鏡，先鎖首尾幀",
+        "同一場固定左右關係與色溫",
+        "跨場只在明確地點轉換時硬切",
+        "用反應鏡及道具插鏡處理口型",
+        "旁白與字幕全部後期"
+      ],
+      "shots": [
+        {
+          "shot_id": "B01-01",
+          "source_time": {
+            "start_seconds": 0,
+            "end_seconds": 2.92
+          },
+          "test_duration_seconds": 2.92,
+          "prompt_zh": "明亮家居入口，原創亞洲家庭角色，暖色電影感、淺景深。 父母突然湊近鏡頭追問孩子戀愛資料。",
+          "composition": "父母雙人近鏡",
+          "camera_motion": "固定或極輕手持",
+          "action": "兩人輪流追問，動作簡短",
+          "expression": "好奇興奮",
+          "dialogue_or_narration_placeholder_zh": "[待人工聽寫覆核：來源 0.00–2.92；父母追問戀愛、性別及照片]",
+          "audio_post": "室內／現場環境聲後期建立；所有對白待人工聽寫後配。",
+          "reference_assets": [
+            "son_reference",
+            "mother_reference",
+            "father_reference",
+            "scene_layout_B01"
+          ],
+          "transition_out": "direct_cut",
+          "acceptance_checks": [
+            "人物身份與服裝不漂移",
+            "肢體與接觸點自然",
+            "背景方向及道具數量連續",
+            "畫面不生成可讀文字；字幕後期加入"
+          ]
+        },
+        {
+          "shot_id": "B01-02",
+          "source_time": {
+            "start_seconds": 2.92,
+            "end_seconds": 5.84
+          },
+          "test_duration_seconds": 2.92,
+          "prompt_zh": "明亮家居入口，原創亞洲家庭角色，暖色電影感、淺景深。 切到少年正面，以旁白建立全片規則。",
+          "composition": "少年正面中近鏡",
+          "camera_motion": "固定或極輕手持",
+          "action": "少年望鏡頭停一拍",
+          "expression": "無奈但親密",
+          "dialogue_or_narration_placeholder_zh": "[待人工聽寫覆核：來源 2.92–5.84；兒子旁白：父母是一對不靠譜的 00 後]",
+          "audio_post": "室內／現場環境聲後期建立；所有對白待人工聽寫後配。",
+          "reference_assets": [
+            "son_reference",
+            "mother_reference",
+            "father_reference",
+            "scene_layout_B01"
+          ],
+          "transition_out": "direct_cut",
+          "acceptance_checks": [
+            "人物身份與服裝不漂移",
+            "肢體與接觸點自然",
+            "背景方向及道具數量連續",
+            "畫面不生成可讀文字；字幕後期加入"
+          ]
+        },
+        {
+          "shot_id": "B02-01",
+          "source_time": {
+            "start_seconds": 5.84,
+            "end_seconds": 9.3
+          },
+          "test_duration_seconds": 3.46,
+          "prompt_zh": "同一家庭的清晨臥室與走廊；暖光但保留凌晨疲態。 母親熬夜後慌張催少年起床。",
+          "composition": "母親床邊中景",
+          "camera_motion": "固定或極輕手持",
+          "action": "母親坐起看時間並催促",
+          "expression": "睡眼惺忪、突然緊張",
+          "dialogue_or_narration_placeholder_zh": "[待人工聽寫覆核：來源 5.84–9.30；催上學]",
+          "audio_post": "室內／現場環境聲後期建立；所有對白待人工聽寫後配。",
+          "reference_assets": [
+            "son_reference",
+            "mother_reference",
+            "father_reference",
+            "scene_layout_B02"
+          ],
+          "transition_out": "direct_cut",
+          "acceptance_checks": [
+            "人物身份與服裝不漂移",
+            "肢體與接觸點自然",
+            "背景方向及道具數量連續",
+            "畫面不生成可讀文字；字幕後期加入"
+          ]
+        },
+        {
+          "shot_id": "B02-02",
+          "source_time": {
+            "start_seconds": 9.3,
+            "end_seconds": 12.76
+          },
+          "test_duration_seconds": 3.46,
+          "prompt_zh": "同一家庭的清晨臥室與走廊；暖光但保留凌晨疲態。 少年在門口解釋仍很早。",
+          "composition": "少年門口反打",
+          "camera_motion": "固定或極輕手持",
+          "action": "少年指向時間",
+          "expression": "困惑",
+          "dialogue_or_narration_placeholder_zh": "[待人工聽寫覆核：來源 9.30–12.76；現在才六點、八點上課]",
+          "audio_post": "室內／現場環境聲後期建立；所有對白待人工聽寫後配。",
+          "reference_assets": [
+            "son_reference",
+            "mother_reference",
+            "father_reference",
+            "scene_layout_B02"
+          ],
+          "transition_out": "direct_cut",
+          "acceptance_checks": [
+            "人物身份與服裝不漂移",
+            "肢體與接觸點自然",
+            "背景方向及道具數量連續",
+            "畫面不生成可讀文字；字幕後期加入"
+          ]
+        },
+        {
+          "shot_id": "B02-03",
+          "source_time": {
+            "start_seconds": 12.76,
+            "end_seconds": 16.22
+          },
+          "test_duration_seconds": 3.46,
+          "prompt_zh": "同一家庭的清晨臥室與走廊；暖光但保留凌晨疲態。 母親承認熬通宵並繼續荒誕建議。",
+          "composition": "母親近鏡",
+          "camera_motion": "固定或極輕手持",
+          "action": "母親揉眼再躺回",
+          "expression": "理直氣壯",
+          "dialogue_or_narration_placeholder_zh": "[待人工聽寫覆核：來源 12.76–16.22；熬通宵、怕睡後起不來]",
+          "audio_post": "室內／現場環境聲後期建立；所有對白待人工聽寫後配。",
+          "reference_assets": [
+            "son_reference",
+            "mother_reference",
+            "father_reference",
+            "scene_layout_B02"
+          ],
+          "transition_out": "direct_cut",
+          "acceptance_checks": [
+            "人物身份與服裝不漂移",
+            "肢體與接觸點自然",
+            "背景方向及道具數量連續",
+            "畫面不生成可讀文字；字幕後期加入"
+          ]
+        },
+        {
+          "shot_id": "B03-01",
+          "source_time": {
+            "start_seconds": 16.22,
+            "end_seconds": 21.115
+          },
+          "test_duration_seconds": 4.89,
+          "prompt_zh": "日間街邊小食攤，少年校服、父母便服，食物及付款道具固定。 少年獨自吃小食，低聲希望不被父母發現。",
+          "composition": "少年與小食中景",
+          "camera_motion": "固定或極輕手持",
+          "action": "少年咬一口後左右張望",
+          "expression": "滿足又心虛",
+          "dialogue_or_narration_placeholder_zh": "[待人工聽寫覆核：來源 16.22–21.11；食物很香、不要被母親看見]",
+          "audio_post": "室內／現場環境聲後期建立；所有對白待人工聽寫後配。",
+          "reference_assets": [
+            "son_reference",
+            "mother_reference",
+            "father_reference",
+            "scene_layout_B03"
+          ],
+          "transition_out": "direct_cut",
+          "acceptance_checks": [
+            "人物身份與服裝不漂移",
+            "肢體與接觸點自然",
+            "背景方向及道具數量連續",
+            "畫面不生成可讀文字；字幕後期加入"
+          ]
+        },
+        {
+          "shot_id": "B03-02",
+          "source_time": {
+            "start_seconds": 21.115,
+            "end_seconds": 26.01
+          },
+          "test_duration_seconds": 4.89,
+          "prompt_zh": "日間街邊小食攤，少年校服、父母便服，食物及付款道具固定。 父母突然入畫，少年以為會被責罵。",
+          "composition": "三人中景",
+          "camera_motion": "固定或極輕手持",
+          "action": "母親指向食物，少年後退半步",
+          "expression": "母親嚴肅、少年緊張",
+          "dialogue_or_narration_placeholder_zh": "[待人工聽寫覆核：來源 21.11–26.01；質問偷吃垃圾食品]",
+          "audio_post": "室內／現場環境聲後期建立；所有對白待人工聽寫後配。",
+          "reference_assets": [
+            "son_reference",
+            "mother_reference",
+            "father_reference",
+            "scene_layout_B03"
+          ],
+          "transition_out": "direct_cut",
+          "acceptance_checks": [
+            "人物身份與服裝不漂移",
+            "肢體與接觸點自然",
+            "背景方向及道具數量連續",
+            "畫面不生成可讀文字；字幕後期加入"
+          ]
+        },
+        {
+          "shot_id": "B03-03",
+          "source_time": {
+            "start_seconds": 26.01,
+            "end_seconds": 30.905
+          },
+          "test_duration_seconds": 4.89,
+          "prompt_zh": "日間街邊小食攤，少年校服、父母便服，食物及付款道具固定。 父母反轉成一起加單。",
+          "composition": "父母與攤主側面中景",
+          "camera_motion": "固定或極輕手持",
+          "action": "父母向攤主比數量並要求調味",
+          "expression": "自然興奮",
+          "dialogue_or_narration_placeholder_zh": "[待人工聽寫覆核：來源 26.01–30.90；替父母也買兩根]",
+          "audio_post": "室內／現場環境聲後期建立；所有對白待人工聽寫後配。",
+          "reference_assets": [
+            "son_reference",
+            "mother_reference",
+            "father_reference",
+            "scene_layout_B03"
+          ],
+          "transition_out": "direct_cut",
+          "acceptance_checks": [
+            "人物身份與服裝不漂移",
+            "肢體與接觸點自然",
+            "背景方向及道具數量連續",
+            "畫面不生成可讀文字；字幕後期加入"
+          ]
+        },
+        {
+          "shot_id": "B03-04",
+          "source_time": {
+            "start_seconds": 30.905,
+            "end_seconds": 35.8
+          },
+          "test_duration_seconds": 4.89,
+          "prompt_zh": "日間街邊小食攤，少年校服、父母便服，食物及付款道具固定。 攤主問誰付款，全家指向少年。",
+          "composition": "三人＋攤主闊中景",
+          "camera_motion": "固定或極輕手持",
+          "action": "父母同時指向少年，少年停住",
+          "expression": "父母理所當然、少年錯愕",
+          "dialogue_or_narration_placeholder_zh": "[待人工聽寫覆核：來源 30.90–35.80；誰付錢／他]",
+          "audio_post": "室內／現場環境聲後期建立；所有對白待人工聽寫後配。",
+          "reference_assets": [
+            "son_reference",
+            "mother_reference",
+            "father_reference",
+            "scene_layout_B03"
+          ],
+          "transition_out": "direct_cut",
+          "acceptance_checks": [
+            "人物身份與服裝不漂移",
+            "肢體與接觸點自然",
+            "背景方向及道具數量連續",
+            "畫面不生成可讀文字；字幕後期加入"
+          ]
+        },
+        {
+          "shot_id": "B04-01",
+          "source_time": {
+            "start_seconds": 35.8,
+            "end_seconds": 39.6
+          },
+          "test_duration_seconds": 3.8,
+          "prompt_zh": "同一家庭廚房餐桌，日間。 少年交代下午家長會。",
+          "composition": "少年餐桌中景",
+          "camera_motion": "固定或極輕手持",
+          "action": "少年放下餐具說明",
+          "expression": "平常",
+          "dialogue_or_narration_placeholder_zh": "[待人工聽寫覆核：來源 35.80–39.60；下午三點開家長會]",
+          "audio_post": "室內／現場環境聲後期建立；所有對白待人工聽寫後配。",
+          "reference_assets": [
+            "son_reference",
+            "mother_reference",
+            "father_reference",
+            "scene_layout_B04"
+          ],
+          "transition_out": "direct_cut",
+          "acceptance_checks": [
+            "人物身份與服裝不漂移",
+            "肢體與接觸點自然",
+            "背景方向及道具數量連續",
+            "畫面不生成可讀文字；字幕後期加入"
+          ]
+        },
+        {
+          "shot_id": "B04-02",
+          "source_time": {
+            "start_seconds": 39.6,
+            "end_seconds": 43.4
+          },
+          "test_duration_seconds": 3.8,
+          "prompt_zh": "同一家庭廚房餐桌，日間。 父母把家長會當成表演，討論穿校服或禮服。",
+          "composition": "父母雙人反打",
+          "camera_motion": "固定或極輕手持",
+          "action": "兩人快速交換造型主意",
+          "expression": "興奮",
+          "dialogue_or_narration_placeholder_zh": "[待人工聽寫覆核：來源 39.60–43.40；去學校炸場子、穿校服還是禮服]",
+          "audio_post": "室內／現場環境聲後期建立；所有對白待人工聽寫後配。",
+          "reference_assets": [
+            "son_reference",
+            "mother_reference",
+            "father_reference",
+            "scene_layout_B04"
+          ],
+          "transition_out": "direct_cut",
+          "acceptance_checks": [
+            "人物身份與服裝不漂移",
+            "肢體與接觸點自然",
+            "背景方向及道具數量連續",
+            "畫面不生成可讀文字；字幕後期加入"
+          ]
+        },
+        {
+          "shot_id": "B05-01",
+          "source_time": {
+            "start_seconds": 43.4,
+            "end_seconds": 48.69
+          },
+          "test_duration_seconds": 5.29,
+          "prompt_zh": "夜間家庭餐桌與少年臥室，食物包裝位置需跨鏡連續。 父母把食物推給少年，聲稱自己不吃。",
+          "composition": "三人餐桌中景",
+          "camera_motion": "固定或極輕手持",
+          "action": "父母把盤子推前",
+          "expression": "假裝克制",
+          "dialogue_or_narration_placeholder_zh": "[待人工聽寫覆核：來源 43.40–48.69；兒子多吃、父母不餓]",
+          "audio_post": "室內／現場環境聲後期建立；所有對白待人工聽寫後配。",
+          "reference_assets": [
+            "son_reference",
+            "mother_reference",
+            "father_reference",
+            "scene_layout_B05"
+          ],
+          "transition_out": "direct_cut",
+          "acceptance_checks": [
+            "人物身份與服裝不漂移",
+            "肢體與接觸點自然",
+            "背景方向及道具數量連續",
+            "畫面不生成可讀文字；字幕後期加入"
+          ]
+        },
+        {
+          "shot_id": "B05-02",
+          "source_time": {
+            "start_seconds": 48.69,
+            "end_seconds": 53.98
+          },
+          "test_duration_seconds": 5.29,
+          "prompt_zh": "夜間家庭餐桌與少年臥室，食物包裝位置需跨鏡連續。 切到少年在臥室／被窩，父母在門外叫他出來吃。",
+          "composition": "少年床上中景",
+          "camera_motion": "固定或極輕手持",
+          "action": "少年沒有即時回應",
+          "expression": "半睡半醒",
+          "dialogue_or_narration_placeholder_zh": "[待人工聽寫覆核：來源 48.69–53.98；兒子來吃點東西]",
+          "audio_post": "室內／現場環境聲後期建立；所有對白待人工聽寫後配。",
+          "reference_assets": [
+            "son_reference",
+            "mother_reference",
+            "father_reference",
+            "scene_layout_B05"
+          ],
+          "transition_out": "direct_cut",
+          "acceptance_checks": [
+            "人物身份與服裝不漂移",
+            "肢體與接觸點自然",
+            "背景方向及道具數量連續",
+            "畫面不生成可讀文字；字幕後期加入"
+          ]
+        },
+        {
+          "shot_id": "B05-03",
+          "source_time": {
+            "start_seconds": 53.98,
+            "end_seconds": 59.27
+          },
+          "test_duration_seconds": 5.29,
+          "prompt_zh": "夜間家庭餐桌與少年臥室，食物包裝位置需跨鏡連續。 父母趁少年未出來先吃，包裝數量逐步減少。",
+          "composition": "餐桌雙人中景",
+          "camera_motion": "固定或極輕手持",
+          "action": "兩人快速但自然地吃",
+          "expression": "默契",
+          "dialogue_or_narration_placeholder_zh": "[待人工聽寫覆核：來源 53.98–59.27；不理人就不怪我們]",
+          "audio_post": "室內／現場環境聲後期建立；所有對白待人工聽寫後配。",
+          "reference_assets": [
+            "son_reference",
+            "mother_reference",
+            "father_reference",
+            "scene_layout_B05"
+          ],
+          "transition_out": "direct_cut",
+          "acceptance_checks": [
+            "人物身份與服裝不漂移",
+            "肢體與接觸點自然",
+            "背景方向及道具數量連續",
+            "畫面不生成可讀文字；字幕後期加入"
+          ]
+        },
+        {
+          "shot_id": "B05-04",
+          "source_time": {
+            "start_seconds": 59.27,
+            "end_seconds": 64.56
+          },
+          "test_duration_seconds": 5.29,
+          "prompt_zh": "夜間家庭餐桌與少年臥室，食物包裝位置需跨鏡連續。 少年回來只見空盤／包裝，拆穿父母。",
+          "composition": "少年門口反應鏡",
+          "camera_motion": "固定或極輕手持",
+          "action": "少年看桌面再看父母",
+          "expression": "無奈",
+          "dialogue_or_narration_placeholder_zh": "[待人工聽寫覆核：來源 59.27–64.56；不想讓我吃可以直說]",
+          "audio_post": "室內／現場環境聲後期建立；所有對白待人工聽寫後配。",
+          "reference_assets": [
+            "son_reference",
+            "mother_reference",
+            "father_reference",
+            "scene_layout_B05"
+          ],
+          "transition_out": "direct_cut",
+          "acceptance_checks": [
+            "人物身份與服裝不漂移",
+            "肢體與接觸點自然",
+            "背景方向及道具數量連續",
+            "畫面不生成可讀文字；字幕後期加入"
+          ]
+        },
+        {
+          "shot_id": "B06-01",
+          "source_time": {
+            "start_seconds": 64.56,
+            "end_seconds": 70.233
+          },
+          "test_duration_seconds": 5.67,
+          "prompt_zh": "學校入口／走廊，父母潮流造型與少年校服固定。 少年見父母潮流打扮到校，停在門口。",
+          "composition": "少年反應中景",
+          "camera_motion": "固定或極輕手持",
+          "action": "少年望向畫外父母",
+          "expression": "尷尬",
+          "dialogue_or_narration_placeholder_zh": "[待人工聽寫覆核：來源 64.56–70.23；誰家長這麼潮]",
+          "audio_post": "室內／現場環境聲後期建立；所有對白待人工聽寫後配。",
+          "reference_assets": [
+            "son_reference",
+            "mother_reference",
+            "father_reference",
+            "scene_layout_B06"
+          ],
+          "transition_out": "direct_cut",
+          "acceptance_checks": [
+            "人物身份與服裝不漂移",
+            "肢體與接觸點自然",
+            "背景方向及道具數量連續",
+            "畫面不生成可讀文字；字幕後期加入"
+          ]
+        },
+        {
+          "shot_id": "B06-02",
+          "source_time": {
+            "start_seconds": 70.233,
+            "end_seconds": 75.907
+          },
+          "test_duration_seconds": 5.67,
+          "prompt_zh": "學校入口／走廊，父母潮流造型與少年校服固定。 父母在校門／走廊自拍，忽略少年提醒。",
+          "composition": "父母雙人全身＋手機",
+          "camera_motion": "固定或極輕手持",
+          "action": "兩人擺姿勢看手機",
+          "expression": "投入",
+          "dialogue_or_narration_placeholder_zh": "[待人工聽寫覆核：來源 70.23–75.91；看鏡頭]",
+          "audio_post": "室內／現場環境聲後期建立；所有對白待人工聽寫後配。",
+          "reference_assets": [
+            "son_reference",
+            "mother_reference",
+            "father_reference",
+            "scene_layout_B06"
+          ],
+          "transition_out": "direct_cut",
+          "acceptance_checks": [
+            "人物身份與服裝不漂移",
+            "肢體與接觸點自然",
+            "背景方向及道具數量連續",
+            "畫面不生成可讀文字；字幕後期加入"
+          ]
+        },
+        {
+          "shot_id": "B06-03",
+          "source_time": {
+            "start_seconds": 75.907,
+            "end_seconds": 81.58
+          },
+          "test_duration_seconds": 5.67,
+          "prompt_zh": "學校入口／走廊，父母潮流造型與少年校服固定。 父母突然想起自己是家長，急忙收起姿勢。",
+          "composition": "父母雙人近鏡",
+          "camera_motion": "固定或極輕手持",
+          "action": "同時放下手機",
+          "expression": "恍然大悟",
+          "dialogue_or_narration_placeholder_zh": "[待人工聽寫覆核：來源 75.91–81.58；不對，我們是家長]",
+          "audio_post": "室內／現場環境聲後期建立；所有對白待人工聽寫後配。",
+          "reference_assets": [
+            "son_reference",
+            "mother_reference",
+            "father_reference",
+            "scene_layout_B06"
+          ],
+          "transition_out": "direct_cut",
+          "acceptance_checks": [
+            "人物身份與服裝不漂移",
+            "肢體與接觸點自然",
+            "背景方向及道具數量連續",
+            "畫面不生成可讀文字；字幕後期加入"
+          ]
+        },
+        {
+          "shot_id": "B07-01",
+          "source_time": {
+            "start_seconds": 81.58,
+            "end_seconds": 85.32
+          },
+          "test_duration_seconds": 3.74,
+          "prompt_zh": "教室／家長會，老師、父母與少年左右關係固定。 老師對全班談父母辛勞。",
+          "composition": "老師正面中景",
+          "camera_motion": "固定或極輕手持",
+          "action": "老師持講義講話",
+          "expression": "正式",
+          "dialogue_or_narration_placeholder_zh": "[待人工聽寫覆核：來源 81.58–85.32；看看爸爸白髮與媽媽雙手]",
+          "audio_post": "室內／現場環境聲後期建立；所有對白待人工聽寫後配。",
+          "reference_assets": [
+            "son_reference",
+            "mother_reference",
+            "father_reference",
+            "scene_layout_B07"
+          ],
+          "transition_out": "direct_cut",
+          "acceptance_checks": [
+            "人物身份與服裝不漂移",
+            "肢體與接觸點自然",
+            "背景方向及道具數量連續",
+            "畫面不生成可讀文字；字幕後期加入"
+          ]
+        },
+        {
+          "shot_id": "B07-02",
+          "source_time": {
+            "start_seconds": 85.32,
+            "end_seconds": 89.06
+          },
+          "test_duration_seconds": 3.74,
+          "prompt_zh": "教室／家長會，老師、父母與少年左右關係固定。 父親展示潮流髮型，打斷說教節奏。",
+          "composition": "父親與少年雙人反應",
+          "camera_motion": "固定或極輕手持",
+          "action": "父親側頭展示髮型",
+          "expression": "自信",
+          "dialogue_or_narration_placeholder_zh": "[待人工聽寫覆核：來源 85.32–89.06；今天造型帥不帥]",
+          "audio_post": "室內／現場環境聲後期建立；所有對白待人工聽寫後配。",
+          "reference_assets": [
+            "son_reference",
+            "mother_reference",
+            "father_reference",
+            "scene_layout_B07"
+          ],
+          "transition_out": "direct_cut",
+          "acceptance_checks": [
+            "人物身份與服裝不漂移",
+            "肢體與接觸點自然",
+            "背景方向及道具數量連續",
+            "畫面不生成可讀文字；字幕後期加入"
+          ]
+        },
+        {
+          "shot_id": "B07-03",
+          "source_time": {
+            "start_seconds": 89.06,
+            "end_seconds": 92.8
+          },
+          "test_duration_seconds": 3.74,
+          "prompt_zh": "教室／家長會，老師、父母與少年左右關係固定。 母親展示新美甲，少年更尷尬。",
+          "composition": "母親手部近鏡接少年反應",
+          "camera_motion": "固定或極輕手持",
+          "action": "母親伸手展示指甲",
+          "expression": "母親得意、少年無奈",
+          "dialogue_or_narration_placeholder_zh": "[待人工聽寫覆核：來源 89.06–92.80；新做的美甲怎樣]",
+          "audio_post": "室內／現場環境聲後期建立；所有對白待人工聽寫後配。",
+          "reference_assets": [
+            "son_reference",
+            "mother_reference",
+            "father_reference",
+            "scene_layout_B07"
+          ],
+          "transition_out": "direct_cut",
+          "acceptance_checks": [
+            "人物身份與服裝不漂移",
+            "肢體與接觸點自然",
+            "背景方向及道具數量連續",
+            "畫面不生成可讀文字；字幕後期加入"
+          ]
+        },
+        {
+          "shot_id": "B08-01",
+          "source_time": {
+            "start_seconds": 92.8,
+            "end_seconds": 98.145
+          },
+          "test_duration_seconds": 5.35,
+          "prompt_zh": "老師辦公室／課室，成績單、手機及三人站位固定。 老師說少年偏科並公布數學滿分。",
+          "composition": "老師與成績單中景",
+          "camera_motion": "固定或極輕手持",
+          "action": "老師指向第一科分數",
+          "expression": "專業",
+          "dialogue_or_narration_placeholder_zh": "[待人工聽寫覆核：來源 92.80–98.14；數學一百分]",
+          "audio_post": "室內／現場環境聲後期建立；所有對白待人工聽寫後配。",
+          "reference_assets": [
+            "son_reference",
+            "mother_reference",
+            "father_reference",
+            "scene_layout_B08"
+          ],
+          "transition_out": "direct_cut",
+          "acceptance_checks": [
+            "人物身份與服裝不漂移",
+            "肢體與接觸點自然",
+            "背景方向及道具數量連續",
+            "畫面不生成可讀文字；字幕後期加入"
+          ]
+        },
+        {
+          "shot_id": "B08-02",
+          "source_time": {
+            "start_seconds": 98.145,
+            "end_seconds": 103.49
+          },
+          "test_duration_seconds": 5.35,
+          "prompt_zh": "老師辦公室／課室，成績單、手機及三人站位固定。 父母誇張慶祝並拍照。",
+          "composition": "父母雙人反應",
+          "camera_motion": "固定或極輕手持",
+          "action": "舉手機拍少年",
+          "expression": "驕傲",
+          "dialogue_or_narration_placeholder_zh": "[待人工聽寫覆核：來源 98.14–103.49；牛、竟然滿分]",
+          "audio_post": "室內／現場環境聲後期建立；所有對白待人工聽寫後配。",
+          "reference_assets": [
+            "son_reference",
+            "mother_reference",
+            "father_reference",
+            "scene_layout_B08"
+          ],
+          "transition_out": "direct_cut",
+          "acceptance_checks": [
+            "人物身份與服裝不漂移",
+            "肢體與接觸點自然",
+            "背景方向及道具數量連續",
+            "畫面不生成可讀文字；字幕後期加入"
+          ]
+        },
+        {
+          "shot_id": "B08-03",
+          "source_time": {
+            "start_seconds": 103.49,
+            "end_seconds": 108.835
+          },
+          "test_duration_seconds": 5.35,
+          "prompt_zh": "老師辦公室／課室，成績單、手機及三人站位固定。 老師公布語文剛過線、英文零分；鏡頭保持同一方向。",
+          "composition": "老師近鏡＋成績單插鏡",
+          "camera_motion": "固定或極輕手持",
+          "action": "依次指向兩科",
+          "expression": "困惑",
+          "dialogue_or_narration_placeholder_zh": "[待人工聽寫覆核：來源 103.49–108.84；語文六十分、英語零分]",
+          "audio_post": "室內／現場環境聲後期建立；所有對白待人工聽寫後配。",
+          "reference_assets": [
+            "son_reference",
+            "mother_reference",
+            "father_reference",
+            "scene_layout_B08"
+          ],
+          "transition_out": "direct_cut",
+          "acceptance_checks": [
+            "人物身份與服裝不漂移",
+            "肢體與接觸點自然",
+            "背景方向及道具數量連續",
+            "畫面不生成可讀文字；字幕後期加入"
+          ]
+        },
+        {
+          "shot_id": "B08-04",
+          "source_time": {
+            "start_seconds": 108.835,
+            "end_seconds": 114.18
+          },
+          "test_duration_seconds": 5.35,
+          "prompt_zh": "老師辦公室／課室，成績單、手機及三人站位固定。 父母仍以同一語氣稱讚零分並準備發朋友圈。",
+          "composition": "父母與少年三人中景",
+          "camera_motion": "固定或極輕手持",
+          "action": "父母再次拍照，少年看向老師",
+          "expression": "父母興奮、少年錯愕",
+          "dialogue_or_narration_placeholder_zh": "[待人工聽寫覆核：來源 108.84–114.18；小概率也碰上、發朋友圈]",
+          "audio_post": "室內／現場環境聲後期建立；所有對白待人工聽寫後配。",
+          "reference_assets": [
+            "son_reference",
+            "mother_reference",
+            "father_reference",
+            "scene_layout_B08"
+          ],
+          "transition_out": "direct_cut",
+          "acceptance_checks": [
+            "人物身份與服裝不漂移",
+            "肢體與接觸點自然",
+            "背景方向及道具數量連續",
+            "畫面不生成可讀文字；字幕後期加入"
+          ]
+        },
+        {
+          "shot_id": "B09-01",
+          "source_time": {
+            "start_seconds": 114.18,
+            "end_seconds": 117.927
+          },
+          "test_duration_seconds": 3.75,
+          "prompt_zh": "同一老師辦公室，保持人物服裝與成績單。 少年問父母為何不生氣。",
+          "composition": "少年近鏡",
+          "camera_motion": "固定或極輕手持",
+          "action": "少年指向成績單",
+          "expression": "不解",
+          "dialogue_or_narration_placeholder_zh": "[待人工聽寫覆核：來源 114.18–117.93；考零分也不生氣嗎]",
+          "audio_post": "室內／現場環境聲後期建立；所有對白待人工聽寫後配。",
+          "reference_assets": [
+            "son_reference",
+            "mother_reference",
+            "father_reference",
+            "scene_layout_B09"
+          ],
+          "transition_out": "direct_cut",
+          "acceptance_checks": [
+            "人物身份與服裝不漂移",
+            "肢體與接觸點自然",
+            "背景方向及道具數量連續",
+            "畫面不生成可讀文字；字幕後期加入"
+          ]
+        },
+        {
+          "shot_id": "B09-02",
+          "source_time": {
+            "start_seconds": 117.927,
+            "end_seconds": 121.673
+          },
+          "test_duration_seconds": 3.75,
+          "prompt_zh": "同一老師辦公室，保持人物服裝與成績單。 父母先說成績屬於少年，再說仍要負責。",
+          "composition": "父母雙人中景",
+          "camera_motion": "固定或極輕手持",
+          "action": "兩人先平靜點頭",
+          "expression": "認真",
+          "dialogue_or_narration_placeholder_zh": "[待人工聽寫覆核：來源 117.93–121.67；成績是你的、父母仍要負責]",
+          "audio_post": "室內／現場環境聲後期建立；所有對白待人工聽寫後配。",
+          "reference_assets": [
+            "son_reference",
+            "mother_reference",
+            "father_reference",
+            "scene_layout_B09"
+          ],
+          "transition_out": "direct_cut",
+          "acceptance_checks": [
+            "人物身份與服裝不漂移",
+            "肢體與接觸點自然",
+            "背景方向及道具數量連續",
+            "畫面不生成可讀文字；字幕後期加入"
+          ]
+        },
+        {
+          "shot_id": "B09-03",
+          "source_time": {
+            "start_seconds": 121.673,
+            "end_seconds": 125.42
+          },
+          "test_duration_seconds": 3.75,
+          "prompt_zh": "同一老師辦公室，保持人物服裝與成績單。 父母提出補習與食物條件，完成喜劇回扣。",
+          "composition": "三人中景",
+          "camera_motion": "固定或極輕手持",
+          "action": "父母同時提出條件",
+          "expression": "一本正經",
+          "dialogue_or_narration_placeholder_zh": "[待人工聽寫覆核：來源 121.67–125.42；補習班、每天帶澱粉腸、用壓歲錢]",
+          "audio_post": "室內／現場環境聲後期建立；所有對白待人工聽寫後配。",
+          "reference_assets": [
+            "son_reference",
+            "mother_reference",
+            "father_reference",
+            "scene_layout_B09"
+          ],
+          "transition_out": "direct_cut",
+          "acceptance_checks": [
+            "人物身份與服裝不漂移",
+            "肢體與接觸點自然",
+            "背景方向及道具數量連續",
+            "畫面不生成可讀文字；字幕後期加入"
+          ]
+        },
+        {
+          "shot_id": "B10-01",
+          "source_time": {
+            "start_seconds": 125.42,
+            "end_seconds": 129.513
+          },
+          "test_duration_seconds": 4.09,
+          "prompt_zh": "家中親戚到訪日，少年房間／衣櫃旁；親戚只作模糊背景。 外面長輩叫少年露面，家長與少年在房內示意安靜。",
+          "composition": "家長與少年雙人近鏡",
+          "camera_motion": "固定或極輕手持",
+          "action": "家長做噓聲手勢",
+          "expression": "緊張又好笑",
+          "dialogue_or_narration_placeholder_zh": "[待人工聽寫覆核：來源 125.42–129.51；長輩在客廳、不要露面]",
+          "audio_post": "室內／現場環境聲後期建立；所有對白待人工聽寫後配。",
+          "reference_assets": [
+            "son_reference",
+            "mother_reference",
+            "father_reference",
+            "scene_layout_B10"
+          ],
+          "transition_out": "direct_cut",
+          "acceptance_checks": [
+            "人物身份與服裝不漂移",
+            "肢體與接觸點自然",
+            "背景方向及道具數量連續",
+            "畫面不生成可讀文字；字幕後期加入"
+          ]
+        },
+        {
+          "shot_id": "B10-02",
+          "source_time": {
+            "start_seconds": 129.513,
+            "end_seconds": 133.607
+          },
+          "test_duration_seconds": 4.09,
+          "prompt_zh": "家中親戚到訪日，少年房間／衣櫃旁；親戚只作模糊背景。 家長解釋自己也怕被問工作，父子／母子形成同盟。",
+          "composition": "兩人低角度中景",
+          "camera_motion": "固定或極輕手持",
+          "action": "兩人靠近門聽外面聲音",
+          "expression": "同病相憐",
+          "dialogue_or_narration_placeholder_zh": "[待人工聽寫覆核：來源 129.51–133.61；問工作後一定問成績]",
+          "audio_post": "室內／現場環境聲後期建立；所有對白待人工聽寫後配。",
+          "reference_assets": [
+            "son_reference",
+            "mother_reference",
+            "father_reference",
+            "scene_layout_B10"
+          ],
+          "transition_out": "direct_cut",
+          "acceptance_checks": [
+            "人物身份與服裝不漂移",
+            "肢體與接觸點自然",
+            "背景方向及道具數量連續",
+            "畫面不生成可讀文字；字幕後期加入"
+          ]
+        },
+        {
+          "shot_id": "B10-03",
+          "source_time": {
+            "start_seconds": 133.607,
+            "end_seconds": 137.7
+          },
+          "test_duration_seconds": 4.09,
+          "prompt_zh": "家中親戚到訪日，少年房間／衣櫃旁；親戚只作模糊背景。 兩人一起躲好，不開門。",
+          "composition": "門與兩人全身",
+          "camera_motion": "固定或極輕手持",
+          "action": "一起退到畫面後方",
+          "expression": "默契",
+          "dialogue_or_narration_placeholder_zh": "[待人工聽寫覆核：來源 133.61–137.70；現在都別出去]",
+          "audio_post": "室內／現場環境聲後期建立；所有對白待人工聽寫後配。",
+          "reference_assets": [
+            "son_reference",
+            "mother_reference",
+            "father_reference",
+            "scene_layout_B10"
+          ],
+          "transition_out": "direct_cut",
+          "acceptance_checks": [
+            "人物身份與服裝不漂移",
+            "肢體與接觸點自然",
+            "背景方向及道具數量連續",
+            "畫面不生成可讀文字；字幕後期加入"
+          ]
+        },
+        {
+          "shot_id": "B11-01",
+          "source_time": {
+            "start_seconds": 137.7,
+            "end_seconds": 141.407
+          },
+          "test_duration_seconds": 3.71,
+          "prompt_zh": "昏暗少年臥室，被窩、手機與遊戲畫面位置固定。 家長掀開被角發現少年偷偷玩遊戲。",
+          "composition": "床邊雙人中景",
+          "camera_motion": "固定或極輕手持",
+          "action": "家長掀開被角",
+          "expression": "發現秘密",
+          "dialogue_or_narration_placeholder_zh": "[待人工聽寫覆核：來源 137.70–141.41；被窩偷偷玩遊戲]",
+          "audio_post": "室內／現場環境聲後期建立；所有對白待人工聽寫後配。",
+          "reference_assets": [
+            "son_reference",
+            "mother_reference",
+            "father_reference",
+            "scene_layout_B11"
+          ],
+          "transition_out": "direct_cut",
+          "acceptance_checks": [
+            "人物身份與服裝不漂移",
+            "肢體與接觸點自然",
+            "背景方向及道具數量連續",
+            "畫面不生成可讀文字；字幕後期加入"
+          ]
+        },
+        {
+          "shot_id": "B11-02",
+          "source_time": {
+            "start_seconds": 141.407,
+            "end_seconds": 145.113
+          },
+          "test_duration_seconds": 3.71,
+          "prompt_zh": "昏暗少年臥室，被窩、手機與遊戲畫面位置固定。 家長不先責罵，接過手機示範操作。",
+          "composition": "雙人手部＋臉部",
+          "camera_motion": "固定或極輕手持",
+          "action": "家長接手機快速操作",
+          "expression": "專注得意",
+          "dialogue_or_narration_placeholder_zh": "[待人工聽寫覆核：來源 141.41–145.11；看我怎樣帶你飛]",
+          "audio_post": "室內／現場環境聲後期建立；所有對白待人工聽寫後配。",
+          "reference_assets": [
+            "son_reference",
+            "mother_reference",
+            "father_reference",
+            "scene_layout_B11"
+          ],
+          "transition_out": "direct_cut",
+          "acceptance_checks": [
+            "人物身份與服裝不漂移",
+            "肢體與接觸點自然",
+            "背景方向及道具數量連續",
+            "畫面不生成可讀文字；字幕後期加入"
+          ]
+        },
+        {
+          "shot_id": "B11-03",
+          "source_time": {
+            "start_seconds": 145.113,
+            "end_seconds": 148.82
+          },
+          "test_duration_seconds": 3.71,
+          "prompt_zh": "昏暗少年臥室，被窩、手機與遊戲畫面位置固定。 家長把手機交回並提醒暗處傷眼。",
+          "composition": "雙人中近景",
+          "camera_motion": "固定或極輕手持",
+          "action": "交回手機、指向房燈",
+          "expression": "溫和認真",
+          "dialogue_or_narration_placeholder_zh": "[待人工聽寫覆核：來源 145.11–148.82；可以玩但不能躲被窩，光線太暗]",
+          "audio_post": "室內／現場環境聲後期建立；所有對白待人工聽寫後配。",
+          "reference_assets": [
+            "son_reference",
+            "mother_reference",
+            "father_reference",
+            "scene_layout_B11"
+          ],
+          "transition_out": "direct_cut",
+          "acceptance_checks": [
+            "人物身份與服裝不漂移",
+            "肢體與接觸點自然",
+            "背景方向及道具數量連續",
+            "畫面不生成可讀文字；字幕後期加入"
+          ]
+        },
+        {
+          "shot_id": "B12-01",
+          "source_time": {
+            "start_seconds": 148.82,
+            "end_seconds": 152.51
+          },
+          "test_duration_seconds": 3.69,
+          "prompt_zh": "明亮家居搬運／廚房區，西瓜、袋子及地板位置固定。 少年主動上前幫母親搬東西。",
+          "composition": "兩人中景",
+          "camera_motion": "固定或極輕手持",
+          "action": "少年伸手接物",
+          "expression": "積極",
+          "dialogue_or_narration_placeholder_zh": "[待人工聽寫覆核：來源 148.82–152.51；媽媽我來幫你]",
+          "audio_post": "室內／現場環境聲後期建立；所有對白待人工聽寫後配。",
+          "reference_assets": [
+            "son_reference",
+            "mother_reference",
+            "father_reference",
+            "scene_layout_B12"
+          ],
+          "transition_out": "direct_cut",
+          "acceptance_checks": [
+            "人物身份與服裝不漂移",
+            "肢體與接觸點自然",
+            "背景方向及道具數量連續",
+            "畫面不生成可讀文字；字幕後期加入"
+          ]
+        },
+        {
+          "shot_id": "B12-02",
+          "source_time": {
+            "start_seconds": 152.51,
+            "end_seconds": 156.2
+          },
+          "test_duration_seconds": 3.69,
+          "prompt_zh": "明亮家居搬運／廚房區，西瓜、袋子及地板位置固定。 物件／西瓜意外跌落地面，角色只做一次清楚失誤。",
+          "composition": "手部插鏡接地面闊中景",
+          "camera_motion": "固定或極輕手持",
+          "action": "物件滑落並停住",
+          "expression": "少年驚慌",
+          "dialogue_or_narration_placeholder_zh": "[待人工聽寫覆核：來源 152.51–156.20；小心、對不起]",
+          "audio_post": "室內／現場環境聲後期建立；所有對白待人工聽寫後配。",
+          "reference_assets": [
+            "son_reference",
+            "mother_reference",
+            "father_reference",
+            "scene_layout_B12"
+          ],
+          "transition_out": "direct_cut",
+          "acceptance_checks": [
+            "人物身份與服裝不漂移",
+            "肢體與接觸點自然",
+            "背景方向及道具數量連續",
+            "畫面不生成可讀文字；字幕後期加入"
+          ]
+        },
+        {
+          "shot_id": "B12-03",
+          "source_time": {
+            "start_seconds": 156.2,
+            "end_seconds": 159.89
+          },
+          "test_duration_seconds": 3.69,
+          "prompt_zh": "明亮家居搬運／廚房區，西瓜、袋子及地板位置固定。 父母進場先化解尷尬，把結果轉成可以一起吃。",
+          "composition": "三人中景",
+          "camera_motion": "固定或極輕手持",
+          "action": "父母查看地面後輕鬆回應",
+          "expression": "寬容",
+          "dialogue_or_narration_placeholder_zh": "[待人工聽寫覆核：來源 156.20–159.89；沒事，正好不用切]",
+          "audio_post": "室內／現場環境聲後期建立；所有對白待人工聽寫後配。",
+          "reference_assets": [
+            "son_reference",
+            "mother_reference",
+            "father_reference",
+            "scene_layout_B12"
+          ],
+          "transition_out": "direct_cut",
+          "acceptance_checks": [
+            "人物身份與服裝不漂移",
+            "肢體與接觸點自然",
+            "背景方向及道具數量連續",
+            "畫面不生成可讀文字；字幕後期加入"
+          ]
+        },
+        {
+          "shot_id": "B12-04",
+          "source_time": {
+            "start_seconds": 159.89,
+            "end_seconds": 163.58
+          },
+          "test_duration_seconds": 3.69,
+          "prompt_zh": "明亮家居搬運／廚房區，西瓜、袋子及地板位置固定。 全家開始收拾，父母仍交代吃完要清潔地板。",
+          "composition": "三人闊景",
+          "camera_motion": "固定或極輕手持",
+          "action": "少年拿清潔工具，父母整理食物",
+          "expression": "溫暖自然",
+          "dialogue_or_narration_placeholder_zh": "[待人工聽寫覆核：來源 159.89–163.58；吃完要把地板擦乾淨]",
+          "audio_post": "室內／現場環境聲後期建立；所有對白待人工聽寫後配。",
+          "reference_assets": [
+            "son_reference",
+            "mother_reference",
+            "father_reference",
+            "scene_layout_B12"
+          ],
+          "transition_out": "direct_cut",
+          "acceptance_checks": [
+            "人物身份與服裝不漂移",
+            "肢體與接觸點自然",
+            "背景方向及道具數量連續",
+            "畫面不生成可讀文字；字幕後期加入"
+          ]
+        },
+        {
+          "shot_id": "B13-01",
+          "source_time": {
+            "start_seconds": 163.58,
+            "end_seconds": 169.572
+          },
+          "test_duration_seconds": 5.99,
+          "prompt_zh": "戶外樹蔭步道，三人原創家庭角色並肩前行，柔和自然光。 一家三口並肩走遠，少年旁白由不靠譜反轉成幸福。",
+          "composition": "三人全身跟拍轉闊景",
+          "camera_motion": "穩定慢速後退再停住",
+          "action": "三人自然聊天行走",
+          "expression": "放鬆親密",
+          "dialogue_or_narration_placeholder_zh": "[待人工聽寫覆核：來源 163.58–169.57；表面不靠譜，但生活在這樣的家庭很幸福]",
+          "audio_post": "室內／現場環境聲後期建立；所有對白待人工聽寫後配。",
+          "reference_assets": [
+            "son_reference",
+            "mother_reference",
+            "father_reference",
+            "scene_layout_B13"
+          ],
+          "transition_out": "direct_cut",
+          "acceptance_checks": [
+            "人物身份與服裝不漂移",
+            "肢體與接觸點自然",
+            "背景方向及道具數量連續",
+            "畫面不生成可讀文字；字幕後期加入"
+          ]
+        }
+      ],
+      "test_order": [
+        "先測 B03 街邊小食四鏡，驗證三人身份與一次反轉",
+        "再測 B08 成績公布四鏡，驗證老師＋三人視線",
+        "再測 B11 遊戲三鏡，驗證手部與手機",
+        "通過後才串接 13 場"
+      ],
+      "pass_criteria": [
+        "每場只證明一個角色規則",
+        "三名角色臉、年齡、身高及核心服裝跨場一致",
+        "對話視線、嘴形與反應時機合理",
+        "食物、手機、成績單、西瓜等道具狀態連續",
+        "未成年角色及聲音全部使用已授權原創資產",
+        "所有來源對白在人工聽寫前只顯示 placeholder"
+      ]
+    },
+    {
+      "reference_key": "ai-07",
+      "style_code": "ai_host_time_travel_tour",
+      "display_name_zh": "AI 實景主持穿越導覽／1910 年代郵輪概念測試",
+      "source_duration_seconds": 145.812,
+      "prompt_status": "inferred_reconstruction_experiment_unvalidated",
+      "story_rule": "主持身份固定，按港口→入口→大廳→甲板→公共區→走廊／樓梯→房間→船體全貌的空間次序導覽。",
+      "global_visual_prompt": "原創主持進入以公開歷史資料為基礎、但不複製特定電影美術的 1910 年代大型郵輪概念重建；9:16 自拍 vlog、自然手持、主持近鏡與環境闊景交替；畫面固定標示「AI 概念重建」。",
+      "character_bible": [
+        {
+          "id": "host",
+          "rules": [
+            "使用有授權的原創／內部主持身份參考",
+            "黑色無品牌 polo",
+            "圓框眼鏡",
+            "短黑髮",
+            "臉、膚色、身高、自拍手臂及相機高度全片固定"
+          ]
+        },
+        {
+          "id": "background_people",
+          "rules": [
+            "1910 年代通用服裝研究包",
+            "不使用電影角色或可識別真人",
+            "群眾密度按場景鎖定",
+            "避免肢體交疊"
+          ]
+        }
+      ],
+      "scene_bible": [
+        "港口登船地圖",
+        "船艙概念平面圖",
+        "港口→大廳→甲板→三等艙公共區→樓梯→房間→甲板的可理解路線",
+        "年代服裝與道具研究包",
+        "禁止使用受保護電影標誌、美術、對白及音樂"
+      ],
+      "reference_image_requirements": [
+        "主持正面／側面／全身／眼鏡／手勢／自拍高度",
+        "主持每站首尾姿勢",
+        "每站入口與出口關鍵幀",
+        "船艙地圖及方向圖",
+        "背景服裝組與群眾密度參考",
+        "房間、洗手盆、樓梯、甲板的通用歷史研究圖"
+      ],
+      "stitching": [
+        "每站拆成 2–3 個 2.5–6 秒短鏡",
+        "主持跨鏡使用同一 identity pack",
+        "以入口、門、樓梯、走廊作空間接鏡",
+        "先生成無對白動作，再後期配音及字幕",
+        "112 秒後不得引用現有 ASR"
+      ],
+      "shots": [
+        {
+          "shot_id": "C01-01",
+          "source_time": {
+            "start_seconds": 0,
+            "end_seconds": 4
+          },
+          "test_duration_seconds": 4,
+          "prompt_zh": "1910 年代歐洲港口與大型跨大西洋郵輪；原創成年亞洲男主持穿黑色 polo、圓框眼鏡，自拍器材與臉全片固定。 主持在巨大船身旁自拍，轉頭揭示排隊乘客。",
+          "composition": "9:16 自拍中近景，船身佔背景大面積",
+          "camera_motion": "固定或極輕手持",
+          "action": "主持走兩步後回頭指船",
+          "expression": "驚喜",
+          "dialogue_or_narration_placeholder_zh": "[待人工聽寫覆核：來源 0.00–4.00；交代 1912 年大型郵輪體驗；具體史實待核實]",
+          "audio_post": "主持聲線及對白待人工聽寫後期配音；背景用海風、腳步、人群與船艙環境聲分層製作。",
+          "reference_assets": [
+            "host_identity_pack",
+            "host_black_polo",
+            "1910s_liner_world_bible",
+            "route_map_C01"
+          ],
+          "transition_out": "direct_cut",
+          "acceptance_checks": [
+            "人物身份與服裝不漂移",
+            "肢體與接觸點自然",
+            "背景方向及道具數量連續",
+            "畫面不生成可讀文字；字幕後期加入"
+          ]
+        },
+        {
+          "shot_id": "C01-02",
+          "source_time": {
+            "start_seconds": 4,
+            "end_seconds": 8
+          },
+          "test_duration_seconds": 4,
+          "prompt_zh": "1910 年代歐洲港口與大型跨大西洋郵輪；原創成年亞洲男主持穿黑色 polo、圓框眼鏡，自拍器材與臉全片固定。 主持與入口、人群同框，讓觀眾看清時代服裝與登船流程。",
+          "composition": "自拍近景轉小闊景",
+          "camera_motion": "固定或極輕手持",
+          "action": "主持側身讓出入口",
+          "expression": "期待",
+          "dialogue_or_narration_placeholder_zh": "[待人工聽寫覆核：來源 4.00–8.00；詢問船名讀法／入口介紹]",
+          "audio_post": "主持聲線及對白待人工聽寫後期配音；背景用海風、腳步、人群與船艙環境聲分層製作。",
+          "reference_assets": [
+            "host_identity_pack",
+            "host_black_polo",
+            "1910s_liner_world_bible",
+            "route_map_C01"
+          ],
+          "transition_out": "direct_cut",
+          "acceptance_checks": [
+            "人物身份與服裝不漂移",
+            "肢體與接觸點自然",
+            "背景方向及道具數量連續",
+            "畫面不生成可讀文字；字幕後期加入"
+          ]
+        },
+        {
+          "shot_id": "C02-01",
+          "source_time": {
+            "start_seconds": 8,
+            "end_seconds": 13
+          },
+          "test_duration_seconds": 5,
+          "prompt_zh": "同一港口入口，工作人員、行李及船身位置固定。 主持走到登船員前詢問規則。",
+          "composition": "主持與工作人員雙人中景",
+          "camera_motion": "固定或極輕手持",
+          "action": "主持停步提問，工作人員指向入口",
+          "expression": "禮貌專注",
+          "dialogue_or_narration_placeholder_zh": "[待人工聽寫覆核：來源 8.00–13.00；登船注意事項待人工聽寫]",
+          "audio_post": "主持聲線及對白待人工聽寫後期配音；背景用海風、腳步、人群與船艙環境聲分層製作。",
+          "reference_assets": [
+            "host_identity_pack",
+            "host_black_polo",
+            "1910s_liner_world_bible",
+            "route_map_C02"
+          ],
+          "transition_out": "direct_cut",
+          "acceptance_checks": [
+            "人物身份與服裝不漂移",
+            "肢體與接觸點自然",
+            "背景方向及道具數量連續",
+            "畫面不生成可讀文字；字幕後期加入"
+          ]
+        },
+        {
+          "shot_id": "C02-02",
+          "source_time": {
+            "start_seconds": 13,
+            "end_seconds": 18
+          },
+          "test_duration_seconds": 5,
+          "prompt_zh": "同一港口入口，工作人員、行李及船身位置固定。 工作人員放行，人群開始前移。",
+          "composition": "側面中闊景",
+          "camera_motion": "固定或極輕手持",
+          "action": "工作人員抬手示意，主持跟隊伍前進",
+          "expression": "主持興奮",
+          "dialogue_or_narration_placeholder_zh": "[待人工聽寫覆核：來源 13.00–18.00；可以登船]",
+          "audio_post": "主持聲線及對白待人工聽寫後期配音；背景用海風、腳步、人群與船艙環境聲分層製作。",
+          "reference_assets": [
+            "host_identity_pack",
+            "host_black_polo",
+            "1910s_liner_world_bible",
+            "route_map_C02"
+          ],
+          "transition_out": "direct_cut",
+          "acceptance_checks": [
+            "人物身份與服裝不漂移",
+            "肢體與接觸點自然",
+            "背景方向及道具數量連續",
+            "畫面不生成可讀文字；字幕後期加入"
+          ]
+        },
+        {
+          "shot_id": "C03-01",
+          "source_time": {
+            "start_seconds": 18,
+            "end_seconds": 22
+          },
+          "test_duration_seconds": 4,
+          "prompt_zh": "登船斜道與密集隊伍，避免人物穿插。 主持在隊伍中自拍，背景有行李及時代服裝乘客。",
+          "composition": "自拍中近景，走道向後延伸",
+          "camera_motion": "固定或極輕手持",
+          "action": "跟隊伍慢行",
+          "expression": "觀察",
+          "dialogue_or_narration_placeholder_zh": "[待人工聽寫覆核：來源 18.00–22.00；人很多]",
+          "audio_post": "主持聲線及對白待人工聽寫後期配音；背景用海風、腳步、人群與船艙環境聲分層製作。",
+          "reference_assets": [
+            "host_identity_pack",
+            "host_black_polo",
+            "1910s_liner_world_bible",
+            "route_map_C03"
+          ],
+          "transition_out": "direct_cut",
+          "acceptance_checks": [
+            "人物身份與服裝不漂移",
+            "肢體與接觸點自然",
+            "背景方向及道具數量連續",
+            "畫面不生成可讀文字；字幕後期加入"
+          ]
+        },
+        {
+          "shot_id": "C03-02",
+          "source_time": {
+            "start_seconds": 22,
+            "end_seconds": 26
+          },
+          "test_duration_seconds": 4,
+          "prompt_zh": "登船斜道與密集隊伍，避免人物穿插。 主持把鏡頭轉向前方入口並預告上船後再拍。",
+          "composition": "POV 與半自拍切換",
+          "camera_motion": "固定或極輕手持",
+          "action": "單次平順轉鏡",
+          "expression": "期待",
+          "dialogue_or_narration_placeholder_zh": "[待人工聽寫覆核：來源 22.00–26.00；上船後展示]",
+          "audio_post": "主持聲線及對白待人工聽寫後期配音；背景用海風、腳步、人群與船艙環境聲分層製作。",
+          "reference_assets": [
+            "host_identity_pack",
+            "host_black_polo",
+            "1910s_liner_world_bible",
+            "route_map_C03"
+          ],
+          "transition_out": "direct_cut",
+          "acceptance_checks": [
+            "人物身份與服裝不漂移",
+            "肢體與接觸點自然",
+            "背景方向及道具數量連續",
+            "畫面不生成可讀文字；字幕後期加入"
+          ]
+        },
+        {
+          "shot_id": "C04-01",
+          "source_time": {
+            "start_seconds": 26,
+            "end_seconds": 31
+          },
+          "test_duration_seconds": 5,
+          "prompt_zh": "郵輪木飾大廳，樓梯、門、地磚及乘客動線固定；不得模仿特定電影場景。 主持步入大廳，回頭展示繁忙人群。",
+          "composition": "自拍中景接環境闊景",
+          "camera_motion": "固定或極輕手持",
+          "action": "走三步後停下",
+          "expression": "驚訝",
+          "dialogue_or_narration_placeholder_zh": "[待人工聽寫覆核：來源 26.00–31.00；大廳、人群忙碌]",
+          "audio_post": "主持聲線及對白待人工聽寫後期配音；背景用海風、腳步、人群與船艙環境聲分層製作。",
+          "reference_assets": [
+            "host_identity_pack",
+            "host_black_polo",
+            "1910s_liner_world_bible",
+            "route_map_C04"
+          ],
+          "transition_out": "direct_cut",
+          "acceptance_checks": [
+            "人物身份與服裝不漂移",
+            "肢體與接觸點自然",
+            "背景方向及道具數量連續",
+            "畫面不生成可讀文字；字幕後期加入"
+          ]
+        },
+        {
+          "shot_id": "C04-02",
+          "source_time": {
+            "start_seconds": 31,
+            "end_seconds": 36
+          },
+          "test_duration_seconds": 5,
+          "prompt_zh": "郵輪木飾大廳，樓梯、門、地磚及乘客動線固定；不得模仿特定電影場景。 狗隻與乘客從背景經過，主持讓出動線。",
+          "composition": "主持前景、背景人物分層",
+          "camera_motion": "固定或極輕手持",
+          "action": "主持側身觀察，不觸碰背景角色",
+          "expression": "好奇",
+          "dialogue_or_narration_placeholder_zh": "[待人工聽寫覆核：來源 31.00–36.00；看到很多狗]",
+          "audio_post": "主持聲線及對白待人工聽寫後期配音；背景用海風、腳步、人群與船艙環境聲分層製作。",
+          "reference_assets": [
+            "host_identity_pack",
+            "host_black_polo",
+            "1910s_liner_world_bible",
+            "route_map_C04"
+          ],
+          "transition_out": "direct_cut",
+          "acceptance_checks": [
+            "人物身份與服裝不漂移",
+            "肢體與接觸點自然",
+            "背景方向及道具數量連續",
+            "畫面不生成可讀文字；字幕後期加入"
+          ]
+        },
+        {
+          "shot_id": "C05-01",
+          "source_time": {
+            "start_seconds": 36,
+            "end_seconds": 40.667
+          },
+          "test_duration_seconds": 4.67,
+          "prompt_zh": "戶外甲板與港口群眾，海面、欄杆與船身方向連續。 主持穿過甲板人群，自拍器材高度固定。",
+          "composition": "自拍近景，肩後見群眾",
+          "camera_motion": "固定或極輕手持",
+          "action": "穩定步行",
+          "expression": "專注",
+          "dialogue_or_narration_placeholder_zh": "[待人工聽寫覆核：來源 36.00–40.67；36–44 秒原聲缺口，待人工聽寫]",
+          "audio_post": "主持聲線及對白待人工聽寫後期配音；背景用海風、腳步、人群與船艙環境聲分層製作。",
+          "reference_assets": [
+            "host_identity_pack",
+            "host_black_polo",
+            "1910s_liner_world_bible",
+            "route_map_C05"
+          ],
+          "transition_out": "direct_cut",
+          "acceptance_checks": [
+            "人物身份與服裝不漂移",
+            "肢體與接觸點自然",
+            "背景方向及道具數量連續",
+            "畫面不生成可讀文字；字幕後期加入"
+          ]
+        },
+        {
+          "shot_id": "C05-02",
+          "source_time": {
+            "start_seconds": 40.667,
+            "end_seconds": 45.333
+          },
+          "test_duration_seconds": 4.67,
+          "prompt_zh": "戶外甲板與港口群眾，海面、欄杆與船身方向連續。 主持轉頭認出港口曾見的人。",
+          "composition": "主持反應近鏡接背景人物",
+          "camera_motion": "固定或極輕手持",
+          "action": "只做一次回頭",
+          "expression": "意外",
+          "dialogue_or_narration_placeholder_zh": "[待人工聽寫覆核：來源 40.67–45.33；是否剛在港口見過]",
+          "audio_post": "主持聲線及對白待人工聽寫後期配音；背景用海風、腳步、人群與船艙環境聲分層製作。",
+          "reference_assets": [
+            "host_identity_pack",
+            "host_black_polo",
+            "1910s_liner_world_bible",
+            "route_map_C05"
+          ],
+          "transition_out": "direct_cut",
+          "acceptance_checks": [
+            "人物身份與服裝不漂移",
+            "肢體與接觸點自然",
+            "背景方向及道具數量連續",
+            "畫面不生成可讀文字；字幕後期加入"
+          ]
+        },
+        {
+          "shot_id": "C05-03",
+          "source_time": {
+            "start_seconds": 45.333,
+            "end_seconds": 50
+          },
+          "test_duration_seconds": 4.67,
+          "prompt_zh": "戶外甲板與港口群眾，海面、欄杆與船身方向連續。 陽光照在甲板，主持短暫遮眼。",
+          "composition": "半身中景，海天背景",
+          "camera_motion": "固定或極輕手持",
+          "action": "抬手遮陽",
+          "expression": "自然不適",
+          "dialogue_or_narration_placeholder_zh": "[待人工聽寫覆核：來源 45.33–50.00；太陽很大]",
+          "audio_post": "主持聲線及對白待人工聽寫後期配音；背景用海風、腳步、人群與船艙環境聲分層製作。",
+          "reference_assets": [
+            "host_identity_pack",
+            "host_black_polo",
+            "1910s_liner_world_bible",
+            "route_map_C05"
+          ],
+          "transition_out": "direct_cut",
+          "acceptance_checks": [
+            "人物身份與服裝不漂移",
+            "肢體與接觸點自然",
+            "背景方向及道具數量連續",
+            "畫面不生成可讀文字；字幕後期加入"
+          ]
+        },
+        {
+          "shot_id": "C06-01",
+          "source_time": {
+            "start_seconds": 50,
+            "end_seconds": 55.5
+          },
+          "test_duration_seconds": 5.5,
+          "prompt_zh": "主甲板，船長／工作人員向乘客講解，保持年代服裝一致。 主持在講解人群外圍自拍，畫面同時看見講者。",
+          "composition": "主持前景＋講者中景",
+          "camera_motion": "固定或極輕手持",
+          "action": "主持壓低聲音指向講者",
+          "expression": "認真",
+          "dialogue_or_narration_placeholder_zh": "[待人工聽寫覆核：來源 50.00–55.50；航程注意事項]",
+          "audio_post": "主持聲線及對白待人工聽寫後期配音；背景用海風、腳步、人群與船艙環境聲分層製作。",
+          "reference_assets": [
+            "host_identity_pack",
+            "host_black_polo",
+            "1910s_liner_world_bible",
+            "route_map_C06"
+          ],
+          "transition_out": "direct_cut",
+          "acceptance_checks": [
+            "人物身份與服裝不漂移",
+            "肢體與接觸點自然",
+            "背景方向及道具數量連續",
+            "畫面不生成可讀文字；字幕後期加入"
+          ]
+        },
+        {
+          "shot_id": "C06-02",
+          "source_time": {
+            "start_seconds": 55.5,
+            "end_seconds": 61
+          },
+          "test_duration_seconds": 5.5,
+          "prompt_zh": "主甲板，船長／工作人員向乘客講解，保持年代服裝一致。 主持轉回鏡頭評論現場正式及旁人注視。",
+          "composition": "主持近鏡＋旁人反應",
+          "camera_motion": "固定或極輕手持",
+          "action": "主持說話後停一拍看旁人",
+          "expression": "稍尷尬",
+          "dialogue_or_narration_placeholder_zh": "[待人工聽寫覆核：來源 55.50–61.00；大家很認真、旁人一直看]",
+          "audio_post": "主持聲線及對白待人工聽寫後期配音；背景用海風、腳步、人群與船艙環境聲分層製作。",
+          "reference_assets": [
+            "host_identity_pack",
+            "host_black_polo",
+            "1910s_liner_world_bible",
+            "route_map_C06"
+          ],
+          "transition_out": "direct_cut",
+          "acceptance_checks": [
+            "人物身份與服裝不漂移",
+            "肢體與接觸點自然",
+            "背景方向及道具數量連續",
+            "畫面不生成可讀文字；字幕後期加入"
+          ]
+        },
+        {
+          "shot_id": "C07-01",
+          "source_time": {
+            "start_seconds": 61,
+            "end_seconds": 66
+          },
+          "test_duration_seconds": 5,
+          "prompt_zh": "三等艙公共區，長椅、木牆、樂器及人群位置固定。 主持進入公共區，先展示空間與聊天人群。",
+          "composition": "自拍中景接室內闊景",
+          "camera_motion": "固定或極輕手持",
+          "action": "緩慢轉鏡",
+          "expression": "興奮",
+          "dialogue_or_narration_placeholder_zh": "[待人工聽寫覆核：來源 61.00–66.00；公共區用途]",
+          "audio_post": "主持聲線及對白待人工聽寫後期配音；背景用海風、腳步、人群與船艙環境聲分層製作。",
+          "reference_assets": [
+            "host_identity_pack",
+            "host_black_polo",
+            "1910s_liner_world_bible",
+            "route_map_C07"
+          ],
+          "transition_out": "direct_cut",
+          "acceptance_checks": [
+            "人物身份與服裝不漂移",
+            "肢體與接觸點自然",
+            "背景方向及道具數量連續",
+            "畫面不生成可讀文字；字幕後期加入"
+          ]
+        },
+        {
+          "shot_id": "C07-02",
+          "source_time": {
+            "start_seconds": 66,
+            "end_seconds": 71
+          },
+          "test_duration_seconds": 5,
+          "prompt_zh": "三等艙公共區，長椅、木牆、樂器及人群位置固定。 主持靠近唱歌／跳舞的小群體，保持安全距離。",
+          "composition": "主持側面＋群體中景",
+          "camera_motion": "固定或極輕手持",
+          "action": "停步提問",
+          "expression": "好奇",
+          "dialogue_or_narration_placeholder_zh": "[待人工聽寫覆核：來源 66.00–71.00；詢問正在玩甚麼]",
+          "audio_post": "主持聲線及對白待人工聽寫後期配音；背景用海風、腳步、人群與船艙環境聲分層製作。",
+          "reference_assets": [
+            "host_identity_pack",
+            "host_black_polo",
+            "1910s_liner_world_bible",
+            "route_map_C07"
+          ],
+          "transition_out": "direct_cut",
+          "acceptance_checks": [
+            "人物身份與服裝不漂移",
+            "肢體與接觸點自然",
+            "背景方向及道具數量連續",
+            "畫面不生成可讀文字；字幕後期加入"
+          ]
+        },
+        {
+          "shot_id": "C07-03",
+          "source_time": {
+            "start_seconds": 71,
+            "end_seconds": 76
+          },
+          "test_duration_seconds": 5,
+          "prompt_zh": "三等艙公共區，長椅、木牆、樂器及人群位置固定。 背景角色邀請加入，主持禮貌拒絕並轉身找房。",
+          "composition": "雙人中景接主持反應",
+          "camera_motion": "固定或極輕手持",
+          "action": "主持擺手、退一步",
+          "expression": "友善",
+          "dialogue_or_narration_placeholder_zh": "[待人工聽寫覆核：來源 71.00–76.00；邀請與拒絕、去找房間]",
+          "audio_post": "主持聲線及對白待人工聽寫後期配音；背景用海風、腳步、人群與船艙環境聲分層製作。",
+          "reference_assets": [
+            "host_identity_pack",
+            "host_black_polo",
+            "1910s_liner_world_bible",
+            "route_map_C07"
+          ],
+          "transition_out": "direct_cut",
+          "acceptance_checks": [
+            "人物身份與服裝不漂移",
+            "肢體與接觸點自然",
+            "背景方向及道具數量連續",
+            "畫面不生成可讀文字；字幕後期加入"
+          ]
+        },
+        {
+          "shot_id": "C08-01",
+          "source_time": {
+            "start_seconds": 76,
+            "end_seconds": 81.5
+          },
+          "test_duration_seconds": 5.5,
+          "prompt_zh": "木飾走廊與分艙入口，門牌與方向一致。 主持在走廊迷路，左右查看。",
+          "composition": "自拍中景，走廊消失點置中",
+          "camera_motion": "固定或極輕手持",
+          "action": "走兩步停下看兩側",
+          "expression": "困惑",
+          "dialogue_or_narration_placeholder_zh": "[待人工聽寫覆核：來源 76.00–81.50；應該迷路、這裡很特別]",
+          "audio_post": "主持聲線及對白待人工聽寫後期配音；背景用海風、腳步、人群與船艙環境聲分層製作。",
+          "reference_assets": [
+            "host_identity_pack",
+            "host_black_polo",
+            "1910s_liner_world_bible",
+            "route_map_C08"
+          ],
+          "transition_out": "direct_cut",
+          "acceptance_checks": [
+            "人物身份與服裝不漂移",
+            "肢體與接觸點自然",
+            "背景方向及道具數量連續",
+            "畫面不生成可讀文字；字幕後期加入"
+          ]
+        },
+        {
+          "shot_id": "C08-02",
+          "source_time": {
+            "start_seconds": 81.5,
+            "end_seconds": 87
+          },
+          "test_duration_seconds": 5.5,
+          "prompt_zh": "木飾走廊與分艙入口，門牌與方向一致。 工作人員指示不同艙等方向。",
+          "composition": "主持與工作人員雙人中景",
+          "camera_motion": "固定或極輕手持",
+          "action": "工作人員指向另一通道",
+          "expression": "主持恍然大悟",
+          "dialogue_or_narration_placeholder_zh": "[待人工聽寫覆核：來源 81.50–87.00；此處屬另一艙等，第三艙在另一方向；史實待核實]",
+          "audio_post": "主持聲線及對白待人工聽寫後期配音；背景用海風、腳步、人群與船艙環境聲分層製作。",
+          "reference_assets": [
+            "host_identity_pack",
+            "host_black_polo",
+            "1910s_liner_world_bible",
+            "route_map_C08"
+          ],
+          "transition_out": "direct_cut",
+          "acceptance_checks": [
+            "人物身份與服裝不漂移",
+            "肢體與接觸點自然",
+            "背景方向及道具數量連續",
+            "畫面不生成可讀文字；字幕後期加入"
+          ]
+        },
+        {
+          "shot_id": "C09-01",
+          "source_time": {
+            "start_seconds": 87,
+            "end_seconds": 91.5
+          },
+          "test_duration_seconds": 4.5,
+          "prompt_zh": "狹窄金屬樓梯，人群與行李方向一致。 主持跟隨人群爬樓梯，保留擠迫感但避免身體穿插。",
+          "composition": "自拍廣角中景，樓梯向上延伸",
+          "camera_motion": "固定或極輕手持",
+          "action": "慢步上梯",
+          "expression": "吃力",
+          "dialogue_or_narration_placeholder_zh": "[待人工聽寫覆核：來源 87.00–91.50；樓梯很擠、很多人找房]",
+          "audio_post": "主持聲線及對白待人工聽寫後期配音；背景用海風、腳步、人群與船艙環境聲分層製作。",
+          "reference_assets": [
+            "host_identity_pack",
+            "host_black_polo",
+            "1910s_liner_world_bible",
+            "route_map_C09"
+          ],
+          "transition_out": "direct_cut",
+          "acceptance_checks": [
+            "人物身份與服裝不漂移",
+            "肢體與接觸點自然",
+            "背景方向及道具數量連續",
+            "畫面不生成可讀文字；字幕後期加入"
+          ]
+        },
+        {
+          "shot_id": "C09-02",
+          "source_time": {
+            "start_seconds": 91.5,
+            "end_seconds": 96
+          },
+          "test_duration_seconds": 4.5,
+          "prompt_zh": "狹窄金屬樓梯，人群與行李方向一致。 主持在走廊找到房門。",
+          "composition": "主持與門牌中景",
+          "camera_motion": "固定或極輕手持",
+          "action": "停在門前確認",
+          "expression": "鬆一口氣",
+          "dialogue_or_narration_placeholder_zh": "[待人工聽寫覆核：來源 91.50–96.00；就是這間]",
+          "audio_post": "主持聲線及對白待人工聽寫後期配音；背景用海風、腳步、人群與船艙環境聲分層製作。",
+          "reference_assets": [
+            "host_identity_pack",
+            "host_black_polo",
+            "1910s_liner_world_bible",
+            "route_map_C09"
+          ],
+          "transition_out": "direct_cut",
+          "acceptance_checks": [
+            "人物身份與服裝不漂移",
+            "肢體與接觸點自然",
+            "背景方向及道具數量連續",
+            "畫面不生成可讀文字；字幕後期加入"
+          ]
+        },
+        {
+          "shot_id": "C10-01",
+          "source_time": {
+            "start_seconds": 96,
+            "end_seconds": 100.333
+          },
+          "test_duration_seconds": 4.33,
+          "prompt_zh": "小型三等艙客房，木牆、單人床、床頭洗手盆固定；只用通用史料感設計。 主持推門進房，先拍全貌。",
+          "composition": "POV 開門接室內闊景",
+          "camera_motion": "固定或極輕手持",
+          "action": "門一次打開，不穿模",
+          "expression": "期待",
+          "dialogue_or_narration_placeholder_zh": "[待人工聽寫覆核：來源 96.00–100.33；開箱房間]",
+          "audio_post": "主持聲線及對白待人工聽寫後期配音；背景用海風、腳步、人群與船艙環境聲分層製作。",
+          "reference_assets": [
+            "host_identity_pack",
+            "host_black_polo",
+            "1910s_liner_world_bible",
+            "route_map_C10"
+          ],
+          "transition_out": "direct_cut",
+          "acceptance_checks": [
+            "人物身份與服裝不漂移",
+            "肢體與接觸點自然",
+            "背景方向及道具數量連續",
+            "畫面不生成可讀文字；字幕後期加入"
+          ]
+        },
+        {
+          "shot_id": "C10-02",
+          "source_time": {
+            "start_seconds": 100.333,
+            "end_seconds": 104.667
+          },
+          "test_duration_seconds": 4.33,
+          "prompt_zh": "小型三等艙客房，木牆、單人床、床頭洗手盆固定；只用通用史料感設計。 主持坐在床邊評論空間。",
+          "composition": "固定中景，床與木牆清楚",
+          "camera_motion": "固定或極輕手持",
+          "action": "坐下輕壓床面",
+          "expression": "滿意",
+          "dialogue_or_narration_placeholder_zh": "[待人工聽寫覆核：來源 100.33–104.67；房間不錯]",
+          "audio_post": "主持聲線及對白待人工聽寫後期配音；背景用海風、腳步、人群與船艙環境聲分層製作。",
+          "reference_assets": [
+            "host_identity_pack",
+            "host_black_polo",
+            "1910s_liner_world_bible",
+            "route_map_C10"
+          ],
+          "transition_out": "direct_cut",
+          "acceptance_checks": [
+            "人物身份與服裝不漂移",
+            "肢體與接觸點自然",
+            "背景方向及道具數量連續",
+            "畫面不生成可讀文字；字幕後期加入"
+          ]
+        },
+        {
+          "shot_id": "C10-03",
+          "source_time": {
+            "start_seconds": 104.667,
+            "end_seconds": 109
+          },
+          "test_duration_seconds": 4.33,
+          "prompt_zh": "小型三等艙客房，木牆、單人床、床頭洗手盆固定；只用通用史料感設計。 床頭洗手盆及細節近鏡，再回主持。",
+          "composition": "道具近鏡接主持中景",
+          "camera_motion": "固定或極輕手持",
+          "action": "主持指向洗手盆，不開水",
+          "expression": "好奇",
+          "dialogue_or_narration_placeholder_zh": "[待人工聽寫覆核：來源 104.67–109.00；床頭附洗手設備、房間評價]",
+          "audio_post": "主持聲線及對白待人工聽寫後期配音；背景用海風、腳步、人群與船艙環境聲分層製作。",
+          "reference_assets": [
+            "host_identity_pack",
+            "host_black_polo",
+            "1910s_liner_world_bible",
+            "route_map_C10"
+          ],
+          "transition_out": "direct_cut",
+          "acceptance_checks": [
+            "人物身份與服裝不漂移",
+            "肢體與接觸點自然",
+            "背景方向及道具數量連續",
+            "畫面不生成可讀文字；字幕後期加入"
+          ]
+        },
+        {
+          "shot_id": "C11-01",
+          "source_time": {
+            "start_seconds": 109,
+            "end_seconds": 112
+          },
+          "test_duration_seconds": 3,
+          "prompt_zh": "同一客房。 主持從袋中取出小型拍攝裝置作過場，不展示品牌。",
+          "composition": "手部插鏡＋主持中景",
+          "camera_motion": "固定或極輕手持",
+          "action": "取出設備並指向甲板方向",
+          "expression": "興奮",
+          "dialogue_or_narration_placeholder_zh": "[待人工聽寫覆核：來源 109.00–112.00；準備展示船有多大]",
+          "audio_post": "主持聲線及對白待人工聽寫後期配音；背景用海風、腳步、人群與船艙環境聲分層製作。",
+          "reference_assets": [
+            "host_identity_pack",
+            "host_black_polo",
+            "1910s_liner_world_bible",
+            "route_map_C11"
+          ],
+          "transition_out": "direct_cut",
+          "acceptance_checks": [
+            "人物身份與服裝不漂移",
+            "肢體與接觸點自然",
+            "背景方向及道具數量連續",
+            "畫面不生成可讀文字；字幕後期加入"
+          ]
+        },
+        {
+          "shot_id": "C12-01",
+          "source_time": {
+            "start_seconds": 112,
+            "end_seconds": 116.667
+          },
+          "test_duration_seconds": 4.67,
+          "prompt_zh": "主甲板與船體闊景；音訊完全待核實。 主持走上甲板，以環境闊景建立船上尺度。",
+          "composition": "主持小比例、甲板大比例",
+          "camera_motion": "固定或極輕手持",
+          "action": "主持走向欄杆",
+          "expression": "驚嘆",
+          "dialogue_or_narration_placeholder_zh": "[待人工聽寫覆核：來源 112.00–116.67；112 秒後 ASR 失真，不填寫]",
+          "audio_post": "主持聲線及對白待人工聽寫後期配音；背景用海風、腳步、人群與船艙環境聲分層製作。",
+          "reference_assets": [
+            "host_identity_pack",
+            "host_black_polo",
+            "1910s_liner_world_bible",
+            "route_map_C12"
+          ],
+          "transition_out": "direct_cut",
+          "acceptance_checks": [
+            "人物身份與服裝不漂移",
+            "肢體與接觸點自然",
+            "背景方向及道具數量連續",
+            "畫面不生成可讀文字；字幕後期加入"
+          ]
+        },
+        {
+          "shot_id": "C12-02",
+          "source_time": {
+            "start_seconds": 116.667,
+            "end_seconds": 121.333
+          },
+          "test_duration_seconds": 4.67,
+          "prompt_zh": "主甲板與船體闊景；音訊完全待核實。 高位俯拍甲板人群與煙囪，使用通用 1910 年代郵輪設計。",
+          "composition": "高角度闊景",
+          "camera_motion": "固定或極輕手持",
+          "action": "鏡頭平順上升",
+          "expression": "不適用",
+          "dialogue_or_narration_placeholder_zh": "[待人工聽寫覆核：來源 116.67–121.33；待人工聽寫]",
+          "audio_post": "主持聲線及對白待人工聽寫後期配音；背景用海風、腳步、人群與船艙環境聲分層製作。",
+          "reference_assets": [
+            "host_identity_pack",
+            "host_black_polo",
+            "1910s_liner_world_bible",
+            "route_map_C12"
+          ],
+          "transition_out": "direct_cut",
+          "acceptance_checks": [
+            "人物身份與服裝不漂移",
+            "肢體與接觸點自然",
+            "背景方向及道具數量連續",
+            "畫面不生成可讀文字；字幕後期加入"
+          ]
+        },
+        {
+          "shot_id": "C12-03",
+          "source_time": {
+            "start_seconds": 121.333,
+            "end_seconds": 126
+          },
+          "test_duration_seconds": 4.67,
+          "prompt_zh": "主甲板與船體闊景；音訊完全待核實。 主持以小窗或畫中畫出現，指示船體尺度。",
+          "composition": "主畫面環境＋小型主持畫面",
+          "camera_motion": "固定或極輕手持",
+          "action": "環境鏡緩慢前移",
+          "expression": "主持驚喜",
+          "dialogue_or_narration_placeholder_zh": "[待人工聽寫覆核：來源 121.33–126.00；待人工聽寫]",
+          "audio_post": "主持聲線及對白待人工聽寫後期配音；背景用海風、腳步、人群與船艙環境聲分層製作。",
+          "reference_assets": [
+            "host_identity_pack",
+            "host_black_polo",
+            "1910s_liner_world_bible",
+            "route_map_C12"
+          ],
+          "transition_out": "direct_cut",
+          "acceptance_checks": [
+            "人物身份與服裝不漂移",
+            "肢體與接觸點自然",
+            "背景方向及道具數量連續",
+            "畫面不生成可讀文字；字幕後期加入"
+          ]
+        },
+        {
+          "shot_id": "C13-01",
+          "source_time": {
+            "start_seconds": 126,
+            "end_seconds": 132
+          },
+          "test_duration_seconds": 6,
+          "prompt_zh": "海面、甲板、桅杆與船身；不得使用受保護電影標誌或角色。 鏡頭由船邊掠過海面，再抬向桅杆與煙囪。",
+          "composition": "POV 闊景",
+          "camera_motion": "慢速傾斜＋平移",
+          "action": "無人物主要動作",
+          "expression": "不適用",
+          "dialogue_or_narration_placeholder_zh": "[待人工聽寫覆核：來源 126.00–132.00；ASR 重複單字，棄用]",
+          "audio_post": "主持聲線及對白待人工聽寫後期配音；背景用海風、腳步、人群與船艙環境聲分層製作。",
+          "reference_assets": [
+            "host_identity_pack",
+            "host_black_polo",
+            "1910s_liner_world_bible",
+            "route_map_C13"
+          ],
+          "transition_out": "direct_cut",
+          "acceptance_checks": [
+            "人物身份與服裝不漂移",
+            "肢體與接觸點自然",
+            "背景方向及道具數量連續",
+            "畫面不生成可讀文字；字幕後期加入"
+          ]
+        },
+        {
+          "shot_id": "C13-02",
+          "source_time": {
+            "start_seconds": 132,
+            "end_seconds": 138
+          },
+          "test_duration_seconds": 6,
+          "prompt_zh": "海面、甲板、桅杆與船身；不得使用受保護電影標誌或角色。 主持站在甲板邊，讓出船體與海天線。",
+          "composition": "主持半身＋船體闊景",
+          "camera_motion": "固定或極輕手持",
+          "action": "主持轉身指向後方",
+          "expression": "平靜驚嘆",
+          "dialogue_or_narration_placeholder_zh": "[待人工聽寫覆核：來源 132.00–138.00；待人工聽寫]",
+          "audio_post": "主持聲線及對白待人工聽寫後期配音；背景用海風、腳步、人群與船艙環境聲分層製作。",
+          "reference_assets": [
+            "host_identity_pack",
+            "host_black_polo",
+            "1910s_liner_world_bible",
+            "route_map_C13"
+          ],
+          "transition_out": "direct_cut",
+          "acceptance_checks": [
+            "人物身份與服裝不漂移",
+            "肢體與接觸點自然",
+            "背景方向及道具數量連續",
+            "畫面不生成可讀文字；字幕後期加入"
+          ]
+        },
+        {
+          "shot_id": "C14-01",
+          "source_time": {
+            "start_seconds": 138,
+            "end_seconds": 141.906
+          },
+          "test_duration_seconds": 3.91,
+          "prompt_zh": "甲板工作人員、纜繩與船體最後闊景。 穿通用 1910 年代制服的工作人員沿甲板行走；不仿照電影角色。",
+          "composition": "低角度中闊景",
+          "camera_motion": "固定或極輕手持",
+          "action": "工作人員直線走過",
+          "expression": "專業",
+          "dialogue_or_narration_placeholder_zh": "[待人工聽寫覆核：來源 138.00–141.91；無可靠轉錄]",
+          "audio_post": "主持聲線及對白待人工聽寫後期配音；背景用海風、腳步、人群與船艙環境聲分層製作。",
+          "reference_assets": [
+            "host_identity_pack",
+            "host_black_polo",
+            "1910s_liner_world_bible",
+            "route_map_C14"
+          ],
+          "transition_out": "direct_cut",
+          "acceptance_checks": [
+            "人物身份與服裝不漂移",
+            "肢體與接觸點自然",
+            "背景方向及道具數量連續",
+            "畫面不生成可讀文字；字幕後期加入"
+          ]
+        },
+        {
+          "shot_id": "C14-02",
+          "source_time": {
+            "start_seconds": 141.906,
+            "end_seconds": 145.812
+          },
+          "test_duration_seconds": 3.91,
+          "prompt_zh": "甲板工作人員、纜繩與船體最後闊景。 最後以船體、甲板及海面闊景收尾，保留重建標示位置。",
+          "composition": "9:16 垂直闊景，畫面上方留字幕安全區",
+          "camera_motion": "慢速拉遠",
+          "action": "人群低幅移動",
+          "expression": "不適用",
+          "dialogue_or_narration_placeholder_zh": "[待人工聽寫覆核：來源 141.91–145.81；無可靠轉錄]",
+          "audio_post": "主持聲線及對白待人工聽寫後期配音；背景用海風、腳步、人群與船艙環境聲分層製作。",
+          "reference_assets": [
+            "host_identity_pack",
+            "host_black_polo",
+            "1910s_liner_world_bible",
+            "route_map_C14"
+          ],
+          "transition_out": "direct_cut",
+          "acceptance_checks": [
+            "人物身份與服裝不漂移",
+            "肢體與接觸點自然",
+            "背景方向及道具數量連續",
+            "畫面不生成可讀文字；字幕後期加入"
+          ]
+        }
+      ],
+      "test_order": [
+        "先測 C10 客房三鏡，驗證主持身份與小空間",
+        "再測 C01 港口兩鏡，驗證主持＋群眾＋船身尺度",
+        "再測 C09 樓梯兩鏡，驗證多人肢體及空間連續",
+        "最後測 C12–C14 船體闊景；通過後才串完整導覽"
+      ],
+      "pass_criteria": [
+        "每一站入口／出口及路線能理解",
+        "主持臉、眼鏡、黑色上衣、聲線與自拍高度固定",
+        "背景服裝、建築、文字及道具無明顯年代錯置",
+        "全片明示 AI 概念重建，不冒充史料",
+        "沒有特定電影場景、角色、標誌、音樂或對白",
+        "112 秒後全部對白保持待核實"
+      ]
+    }
+  ],
+  "supplement_effect_modules": [
+    {
+      "source": "ai-02",
+      "source_time": "0.00–15.16",
+      "module": "futile_effort_reversal",
+      "prompt": "原創多層建築闊景；一群虛構成人以連續但安全的協作鏈嘗試接住一隻虛構小動物，最後小動物從另一條安全路徑自行離開；全程保持樓層、人物順序、重力及動物位置連續。",
+      "use": "反轉必須直接否定前面投入；先驗證闊景因果，再做角色細節。",
+      "rights": "不使用來源水印、人物或構圖逐格複製。"
+    },
+    {
+      "source": "ai-04",
+      "source_time": "0.00–10.17",
+      "module": "task_sabotage_reversal",
+      "prompt": "兩個原創擬人動物在乾淨工作枱完成精密擺盤；第一角色專注建立成果，第二角色只做一次清楚破壞，最後停留兩者反應；固定毛色、服裝、餐碟、醬汁及左右位置。",
+      "use": "工作被破壞的一次性反轉。",
+      "rights": "不複製來源角色造型。"
+    },
+    {
+      "source": "ai-10",
+      "source_time": "0.00–10.14",
+      "module": "single_attribute_transformation",
+      "prompt": "原創虛構動物靠近安全、明確標示為幻想材質的彩色容器，經無傷害的魔法式轉場後只改變一個外觀屬性；身份、體型、眼睛及背景保持一致；畫面標示 AI／虛構。",
+      "use": "前後狀態差；避免真實化學品與可模仿危險。",
+      "rights": "不照搬來源貓外形或品牌。"
+    },
+    {
+      "source": "ai-11",
+      "source_time": "0.00–8.52",
+      "module": "taboo_reveal",
+      "prompt": "原創擬人角色在潔白浴室清潔大量道具，鏡頭最後才揭示一個明確虛構、不可被誤認為真實衛生行為的荒誕位置；固定角色、道具數量、容器及水面。",
+      "use": "延後揭示禁忌資訊。",
+      "rights": "需清楚 AI／虛構標示。"
+    },
+    {
+      "source": "ai-09",
+      "source_time": "0.00–20.00",
+      "module": "consequence_guardian_public_service_hook",
+      "prompt": "使用完全原創的「後果守護者」角色，在家居危險出現後先製造觀眾對嚴重後果的預期，再由守護者阻止錯誤行為；不使用特定民俗角色、新聞版面或未核實安全指示。",
+      "use": "只保留後果角色→阻止錯誤的結構；安全內容須另由官方來源與專業人員核實。",
+      "rights": "來源是新聞轉載；不可直接重製。"
+    },
+    {
+      "source": "ai-05",
+      "source_time": "0.00–20.18",
+      "module": "artwork_walks_into_reality",
+      "prompt": "在同一原創畫廊背景與一致運鏡下，讓數名完全原創、或權利已清楚的公共領域人物依次從平面畫作轉為立體角色並走過鏡頭；固定背景、光線、步速與比例。",
+      "use": "作品意象／轉場，不獨立成新方向。",
+      "rights": "公共領域原作、掃描、音樂與當代生成片權利分開核實。"
+    },
+    {
+      "source": "ai-06",
+      "source_time": "0.00–15.16",
+      "module": "space_boundary_spectacle",
+      "prompt": "先用 2 秒建立正常原創室內空間，再讓單一原創元素分三個清楚尺度逐級跨越原有邊界，最後用人物或固定物件反應提供比例；每級只改變尺度，不改身份或材質。",
+      "use": "效果研究，不能單獨視為內容方向。",
+      "rights": "不使用來源工具宣傳字樣或品牌。"
+    }
+  ],
+  "excluded_unchanged": [
+    {
+      "source": "ai-08",
+      "reason": "第三方 Harry Potter／Hogwarts IP 依賴；不建立直接重製 prompt。"
+    }
+  ],
+  "experiment_priority": [
+    {
+      "order": 1,
+      "scope": "ai-01 S04–S06",
+      "reason": "10 秒內可先驗證角色一致、中文嘴形、雙關節奏與動作收尾。"
+    },
+    {
+      "order": 2,
+      "scope": "ai-03 B03",
+      "reason": "單場三角色四鏡，可驗證身份、對話視線、食物道具及反轉。"
+    },
+    {
+      "order": 3,
+      "scope": "ai-07 C10",
+      "reason": "小房間三鏡可先驗證主持身份、手部、空間及道具。"
+    },
+    {
+      "order": 4,
+      "scope": "ai-03 B08 + B11",
+      "reason": "驗證老師／家長群像與手機互動。"
+    },
+    {
+      "order": 5,
+      "scope": "ai-07 C01 + C09 + C12",
+      "reason": "逐步增加群眾、樓梯肢體及大尺度船體難度。"
+    },
+    {
+      "order": 6,
+      "scope": "full assembly",
+      "reason": "所有短鏡通過後才串接；不測一次 prompt 生成全片。"
+    }
+  ],
+  "unverified": [
+    "Seedance 2.5 的可用性、輸入模式、最長片長、參考圖數量、解析度、seed、camera control、音訊或 lip-sync 能力均未在本交付核實。",
+    "任何模型專屬參數須在實際測試前依官方現行文件另行確認。",
+    "AI-03 全片對白仍待人工聽寫；prompt 只保存情節提示。",
+    "AI-07 112 秒後沒有可靠 transcript；沒有使用 ASR 重複「好」的內容。",
+    "所有角色身份、聲音、來源影片及音樂權利仍待確認。",
+    "本交付未執行任何生成、API、credit 或付費交易。"
+  ],
+  "summary": {
+    "style_count": 3,
+    "shot_count": 76,
+    "effect_module_count": 7,
+    "generation_runs": 0,
+    "api_transactions": 0,
+    "audio_fully_manually_verified_count": 0
+  }
+}

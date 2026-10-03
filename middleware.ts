@@ -8,11 +8,27 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 export async function middleware(req: NextRequest) {
   let res = NextResponse.next({ request: req })
   const pathname = req.nextUrl.pathname
-  const publicApiRoutes = ['/api/invite/accept', '/api/auth', '/api/ai/generate']
+  // Machine-to-machine routes must reach their own secret validation before
+  // session middleware. They are not public data endpoints: each handler
+  // rejects requests without its CRON/knowledge credential.
+  const publicApiRoutes = [
+    '/api/invite/accept',
+    '/api/auth',
+    '/api/ai/generate',
+    '/api/campaign-experiences/search',
+    '/api/campaign-experiences/sync-brand',
+    '/api/intelligence/bundle',
+    '/api/intelligence/styles',
+    '/api/intelligence/template-drafts',
+    '/api/intelligence/dna/sync',
+    '/api/cron',
+  ]
+  const topicApiSegment = pathname.startsWith('/api/topics/') ? pathname.slice('/api/topics/'.length) : ''
+  const isPublicTopicRoute =
+    pathname === '/api/topics' ||
+    (Boolean(topicApiSegment) && !topicApiSegment.includes('/') && !['admin', 'assist', 'upload'].includes(topicApiSegment))
 
-  if (publicApiRoutes.some((route) => pathname.startsWith(route))) {
-    return res
-  }
+  const isPublicMachineRoute = isPublicTopicRoute || publicApiRoutes.some((route) => pathname.startsWith(route))
 
   if (!supabaseUrl || !supabaseAnonKey) {
     return res
@@ -24,9 +40,17 @@ export async function middleware(req: NextRequest) {
         return req.cookies.getAll()
       },
       setAll(cookiesToSet) {
-        cookiesToSet.forEach(({ name, value, options }) => {
+        // Supabase may split a large auth session across multiple cookies.
+        // Update the request first so the refreshed session is available to
+        // the rest of this middleware invocation, then create one response
+        // and attach every cookie to it. Recreating the response inside the
+        // loop drops the cookies written by earlier iterations and can cause
+        // an intermittent OAuth redirect loop.
+        cookiesToSet.forEach(({ name, value }) => {
           req.cookies.set(name, value)
-          res = NextResponse.next({ request: req })
+        })
+        res = NextResponse.next({ request: req })
+        cookiesToSet.forEach(({ name, value, options }) => {
           res.cookies.set(name, value, options)
         })
       },
@@ -45,8 +69,39 @@ export async function middleware(req: NextRequest) {
     pathname.startsWith('/auth') ||
     pathname.startsWith('/invite')
 
+  if (!session && isPublicMachineRoute) return res
+
   if (!session && !isAuthPage) {
     return NextResponse.redirect(new URL('/login', req.url))
+  }
+
+  let feedbackOnly = false
+  if (session?.user) {
+    const email = session.user.email?.trim().toLowerCase() ?? ''
+    const { data: userFeedbackAccess } = await supabase
+      .from('product_feedback_reporter_access')
+      .select('access_scope,status')
+      .eq('status', 'active')
+      .eq('user_id', session.user.id)
+      .limit(1)
+      .maybeSingle()
+    const { data: emailFeedbackAccess } = userFeedbackAccess ? { data: null } : await supabase
+      .from('product_feedback_reporter_access')
+      .select('access_scope,status')
+      .eq('status', 'active')
+      .eq('email', email)
+      .limit(1)
+      .maybeSingle()
+    const feedbackAccess = userFeedbackAccess ?? emailFeedbackAccess
+    feedbackOnly = feedbackAccess?.access_scope === 'feedback_only' || feedbackAccess?.access_scope === 'feedback_shared'
+  }
+
+  if (session && feedbackOnly) {
+    const allowed = pathname === '/' || pathname === '/feedback' || pathname.startsWith('/api/feedback') || pathname.startsWith('/auth')
+    if (!allowed) {
+      if (pathname.startsWith('/api/')) return NextResponse.json({ error: 'Feedback-only account' }, { status: 403 })
+      return NextResponse.redirect(new URL('/', req.url))
+    }
   }
 
   if (session && pathname === '/login') {

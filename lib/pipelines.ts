@@ -68,13 +68,13 @@ export const pipelines: Record<PipelineId, PipelineConfig> = {
         id: 'idea',
         label: 'Idea',
         icon: '💡',
-        url: 'https://soon-youtube-idea.vercel.app?embedded=true&v=20260531-dark-topic-library',
+        url: 'https://soon-youtube-idea-jrmiln8vy-tsangtakyun-4639s-projects.vercel.app?embedded=true&v=20260701-ws-preview',
       },
       {
         id: 'script',
         label: 'script',
         icon: '📝',
-        url: 'https://soon-youtube-idea.vercel.app/workbench?embedded=true&v=20260531-dark-script',
+        url: 'https://soon-youtube-idea-jrmiln8vy-tsangtakyun-4639s-projects.vercel.app/workbench?embedded=true&v=20260701-ws-preview',
       },
       {
         id: 'storyboard',

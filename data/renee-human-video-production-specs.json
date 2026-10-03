@@ -1,0 +1,341 @@
+{
+  "schema_version": 1,
+  "status": "candidate_for_tommy_review",
+  "published": false,
+  "directions": [
+    {
+      "code": "multi_stop_city_curation",
+      "display_name": "多站清單式城市精選",
+      "format": "human_short_video",
+      "reference_ids": [
+        "01"
+      ],
+      "intent": "以明確主題及選擇準則，逐站展示三至六個可比較地點，每站提供名稱、獨特點、可見證據和有限度評價。",
+      "duration_seconds": {
+        "min": 45,
+        "ideal": 70,
+        "max": 90
+      },
+      "beats": [
+        {
+          "role": "list_promise",
+          "time": "0-5s"
+        },
+        {
+          "role": "selection_criteria",
+          "time": "5-9s"
+        },
+        {
+          "role": "repeating_stop_module",
+          "time": "8-14s_each",
+          "fields": [
+            "name_location",
+            "distinctive_point",
+            "visible_proof",
+            "bounded_verdict"
+          ]
+        },
+        {
+          "role": "comparison_recap",
+          "time": "last_4-8s"
+        },
+        {
+          "role": "cta",
+          "time": "last_3-5s"
+        }
+      ],
+      "capture_required_per_stop": [
+        "exterior_or_name",
+        "environment_wide",
+        "hero_subject",
+        "two_or_three_interactions",
+        "distinctive_proof",
+        "host_reaction_or_pov"
+      ],
+      "capture_optional": [
+        "staff_process_with_permission",
+        "relative_location_map",
+        "category_card",
+        "same_action_match_cut"
+      ],
+      "host": "hook_selected_stops_and_close",
+      "narration": "post_recorded_first_person_after_capture",
+      "sync_sound": [
+        "door_bell",
+        "packaging",
+        "printing",
+        "page_turn",
+        "craft_action"
+      ],
+      "captions": {
+        "language": "zh-Hant-written",
+        "max_lines": 2,
+        "position": "adaptive_middle_lower_safe_zone",
+        "protect": [
+          "face",
+          "hands",
+          "product_name",
+          "platform_controls"
+        ]
+      },
+      "editing": [
+        "repeat_same_module_order",
+        "1-2.5s_information_shots",
+        "hold_process_for_visible_causality",
+        "transition_by_name_entrance_or_sound"
+      ],
+      "missing_assets": {
+        "missing_name": "reshoot_or_licensed_official_asset",
+        "missing_proof": "remove_claim",
+        "under_four_required_types": "shorten_or_remove_stop",
+        "no_visit": "route_to_research_list"
+      },
+      "cta_allowed": [
+        "save_list",
+        "choose_a_stop",
+        "share_with_companion",
+        "next_theme"
+      ],
+      "facts_require_source": [
+        "name",
+        "address",
+        "open_status",
+        "branch_count",
+        "customisation",
+        "origin",
+        "material",
+        "price",
+        "celebrity_visit",
+        "superlatives"
+      ]
+    },
+    {
+      "code": "spectacle_first_experience_micro",
+      "display_name": "超短奇觀體驗快拍",
+      "format": "human_short_video",
+      "reference_ids": [
+        "07"
+      ],
+      "supporting_analysis": [
+        "02",
+        "03",
+        "04"
+      ],
+      "intent": "先展示奇觀動作或結果，再以一個可理解的連續體驗、真實反應及場所全貌，在十至三十秒內完成一件事。",
+      "duration_seconds": {
+        "min": 10,
+        "ideal": 22,
+        "max": 30
+      },
+      "beats": [
+        {
+          "role": "spectacle_first_frame",
+          "time": "0-2s"
+        },
+        {
+          "role": "one_line_rule",
+          "time": "1-4s"
+        },
+        {
+          "role": "continuous_core_action",
+          "time": "3-18s"
+        },
+        {
+          "role": "result_or_reaction",
+          "time": "12-24s"
+        },
+        {
+          "role": "wide_or_cta",
+          "time": "last_2-4s"
+        }
+      ],
+      "capture_required": [
+        "stable_spectacle_wide",
+        "action_start",
+        "continuous_core_take",
+        "result_or_exit",
+        "first_real_reaction",
+        "rules_or_signage_if_claimed"
+      ],
+      "capture_optional": [
+        "stable_360_reframe",
+        "companion_side_view",
+        "verified_timer_or_measurement",
+        "mechanism_detail"
+      ],
+      "host": "entrance_and_reaction_optional",
+      "narration": "optional_max_one_rule_and_one_verified_fact",
+      "sync_sound_priority": [
+        "mechanism",
+        "friction",
+        "breath",
+        "shout",
+        "laugh",
+        "exit_reaction"
+      ],
+      "captions": {
+        "language": "zh-Hant-written",
+        "max_lines": 2,
+        "position": "adaptive_middle_lower_safe_zone",
+        "protect": [
+          "hands",
+          "controls",
+          "timer",
+          "exit",
+          "platform_controls"
+        ]
+      },
+      "editing": [
+        "show_subject_in_first_frame",
+        "preserve_one_continuous_causal_take",
+        "hold_before_and_after_result",
+        "stable_horizon_for_360",
+        "hard_or_action_cuts_only"
+      ],
+      "missing_assets": {
+        "missing_full_action": "do_not_imply_completion",
+        "missing_reaction": "close_on_result_or_wide",
+        "missing_number_source": "remove_number",
+        "third_party_only": "analysis_only_no_playable_reference",
+        "shaky_pov": "use_stable_side_view"
+      },
+      "cta_allowed": [
+        "would_you_try",
+        "save_place",
+        "follow_next_experience"
+      ],
+      "facts_require_source": [
+        "place",
+        "location",
+        "open_status",
+        "restrictions",
+        "price",
+        "speed",
+        "height",
+        "records",
+        "superlatives"
+      ],
+      "rights": {
+        "03": "pending",
+        "04": "pending"
+      }
+    },
+    {
+      "code": "immersive_experience_reflection",
+      "display_name": "沉浸式體驗反思敘事",
+      "format": "human_short_video",
+      "reference_ids": [
+        "11"
+      ],
+      "intent": "以有階段的實體體驗為骨架，由身體與情緒變化推進到背景概念和克制反思。",
+      "duration_seconds": {
+        "min": 75,
+        "ideal": 100,
+        "max": 120
+      },
+      "beats": [
+        {
+          "role": "counterintuitive_rule",
+          "time": "0-6s"
+        },
+        {
+          "role": "three_to_five_stages",
+          "time": "6-45s"
+        },
+        {
+          "role": "emotional_low_point",
+          "time": "40-65s"
+        },
+        {
+          "role": "return_to_ordinary_space",
+          "time": "60-75s"
+        },
+        {
+          "role": "concept_and_sources",
+          "time": "70-100s"
+        },
+        {
+          "role": "personal_reflection",
+          "time": "90-112s"
+        },
+        {
+          "role": "restrained_cta",
+          "time": "last_5-10s"
+        }
+      ],
+      "capture_required_per_stage": [
+        "stage_name_or_threshold",
+        "environment_wide",
+        "complete_interaction",
+        "sensory_or_body_proof",
+        "first_real_reaction",
+        "transition_out"
+      ],
+      "capture_required_global": [
+        "venue_entry_or_rules",
+        "pre_experience_expectation",
+        "natural_sound_before_and_after_low_point",
+        "return_to_ordinary_space",
+        "post_experience_reflection",
+        "venue_claim_source"
+      ],
+      "capture_optional": [
+        "guide_explanation",
+        "design_material",
+        "post_interview_labelled",
+        "qualified_primary_source"
+      ],
+      "host": "interaction_reaction_and_reflection",
+      "narration": "post_recorded_first_person_separating_feeling_venue_claim_and_external_fact",
+      "sync_sound_priority": [
+        "heartbeat_or_device",
+        "footsteps",
+        "door",
+        "breath",
+        "silence"
+      ],
+      "captions": {
+        "language": "zh-Hant-written",
+        "max_lines": 2,
+        "position": "adaptive_middle_lower_safe_zone",
+        "protect": [
+          "face",
+          "body_equipment",
+          "props",
+          "venue_original_text",
+          "platform_controls"
+        ]
+      },
+      "editing": [
+        "preserve_real_stage_order",
+        "repeat_space_action_feeling",
+        "reduce_music_and_text_at_low_point",
+        "separate_experience_from_analysis",
+        "derive_reflection_from_seen_events",
+        "separate_and_disclose_commercial_segment"
+      ],
+      "missing_assets": {
+        "missing_complete_stage": "describe_only_observed_content",
+        "missing_first_reaction": "label_post_experience_reflection",
+        "missing_venue_source": "remove_origin_or_causal_claim",
+        "privacy_restriction": "use_consented_empty_space_or_licensed_diagram",
+        "host_exits": "state_exit_truthfully"
+      },
+      "cta_allowed": [
+        "related_reflection_question",
+        "save_venue_information",
+        "read_primary_explanation"
+      ],
+      "facts_require_source": [
+        "venue_name",
+        "program_content",
+        "founding_intent",
+        "religious_or_cultural_origin",
+        "health_simulation_claim",
+        "tickets",
+        "current_open_status",
+        "broad_cultural_claims"
+      ]
+    }
+  ]
+}

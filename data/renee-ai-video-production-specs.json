@@ -1,0 +1,180 @@
+{
+  "schema_version": 1,
+  "delivery_id": "renee-ai-video-reference-intake-2026-09-29",
+  "source_analysis": "docs/design-demos/2026-09-29-ai-video-reference-intake/ANALYSIS.md",
+  "owner_contract": {
+    "spec_owner": "reference-analysis-thread",
+    "core_db_deployment_owner": "01a0e3dc-1043-7210-9048-433b640558e9",
+    "single_write_owner_confirmed": true
+  },
+  "storage_policy": {
+    "target": "core_only_review",
+    "status": "review",
+    "modify_existing_published_versions": false,
+    "creator_eligible": false,
+    "content_studio_enabled": false,
+    "generation_enabled": false,
+    "template_binding_allowed": false,
+    "active_binding_required": false,
+    "public_reference_playback_allowed": false,
+    "capability_claim": "Specification only. No automatic video generation capability is implemented or verified."
+  },
+  "directions": [
+    {
+      "code": "ai_absurd_twist_microdrama",
+      "name": "AI 荒誕反轉微劇",
+      "format": "ai_short_video",
+      "intent": "在單一場景內，以一條清楚動作線建立預期，再用反常結果完成可在短時間理解的笑點或驚奇。",
+      "output": {
+        "width": 1080,
+        "height": 1920,
+        "aspect_ratio": "9:16",
+        "duration_seconds": {"min": 8, "ideal": 12, "max": 20}
+      },
+      "suitable_for": ["對白誤會", "徒勞反轉", "工作被破壞", "角色或物件狀態變形", "明確虛構的禁忌揭示"],
+      "not_suitable_for": ["只有漂亮變形而沒有事件", "需要長背景才理解", "危險模仿挑戰", "可能被誤認為真實新聞或衛生事件"],
+      "hook_rules": ["首兩秒顯示角色、地點和任務", "首幀必須在靜音狀態可理解", "對白誤會變體可由第一句建立雙關"],
+      "timeline": [
+        {"order": 1, "role": "處境與主體", "start": 0, "end": 2, "purpose": "交代角色、地點和正在進行的事"},
+        {"order": 2, "role": "動作與預期", "start": 2, "end": 7, "purpose": "只推進一條主要動作，令觀眾形成預期"},
+        {"order": 3, "role": "反轉或揭示", "start": 7, "end": 11, "purpose": "結果直接改寫前面行動的意義"},
+        {"order": 4, "role": "反應與停留", "start": 11, "end": 12, "purpose": "保留角色反應或結果全貌"}
+      ],
+      "assets": {
+        "characters": ["正面", "側面", "全身", "表情組", "固定服裝", "動物毛色與比例"],
+        "scene": ["單一主要空間", "左右位置", "入口", "主要家具", "背景人物規則"],
+        "props": ["開始狀態", "互動狀態", "結果狀態", "數量", "顏色", "尺寸"]
+      },
+      "shot_and_transition": {
+        "shot_plan": "一個完整主鏡，或二至四個因果連續鏡頭。",
+        "transitions": ["動作承接", "直接切換"],
+        "avoid": ["用切鏡掩蓋故事斷裂", "與笑點無關的特效轉場"]
+      },
+      "continuity": ["角色身份", "毛色或髮型", "服裝", "四肢", "視線", "空間方向", "接觸點", "道具數量", "結果狀態"],
+      "audio": {"voice": "可無旁白；對白版本最多六至九句。", "priorities": ["環境聲", "動作聲", "角色反應"], "rule": "不得用旁白解釋已經看得到的動作。"},
+      "captions": {"language": "繁體中文", "max_lines": 2, "position": "下方安全區", "rendering": "後期加入；不使用模型生成畫面文字"},
+      "missing_asset_policy": ["缺角色多角度參考時停止動態生成", "缺結果狀態圖時先批准首尾幀", "肢體或接觸不穩時縮短動作或拆鏡", "權利不明時只保留文字規格"],
+      "qa": ["首兩秒能理解角色、地點和任務", "只有一條主要因果", "反轉位於最後百分之二十至三十五", "角色、道具和空間連續", "接觸無穿插漂浮或消失", "聲音嘴形字幕一致", "兒童動物衛生危險內容標示為 AI 或虛構"],
+      "risks": ["中文口型", "多人或動物肢體接觸", "液體與毛髮", "危險行為模仿", "兒童及真人聲線權利"],
+      "generation_method_note": "原始工程未提供。I2V、T2V、V2V 或合成方法均只可標示為視覺推測。",
+      "references": [
+        {"id": "01", "role": "primary_dialogue_misunderstanding", "asset_binding": "blocked_rights_unverified"},
+        {"id": "02", "role": "supplement_futile_reversal", "asset_binding": "blocked_creator_watermark"},
+        {"id": "04", "role": "supplement_task_sabotage", "asset_binding": "blocked_rights_unverified"},
+        {"id": "10", "role": "supplement_material_transformation", "asset_binding": "blocked_rights_unverified"},
+        {"id": "11", "role": "supplement_taboo_reveal", "asset_binding": "blocked_rights_unverified"}
+      ]
+    },
+    {
+      "code": "ai_continuity_ensemble_skit",
+      "name": "AI 多角色連續情境短劇",
+      "format": "ai_short_video",
+      "intent": "固定角色群在多個日常情境反覆互動，每場證明同一角色設定，最後完成情感、喜劇或經核實的公益資訊主線。",
+      "output": {"width": 1080, "height": 1920, "aspect_ratio": "9:16", "duration_seconds": {"min": 60, "ideal": 90, "max": 180}, "first_validation_seconds": {"min": 45, "max": 60}},
+      "suitable_for": ["家庭關係喜劇", "同事或朋友關係", "角色觀點反差", "經專業核對的公益情境短劇"],
+      "not_suitable_for": ["一次性視覺笑點", "沒有固定角色關係的片段合集", "未核對醫療安全或法律指示"],
+      "hook_rules": ["首六秒用一句高概念交代角色關係", "開場先示範角色規則，不先解釋背景"],
+      "timeline": [
+        {"order": 1, "role": "高概念設定", "start": 0, "end": 6},
+        {"order": 2, "role": "情境一", "start": 6, "end": 20},
+        {"order": 3, "role": "情境二", "start": 20, "end": 36},
+        {"order": 4, "role": "情境三", "start": 36, "end": 52},
+        {"order": 5, "role": "角色轉折", "start": 52, "end": 58},
+        {"order": 6, "role": "收束", "start": 58, "end": 60}
+      ],
+      "assets": {
+        "character_bible": ["姓名或編號", "年齡", "關係", "身高比例", "面部特徵", "髮型", "服裝組", "聲線", "說話方式", "不可變特徵"],
+        "scene_bible": ["平面方向", "門窗", "家具", "光線", "時間", "固定道具"],
+        "dialogue": ["逐角色劇本", "情緒", "停頓", "字幕版", "事實來源"],
+        "visual": ["正面", "側面", "全身", "表情組", "雙人比例", "常用動作", "每場首尾幀"]
+      },
+      "shot_and_transition": {"per_scene": ["環境建立鏡", "對話主鏡", "反應鏡", "必要證據插鏡"], "transitions": ["直接切換", "聲音先行", "動作匹配"], "rule": "轉場必須對應時間、地點或因果改變。"},
+      "continuity": ["人物身份", "年齡", "臉", "聲線", "身高比例", "核心服裝", "對話視線", "左右關係", "場景格局", "道具狀態"],
+      "audio": {"voice": "每名角色固定聲線。", "lip_sync_fallback": ["背面", "側面", "反應鏡", "證據插鏡"], "avoid": "不得保留明顯不同步的正面說話鏡頭。"},
+      "captions": {"language": "繁體中文書面語", "max_lines": 2, "english": "只在項目需要時另加"},
+      "missing_asset_policy": ["缺角色聖經不得開始跨場生成", "單場身份失真只重做該鏡", "對白太長先改稿或拆反應鏡", "事實來源不足時移除具體指示並保持 review", "權利不足只保留結構摘要"],
+      "qa": ["首六秒交代角色關係", "每場只承擔一個衝突或資訊點", "角色臉年齡聲線服裝跨場一致", "視線口型反應與左右關係合理", "場景與道具連續", "結尾由前面自然推導", "公益內容有權威來源及人工專業審核"],
+      "risks": ["跨場身份漂移", "中文口型", "多人對話視線", "場景格局跳動", "未成年人權利", "安全或公益資訊錯誤"],
+      "generation_method_note": "原始工程未提供。多角色參考圖、I2V、V2V、真人混合等方法均只可標示為推測。",
+      "references": [
+        {"id": "03", "role": "primary_family_ensemble", "asset_binding": "blocked_rights_unverified"},
+        {"id": "09", "role": "conditional_variant_public_service_folklore_reversal", "asset_binding": "blocked_news_repost_and_fact_review", "fact_review_required": true}
+      ]
+    },
+    {
+      "code": "ai_host_time_travel_tour",
+      "name": "AI 實景主持穿越導覽",
+      "format": "ai_short_video",
+      "intent": "保留真人主持身份、聲音和 vlog 語言，把主持放入人工智能重建的歷史、科學或原創幻想環境，依空間順序導覽。",
+      "output": {"width": 1080, "height": 1920, "aspect_ratio": "9:16", "duration_seconds": {"min": 75, "ideal": 105, "max": 150}},
+      "suitable_for": ["已消失城市空間", "歷史建築", "考古場景", "科學尺度", "資料充分的原創重建世界"],
+      "not_suitable_for": ["獵奇災難重演", "把生成畫面冒充史料", "欠缺資料卻聲稱精準還原", "直接套用第三方影視 IP"],
+      "hook_rules": ["首八秒主持與重建世界同框", "開場交代年代或地點", "固定標示 AI 重建"],
+      "timeline": [
+        {"order": 1, "role": "現場證明", "start": 0, "end": 8},
+        {"order": 2, "role": "入口與規則", "start": 8, "end": 22},
+        {"order": 3, "role": "第一站", "start": 22, "end": 42},
+        {"order": 4, "role": "第二站", "start": 42, "end": 65},
+        {"order": 5, "role": "第三站", "start": 65, "end": 88},
+        {"order": 6, "role": "私密或細節空間", "start": 88, "end": 105},
+        {"order": 7, "role": "全貌與回扣", "start": 105, "end": 120}
+      ],
+      "assets": {
+        "host": ["有授權乾淨原片", "正側面身份參考", "髮型", "眼鏡", "衣服", "聲音", "常用手勢"],
+        "world": ["研究包", "地圖", "導覽順序", "建築", "室內", "服裝群", "交通工具", "道具", "標誌", "禁用元素"],
+        "scene": ["每站入口與出口", "相鄰關係", "光線", "人流", "主持移動方向"],
+        "evidence": ["每個可驗證句子的來源", "生成重建與真實照片分開標示"]
+      },
+      "shot_and_transition": {"shots": ["自拍近鏡", "回頭揭示", "步行跟拍", "環境闊景", "物件近鏡", "房間近鏡", "路線過場"], "transition_rule": "只在主持移動、時間改變或環境層級改變時轉場；保留入口走廊樓梯等空間證據。"},
+      "continuity": ["主持臉", "眼鏡", "髮型", "衣服", "膚色", "自拍手臂", "相機高度", "年代", "群眾服裝", "建築", "文字", "空間方向"],
+      "audio": {"primary": "主持同期講述", "secondary": "環境聲", "voiceover": "只補不能在場景自然說出的資料", "rights": "不得使用未授權真人聲線"},
+      "captions": {"language": "繁體中文書面語", "max_lines": 2, "fixed_cards": ["年代", "地名", "AI 重建標示"]},
+      "missing_asset_policy": ["缺主持授權或乾淨素材時停止身份生成", "缺地圖時改稱概念重建並移除精準路線", "缺來源時刪除具體聲稱或標示待核實", "身份漂移時縮鏡或改用背面 POV 環境鏡", "群眾互動失真時降低互動複雜度"],
+      "qa": ["開場標示 AI 重建", "主持身份聲線衣服全片一致", "導覽路線符合地圖", "年代服裝建築交通道具無明顯錯置", "每站只有一個重點", "每個事實有來源", "敏感歷史或災難經編輯審核", "沒有未授權 IP 音樂商標真人聲線"],
+      "risks": ["真人身份漂移", "自拍手臂或器材變形", "群眾互動", "歷史錯置", "虛構路線", "災難敏感度", "第三方電影美術與商標"],
+      "generation_method_note": "成片可能混合真人拍攝、V2V、I2V、身份保持及後期合成，但沒有原始工程可確認。所有方法必須標示為推測。",
+      "references": [{"id": "07", "role": "primary_historical_host_tour", "asset_binding": "blocked_rights_and_fact_review", "fact_review_required": true}]
+    }
+  ],
+  "existing_direction_supplement": {
+    "source_reference_id": "05",
+    "merge_target": "ai_artist_reflective_monologue",
+    "module_code": "artwork_walks_into_reality",
+    "action": "create_next_review_version_only",
+    "modify_current_published": false,
+    "public_asset_binding": "blocked_rights_unverified",
+    "rules": ["同一背景與運鏡", "藝術家或作品人物依次出現", "只作開場作品意象或轉場", "公有領域原作與特定再製版本權利分開核對"]
+  },
+  "effect_research": {
+    "source_reference_id": "06",
+    "research_code": "space_boundary_spectacle",
+    "create_style": false,
+    "create_template": false,
+    "public_asset_binding": "blocked_tool_promo_watermark",
+    "rules": ["先建立正常空間", "單一元素逐級跨越邊界", "每級尺度清楚增加", "最後以人物或物件反應提供比例"]
+  },
+  "excluded_direct_reference": {
+    "source_reference_id": "08",
+    "reason": "Direct Harry Potter/Hogwarts IP dependency",
+    "asset_binding": "prohibited",
+    "abstract_method_only": "original_fantasy_world_pov",
+    "reconsideration_rule": "Only after two or three fully original, non-third-party-IP references are available."
+  },
+  "global_rights_and_fact_restrictions": [
+    "User-supplied local files do not establish redistribution or training rights.",
+    "No original video may be exposed as a public playable reference until rights are verified.",
+    "Reference 09 requires original-source verification and jurisdiction-appropriate fire, electrical and charging safety review.",
+    "Reference 07 requires historical-source review and an AI reconstruction disclosure.",
+    "Reference 05 requires separate review of public-domain works, scans, contemporary adaptations, music and the generated video.",
+    "Any identifiable person or voice requires image, voice and purpose authorization."
+  ],
+  "owner_verification": [
+    "Create three unique review style records without replacing published rows.",
+    "Save and reopen each record in the production UI.",
+    "Verify all four isolation booleans are false.",
+    "Verify active template binding count is zero.",
+    "Verify no original video is exposed as a public playable reference.",
+    "Report style ID, style version ID, version, status, binding count, isolation values and UI evidence.",
+    "Use wording 'specification stored in Core review'; do not claim generation capability or Content Studio integration."
+  ]
+}
