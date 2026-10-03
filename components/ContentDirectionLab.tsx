@@ -132,6 +132,7 @@ type DemoScript = {
   timeline: DemoScriptBeat[];
   project_material_requirements: string[];
   evidence_requirements: string[];
+  production_notes_zh: string[];
   continuity_requirements: string[];
   generation: { enabled: boolean; runs: number; paid_api_calls: number; credits_used: number };
 };
@@ -1044,6 +1045,7 @@ export function ContentDirectionLab() {
                       </div>
                       <div className="demo-requirements">
                         <div><b>項目素材</b><ul>{selectedDemoScript.project_material_requirements.map((item) => <li key={item}>{item}</li>)}</ul></div>
+                        <div><b>製作備註（不屬於成片對白）</b><ul>{selectedDemoScript.production_notes_zh.map((item) => <li key={item}>{item}</li>)}</ul></div>
                         {selectedDemoScript.evidence_requirements.length ? <div><b>核實要求</b><ul>{selectedDemoScript.evidence_requirements.map((item) => <li key={item}>{item}</li>)}</ul></div> : null}
                         {selectedDemoScript.continuity_requirements.length ? <div><b>連續性要求</b><ul>{selectedDemoScript.continuity_requirements.map((item) => <li key={item}>{item}</li>)}</ul></div> : null}
                       </div>
