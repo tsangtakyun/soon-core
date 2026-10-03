@@ -1,11 +1,13 @@
 import 'server-only'
 
 import restorationPackage from '@/data/renee-video-reference-restorations.json'
+import publishedRestorationPackage from '@/data/published-video-reference-restorations.json'
 import reconstructionPackage from '@/data/renee-ai-reconstruction-experiment-prompts.json'
 import { createSupabaseAdmin } from '@/lib/supabase-admin'
 
 const CORE_WORKSPACE_ID = 'a5c7750e-1b3b-495b-8cd3-6e1d47d05ef2'
 const SOURCE_PREFIX = 'local-reference://renee-video-restoration/2026-10-01/'
+const PUBLISHED_SOURCE_PREFIX = 'local-reference://published-video-restoration/2026-10-03/'
 const PROMPT_SOURCE_PREFIX = 'local-reference://renee-ai-reconstruction-prompt/2026-10-01/'
 const HUMAN_SOURCE = 'renee_reference_intake_2026_09_29'
 const AI_SOURCE = 'renee_ai_video_reference_intake_2026_09_29'
@@ -13,6 +15,7 @@ const AI_SOURCE = 'renee_ai_video_reference_intake_2026_09_29'
 type JsonRecord = Record<string, unknown>
 type FullEntry = (typeof restorationPackage.full_representatives)[number]
 type FragmentEntry = (typeof restorationPackage.fragment_supplements)[number]
+type PublishedEntry = (typeof publishedRestorationPackage.published_representatives)[number]
 
 export type VideoReferenceRestoration = {
   id: string
@@ -60,6 +63,45 @@ function targetStyleCode(entry: FullEntry | FragmentEntry) {
 function sourceUrl(entry: FullEntry | FragmentEntry) {
   if ('fragment' in entry) return `${SOURCE_PREFIX}${entry.reference_key}/${entry.fragment.start_seconds}-${entry.fragment.end_seconds}`
   return `${SOURCE_PREFIX}${entry.reference_key}/full`
+}
+
+function publishedSourceUrl(entry: PublishedEntry) {
+  return `${PUBLISHED_SOURCE_PREFIX}${entry.style_code}/full`
+}
+
+function publishedExtractedPatterns(entry: PublishedEntry): JsonRecord {
+  return {
+    artifact_type: 'original_video_restoration',
+    artifact_label_zh: '原片還原稿',
+    semantic_separation: {
+      original_video_restoration: 'stored_here',
+      style_specification: 'linked_published_style_version',
+      demonstration_script: 'separate_artifact_not_in_this_record',
+      reconstruction_prompt: 'separate_artifact_not_in_this_record',
+    },
+    reference_key: entry.reference_key,
+    format: entry.format,
+    source_id: entry.source_id,
+    source_filename: entry.source_filename,
+    duration_seconds: entry.duration_seconds,
+    selection: entry.selection,
+    source_style_code: entry.style_code,
+    target_style_code: entry.style_code,
+    role: entry.role,
+    rights_state: entry.rights_state,
+    restoration_scope: entry.restoration_scope,
+    coverage_seconds: entry.coverage_seconds,
+    coverage_percent: entry.coverage_percent,
+    audio_transcript_status: entry.audio_transcript_status,
+    visual_status: entry.visual_status,
+    timeline: entry.timeline,
+    unverified: entry.unverified,
+    rights_policy: {
+      internal_research_only: true,
+      playable_reference: true,
+      reupload_allowed: false,
+    },
+  }
 }
 
 function extractedPatterns(entry: FullEntry | FragmentEntry): JsonRecord {
@@ -126,7 +168,7 @@ export async function loadVideoReferenceRestorations(format?: 'human' | 'ai'): P
   const admin = createSupabaseAdmin()
   const query = admin.from('style_references')
     .select('id,style_id,style_version_id,source_url,extracted_patterns,confirmation_status')
-    .like('source_url', `${SOURCE_PREFIX}%`)
+    .or(`source_url.like.${SOURCE_PREFIX}%,source_url.like.${PUBLISHED_SOURCE_PREFIX}%`)
     .eq('confirmation_status', 'review')
   const { data: references, error } = await query
   if (error) throw error
@@ -171,6 +213,59 @@ export async function loadVideoReferenceRestorations(format?: 'human' | 'ai'): P
       unverified: Array.isArray(patterns.unverified) ? patterns.unverified.map(String) : [],
     }
   }).sort((a, b) => a.referenceKey.localeCompare(b.referenceKey) || a.sourceUrl.localeCompare(b.sourceUrl))
+}
+
+async function applyPublishedVideoReferenceRestorations(actorId: string | null) {
+  const admin = createSupabaseAdmin()
+  const entries = publishedRestorationPackage.published_representatives
+  const codes = entries.map((entry) => entry.style_code)
+  const { data: styles, error: styleError } = await admin.from('content_styles').select('id,code').in('code', codes)
+  if (styleError) throw styleError
+  const styleByCode = new Map((styles ?? []).map((style) => [style.code, style]))
+  const styleIds = (styles ?? []).map((style) => style.id)
+  const { data: versions, error: versionError } = await admin.from('style_versions')
+    .select('id,style_id,version,status').in('style_id', styleIds).eq('status', 'published')
+  if (versionError) throw versionError
+
+  const inserted: string[] = []
+  const updated: string[] = []
+  for (const entry of entries) {
+    const style = styleByCode.get(entry.style_code)
+    if (!style) throw new Error(`Published target style missing for ${entry.style_code}`)
+    const version = (versions ?? [])
+      .filter((item) => item.style_id === style.id)
+      .sort((a, b) => b.version - a.version)[0]
+    if (!version) throw new Error(`Published style version missing for ${entry.style_code}`)
+    const url = publishedSourceUrl(entry)
+    const row = {
+      style_id: style.id,
+      style_version_id: version.id,
+      workspace_id: CORE_WORKSPACE_ID,
+      reference_type: 'external',
+      source_url: url,
+      source_account: 'Published reference restoration 2026-10-03',
+      extracted_patterns: publishedExtractedPatterns(entry),
+      evidence_summary: `${entry.style_name_zh}正式代表片完整時間軸原片還原稿；畫面已逐段抽查，音訊仍待人工逐句聆聽。`,
+      evidence_level: 'observed',
+      confirmation_status: 'review',
+      source_scope: 'workspace_private',
+      confirmed_by: null,
+      confirmed_at: null,
+      created_by: actorId,
+    }
+    const { data: existing, error: lookupError } = await admin.from('style_references').select('id').eq('source_url', url).maybeSingle()
+    if (lookupError) throw lookupError
+    if (existing) {
+      const { error: updateError } = await admin.from('style_references').update(row).eq('id', existing.id)
+      if (updateError) throw updateError
+      updated.push(url)
+    } else {
+      const { error: insertError } = await admin.from('style_references').insert(row)
+      if (insertError) throw insertError
+      inserted.push(url)
+    }
+  }
+  return { inserted, updated }
 }
 
 export async function loadAiReconstructionPromptSets(): Promise<AiReconstructionPromptSet[]> {
@@ -351,11 +446,15 @@ export async function applyVideoReferenceRestorations(actorId: string | null) {
       inserted.push(url)
     }
   }
+  const publishedRestorations = await applyPublishedVideoReferenceRestorations(actorId)
   const promptSets = await applyAiReconstructionPromptSets(actorId)
   return {
     source: SOURCE_PREFIX,
-    insertedCount: inserted.length,
-    updatedCount: updated.length,
+    publishedSource: PUBLISHED_SOURCE_PREFIX,
+    insertedCount: inserted.length + publishedRestorations.inserted.length,
+    updatedCount: updated.length + publishedRestorations.updated.length,
+    publishedInsertedCount: publishedRestorations.inserted.length,
+    publishedUpdatedCount: publishedRestorations.updated.length,
     promptSetInsertedCount: promptSets.inserted.length,
     promptSetUpdatedCount: promptSets.updated.length,
     audioFullyManuallyVerifiedCount: restorationPackage.summary.audio_fully_manually_verified_count,
