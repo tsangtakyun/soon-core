@@ -80,6 +80,7 @@ type RestorationSegment = {
   speech_original?: string | null;
   speech_translation_zh_hant?: string | null;
   speech_raw_asr?: string | null;
+  speech_asr_cleaned?: string | null;
   speech_source?: string;
   on_screen_text_zh?: string | null;
   notes?: string | null;
@@ -670,7 +671,7 @@ export function ContentDirectionLab() {
     const response = await fetch("/api/content-directions/internal-video-reference-restorations", { method: "POST" });
     const payload = await response.json().catch(() => ({}));
     if (response.ok) {
-      setMessage(`原片還原稿已存入 Core：新增 ${payload.insertedCount ?? 0} 項、更新 ${payload.updatedCount ?? 0} 項；重建 Prompt 新增 ${payload.promptSetInsertedCount ?? 0} 組、更新 ${payload.promptSetUpdatedCount ?? 0} 組；音訊人工逐句核實仍為 0。`);
+      setMessage(`原片還原稿已存入 Core：新增 ${payload.insertedCount ?? 0} 項、更新 ${payload.updatedCount ?? 0} 項；正式片可用台詞／字幕 ${payload.publishedUsableSegmentCount ?? 0}/${payload.publishedTimelineSegmentCount ?? 0} 段，待人工音訊核實 ${payload.publishedPendingAudioVerificationCount ?? 0} 段，整段無法辨識 ${payload.publishedUnrecognizableSegmentCount ?? 0} 段，局部缺口 ${payload.publishedPartiallyRecoveredSegmentCount ?? 0} 段；音訊人工逐句核實仍為 0。`);
       await load();
     } else setMessage(payload.error || "未能匯入原片還原稿");
     setImportingRestorations(false);
@@ -945,7 +946,7 @@ export function ContentDirectionLab() {
                                 {segment.speech_original ? <p><b>原文：</b>{segment.speech_original}</p> : null}
                                 {segment.speech_raw_asr ? (
                                   <details className="raw-asr">
-                                    <summary>查看 raw ASR（未核聽）</summary>
+                                    <summary>查看原始 raw ASR（未核聽）</summary>
                                     <p>{segment.speech_raw_asr}</p>
                                   </details>
                                 ) : null}

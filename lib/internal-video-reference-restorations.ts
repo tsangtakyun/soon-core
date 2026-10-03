@@ -460,6 +460,11 @@ export async function applyVideoReferenceRestorations(actorId: string | null) {
     promptSetInsertedCount: promptSets.inserted.length,
     promptSetUpdatedCount: promptSets.updated.length,
     audioFullyManuallyVerifiedCount: restorationPackage.summary.audio_fully_manually_verified_count,
+    publishedTimelineSegmentCount: publishedRestorationPackage.summary.timeline_segment_count,
+    publishedUsableSegmentCount: publishedRestorationPackage.summary.usable_dialogue_or_caption_segment_count,
+    publishedPendingAudioVerificationCount: publishedRestorationPackage.summary.pending_manual_audio_verification_segment_count,
+    publishedUnrecognizableSegmentCount: publishedRestorationPackage.summary.unrecognizable_display_segment_count,
+    publishedPartiallyRecoveredSegmentCount: publishedRestorationPackage.summary.partially_recovered_segment_count,
     restorations: await loadVideoReferenceRestorations(),
     promptSets: await loadAiReconstructionPromptSets(),
   }

@@ -2,22 +2,38 @@
 
 ## 正式發布代表片
 
-以下 12 條均已建立 0 秒至片尾的連續時間軸。顯示稿已清除可辨識的 ASR 重複幻覺；raw ASR 逐段保留。`audio_fully_manually_verified_count` 仍為 0。
+以下 12 條均已建立 0 秒至片尾的連續時間軸。共 89 段；可用台詞或燒錄字幕段 89 段，待人工音訊核實 89 段，整段無法辨識 0 段，局部仍有缺口 1 段。`audio_fully_manually_verified_count` 仍為 0。
 
-| 內容方向 | Source | 片長 | 段數 | 音訊狀態 |
+| 內容方向 | Source | 片長 | 段數 | 來源依據及狀態 |
 |---|---|---:|---:|---|
-| 藝術家第一身情感獨白 | `public/templates/ai-artist-reflective-monologue-v1/reference.mp4` | 151.72s | 8 | 顯示稿已清理；待人工逐句核聽 |
-| 電影感創辦人傳記 | `public/templates/ai-cinematic-founder-biography-v1/reference.mp4` | 98.98s | 7 | 顯示稿已清理；待人工逐句核聽 |
-| 無需出鏡沉浸式探店 | `public/templates/faceless-sensory-food-discovery-v1/reference.mp4` | 43.33s | 6 | 語音未能可靠辨識；已保留 raw ASR，待人工核聽 |
-| 第一身旅程實錄 | `public/templates/first-person-journey-diary-v1/reference.mp4` | 82.69s | 8 | 語音未能可靠辨識；已保留 raw ASR，待人工核聽 |
-| 主持試食文化快解 | `public/templates/host-led-food-culture-tasting-v1/reference.mp4` | 81.78s | 7 | 語音未能可靠辨識；已保留 raw ASR，待人工核聽 |
-| 真人產品實測導購 | `public/templates/human-product-demo-conversion-v1/reference.mp4` | 54.66s | 6 | 語音未能可靠辨識；已保留 raw ASR，待人工核聽 |
-| 實景冷知識快講 | `public/templates/on-location-fact-sprint-v1/reference.mp4` | 58.28s | 6 | 語音未能可靠辨識；已保留 raw ASR，待人工核聽 |
-| 生活痛點解法型產品片 | `public/templates/problem-first-lifestyle-product-v1/reference.mp4` | 64.22s | 9 | 顯示稿已清理；待人工逐句核聽 |
-| 城市路線敘事 | `public/templates/route-led-city-portrait-v1/reference.mp4` | 55.73s | 6 | 顯示稿已清理；待人工逐句核聽 |
-| 坐定主持考據式解說 | `public/templates/seated-host-research-explainer-v1/reference.mp4` | 176.70s | 9 | 語音未能可靠辨識；已保留 raw ASR，待人工核聽 |
-| 情境探店逐款試食 | `public/templates/situational-multi-dish-tasting-v1/reference.mp4` | 180.04s | 9 | 語音未能可靠辨識；已保留 raw ASR，待人工核聽 |
-| 雙人誤會反轉短劇 | `public/templates/two-person-misunderstanding-twist-v1/reference.mp4` | 147.56s | 8 | 語音未能可靠辨識；已保留 raw ASR，待人工核聽 |
+| 藝術家第一身情感獨白 | `public/templates/ai-artist-reflective-monologue-v1/reference.mp4` | 151.72s | 8 | ASR、字幕或畫面交叉整理；待人工核聽 |
+| 電影感創辦人傳記 | `public/templates/ai-cinematic-founder-biography-v1/reference.mp4` | 98.98s | 7 | 保留原文及繁中翻譯；待人工核聽／翻譯核對 |
+| 無需出鏡沉浸式探店 | `public/templates/faceless-sensory-food-discovery-v1/reference.mp4` | 43.33s | 6 | 燒錄字幕 OCR 與 ASR 交叉對照；待人工核聽 |
+| 第一身旅程實錄 | `public/templates/first-person-journey-diary-v1/reference.mp4` | 82.69s | 8 | 燒錄字幕 OCR 與 ASR 交叉對照；待人工核聽 |
+| 主持試食文化快解 | `public/templates/host-led-food-culture-tasting-v1/reference.mp4` | 81.78s | 7 | 燒錄字幕 OCR 與 ASR 交叉對照；待人工核聽 |
+| 真人產品實測導購 | `public/templates/human-product-demo-conversion-v1/reference.mp4` | 54.66s | 6 | 燒錄字幕 OCR 與 ASR 交叉對照；待人工核聽 |
+| 實景冷知識快講 | `public/templates/on-location-fact-sprint-v1/reference.mp4` | 58.28s | 6 | 燒錄字幕 OCR 與 ASR 交叉對照；待人工核聽 |
+| 生活痛點解法型產品片 | `public/templates/problem-first-lifestyle-product-v1/reference.mp4` | 64.22s | 9 | ASR、字幕或畫面交叉整理；待人工核聽 |
+| 城市路線敘事 | `public/templates/route-led-city-portrait-v1/reference.mp4` | 55.73s | 6 | 保留原文及繁中翻譯；待人工核聽／翻譯核對 |
+| 坐定主持考據式解說 | `public/templates/seated-host-research-explainer-v1/reference.mp4` | 176.70s | 9 | 燒錄字幕 OCR 與 ASR 交叉對照；待人工核聽 |
+| 情境探店逐款試食 | `public/templates/situational-multi-dish-tasting-v1/reference.mp4` | 180.04s | 9 | 燒錄字幕 OCR 與 ASR 交叉對照；待人工核聽 |
+| 雙人誤會反轉短劇 | `public/templates/two-person-misunderstanding-twist-v1/reference.mp4` | 147.56s | 8 | 燒錄字幕 OCR 與 ASR 交叉對照；待人工核聽 |
+
+## 逐段恢復方法
+
+- 從原片每秒抽取一格，以 macOS Apple Vision 在本機辨識燒錄字幕，再按時間軸分段。
+- 將燒錄字幕與原有 timestamped ASR 交叉對照；字幕可確認的內容放入顯示稿，未聲稱已人工聽音。
+- `speech_raw_asr` 及 `speech_raw_asr_segments` 逐字保留原始 ASR，包括重複幻覺；清理稿另存於 `speech_asr_cleaned`／顯示欄。
+- 外語片同時保留原文及標示為待核對的繁體中文翻譯。
+
+## 修正樣本
+
+| 內容方向 | 修正前 | 修正後 | 依據 |
+|---|---|---|---|
+| 無需出鏡沉浸式探店 | 整片 6/6 段顯示「語音未能可靠辨識」 | 6/6 段恢復，例如「從中目黑車站走路八分鐘」、「招牌黑蒜油水餃」 | 原片燒錄字幕逐秒 OCR，與中文 ASR 交叉對照 |
+| 真人產品實測導購 | 整片 6/6 段只顯示待核聽 | 6/6 段恢復，例如「垃圾快滿的時候往下一壓，體積直接縮小」 | 原片繁中燒錄字幕逐秒 OCR |
+| 電影感創辦人傳記 | 最後一段誤收上一段 `Every empire...`，raw 重複曾被刪 | 按 21.10／33.12／44.82／64.36／80.66／91.12 秒重新切段；最後段由 `What was yours...` 開始；raw 保留 `From time to time...` 幻覺 | 原始 timestamped ASR word/segment 時間 |
+| 雙人誤會反轉短劇 | 整片 8/8 段只顯示待核聽 | 7 段恢復可辨識對話；第 8 段保留可確認片尾字卡，並標示其餘短句待核聽 | 原片中英燒錄字幕逐秒 OCR，與 ASR 交叉對照 |
 
 ## 新增 review 入選方向及補充片
 
@@ -54,5 +70,5 @@
 - 所有 published 代表片及 Renee review 片的音訊人工逐句核聽數仍為 0。
 - 外語片的繁體中文翻譯已提供，但仍標示待人工核對。
 - 品牌、人物、歷史、地點、數字、價格、認證及功效只記錄原片說法，尚未完成外部事實核實。
-- 無法可靠辨識的顯示段落已改為「語音未能可靠辨識，待人工核聽」；不以推測句子補齊。
+- Published 12 目前沒有整段完全無法辨識；雙人短劇最後一段仍有局部短句待人工核聽，已在顯示稿內清楚標示。
 - 排除片維持排除，不建立原稿；補充片不擴寫成全片。
