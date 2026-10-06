@@ -31,6 +31,14 @@ export const APPROVED_STYLE_PREVIEWS: Readonly<Record<string, string>> = {
     "/templates/single-photo-news-card-v3/approved-preview.png",
 };
 
+const APPROVED_STYLE_PREVIEW_ASSETS = new Set(
+  Object.values(APPROVED_STYLE_PREVIEWS),
+);
+
 export function approvedStylePreview(code: string) {
   return APPROVED_STYLE_PREVIEWS[code] ?? null;
+}
+
+export function isApprovedStylePreviewAsset(pathname: string) {
+  return APPROVED_STYLE_PREVIEW_ASSETS.has(pathname);
 }

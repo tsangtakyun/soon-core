@@ -1,6 +1,7 @@
 import { createServerClient } from '@supabase/auth-helpers-nextjs'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
+import { isApprovedStylePreviewAsset } from '@/lib/approved-style-previews'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
@@ -29,6 +30,7 @@ export async function middleware(req: NextRequest) {
     (Boolean(topicApiSegment) && !topicApiSegment.includes('/') && !['admin', 'assist', 'upload'].includes(topicApiSegment))
 
   const isPublicMachineRoute = isPublicTopicRoute || publicApiRoutes.some((route) => pathname.startsWith(route))
+  const isPublicPublishedAsset = isApprovedStylePreviewAsset(pathname)
 
   if (!supabaseUrl || !supabaseAnonKey) {
     return res
@@ -69,7 +71,7 @@ export async function middleware(req: NextRequest) {
     pathname.startsWith('/auth') ||
     pathname.startsWith('/invite')
 
-  if (!session && isPublicMachineRoute) return res
+  if (!session && (isPublicMachineRoute || isPublicPublishedAsset)) return res
 
   if (!session && !isAuthPage) {
     return NextResponse.redirect(new URL('/login', req.url))
